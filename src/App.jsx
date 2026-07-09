@@ -397,6 +397,10 @@ function TopBar({ activeView, apiMessage, collectionCount, theme, totalXp, onNav
             <span>{item.label}</span>
           </button>
         ))}
+        <button type="button" className="nav-profile-item">
+          <Icon name="shield" />
+          <span>Profile</span>
+        </button>
       </nav>
       <div className="topbar-actions">
         <div className="quick-stat">
@@ -455,9 +459,15 @@ function DashboardView({
       <QuestDetail quest={selectedQuest} reward={getCollectibleForQuest(selectedQuest)} activeProgress={activeProgress} onClaimReward={onClaimReward} />
 
       <section className="weekly-panel">
-        <div>
-          <h2>Weekly Progress</h2>
-          <p>Complete three active streak days to unlock a party feed boost.</p>
+        <div className="relic-tracker-head">
+          <div className="relic-thumb" aria-hidden="true">
+            <Icon name="leaf" />
+          </div>
+          <div>
+            <span className="relic-label">Focus Wisp</span>
+            <span className="pill mind">Rare</span>
+            <p>Unlocked for completing a mindful quest 10 times.</p>
+          </div>
         </div>
         <div className="week-dots" aria-label="Weekly progress">
           {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, index) => (
@@ -466,7 +476,15 @@ function DashboardView({
             </span>
           ))}
         </div>
+        <div className="relic-path" aria-hidden="true">
+          {['leaf', 'compass', 'bolt', 'shield'].map((icon, index) => (
+            <span key={icon} className={index === 0 ? 'reached' : ''}>
+              <Icon name={icon} />
+            </span>
+          ))}
+        </div>
         <ProgressBar value={0.64} label="640 / 1,000 weekly XP" />
+        <p className="relic-caption">Stay focused to reach your next reward.</p>
       </section>
     </section>
   );
@@ -675,7 +693,8 @@ function CatPanel({ collectionCount, mood, onAction, onOpenGallery }) {
       <div className="panel-header">
         <div>
           <h2>Neko</h2>
-          <span>{mood}</span>
+          <span className="cat-mood-label">{mood}</span>
+          <span className="cat-companion-label">Your companion on the path of growth.</span>
         </div>
         <span className="status-dot mind" aria-hidden="true" />
       </div>

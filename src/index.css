@@ -60,6 +60,7 @@ svg {
 }
 
 .app-shell {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 340px;
   gap: 18px;
@@ -72,21 +73,109 @@ svg {
 
 .light-theme {
   color-scheme: light;
-  --bg: #f8f6ef;
-  --stage: #efece3;
-  --panel: #ffffff;
-  --panel-strong: #f4f2ea;
-  --panel-soft: #faf9f3;
-  --text: #1b1e1a;
-  --muted: #5f675e;
-  --faint: #838a7f;
-  --border: #d9d7ca;
-  --line: #e7e3d8;
-  --green: #18825b;
-  --green-strong: #0f6848;
-  --coral: #c85f45;
-  --amber: #9c6b13;
-  --shadow: rgba(48, 52, 44, 0.12);
+  --bg: #f2ece0;
+  --stage: #efe6d3;
+  --panel: #fbf7ee;
+  --panel-strong: #f4ecd9;
+  --panel-soft: #f8f2e4;
+  --text: #362c1f;
+  --muted: #7a6d59;
+  --faint: #948767;
+  --border: #ddceac;
+  --line: #e8dcc0;
+  --green: #4b7a52;
+  --green-strong: #345e3a;
+  --coral: #c1653c;
+  --amber: #b98a2e;
+  --ink: #2c2210;
+  --shadow: rgba(90, 70, 30, 0.14);
+  --tape: #e3cf9a;
+  font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+}
+
+.light-theme body {
+  background:
+    radial-gradient(circle at 8% 4%, rgba(193, 101, 60, 0.08), transparent 40%),
+    linear-gradient(180deg, rgba(75, 122, 82, 0.06), transparent 260px),
+    var(--bg);
+}
+
+.light-theme .topbar,
+.light-theme .panel,
+.light-theme .metric-card,
+.light-theme .dashboard-heading,
+.light-theme .weekly-panel {
+  position: relative;
+  border-radius: 3px;
+  border-color: var(--border);
+  background-image:
+    repeating-linear-gradient(180deg, transparent 0 27px, rgba(90, 70, 30, 0.035) 28px);
+}
+
+.light-theme .topbar::before,
+.light-theme .dashboard-heading::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: 28px;
+  width: 46px;
+  height: 18px;
+  background: var(--tape);
+  opacity: 0.75;
+  transform: rotate(-4deg);
+  box-shadow: 0 2px 4px rgba(90, 70, 30, 0.18);
+}
+
+.light-theme .brand-mark {
+  border-radius: 3px;
+  color: #fbf7ee;
+  background: var(--green);
+}
+
+.light-theme .top-nav {
+  border-radius: 3px;
+  background: var(--panel-soft);
+}
+
+.light-theme .top-nav button.active {
+  color: #fbf7ee;
+  background: var(--amber);
+}
+
+.light-theme .nav-profile-item {
+  display: none;
+}
+
+.light-theme .segmented-control button.active {
+  color: #fbf7ee;
+  background: var(--amber);
+}
+
+.light-theme .week-dots span.done {
+  color: #fbf7ee;
+  background: var(--coral);
+}
+
+.light-theme .primary-action {
+  color: #fbf7ee;
+  border-radius: 3px;
+  background: var(--coral);
+}
+
+.light-theme .quest-row,
+.light-theme .feed-row,
+.light-theme .cat-stage {
+  border-radius: 3px;
+}
+
+.light-theme .relic-tracker-head,
+.light-theme .relic-path,
+.light-theme .relic-caption {
+  display: none;
+}
+
+.light-theme .cat-companion-label {
+  display: none;
 }
 
 .workspace {
@@ -758,6 +847,242 @@ svg {
   align-content: start;
   gap: 18px;
   min-width: 0;
+}
+
+.nav-profile-item {
+  display: none;
+}
+
+.dark-theme {
+  --bg: #14100b;
+  --stage: #1c150d;
+  --panel: #201810;
+  --panel-strong: #261c12;
+  --panel-soft: #1a130c;
+  --text: #ecdcb3;
+  --muted: #b6a074;
+  --faint: #8a7654;
+  --border: #5a4520;
+  --line: #3a2c16;
+  --green: #7ba86b;
+  --green-strong: #5c8a4d;
+  --coral: #b9502f;
+  --amber: #d3a83e;
+  --ink: #14100b;
+  --shadow: rgba(0, 0, 0, 0.55);
+  font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+}
+
+.dark-theme body {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(211, 168, 62, 0.06), transparent 45%),
+    var(--bg);
+}
+
+.app-shell.dark-theme {
+  align-items: start;
+}
+
+.dark-theme .topbar,
+.dark-theme .panel,
+.dark-theme .metric-card,
+.dark-theme .dashboard-heading,
+.dark-theme .weekly-panel {
+  border-width: 2px;
+  border-radius: 4px;
+  border-color: var(--border);
+  box-shadow:
+    0 0 0 1px rgba(211, 168, 62, 0.15) inset,
+    0 18px 42px var(--shadow);
+}
+
+.dark-theme .brand-mark {
+  border-radius: 50%;
+  color: var(--ink);
+  background: linear-gradient(160deg, var(--amber), #a5791f);
+  box-shadow: 0 0 0 3px var(--bg), 0 0 0 4px var(--border);
+}
+
+.dark-theme .top-nav {
+  grid-area: unset;
+  position: absolute;
+  top: 0;
+  left: -114px;
+  right: auto;
+  bottom: 0;
+  flex-direction: column;
+  gap: 4px;
+  justify-content: flex-start;
+  width: 96px;
+  padding: 14px 8px;
+  border-radius: 4px;
+  background: var(--panel);
+  border: 2px solid var(--border);
+  overflow-y: auto;
+}
+
+.dark-theme .workspace {
+  position: relative;
+  margin-left: 114px;
+}
+
+.dark-theme .top-nav button,
+.dark-theme .nav-profile-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-height: 62px;
+  padding: 8px 2px;
+  color: var(--muted);
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.dark-theme .top-nav button.active {
+  color: var(--amber);
+  background: var(--panel-strong);
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+
+.dark-theme .topbar {
+  position: static;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas: "brand actions actions" "status status status";
+}
+
+.dark-theme .topbar-actions {
+  grid-area: actions;
+}
+
+.dark-theme .quick-stat {
+  border-radius: 4px;
+  background: var(--panel-soft);
+}
+
+.dark-theme .segmented-control button.active {
+  color: var(--ink);
+  background: var(--amber);
+}
+
+.dark-theme .week-dots span.done {
+  color: var(--ink);
+  background: var(--amber);
+}
+
+.dark-theme .primary-action {
+  color: var(--ink);
+  border-radius: 4px;
+  background: linear-gradient(160deg, var(--coral), #8a3a20);
+}
+
+.dark-theme .quest-row,
+.dark-theme .feed-row,
+.dark-theme .cat-stage,
+.dark-theme .leader-row.current {
+  border-radius: 4px;
+}
+
+.dark-theme .weekly-panel {
+  padding: 18px;
+}
+
+.dark-theme .relic-tracker-head {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.dark-theme .relic-thumb {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--green);
+  background: var(--panel-soft);
+  border: 2px solid var(--border);
+}
+
+.dark-theme .relic-label {
+  display: block;
+  font-weight: 800;
+}
+
+.dark-theme .relic-tracker-head p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.dark-theme .relic-path {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  margin: 14px 4px;
+  padding: 0 8px;
+}
+
+.dark-theme .relic-path::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 24px;
+  right: 24px;
+  height: 1px;
+  background: repeating-linear-gradient(90deg, var(--border) 0 6px, transparent 6px 12px);
+}
+
+.dark-theme .relic-path span {
+  position: relative;
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--faint);
+  background: var(--panel-soft);
+  border: 2px solid var(--border);
+  font-size: 0.85rem;
+}
+
+.dark-theme .relic-path span.reached {
+  color: var(--ink);
+  background: var(--amber);
+  border-color: var(--amber);
+}
+
+.dark-theme .relic-caption {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  text-align: center;
+}
+
+.dark-theme .cat-companion-label {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+.dark-theme .cat-mood-label {
+  display: none;
+}
+
+@media (max-width: 1180px) {
+  .dark-theme .top-nav {
+    position: static;
+    flex-direction: row;
+    width: 100%;
+  }
+
+  .dark-theme .workspace,
+  .dark-theme .right-rail {
+    margin-left: 0;
+  }
 }
 
 .right-rail .panel,
