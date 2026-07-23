@@ -59,8 +59,17 @@ export function createApp(options = {}) {
     crossOriginResourcePolicy: { policy: 'same-site' },
     contentSecurityPolicy: {
       directives: {
-        ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-        'connect-src': ["'self'", ...(config.SUPABASE_URL ? [config.SUPABASE_URL] : [])],
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", 'data:', 'blob:'],
+        connectSrc: ["'self'", 'https://*.supabase.co'],
+        fontSrc: ["'self'", 'data:'],
+        objectSrc: ["'none'"],
+        frameAncestors: ["'none'"],
+        baseUri: ["'self'"],
+        formAction: ["'self'"],
+        workerSrc: ["'self'", 'blob:'],
       },
     },
   }));

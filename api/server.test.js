@@ -23,10 +23,10 @@ describe('Quest API', () => {
     expect(ready.body).toEqual({ status: 'ready', database: 'memory' });
   });
 
-  it('allows browser fetches to the configured Supabase auth origin via CSP connect-src', async () => {
-    const app = createApp({ config: testConfig({ SUPABASE_URL: 'https://example-project.supabase.co', OIDC_AUDIENCE: 'authenticated' }) });
+  it('allows browser fetches to Supabase via CSP connect-src', async () => {
+    const app = createApp({ config: testConfig() });
     const health = await request(app).get('/health');
-    expect(health.headers['content-security-policy']).toContain("connect-src 'self' https://example-project.supabase.co");
+    expect(health.headers['content-security-policy']).toContain("connect-src 'self' https://*.supabase.co");
   });
 
   it('scopes the CORS allowlist to /api and never blocks static assets by origin', async () => {
