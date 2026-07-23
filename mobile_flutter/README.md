@@ -2,19 +2,21 @@
 
 Flutter phone UI for the standalone HABBIT Quest app.
 
-This v1 is a polished static dark-fantasy mobile experience. It uses generated
-raster art for the adventurer, chests, badges, and loot, while keeping layout,
-navigation, cards, progress, and panels in Flutter.
+This version is a compact, gamified dark-fantasy mobile experience. The primary
+quest loop is interactive: players can log progress, submit a short reflection,
+complete quests, earn XP, claim a reward, contribute to the guild, filter the
+quest log, and update profile preferences.
 
 Tabs:
 
-- Home: overall score, streak, XP, wellness metrics, today's quests, and daily challenge.
-- Quests: focus quest, active quests, weekly streak, path rank, and available quests.
-- Guild: party members, friends online, co-op quests, leaderboard, guild war, and activity.
-- Rewards: season chest, reward track, badges, loot, claimable rewards, and rank.
-- Profile: avatar hero, level/XP, achievements, history, stats, gear, and customization.
+- Home: daily progress, streak, XP, active quests, and weekly challenge.
+- Quests: category filters, daily quest actions, and the weekly quest.
+- Guild: shared quest progress, contribution action, party, and guild note.
+- Rewards: daily claim, reward track, coins, and unlocked collection items.
+- Profile: level, XP, quest stats, reminders, reset time, and accessibility.
 
-There is no backend sync or local persistence in this static pass.
+The UI currently keeps its demo session state in memory. Backend authentication
+and synchronization can be connected as the next mobile integration slice.
 
 ## Run
 
@@ -30,4 +32,5 @@ flutter run
 cd mobile_flutter
 dart format lib
 flutter analyze
+flutter test
 ```

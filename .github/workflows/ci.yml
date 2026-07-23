@@ -37,6 +37,8 @@ jobs:
 
       - name: Run tests
         run: npm run test:ci
+        env:
+          TEST_DATABASE_URL: postgres://questuser:questpass@localhost:5432/questdb
 
       - name: Build app
         run: npm run build

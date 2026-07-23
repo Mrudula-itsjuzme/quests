@@ -9,6 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  http: ^1.6.0
+  supabase_flutter: ^2.16.0
 
 dev_dependencies:
   flutter_test:
@@ -19,3 +21,9 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/fantasy-rewards-sheet.png
+    - assets/images/quest-compass-mobile.png
+
+  fonts:
+    - family: Cinzel
+      fonts:
+        - asset: assets/fonts/Cinzel-Variable.ttf

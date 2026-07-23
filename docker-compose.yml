@@ -2,10 +2,16 @@ services:
   app:
     build: .
     ports:
-      - "3001:3001"
+      - "127.0.0.1:3001:3001"
     environment:
+      NODE_ENV: development
+      HOST: 0.0.0.0
       PORT: 3001
-      DATABASE_URL: postgres://questuser:questpass@db:5432/questdb
+      DATABASE_URL: postgres://questuser:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@db:5432/questdb
+      DEV_AUTH_ENABLED: "true"
+      DEV_ALLOW_LEGACY_MUTATIONS: "true"
+      PROVIDER_MODE: local
+    command: ["sh", "-c", "npm run migrate && npm start"]
     depends_on:
       db:
         condition: service_healthy
@@ -15,11 +21,9 @@ services:
     environment:
       POSTGRES_DB: questdb
       POSTGRES_USER: questuser
-      POSTGRES_PASSWORD: questpass
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
     ports:
-      - "5432:5432"
-    volumes:
-      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - "127.0.0.1:5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U questuser -d questdb"]
       interval: 10s

@@ -1,0 +1,4364 @@
+
+> quests-app@1.0.0 test
+> vitest run
+
+
+ RUN  v3.2.6 /home/mrudula/Downloads/HABBIT/quests
+
+ ✓ api/lib/providers.test.js (3 tests) 12ms
+ ↓ api/postgres.integration.test.js (7 tests | 7 skipped)
+ ✓ api/config.test.js (6 tests) 37ms
+ ✓ api/lib/quest-engine.test.js (12 tests) 80ms
+stderr | api/server.test.js > Quest API > does not expose database error codes in production-shaped errors
+{"level":"error","event":"request_failed","requestId":"71f7c874-98aa-47d6-aa46-40a5c4f17794","method":"GET","path":"/api/v1/me","code":"internal_error"}
+
+ ✓ api/server.test.js (18 tests) 497ms
+stdout | src/App.test.tsx > premium Quest experience > completes an automatic quest only after the API succeeds
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"app-page"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"app-topbar"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33maria-label[39m=[32m"HABBIT Quest home"[39m
+          [33mclass[39m=[32m"brand "[39m
+          [33mhref[39m=[32m"/"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"brand-crest"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-castle"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M22 20v-9H2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2Z"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M18 11V4H6v7"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 22v-4a3 3 0 0 0-3-3a3 3 0 0 0-3 3v4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M22 11V9"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M2 11V9"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M6 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M18 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M10 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M14 4V2"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"brand-copy"[39m
+          [36m>[39m
+            [36m<strong>[39m
+              [0mHABBIT[0m
+            [36m</strong>[39m
+            [36m<span>[39m
+              [0mQUEST[0m
+            [36m</span>[39m
+          [36m</span>[39m
+        [36m</a>[39m
+        [36m<button[39m
+          [33maria-label[39m=[32m"Toggle app navigation"[39m
+          [33mclass[39m=[32m"mobile-menu-button"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33mclass[39m=[32m"lucide lucide-menu"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mheight[39m=[32m"24"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-linejoin[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [33mwidth[39m=[32m"24"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"12"[39m
+              [33my2[39m=[32m"12"[39m
+            [36m/>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"6"[39m
+              [33my2[39m=[32m"6"[39m
+            [36m/>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"18"[39m
+              [33my2[39m=[32m"18"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+        [36m</button>[39m
+        [36m<nav[39m
+          [33maria-label[39m=[32m"Primary"[39m
+          [33mclass[39m=[32m""[39m
+        [36m>[39m
+          [36m<a[39m
+            [33mclass[39m=[32m""[39m
+            [33mhref[39m=[32m"/app"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-house"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<span>[39m
+              [0mHome[0m
+            [36m</span>[39m
+          [36m</a>[39m
+          [36m<a[39m
+            [33maria-current[39m=[32m"page"[39m
+            [33mclass[39m=[32m"active"[39m
+            [33mhref[39m=[32m"/app/quests"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-scroll-text"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 12h-5"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 8h-5"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M19 17V5a2 2 0 0 0-2-2H4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<span>[39m
+              [0mQuests[0m
+            [36m</span>[39m
+          [36m</a>[39m
+          [36m<a[39m
+            [33mclass[39m=[32m""[39m
+            [33mhref[39m=[32m"/app/guild"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-shield"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<span>[39m
+              [0mGuild[0m
+            [36m</span>[39m
+          [36m</a>[39m
+          [36m<a[39m
+            [33mclass[39m=[32m""[39m
+            [33mhref[39m=[32m"/app/rewards"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-gift"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<rect[39m
+                [33mheight[39m=[32m"4"[39m
+                [33mrx[39m=[32m"1"[39m
+                [33mwidth[39m=[32m"18"[39m
+                [33mx[39m=[32m"3"[39m
+                [33my[39m=[32m"8"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M12 8v13"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<span>[39m
+              [0mRewards[0m
+            [36m</span>[39m
+          [36m</a>[39m
+        [36m</nav>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"app-actions"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"xp-readout"[39m
+          [36m>[39m
+            [36m<strong>[39m
+              [0m2,450[0m
+            [36m</strong>[39m
+            [36m<span>[39m
+              [0mXP[0m
+            [36m</span>[39m
+          [36m</div>[39m
+          [36m<button[39m
+            [33maria-label[39m=[32m"Notifications"[39m
+            [33mclass[39m=[32m"icon-button"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-bell"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M10.268 21a2 2 0 0 0 3.464 0"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</button>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"profile-menu-wrap"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33maria-expanded[39m=[32m"false"[39m
+              [33mclass[39m=[32m"profile-button"[39m
+            [36m>[39m
+              [36m<span>[39m
+                [0mA[0m
+              [36m</span>[39m
+              [36m<strong>[39m
+                [0maDev[0m
+              [36m</strong>[39m
+            [36m</button>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</header>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"app-status"[39m
+        [33mrole[39m=[32m"status"[39m
+      [36m>[39m
+        [36m<span[39m
+          [33mclass[39m=[32m"online"[39m
+        [36m/>[39m
+        [0mQuest service connected[0m
+        [36m<button>[39m
+          [36m<svg[39m
+            [33mclass[39m=[32m"lucide lucide-refresh-cw"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mheight[39m=[32m"24"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-linejoin[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [33mwidth[39m=[32m"24"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M21 3v5h-5"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M8 16H3v5"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+          [0m Refresh[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<main[39m
+        [33mclass[39m=[32m"app-content"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"page-stack"[39m
+        [36m>[39m
+          [36m<header[39m
+            [33mclass[39m=[32m"page-heading"[39m
+          [36m>[39m
+            [36m<span>[39m
+              [0mADVENTURE LOG[0m
+            [36m</span>[39m
+            [36m<h1>[39m
+              [0mQuests[0m
+            [36m</h1>[39m
+            [36m<p>[39m
+              [0mChoose a path and keep moving.[0m
+            [36m</p>[39m
+          [36m</header>[39m
+          [36m<div[39m
+            [33maria-label[39m=[32m"Quest filters"[39m
+            [33mclass[39m=[32m"filter-tabs"[39m
+            [33mrole[39m=[32m"group"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"active"[39m
+            [36m>[39m
+              [0mAll[0m
+            [36m</button>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m""[39m
+            [36m>[39m
+              [0mMind[0m
+            [36m</button>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m""[39m
+            [36m>[39m
+              [0mBody[0m
+            [36m</button>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m""[39m
+            [36m>[39m
+              [0mDiscovery[0m
+            [36m</button>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m""[39m
+            [36m>[39m
+              [0mWeekly[0m
+            [36m</button>[39m
+          [36m</div>[39m
+          [36m<section[39m
+            [33mclass[39m=[32m"quest-grid"[39m
+          [36m>[39m
+            [36m<article[39m
+              [33mclass[39m=[32m"quest-card path-mind"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"quest-card-head"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"category-icon"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33mclass[39m=[32m"lucide lucide-book-open"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M12 7v14"[39m
+                    [36m/>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                [36m</span>[39m
+                [36m<div>[39m
+                  [36m<small>[39m
+                    [0mMind[0m
+                    [0m · [0m
+                    [0mCommon[0m
+                  [36m</small>[39m
+                  [36m<h2>[39m
+                    [0mRead with focus[0m
+                  [36m</h2>[39m
+                [36m</div>[39m
+                [36m<strong>[39m
+                  [0m+[0m
+                  [0m50[0m
+                  [0m XP[0m
+                [36m</strong>[39m
+              [36m</div>[39m
+              [36m<p>[39m
+                [0mSpend 15 minutes reading something that challenges your thinking.[0m
+              [36m</p>[39m
+              [36m<ul>[39m
+                [36m<li>[39m
+                  [36m<svg[39m
+                    [33mclass[39m=[32m"lucide lucide-check"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M20 6 9 17l-5-5"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [0m [0m
+                  [0mChoose a book, article, or paper[0m
+                [36m</li>[39m
+                [36m<li>[39m
+                  [36m<svg[39m
+                    [33mclass[39m=[32m"lucide lucide-check"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M20 6 9 17l-5-5"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [0m [0m
+                  [0mRead without multitasking for 15 minutes[0m
+                [36m</li>[39m
+                [36m<li>[39m
+                  [36m<svg[39m
+                    [33mclass[39m=[32m"lucide lucide-check"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M20 6 9 17l-5-5"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [0m [0m
+                  [0mWrite a one-line reflection[0m
+                [36m</li>[39m
+              [36m</ul>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"quest-progress"[39m
+              [36m>[39m
+                [36m<i[39m
+                  [33mstyle[39m=[32m"width: 66.66666666666666%;"[39m
+                [36m/>[39m
+              [36m</div>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"progress-copy"[39m
+              [36m>[39m
+                [0m10[0m
+                [0m / [0m
+                [0m15[0m
+                [0m [0m
+                [0mmin[0m
+              [36m</span>[39m
+              [36m<textarea[39m
+                [33mmaxlength[39m=[32m"10000"[39m
+                [33mplaceholder[39m=[32m"Write a short reflection…"[39m
+              [36m/>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"button primary"[39m
+                [33mdisabled[39m=[32m""[39m
+              [36m>[39m
+                [0mSubmit reflection[0m
+              [36m</button>[39m
+            [36m</article>[39m
+            [36m<article[39m
+              [33mclass[39m=[32m"quest-card path-body"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"quest-card-head"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"category-icon"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33mclass[39m=[32m"lucide lucide-swords"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<polyline[39m
+                      [33mpoints[39m=[32m"14.5 17.5 3 6 3 3 6 3 17.5 14.5"[39m
+                    [36m/>[39m
+                    [36m<line[39m
+                      [33mx1[39m=[32m"13"[39m
+                      [33mx2[39m=[32m"19"[39m
+                      [33my1[39m=[32m"19"[39m
+                      [33my2[39m=[32m"13"[39m
+                    [36m/>[39m
+                    [36m<line[39m
+                      [33mx1[39m=[32m"16"[39m
+                      [33mx2[39m=[32m"20"[39m
+                      [33my1[39m=[32m"16"[39m
+                      [33my2[39m=[32m"20"[39m
+                    [36m/>[39m
+                    [36m<line[39m
+                      [33mx1[39m=[32m"19"[39m
+                      [33mx2[39m=[32m"21"[39m
+                      [33my1[39m=[32m"21"[39m
+                      [33my2[39m=[32m"19"[39m
+                    [36m/>[39m
+                    [36m<polyline[39m
+                      [33mpoints[39m=[32m"14.5 6.5 18 3 21 3 21 6 17.5 9.5"[39m
+                    [36m/>[39m
+                    [36m<line[39m
+                      [33mx1[39m=[32m"5"[39m
+                      [33mx2[39m=[32m"9"[39m
+                      [33my1[39m=[32m"14"[39m
+                      [33my2[39m=[32m"18"[39m
+                    [36m/>[39m
+                    [36m<line[39m
+                      [33mx1[39m=[32m"7"[39m
+                      [33mx2[39m=[32m"4"[39m
+                      [33my1[39m=[32m"17"[39m
+                      [33my2[39m=[32m"20"[39m
+                    [36m/>[39m
+                    [36m<line[39m
+                      [33mx1[39m=[32m"3"[39m
+                      [33mx2[39m=[32m"5"[39m
+                      [33my1[39m=[32m"19"[39m
+                      [33my2[39m=[32m"21"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                [36m</span>[39m
+                [36m<div>[39m
+                  [36m<small>[39m
+                    [0mBody[0m
+                    [0m · [0m
+                    [0mUncommon[0m
+                  [36m</small>[39m
+                  [36m<h2>[39m
+                    [0mMove for 20 minutes[0m
+                  [36m</h2>[39m
+                [36m</div>[39m
+                [36m<strong>[39m
+                  [0m+[0m
+                  [0m75[0m
+                  [0m XP[0m
+                [36m</strong>[39m
+              [36m</div>[39m
+              [36m<p>[39m
+                [0mAny continuous movement counts — walking, stretching, lifting.[0m
+              [36m</p>[39m
+              [36m<ul>[39m
+                [36m<li>[39m
+                  [36m<svg[39m
+                    [33mclass[39m=[32m"lucide lucide-check"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M20 6 9 17l-5-5"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [0m [0m
+                  [0mChoose any form of movement[0m
+                [36m</li>[39m
+                [36m<li>[39m
+                  [36m<svg[39m
+                    [33mclass[39m=[32m"lucide lucide-check"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M20 6 9 17l-5-5"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [0m [0m
+                  [0mKeep moving for 20 minutes[0m
+                [36m</li>[39m
+                [36m<li>[39m
+                  [36m<svg[39m
+                    [33mclass[39m=[32m"lucide lucide-check"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M20 6 9 17l-5-5"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [0m [0m
+                  [0mNo pauses longer than 60 seconds[0m
+                [36m</li>[39m
+              [36m</ul>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"quest-progress"[39m
+              [36m>[39m
+                [36m<i[39m
+                  [33mstyle[39m=[32m"width: 100%;"[39m
+                [36m/>[39m
+              [36m</div>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"progress-copy"[39m
+              [36m>[39m
+                [0m20[0m
+                [0m / [0m
+                [0m20[0m
+                [0m [0m
+                [0mmin[0m
+              [36m</span>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"form-success"[39m
+                [33mrole[39m=[32m"status"[39m
+              [36m>[39m
+                [0mQuest complete · +75 XP[0m
+              [36m</p>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"button primary"[39m
+              [36m>[39m
+                [0mComplete quest[0m
+              [36m</button>[39m
+            [36m</article>[39m
+            [36m<article[39m
+              [33mclass[39m=[32m"quest-card path-discovery"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"quest-card-head"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"category-icon"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33mclass[39m=[32m"lucide lucide-compass"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z"[39m
+                    [36m/>[39m
+                    [36m<circle[39m
+                      [33mcx[39m=[32m"12"[39m
+                      [33mcy[39m=[32m"12"[39m
+                      [33mr[39m=[32m"10"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                [36m</span>[39m
+                [36m<div>[39m
+                  [36m<small>[39m
+                    [0mDiscovery[0m
+                    [0m · [0m
+                    [0mRare[0m
+                  [36m</small>[39m
+                  [36m<h2>[39m
+                    [0mNotice something new[0m
+                  [36m</h2>[39m
+                [36m</div>[39m
+                [36m<strong>[39m
+                  [0m+[0m
+                  [0m100[0m
+                  [0m XP[0m
+                [36m</strong>[39m
+              [36m</div>[39m
+              [36m<p>[39m
+                [0mSpot something in your environment you have never paid attention to.[0m
+              [36m</p>[39m
+              [36m<ul>[39m
+                [36m<li>[39m
+                  [36m<svg[39m
+                    [33mclass[39m=[32m"lucide lucide-check"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M20 6 9 17l-5-5"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [0m [0m
+                  [0mLook around your space with fresh eyes[0m
+                [36m</li>[39m
+                [36m<li>[39m
+                  [36m<svg[39m
+                    [33mclass[39m=[32m"lucide lucide-check"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M20 6 9 17l-5-5"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [0m [0m
+                  [0mFind one thing you have never noticed[0m
+                [36m</li>[39m
+                [36m<li>[39m
+                  [36m<svg[39m
+                    [33mclass[39m=[32m"lucide lucide-check"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M20 6 9 17l-5-5"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [0m [0m
+                  [0mCapture it with a photo[0m
+                [36m</li>[39m
+              [36m</ul>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"quest-progress"[39m
+              [36m>[39m
+                [36m<i[39m
+                  [33mstyle[39m=[32m"width: 0%;"[39m
+                [36m/>[39m
+              [36m</div>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"progress-copy"[39m
+              [36m>[39m
+                [0m0[0m
+                [0m / [0m
+                [0m1[0m
+                [0m [0m
+                [0mphoto[0m
+              [36m</span>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"button primary"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-image-plus"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M16 5h6"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M19 2v6"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M21 11.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7.5"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"[39m
+                  [36m/>[39m
+                  [36m<circle[39m
+                    [33mcx[39m=[32m"9"[39m
+                    [33mcy[39m=[32m"9"[39m
+                    [33mr[39m=[32m"2"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+                [0m Add photo proof[0m
+              [36m</button>[39m
+            [36m</article>[39m
+            [36m<article[39m
+              [33mclass[39m=[32m"quest-card path-weekly"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"quest-card-head"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"category-icon"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33mclass[39m=[32m"lucide lucide-crown"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"[39m
+                    [36m/>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M5 21h14"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                [36m</span>[39m
+                [36m<div>[39m
+                  [36m<small>[39m
+                    [0mWeekly[0m
+                    [0m · [0m
+                    [0mEpic[0m
+                  [36m</small>[39m
+                  [36m<h2>[39m
+                    [0mExplore a new neighbourhood[0m
+                  [36m</h2>[39m
+                [36m</div>[39m
+                [36m<strong>[39m
+                  [0m+[0m
+                  [0m250[0m
+                  [0m XP[0m
+                [36m</strong>[39m
+              [36m</div>[39m
+              [36m<p>[39m
+                [0mVisit a part of your city you have not walked through before.[0m
+              [36m</p>[39m
+              [36m<ul>[39m
+                [36m<li>[39m
+                  [36m<svg[39m
+                    [33mclass[39m=[32m"lucide lucide-check"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M20 6 9 17l-5-5"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [0m [0m
+                  [0mChoose an unfamiliar neighbourhood[0m
+                [36m</li>[39m
+                [36m<li>[39m
+                  [36m<svg[39m
+                    [33mclass[39m=[32m"lucide lucide-check"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M20 6 9 17l-5-5"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [0m [0m
+                  [0mWalk for at least 30 minutes[0m
+                [36m</li>[39m
+                [36m<li>[39m
+                  [36m<svg[39m
+                    [33mclass[39m=[32m"lucide lucide-check"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M20 6 9 17l-5-5"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [0m [0m
+                  [0mTake a photo of something that caught your eye[0m
+                [36m</li>[39m
+              [36m</ul>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"quest-progress"[39m
+              [36m>[39m
+                [36m<i[39m
+                  [33mstyle[39m=[32m"width: 0%;"[39m
+                [36m/>[39m
+              [36m</div>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"progress-copy"[39m
+              [36m>[39m
+                [0m0[0m
+                [0m / [0m
+                [0m1[0m
+                [0m [0m
+                [0mvisit[0m
+              [36m</span>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"button primary"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-image-plus"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M16 5h6"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M19 2v6"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M21 11.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7.5"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"[39m
+                  [36m/>[39m
+                  [36m<circle[39m
+                    [33mcx[39m=[32m"9"[39m
+                    [33mcy[39m=[32m"9"[39m
+                    [33mr[39m=[32m"2"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+                [0m Add photo proof[0m
+              [36m</button>[39m
+            [36m</article>[39m
+          [36m</section>[39m
+        [36m</div>[39m
+      [36m</main>[39m
+      [36m<nav[39m
+        [33maria-label[39m=[32m"Mobile primary navigation"[39m
+        [33mclass[39m=[32m"mobile-bottom-nav"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33mclass[39m=[32m""[39m
+          [33mhref[39m=[32m"/app"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33mclass[39m=[32m"lucide lucide-house"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mheight[39m=[32m"24"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-linejoin[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [33mwidth[39m=[32m"24"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+          [36m<span>[39m
+            [0mHome[0m
+          [36m</span>[39m
+        [36m</a>[39m
+        [36m<a[39m
+          [33maria-current[39m=[32m"page"[39m
+          [33mclass[39m=[32m"active"[39m
+          [33mhref[39m=[32m"/app/quests"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33mclass[39m=[32m"lucide lucide-scroll-text"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mheight[39m=[32m"24"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-linejoin[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [33mwidth[39m=[32m"24"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M15 12h-5"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M15 8h-5"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M19 17V5a2 2 0 0 0-2-2H4"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+          [36m<span>[39m
+            [0mQuests[0m
+          [36m</span>[39m
+        [36m</a>[39m
+        [36m<a[39m
+          [33mclass[39m=[32m""[39m
+          [33mhref[39m=[32m"/app/guild"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33mclass[39m=[32m"lucide lucide-shield"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mheight[39m=[32m"24"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-linejoin[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [33mwidth[39m=[32m"24"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+          [36m<span>[39m
+            [0mGuild[0m
+          [36m</span>[39m
+        [36m</a>[39m
+        [36m<a[39m
+          [33mclass[39m=[32m""[39m
+          [33mhref[39m=[32m"/app/rewards"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33mclass[39m=[32m"lucide lucide-gift"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mheight[39m=[32m"24"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-linejoin[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [33mwidth[39m=[32m"24"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<rect[39m
+              [33mheight[39m=[32m"4"[39m
+              [33mrx[39m=[32m"1"[39m
+              [33mwidth[39m=[32m"18"[39m
+              [33mx[39m=[32m"3"[39m
+              [33my[39m=[32m"8"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M12 8v13"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+          [36m<span>[39m
+            [0mRewards[0m
+          [36m</span>[39m
+        [36m</a>[39m
+        [36m<a[39m
+          [33mclass[39m=[32m""[39m
+          [33mhref[39m=[32m"/app/profile"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33mclass[39m=[32m"lucide lucide-circle-user-round"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mheight[39m=[32m"24"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-linejoin[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [33mwidth[39m=[32m"24"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M18 20a6 6 0 0 0-12 0"[39m
+            [36m/>[39m
+            [36m<circle[39m
+              [33mcx[39m=[32m"12"[39m
+              [33mcy[39m=[32m"10"[39m
+              [33mr[39m=[32m"4"[39m
+            [36m/>[39m
+            [36m<circle[39m
+              [33mcx[39m=[32m"12"[39m
+              [33mcy[39m=[32m"12"[39m
+              [33mr[39m=[32m"10"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+          [36m<span>[39m
+            [0mProfile[0m
+          [36m</span>[39m
+        [36m</a>[39m
+      [36m</nav>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+ ❯ src/App.test.tsx (6 tests | 5 failed) 3621ms
+   ✓ premium Quest experience > renders the minimal public landing journey 172ms
+   × premium Quest experience > protects app routes and offers the explicit development identity 79ms
+     → Unable to find an accessible element with the role "button" and name `/continue as local adventurer/i`
+
+Here are the accessible roles:
+
+  link:
+
+  Name "Home":
+  [36m<a[39m
+    [33mclass[39m=[32m"auth-back"[39m
+    [33mhref[39m=[32m"/"[39m
+  [36m/>[39m
+
+  Name "HABBIT Quest home":
+  [36m<a[39m
+    [33maria-label[39m=[32m"HABBIT Quest home"[39m
+    [33mclass[39m=[32m"brand "[39m
+    [33mhref[39m=[32m"/"[39m
+  [36m/>[39m
+
+  Name "Forgot password?":
+  [36m<a[39m
+    [33mhref[39m=[32m"/forgot-password"[39m
+  [36m/>[39m
+
+  Name "Create account":
+  [36m<a[39m
+    [33mhref[39m=[32m"/signup"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  strong:
+
+  Name "":
+  [36m<strong />[39m
+
+  --------------------------------------------------
+  main:
+
+  Name "":
+  [36m<main[39m
+    [33mclass[39m=[32m"auth-panel"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  heading:
+
+  Name "Welcome back.":
+  [36m<h1 />[39m
+
+  --------------------------------------------------
+  paragraph:
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p />[39m
+
+  --------------------------------------------------
+  textbox:
+
+  Name "Email":
+  [36m<input[39m
+    [33mautocomplete[39m=[32m"email"[39m
+    [33mrequired[39m=[32m""[39m
+    [33mtype[39m=[32m"email"[39m
+    [33mvalue[39m=[32m""[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  button:
+
+  Name "Sign in":
+  [36m<button[39m
+    [33mclass[39m=[32m"button primary full"[39m
+  [36m/>[39m
+
+  Name "Continue as aDev":
+  [36m<button[39m
+    [33mclass[39m=[32m"button quiet full"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  complementary:
+
+  Name "":
+  [36m<aside[39m
+    [33mclass[39m=[32m"auth-aside"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"auth-page"[39m
+    [36m>[39m
+      [36m<a[39m
+        [33mclass[39m=[32m"auth-back"[39m
+        [33mhref[39m=[32m"/"[39m
+      [36m>[39m
+        [36m<svg[39m
+          [33mclass[39m=[32m"lucide lucide-chevron-left"[39m
+          [33mfill[39m=[32m"none"[39m
+          [33mheight[39m=[32m"24"[39m
+          [33mstroke[39m=[32m"currentColor"[39m
+          [33mstroke-linecap[39m=[32m"round"[39m
+          [33mstroke-linejoin[39m=[32m"round"[39m
+          [33mstroke-width[39m=[32m"2"[39m
+          [33mviewBox[39m=[32m"0 0 24 24"[39m
+          [33mwidth[39m=[32m"24"[39m
+          [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+        [36m>[39m
+          [36m<path[39m
+            [33md[39m=[32m"m15 18-6-6 6-6"[39m
+          [36m/>[39m
+        [36m</svg>[39m
+        [0m Home[0m
+      [36m</a>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"auth-brand"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33maria-label[39m=[32m"HABBIT Quest home"[39m
+          [33mclass[39m=[32m"brand "[39m
+          [33mhref[39m=[32m"/"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"brand-crest"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-castle"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M22 20v-9H2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2Z"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M18 11V4H6v7"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 22v-4a3 3 0 0 0-3-3a3 3 0 0 0-3 3v4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M22 11V9"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M2 11V9"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M6 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M18 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M10 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M14 4V2"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"brand-copy"[39m
+          [36m>[39m
+            [36m<strong>[39m
+              [0mHABBIT[0m
+            [36m</strong>[39m
+            [36m<span>[39m
+              [0mQUEST[0m
+            [36m</span>[39m
+          [36m</span>[39m
+        [36m</a>[39m
+      [36m</div>[39m
+      [36m<main[39m
+        [33mclass[39m=[32m"auth-panel"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"auth-heading"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"auth-icon"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-key-round"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"[39m
+              [36m/>[39m
+              [36m<circle[39m
+                [33mcx[39m=[32m"16.5"[39m
+                [33mcy[39m=[32m"7.5"[39m
+                [33mfill[39m=[32m"currentColor"[39m
+                [33mr[39m=[32m".5"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+          [36m<h1>[39m
+            [0mWelcome back.[0m
+          [36m</h1>[39m
+          [36m<p>[39m
+            [0mYour quest is waiting.[0m
+          [36m</p>[39m
+        [36m</div>[39m
+        [36m<form>[39m
+          [36m<label>[39m
+            [0mEmail[0m
+            [36m<input[39m
+              [33mautocomplete[39m=[32m"email"[39m
+              [33mrequired[39m=[32m""[39m
+              [33mtype[39m=[32m"email"[39m
+              [33mvalue[39m=[32m""[39m
+            [36m/>[39m
+          [36m</label>[39m
+          [36m<label>[39m
+            [0mPassword[0m
+            [36m<input[39m
+              [33mautocomplete[39m=[32m"current-password"[39m
+              [33mminlength[39m=[32m"8"[39m
+              [33mrequired[39m=[32m""[39m
+              [33mtype[39m=[32m"password"[39m
+              [33mvalue[39m=[32m""[39m
+            [36m/>[39m
+          [36m</label>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"button primary full"[39m
+          [36m>[39m
+            [0mSign in[0m
+          [36m</button>[39m
+        [36m</form>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"button quiet full"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0mContinue as aDev[0m
+        [36m</button>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"auth-links"[39m
+        [36m>[39m
+          [36m<a[39m
+            [33mhref[39m=[32m"/forgot-password"[39m
+          [36m>[39m
+            [0mForgot password?[0m
+          [36m</a>[39m
+          [36m<span>[39m
+            [0mNew here? [0m
+            [36m<a[39m
+              [33mhref[39m=[32m"/signup"[39m
+            [36m>[39m
+              [0mCreate account[0m
+            [36m</a>[39m
+          [36m</span>[39m
+        [36m</div>[39m
+      [36m</main>[39m
+      [36m<aside[39m
+        [33mclass[39m=[32m"auth-aside"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mdata-testid[39m=[32m"quest-compass"[39m
+        [36m>[39m
+          [0mCompass [0m
+          [0mlocked[0m
+        [36m</div>[39m
+        [36m<p>[39m
+          [0mPrivate credentials stay with Supabase Auth.[0m
+        [36m</p>[39m
+      [36m</aside>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+   × premium Quest experience > restores a development session and renders real API quest data 206ms
+     → Unable to find an element with the text: /12 day streak/i. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"app-page"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"app-topbar"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33maria-label[39m=[32m"HABBIT Quest home"[39m
+          [33mclass[39m=[32m"brand "[39m
+          [33mhref[39m=[32m"/"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"brand-crest"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-castle"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M22 20v-9H2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2Z"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M18 11V4H6v7"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 22v-4a3 3 0 0 0-3-3a3 3 0 0 0-3 3v4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M22 11V9"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M2 11V9"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M6 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M18 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M10 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M14 4V2"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"brand-copy"[39m
+          [36m>[39m
+            [36m<strong>[39m
+              [0mHABBIT[0m
+            [36m</strong>[39m
+            [36m<span>[39m
+              [0mQUEST[0m
+            [36m</span>[39m
+          [36m</span>[39m
+        [36m</a>[39m
+        [36m<button[39m
+          [33maria-label[39m=[32m"Toggle app navigation"[39m
+          [33mclass[39m=[32m"mobile-menu-button"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33mclass[39m=[32m"lucide lucide-menu"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mheight[39m=[32m"24"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-linejoin[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [33mwidth[39m=[32m"24"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"12"[39m
+              [33my2[39m=[32m"12"[39m
+            [36m/>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"6"[39m
+              [33my2[39m=[32m"6"[39m
+            [36m/>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"18"[39m
+              [33my2[39m=[32m"18"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+        [36m</button>[39m
+        [36m<nav[39m
+          [33maria-label[39m=[32m"Primary"[39m
+          [33mclass[39m=[32m""[39m
+        [36m>[39m
+          [36m<a[39m
+            [33maria-current[39m=[32m"page"[39m
+            [33mclass[39m=[32m"active"[39m
+            [33mhref[39m=[32m"/app"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-house"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<span>[39m
+              [0mHome[0m
+            [36m</span>[39m
+          [36m</a>[39m
+          [36m<a[39m
+            [33mclass[39m=[32m""[39m
+            [33mhref[39m=[32m"/app/quests"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-scroll-text"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 12h-5"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 8h-5"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M19 17V5a2 2 0 0 0-2-2H4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<span>[39m
+              [0mQuests[0m
+            [36m</span>[39m
+          [36m</a>[39m
+          [36m<a[39m
+            [33mclass[39m=[32m""[39m
+            [33mhref[39m=[32m"/app/guild"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclas...
+   × premium Quest experience > redirects a first-time profile to the three-step onboarding flow 1019ms
+     → Unable to find role="heading" and name `/meet your guide/i`
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"app-page"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"app-topbar"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33maria-label[39m=[32m"HABBIT Quest home"[39m
+          [33mclass[39m=[32m"brand "[39m
+          [33mhref[39m=[32m"/"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"brand-crest"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-castle"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M22 20v-9H2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2Z"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M18 11V4H6v7"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 22v-4a3 3 0 0 0-3-3a3 3 0 0 0-3 3v4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M22 11V9"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M2 11V9"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M6 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M18 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M10 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M14 4V2"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"brand-copy"[39m
+          [36m>[39m
+            [36m<strong>[39m
+              [0mHABBIT[0m
+            [36m</strong>[39m
+            [36m<span>[39m
+              [0mQUEST[0m
+            [36m</span>[39m
+          [36m</span>[39m
+        [36m</a>[39m
+        [36m<button[39m
+          [33maria-label[39m=[32m"Toggle app navigation"[39m
+          [33mclass[39m=[32m"mobile-menu-button"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33mclass[39m=[32m"lucide lucide-menu"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mheight[39m=[32m"24"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-linejoin[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [33mwidth[39m=[32m"24"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"12"[39m
+              [33my2[39m=[32m"12"[39m
+            [36m/>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"6"[39m
+              [33my2[39m=[32m"6"[39m
+            [36m/>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"18"[39m
+              [33my2[39m=[32m"18"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+        [36m</button>[39m
+        [36m<nav[39m
+          [33maria-label[39m=[32m"Primary"[39m
+          [33mclass[39m=[32m""[39m
+        [36m>[39m
+          [36m<a[39m
+            [33maria-current[39m=[32m"page"[39m
+            [33mclass[39m=[32m"active"[39m
+            [33mhref[39m=[32m"/app"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-house"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<span>[39m
+              [0mHome[0m
+            [36m</span>[39m
+          [36m</a>[39m
+          [36m<a[39m
+            [33mclass[39m=[32m""[39m
+            [33mhref[39m=[32m"/app/quests"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-scroll-text"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 12h-5"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 8h-5"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M19 17V5a2 2 0 0 0-2-2H4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<span>[39m
+              [0mQuests[0m
+            [36m</span>[39m
+          [36m</a>[39m
+          [36m<a[39m
+            [33mclass[39m=[32m""[39m
+            [33mhref[39m=[32m"/app/guild"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclas...
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"app-page"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"app-topbar"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33maria-label[39m=[32m"HABBIT Quest home"[39m
+          [33mclass[39m=[32m"brand "[39m
+          [33mhref[39m=[32m"/"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"brand-crest"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-castle"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M22 20v-9H2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2Z"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M18 11V4H6v7"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 22v-4a3 3 0 0 0-3-3a3 3 0 0 0-3 3v4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M22 11V9"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M2 11V9"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M6 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M18 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M10 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M14 4V2"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"brand-copy"[39m
+          [36m>[39m
+            [36m<strong>[39m
+              [0mHABBIT[0m
+            [36m</strong>[39m
+            [36m<span>[39m
+              [0mQUEST[0m
+            [36m</span>[39m
+          [36m</span>[39m
+        [36m</a>[39m
+        [36m<button[39m
+          [33maria-label[39m=[32m"Toggle app navigation"[39m
+          [33mclass[39m=[32m"mobile-menu-button"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33mclass[39m=[32m"lucide lucide-menu"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mheight[39m=[32m"24"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-linejoin[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [33mwidth[39m=[32m"24"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"12"[39m
+              [33my2[39m=[32m"12"[39m
+            [36m/>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"6"[39m
+              [33my2[39m=[32m"6"[39m
+            [36m/>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"18"[39m
+              [33my2[39m=[32m"18"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+        [36m</button>[39m
+        [36m<nav[39m
+          [33maria-label[39m=[32m"Primary"[39m
+          [33mclass[39m=[32m""[39m
+        [36m>[39m
+          [36m<a[39m
+            [33maria-current[39m=[32m"page"[39m
+            [33mclass[39m=[32m"active"[39m
+            [33mhref[39m=[32m"/app"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-house"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<span>[39m
+              [0mHome[0m
+            [36m</span>[39m
+          [36m</a>[39m
+          [36m<a[39m
+            [33mclass[39m=[32m""[39m
+            [33mhref[39m=[32m"/app/quests"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-scroll-text"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 12h-5"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 8h-5"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M19 17V5a2 2 0 0 0-2-2H4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<span>[39m
+              [0mQuests[0m
+            [36m</span>[39m
+          [36m</a>[39m
+          [36m<a[39m
+            [33mclass[39m=[32m""[39m
+            [33mhref[39m=[32m"/app/guild"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclas...
+   × premium Quest experience > launches and persists the contextual tour 1021ms
+     → Unable to find role="dialog"
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"app-page"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"app-topbar"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33maria-label[39m=[32m"HABBIT Quest home"[39m
+          [33mclass[39m=[32m"brand "[39m
+          [33mhref[39m=[32m"/"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"brand-crest"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-castle"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M22 20v-9H2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2Z"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M18 11V4H6v7"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 22v-4a3 3 0 0 0-3-3a3 3 0 0 0-3 3v4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M22 11V9"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M2 11V9"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M6 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M18 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M10 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M14 4V2"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"brand-copy"[39m
+          [36m>[39m
+            [36m<strong>[39m
+              [0mHABBIT[0m
+            [36m</strong>[39m
+            [36m<span>[39m
+              [0mQUEST[0m
+            [36m</span>[39m
+          [36m</span>[39m
+        [36m</a>[39m
+        [36m<button[39m
+          [33maria-label[39m=[32m"Toggle app navigation"[39m
+          [33mclass[39m=[32m"mobile-menu-button"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33mclass[39m=[32m"lucide lucide-menu"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mheight[39m=[32m"24"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-linejoin[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [33mwidth[39m=[32m"24"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"12"[39m
+              [33my2[39m=[32m"12"[39m
+            [36m/>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"6"[39m
+              [33my2[39m=[32m"6"[39m
+            [36m/>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"18"[39m
+              [33my2[39m=[32m"18"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+        [36m</button>[39m
+        [36m<nav[39m
+          [33maria-label[39m=[32m"Primary"[39m
+          [33mclass[39m=[32m""[39m
+        [36m>[39m
+          [36m<a[39m
+            [33maria-current[39m=[32m"page"[39m
+            [33mclass[39m=[32m"active"[39m
+            [33mhref[39m=[32m"/app"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-house"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<span>[39m
+              [0mHome[0m
+            [36m</span>[39m
+          [36m</a>[39m
+          [36m<a[39m
+            [33mclass[39m=[32m""[39m
+            [33mhref[39m=[32m"/app/quests"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-scroll-text"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 12h-5"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 8h-5"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M19 17V5a2 2 0 0 0-2-2H4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<span>[39m
+              [0mQuests[0m
+            [36m</span>[39m
+          [36m</a>[39m
+          [36m<a[39m
+            [33mclass[39m=[32m""[39m
+            [33mhref[39m=[32m"/app/guild"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclas...
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"app-page"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"app-topbar"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33maria-label[39m=[32m"HABBIT Quest home"[39m
+          [33mclass[39m=[32m"brand "[39m
+          [33mhref[39m=[32m"/"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"brand-crest"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-castle"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M22 20v-9H2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2Z"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M18 11V4H6v7"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 22v-4a3 3 0 0 0-3-3a3 3 0 0 0-3 3v4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M22 11V9"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M2 11V9"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M6 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M18 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M10 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M14 4V2"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"brand-copy"[39m
+          [36m>[39m
+            [36m<strong>[39m
+              [0mHABBIT[0m
+            [36m</strong>[39m
+            [36m<span>[39m
+              [0mQUEST[0m
+            [36m</span>[39m
+          [36m</span>[39m
+        [36m</a>[39m
+        [36m<button[39m
+          [33maria-label[39m=[32m"Toggle app navigation"[39m
+          [33mclass[39m=[32m"mobile-menu-button"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33mclass[39m=[32m"lucide lucide-menu"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mheight[39m=[32m"24"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-linejoin[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [33mwidth[39m=[32m"24"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"12"[39m
+              [33my2[39m=[32m"12"[39m
+            [36m/>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"6"[39m
+              [33my2[39m=[32m"6"[39m
+            [36m/>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"18"[39m
+              [33my2[39m=[32m"18"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+        [36m</button>[39m
+        [36m<nav[39m
+          [33maria-label[39m=[32m"Primary"[39m
+          [33mclass[39m=[32m""[39m
+        [36m>[39m
+          [36m<a[39m
+            [33maria-current[39m=[32m"page"[39m
+            [33mclass[39m=[32m"active"[39m
+            [33mhref[39m=[32m"/app"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-house"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<span>[39m
+              [0mHome[0m
+            [36m</span>[39m
+          [36m</a>[39m
+          [36m<a[39m
+            [33mclass[39m=[32m""[39m
+            [33mhref[39m=[32m"/app/quests"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-scroll-text"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 12h-5"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 8h-5"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M19 17V5a2 2 0 0 0-2-2H4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<span>[39m
+              [0mQuests[0m
+            [36m</span>[39m
+          [36m</a>[39m
+          [36m<a[39m
+            [33mclass[39m=[32m""[39m
+            [33mhref[39m=[32m"/app/guild"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclas...
+   × premium Quest experience > completes an automatic quest only after the API succeeds 1122ms
+     → Unable to find an element with the text: /quest complete.*25 XP/i. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"app-page"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"app-topbar"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33maria-label[39m=[32m"HABBIT Quest home"[39m
+          [33mclass[39m=[32m"brand "[39m
+          [33mhref[39m=[32m"/"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"brand-crest"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-castle"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M22 20v-9H2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2Z"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M18 11V4H6v7"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 22v-4a3 3 0 0 0-3-3a3 3 0 0 0-3 3v4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M22 11V9"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M2 11V9"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M6 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M18 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M10 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M14 4V2"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"brand-copy"[39m
+          [36m>[39m
+            [36m<strong>[39m
+              [0mHABBIT[0m
+            [36m</strong>[39m
+            [36m<span>[39m
+              [0mQUEST[0m
+            [36m</span>[39m
+          [36m</span>[39m
+        [36m</a>[39m
+        [36m<button[39m
+          [33maria-label[39m=[32m"Toggle app navigation"[39m
+          [33mclass[39m=[32m"mobile-menu-button"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33mclass[39m=[32m"lucide lucide-menu"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mheight[39m=[32m"24"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-linejoin[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [33mwidth[39m=[32m"24"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"12"[39m
+              [33my2[39m=[32m"12"[39m
+            [36m/>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"6"[39m
+              [33my2[39m=[32m"6"[39m
+            [36m/>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"18"[39m
+              [33my2[39m=[32m"18"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+        [36m</button>[39m
+        [36m<nav[39m
+          [33maria-label[39m=[32m"Primary"[39m
+          [33mclass[39m=[32m""[39m
+        [36m>[39m
+          [36m<a[39m
+            [33mclass[39m=[32m""[39m
+            [33mhref[39m=[32m"/app"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-house"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<span>[39m
+              [0mHome[0m
+            [36m</span>[39m
+          [36m</a>[39m
+          [36m<a[39m
+            [33maria-current[39m=[32m"page"[39m
+            [33mclass[39m=[32m"active"[39m
+            [33mhref[39m=[32m"/app/quests"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-scroll-text"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 12h-5"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 8h-5"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M19 17V5a2 2 0 0 0-2-2H4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<span>[39m
+              [0mQuests[0m
+            [36m</span>[39m
+          [36m</a>[39m
+          [36m<a[39m
+            [33mclass[39m=[32m""[39m
+            [33mhref[39m=[32m"/app/guild"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclas...
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"app-page"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"app-topbar"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33maria-label[39m=[32m"HABBIT Quest home"[39m
+          [33mclass[39m=[32m"brand "[39m
+          [33mhref[39m=[32m"/"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"brand-crest"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-castle"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M22 20v-9H2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2Z"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M18 11V4H6v7"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 22v-4a3 3 0 0 0-3-3a3 3 0 0 0-3 3v4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M22 11V9"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M2 11V9"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M6 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M18 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M10 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M14 4V2"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"brand-copy"[39m
+          [36m>[39m
+            [36m<strong>[39m
+              [0mHABBIT[0m
+            [36m</strong>[39m
+            [36m<span>[39m
+              [0mQUEST[0m
+            [36m</span>[39m
+          [36m</span>[39m
+        [36m</a>[39m
+        [36m<button[39m
+          [33maria-label[39m=[32m"Toggle app navigation"[39m
+          [33mclass[39m=[32m"mobile-menu-button"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33mclass[39m=[32m"lucide lucide-menu"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mheight[39m=[32m"24"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-linejoin[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [33mwidth[39m=[32m"24"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"12"[39m
+              [33my2[39m=[32m"12"[39m
+            [36m/>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"6"[39m
+              [33my2[39m=[32m"6"[39m
+            [36m/>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"18"[39m
+              [33my2[39m=[32m"18"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+        [36m</button>[39m
+        [36m<nav[39m
+          [33maria-label[39m=[32m"Primary"[39m
+          [33mclass[39m=[32m""[39m
+        [36m>[39m
+          [36m<a[39m
+            [33mclass[39m=[32m""[39m
+            [33mhref[39m=[32m"/app"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-house"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<span>[39m
+              [0mHome[0m
+            [36m</span>[39m
+          [36m</a>[39m
+          [36m<a[39m
+            [33maria-current[39m=[32m"page"[39m
+            [33mclass[39m=[32m"active"[39m
+            [33mhref[39m=[32m"/app/quests"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-scroll-text"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 12h-5"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 8h-5"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M19 17V5a2 2 0 0 0-2-2H4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<span>[39m
+              [0mQuests[0m
+            [36m</span>[39m
+          [36m</a>[39m
+          [36m<a[39m
+            [33mclass[39m=[32m""[39m
+            [33mhref[39m=[32m"/app/guild"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclas...
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/App.test.tsx > premium Quest experience > protects app routes and offers the explicit development identity
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name `/continue as local adventurer/i`
+
+Here are the accessible roles:
+
+  link:
+
+  Name "Home":
+  [36m<a[39m
+    [33mclass[39m=[32m"auth-back"[39m
+    [33mhref[39m=[32m"/"[39m
+  [36m/>[39m
+
+  Name "HABBIT Quest home":
+  [36m<a[39m
+    [33maria-label[39m=[32m"HABBIT Quest home"[39m
+    [33mclass[39m=[32m"brand "[39m
+    [33mhref[39m=[32m"/"[39m
+  [36m/>[39m
+
+  Name "Forgot password?":
+  [36m<a[39m
+    [33mhref[39m=[32m"/forgot-password"[39m
+  [36m/>[39m
+
+  Name "Create account":
+  [36m<a[39m
+    [33mhref[39m=[32m"/signup"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  strong:
+
+  Name "":
+  [36m<strong />[39m
+
+  --------------------------------------------------
+  main:
+
+  Name "":
+  [36m<main[39m
+    [33mclass[39m=[32m"auth-panel"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  heading:
+
+  Name "Welcome back.":
+  [36m<h1 />[39m
+
+  --------------------------------------------------
+  paragraph:
+
+  Name "":
+  [36m<p />[39m
+
+  Name "":
+  [36m<p />[39m
+
+  --------------------------------------------------
+  textbox:
+
+  Name "Email":
+  [36m<input[39m
+    [33mautocomplete[39m=[32m"email"[39m
+    [33mrequired[39m=[32m""[39m
+    [33mtype[39m=[32m"email"[39m
+    [33mvalue[39m=[32m""[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  button:
+
+  Name "Sign in":
+  [36m<button[39m
+    [33mclass[39m=[32m"button primary full"[39m
+  [36m/>[39m
+
+  Name "Continue as aDev":
+  [36m<button[39m
+    [33mclass[39m=[32m"button quiet full"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  complementary:
+
+  Name "":
+  [36m<aside[39m
+    [33mclass[39m=[32m"auth-aside"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"auth-page"[39m
+    [36m>[39m
+      [36m<a[39m
+        [33mclass[39m=[32m"auth-back"[39m
+        [33mhref[39m=[32m"/"[39m
+      [36m>[39m
+        [36m<svg[39m
+          [33mclass[39m=[32m"lucide lucide-chevron-left"[39m
+          [33mfill[39m=[32m"none"[39m
+          [33mheight[39m=[32m"24"[39m
+          [33mstroke[39m=[32m"currentColor"[39m
+          [33mstroke-linecap[39m=[32m"round"[39m
+          [33mstroke-linejoin[39m=[32m"round"[39m
+          [33mstroke-width[39m=[32m"2"[39m
+          [33mviewBox[39m=[32m"0 0 24 24"[39m
+          [33mwidth[39m=[32m"24"[39m
+          [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+        [36m>[39m
+          [36m<path[39m
+            [33md[39m=[32m"m15 18-6-6 6-6"[39m
+          [36m/>[39m
+        [36m</svg>[39m
+        [0m Home[0m
+      [36m</a>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"auth-brand"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33maria-label[39m=[32m"HABBIT Quest home"[39m
+          [33mclass[39m=[32m"brand "[39m
+          [33mhref[39m=[32m"/"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"brand-crest"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-castle"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M22 20v-9H2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2Z"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M18 11V4H6v7"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 22v-4a3 3 0 0 0-3-3a3 3 0 0 0-3 3v4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M22 11V9"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M2 11V9"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M6 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M18 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M10 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M14 4V2"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"brand-copy"[39m
+          [36m>[39m
+            [36m<strong>[39m
+              [0mHABBIT[0m
+            [36m</strong>[39m
+            [36m<span>[39m
+              [0mQUEST[0m
+            [36m</span>[39m
+          [36m</span>[39m
+        [36m</a>[39m
+      [36m</div>[39m
+      [36m<main[39m
+        [33mclass[39m=[32m"auth-panel"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"auth-heading"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"auth-icon"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-key-round"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"[39m
+              [36m/>[39m
+              [36m<circle[39m
+                [33mcx[39m=[32m"16.5"[39m
+                [33mcy[39m=[32m"7.5"[39m
+                [33mfill[39m=[32m"currentColor"[39m
+                [33mr[39m=[32m".5"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+          [36m<h1>[39m
+            [0mWelcome back.[0m
+          [36m</h1>[39m
+          [36m<p>[39m
+            [0mYour quest is waiting.[0m
+          [36m</p>[39m
+        [36m</div>[39m
+        [36m<form>[39m
+          [36m<label>[39m
+            [0mEmail[0m
+            [36m<input[39m
+              [33mautocomplete[39m=[32m"email"[39m
+              [33mrequired[39m=[32m""[39m
+              [33mtype[39m=[32m"email"[39m
+              [33mvalue[39m=[32m""[39m
+            [36m/>[39m
+          [36m</label>[39m
+          [36m<label>[39m
+            [0mPassword[0m
+            [36m<input[39m
+              [33mautocomplete[39m=[32m"current-password"[39m
+              [33mminlength[39m=[32m"8"[39m
+              [33mrequired[39m=[32m""[39m
+              [33mtype[39m=[32m"password"[39m
+              [33mvalue[39m=[32m""[39m
+            [36m/>[39m
+          [36m</label>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"button primary full"[39m
+          [36m>[39m
+            [0mSign in[0m
+          [36m</button>[39m
+        [36m</form>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"button quiet full"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0mContinue as aDev[0m
+        [36m</button>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"auth-links"[39m
+        [36m>[39m
+          [36m<a[39m
+            [33mhref[39m=[32m"/forgot-password"[39m
+          [36m>[39m
+            [0mForgot password?[0m
+          [36m</a>[39m
+          [36m<span>[39m
+            [0mNew here? [0m
+            [36m<a[39m
+              [33mhref[39m=[32m"/signup"[39m
+            [36m>[39m
+              [0mCreate account[0m
+            [36m</a>[39m
+          [36m</span>[39m
+        [36m</div>[39m
+      [36m</main>[39m
+      [36m<aside[39m
+        [33mclass[39m=[32m"auth-aside"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mdata-testid[39m=[32m"quest-compass"[39m
+        [36m>[39m
+          [0mCompass [0m
+          [0mlocked[0m
+        [36m</div>[39m
+        [36m<p>[39m
+          [0mPrivate credentials stay with Supabase Auth.[0m
+        [36m</p>[39m
+      [36m</aside>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/App.test.tsx:75:19
+     73|     renderApp('/app');
+     74|     expect(screen.getByRole('heading', { name: /welcome back/i })).toB…
+     75|     expect(screen.getByRole('button', { name: /continue as local adven…
+       |                   ^
+     76|   });
+     77| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  src/App.test.tsx > premium Quest experience > restores a development session and renders real API quest data
+TestingLibraryElementError: Unable to find an element with the text: /12 day streak/i. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"app-page"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"app-topbar"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33maria-label[39m=[32m"HABBIT Quest home"[39m
+          [33mclass[39m=[32m"brand "[39m
+          [33mhref[39m=[32m"/"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"brand-crest"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-castle"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M22 20v-9H2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2Z"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M18 11V4H6v7"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 22v-4a3 3 0 0 0-3-3a3 3 0 0 0-3 3v4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M22 11V9"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M2 11V9"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M6 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M18 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M10 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M14 4V2"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"brand-copy"[39m
+          [36m>[39m
+            [36m<strong>[39m
+              [0mHABBIT[0m
+            [36m</strong>[39m
+            [36m<span>[39m
+              [0mQUEST[0m
+            [36m</span>[39m
+          [36m</span>[39m
+        [36m</a>[39m
+        [36m<button[39m
+          [33maria-label[39m=[32m"Toggle app navigation"[39m
+          [33mclass[39m=[32m"mobile-menu-button"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33mclass[39m=[32m"lucide lucide-menu"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mheight[39m=[32m"24"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-linejoin[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [33mwidth[39m=[32m"24"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"12"[39m
+              [33my2[39m=[32m"12"[39m
+            [36m/>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"6"[39m
+              [33my2[39m=[32m"6"[39m
+            [36m/>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"18"[39m
+              [33my2[39m=[32m"18"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+        [36m</button>[39m
+        [36m<nav[39m
+          [33maria-label[39m=[32m"Primary"[39m
+          [33mclass[39m=[32m""[39m
+        [36m>[39m
+          [36m<a[39m
+            [33maria-current[39m=[32m"page"[39m
+            [33mclass[39m=[32m"active"[39m
+            [33mhref[39m=[32m"/app"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-house"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<span>[39m
+              [0mHome[0m
+            [36m</span>[39m
+          [36m</a>[39m
+          [36m<a[39m
+            [33mclass[39m=[32m""[39m
+            [33mhref[39m=[32m"/app/quests"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-scroll-text"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 12h-5"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 8h-5"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M19 17V5a2 2 0 0 0-2-2H4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<span>[39m
+              [0mQuests[0m
+            [36m</span>[39m
+          [36m</a>[39m
+          [36m<a[39m
+            [33mclass[39m=[32m""[39m
+            [33mhref[39m=[32m"/app/guild"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclas...
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/App.test.tsx:84:19
+     82|     expect(await screen.findByRole('heading', { name: /today’s path/i …
+     83|     expect(await screen.findByText('Read with focus')).toBeInTheDocume…
+     84|     expect(screen.getByText(/12 day streak/i)).toBeInTheDocument();
+       |                   ^
+     85|     expect(screen.getByRole('navigation', { name: /^primary$/i })).toB…
+     86|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  src/App.test.tsx > premium Quest experience > redirects a first-time profile to the three-step onboarding flow
+TestingLibraryElementError: Unable to find role="heading" and name `/meet your guide/i`
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"app-page"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"app-topbar"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33maria-label[39m=[32m"HABBIT Quest home"[39m
+          [33mclass[39m=[32m"brand "[39m
+          [33mhref[39m=[32m"/"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"brand-crest"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-castle"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M22 20v-9H2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2Z"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M18 11V4H6v7"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 22v-4a3 3 0 0 0-3-3a3 3 0 0 0-3 3v4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M22 11V9"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M2 11V9"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M6 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M18 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M10 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M14 4V2"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"brand-copy"[39m
+          [36m>[39m
+            [36m<strong>[39m
+              [0mHABBIT[0m
+            [36m</strong>[39m
+            [36m<span>[39m
+              [0mQUEST[0m
+            [36m</span>[39m
+          [36m</span>[39m
+        [36m</a>[39m
+        [36m<button[39m
+          [33maria-label[39m=[32m"Toggle app navigation"[39m
+          [33mclass[39m=[32m"mobile-menu-button"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33mclass[39m=[32m"lucide lucide-menu"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mheight[39m=[32m"24"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-linejoin[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [33mwidth[39m=[32m"24"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"12"[39m
+              [33my2[39m=[32m"12"[39m
+            [36m/>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"6"[39m
+              [33my2[39m=[32m"6"[39m
+            [36m/>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"18"[39m
+              [33my2[39m=[32m"18"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+        [36m</button>[39m
+        [36m<nav[39m
+          [33maria-label[39m=[32m"Primary"[39m
+          [33mclass[39m=[32m""[39m
+        [36m>[39m
+          [36m<a[39m
+            [33maria-current[39m=[32m"page"[39m
+            [33mclass[39m=[32m"active"[39m
+            [33mhref[39m=[32m"/app"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-house"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<span>[39m
+              [0mHome[0m
+            [36m</span>[39m
+          [36m</a>[39m
+          [36m<a[39m
+            [33mclass[39m=[32m""[39m
+            [33mhref[39m=[32m"/app/quests"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-scroll-text"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 12h-5"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 8h-5"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M19 17V5a2 2 0 0 0-2-2H4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<span>[39m
+              [0mQuests[0m
+            [36m</span>[39m
+          [36m</a>[39m
+          [36m<a[39m
+            [33mclass[39m=[32m""[39m
+            [33mhref[39m=[32m"/app/guild"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclas...
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"app-page"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"app-topbar"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33maria-label[39m=[32m"HABBIT Quest home"[39m
+          [33mclass[39m=[32m"brand "[39m
+          [33mhref[39m=[32m"/"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"brand-crest"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-castle"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M22 20v-9H2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2Z"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M18 11V4H6v7"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 22v-4a3 3 0 0 0-3-3a3 3 0 0 0-3 3v4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M22 11V9"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M2 11V9"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M6 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M18 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M10 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M14 4V2"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"brand-copy"[39m
+          [36m>[39m
+            [36m<strong>[39m
+              [0mHABBIT[0m
+            [36m</strong>[39m
+            [36m<span>[39m
+              [0mQUEST[0m
+            [36m</span>[39m
+          [36m</span>[39m
+        [36m</a>[39m
+        [36m<button[39m
+          [33maria-label[39m=[32m"Toggle app navigation"[39m
+          [33mclass[39m=[32m"mobile-menu-button"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33mclass[39m=[32m"lucide lucide-menu"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mheight[39m=[32m"24"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-linejoin[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [33mwidth[39m=[32m"24"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"12"[39m
+              [33my2[39m=[32m"12"[39m
+            [36m/>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"6"[39m
+              [33my2[39m=[32m"6"[39m
+            [36m/>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"18"[39m
+              [33my2[39m=[32m"18"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+        [36m</button>[39m
+        [36m<nav[39m
+          [33maria-label[39m=[32m"Primary"[39m
+          [33mclass[39m=[32m""[39m
+        [36m>[39m
+          [36m<a[39m
+            [33maria-current[39m=[32m"page"[39m
+            [33mclass[39m=[32m"active"[39m
+            [33mhref[39m=[32m"/app"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-house"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<span>[39m
+              [0mHome[0m
+            [36m</span>[39m
+          [36m</a>[39m
+          [36m<a[39m
+            [33mclass[39m=[32m""[39m
+            [33mhref[39m=[32m"/app/quests"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-scroll-text"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 12h-5"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 8h-5"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M19 17V5a2 2 0 0 0-2-2H4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<span>[39m
+              [0mQuests[0m
+            [36m</span>[39m
+          [36m</a>[39m
+          [36m<a[39m
+            [33mclass[39m=[32m""[39m
+            [33mhref[39m=[32m"/app/guild"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclas...
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/App.test.tsx:92:25
+     90|     mockApi({ ...profile, onboardingCompletedAt: null, displayName: 'L…
+     91|     renderApp('/app');
+     92|     expect(await screen.findByRole('heading', { name: /meet your guide…
+       |                         ^
+     93|     fireEvent.change(screen.getByLabelText(/display name/i), { target:…
+     94|     fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  src/App.test.tsx > premium Quest experience > launches and persists the contextual tour
+TestingLibraryElementError: Unable to find role="dialog"
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"app-page"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"app-topbar"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33maria-label[39m=[32m"HABBIT Quest home"[39m
+          [33mclass[39m=[32m"brand "[39m
+          [33mhref[39m=[32m"/"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"brand-crest"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-castle"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M22 20v-9H2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2Z"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M18 11V4H6v7"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 22v-4a3 3 0 0 0-3-3a3 3 0 0 0-3 3v4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M22 11V9"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M2 11V9"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M6 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M18 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M10 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M14 4V2"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"brand-copy"[39m
+          [36m>[39m
+            [36m<strong>[39m
+              [0mHABBIT[0m
+            [36m</strong>[39m
+            [36m<span>[39m
+              [0mQUEST[0m
+            [36m</span>[39m
+          [36m</span>[39m
+        [36m</a>[39m
+        [36m<button[39m
+          [33maria-label[39m=[32m"Toggle app navigation"[39m
+          [33mclass[39m=[32m"mobile-menu-button"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33mclass[39m=[32m"lucide lucide-menu"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mheight[39m=[32m"24"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-linejoin[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [33mwidth[39m=[32m"24"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"12"[39m
+              [33my2[39m=[32m"12"[39m
+            [36m/>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"6"[39m
+              [33my2[39m=[32m"6"[39m
+            [36m/>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"18"[39m
+              [33my2[39m=[32m"18"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+        [36m</button>[39m
+        [36m<nav[39m
+          [33maria-label[39m=[32m"Primary"[39m
+          [33mclass[39m=[32m""[39m
+        [36m>[39m
+          [36m<a[39m
+            [33maria-current[39m=[32m"page"[39m
+            [33mclass[39m=[32m"active"[39m
+            [33mhref[39m=[32m"/app"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-house"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<span>[39m
+              [0mHome[0m
+            [36m</span>[39m
+          [36m</a>[39m
+          [36m<a[39m
+            [33mclass[39m=[32m""[39m
+            [33mhref[39m=[32m"/app/quests"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-scroll-text"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 12h-5"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 8h-5"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M19 17V5a2 2 0 0 0-2-2H4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<span>[39m
+              [0mQuests[0m
+            [36m</span>[39m
+          [36m</a>[39m
+          [36m<a[39m
+            [33mclass[39m=[32m""[39m
+            [33mhref[39m=[32m"/app/guild"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclas...
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"app-page"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"app-topbar"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33maria-label[39m=[32m"HABBIT Quest home"[39m
+          [33mclass[39m=[32m"brand "[39m
+          [33mhref[39m=[32m"/"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"brand-crest"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-castle"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M22 20v-9H2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2Z"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M18 11V4H6v7"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 22v-4a3 3 0 0 0-3-3a3 3 0 0 0-3 3v4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M22 11V9"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M2 11V9"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M6 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M18 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M10 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M14 4V2"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"brand-copy"[39m
+          [36m>[39m
+            [36m<strong>[39m
+              [0mHABBIT[0m
+            [36m</strong>[39m
+            [36m<span>[39m
+              [0mQUEST[0m
+            [36m</span>[39m
+          [36m</span>[39m
+        [36m</a>[39m
+        [36m<button[39m
+          [33maria-label[39m=[32m"Toggle app navigation"[39m
+          [33mclass[39m=[32m"mobile-menu-button"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33mclass[39m=[32m"lucide lucide-menu"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mheight[39m=[32m"24"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-linejoin[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [33mwidth[39m=[32m"24"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"12"[39m
+              [33my2[39m=[32m"12"[39m
+            [36m/>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"6"[39m
+              [33my2[39m=[32m"6"[39m
+            [36m/>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"18"[39m
+              [33my2[39m=[32m"18"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+        [36m</button>[39m
+        [36m<nav[39m
+          [33maria-label[39m=[32m"Primary"[39m
+          [33mclass[39m=[32m""[39m
+        [36m>[39m
+          [36m<a[39m
+            [33maria-current[39m=[32m"page"[39m
+            [33mclass[39m=[32m"active"[39m
+            [33mhref[39m=[32m"/app"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-house"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<span>[39m
+              [0mHome[0m
+            [36m</span>[39m
+          [36m</a>[39m
+          [36m<a[39m
+            [33mclass[39m=[32m""[39m
+            [33mhref[39m=[32m"/app/quests"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-scroll-text"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 12h-5"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 8h-5"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M19 17V5a2 2 0 0 0-2-2H4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<span>[39m
+              [0mQuests[0m
+            [36m</span>[39m
+          [36m</a>[39m
+          [36m<a[39m
+            [33mclass[39m=[32m""[39m
+            [33mhref[39m=[32m"/app/guild"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclas...
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/App.test.tsx:102:25
+    100|     const fetchMock = mockApi({ ...profile, tourVersionSeen: 0 });
+    101|     renderApp('/app');
+    102|     expect(await screen.findByRole('dialog')).toBeInTheDocument();
+       |                         ^
+    103|     expect(screen.getAllByRole('heading', { name: /today’s path/i })).…
+    104|     fireEvent.click(screen.getByRole('button', { name: /skip/i }));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  src/App.test.tsx > premium Quest experience > completes an automatic quest only after the API succeeds
+TestingLibraryElementError: Unable to find an element with the text: /quest complete.*25 XP/i. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"app-page"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"app-topbar"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33maria-label[39m=[32m"HABBIT Quest home"[39m
+          [33mclass[39m=[32m"brand "[39m
+          [33mhref[39m=[32m"/"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"brand-crest"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-castle"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M22 20v-9H2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2Z"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M18 11V4H6v7"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 22v-4a3 3 0 0 0-3-3a3 3 0 0 0-3 3v4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M22 11V9"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M2 11V9"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M6 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M18 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M10 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M14 4V2"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"brand-copy"[39m
+          [36m>[39m
+            [36m<strong>[39m
+              [0mHABBIT[0m
+            [36m</strong>[39m
+            [36m<span>[39m
+              [0mQUEST[0m
+            [36m</span>[39m
+          [36m</span>[39m
+        [36m</a>[39m
+        [36m<button[39m
+          [33maria-label[39m=[32m"Toggle app navigation"[39m
+          [33mclass[39m=[32m"mobile-menu-button"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33mclass[39m=[32m"lucide lucide-menu"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mheight[39m=[32m"24"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-linejoin[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [33mwidth[39m=[32m"24"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"12"[39m
+              [33my2[39m=[32m"12"[39m
+            [36m/>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"6"[39m
+              [33my2[39m=[32m"6"[39m
+            [36m/>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"18"[39m
+              [33my2[39m=[32m"18"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+        [36m</button>[39m
+        [36m<nav[39m
+          [33maria-label[39m=[32m"Primary"[39m
+          [33mclass[39m=[32m""[39m
+        [36m>[39m
+          [36m<a[39m
+            [33mclass[39m=[32m""[39m
+            [33mhref[39m=[32m"/app"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-house"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<span>[39m
+              [0mHome[0m
+            [36m</span>[39m
+          [36m</a>[39m
+          [36m<a[39m
+            [33maria-current[39m=[32m"page"[39m
+            [33mclass[39m=[32m"active"[39m
+            [33mhref[39m=[32m"/app/quests"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-scroll-text"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 12h-5"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 8h-5"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M19 17V5a2 2 0 0 0-2-2H4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<span>[39m
+              [0mQuests[0m
+            [36m</span>[39m
+          [36m</a>[39m
+          [36m<a[39m
+            [33mclass[39m=[32m""[39m
+            [33mhref[39m=[32m"/app/guild"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclas...
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"app-page"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"app-topbar"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33maria-label[39m=[32m"HABBIT Quest home"[39m
+          [33mclass[39m=[32m"brand "[39m
+          [33mhref[39m=[32m"/"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"brand-crest"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-castle"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M22 20v-9H2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2Z"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M18 11V4H6v7"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 22v-4a3 3 0 0 0-3-3a3 3 0 0 0-3 3v4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M22 11V9"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M2 11V9"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M6 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M18 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M10 4V2"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M14 4V2"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"brand-copy"[39m
+          [36m>[39m
+            [36m<strong>[39m
+              [0mHABBIT[0m
+            [36m</strong>[39m
+            [36m<span>[39m
+              [0mQUEST[0m
+            [36m</span>[39m
+          [36m</span>[39m
+        [36m</a>[39m
+        [36m<button[39m
+          [33maria-label[39m=[32m"Toggle app navigation"[39m
+          [33mclass[39m=[32m"mobile-menu-button"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33mclass[39m=[32m"lucide lucide-menu"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mheight[39m=[32m"24"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-linejoin[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [33mwidth[39m=[32m"24"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"12"[39m
+              [33my2[39m=[32m"12"[39m
+            [36m/>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"6"[39m
+              [33my2[39m=[32m"6"[39m
+            [36m/>[39m
+            [36m<line[39m
+              [33mx1[39m=[32m"4"[39m
+              [33mx2[39m=[32m"20"[39m
+              [33my1[39m=[32m"18"[39m
+              [33my2[39m=[32m"18"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+        [36m</button>[39m
+        [36m<nav[39m
+          [33maria-label[39m=[32m"Primary"[39m
+          [33mclass[39m=[32m""[39m
+        [36m>[39m
+          [36m<a[39m
+            [33mclass[39m=[32m""[39m
+            [33mhref[39m=[32m"/app"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-house"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<span>[39m
+              [0mHome[0m
+            [36m</span>[39m
+          [36m</a>[39m
+          [36m<a[39m
+            [33maria-current[39m=[32m"page"[39m
+            [33mclass[39m=[32m"active"[39m
+            [33mhref[39m=[32m"/app/quests"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-scroll-text"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 12h-5"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 8h-5"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M19 17V5a2 2 0 0 0-2-2H4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<span>[39m
+              [0mQuests[0m
+            [36m</span>[39m
+          [36m</a>[39m
+          [36m<a[39m
+            [33mclass[39m=[32m""[39m
+            [33mhref[39m=[32m"/app/guild"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclas...
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/App.test.tsx:115:27
+    113|     fireEvent.click(action[0]);
+    114|     try {
+    115|       expect(await screen.findByText(/quest complete.*25 XP/i)).toBeIn…
+       |                           ^
+    116|     } catch (e) {
+    117|       screen.debug(undefined, 30000);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+ Test Files  1 failed | 4 passed | 1 skipped (6)
+      Tests  5 failed | 40 passed | 7 skipped (52)
+   Start at  12:25:52
+   Duration  5.31s (transform 496ms, setup 447ms, collect 1.43s, tests 4.25s, environment 3.16s, prepare 765ms)
+

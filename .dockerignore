@@ -3,3 +3,11 @@ npm-debug.log
 dist
 .git
 .gitignore
+.env
+.env.*
+secrets.env
+coverage
+.claude
+.kilo
+.codex
+mobile_flutter
