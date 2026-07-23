@@ -56,7 +56,7 @@ export function createApp(options = {}) {
     next();
   });
   app.use(helmet({ crossOriginResourcePolicy: { policy: 'same-site' } }));
-  app.use(cors({
+  const corsMiddleware = cors({
     origin(origin, callback) {
       if (!origin || config.corsOrigins.includes(origin)) return callback(null, true);
       return callback(new Error('cors_origin_denied'));
@@ -64,7 +64,8 @@ export function createApp(options = {}) {
     credentials: false,
     methods: ['GET', 'POST', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Authorization', 'Content-Type', 'Idempotency-Key', 'X-Request-ID'],
-  }));
+  });
+  app.use('/api', corsMiddleware);
   app.use(express.json({ limit: config.REQUEST_BODY_LIMIT, strict: true }));
 
   const rateKey = (req) => req.identity?.id || ipKeyGenerator(req.ip);
