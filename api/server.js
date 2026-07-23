@@ -184,4 +184,21 @@ function asyncRoute(handler) { return (req, res, next) => Promise.resolve(handle
 function mapLegacyQuest(item) { return { id: item.id, title: item.title, summary: item.description, detail: item.description, category: item.category === 'Weekly' ? 'Discovery' : item.category, rarity: item.rarity, xp: item.xpReward, status: legacyStatus(item.status), progress: item.targetValue ? item.progressValue / item.targetValue : 0, target: `${item.progressValue}/${item.targetValue} ${item.unit}`, instructions: item.instructions, proofType: item.verificationType.toLowerCase(), cadence: item.cadence }; }
 function legacyStatus(status) { return status === 'completed' ? 'Completed' : status === 'pending_verification' ? 'Awaiting Proof' : status === 'active' || status === 'rejected' ? 'In Progress' : 'Not Started'; }
 
+// --- Vercel Serverless Entry Point ---
+// Vercel imports this file and calls the default export as a request handler.
+// We lazily initialise the runtime once per cold start.
+let _vercelApp;
+async function getVercelApp() {
+  if (!_vercelApp) {
+    const runtime = await createRuntime();
+    _vercelApp = createApp(runtime);
+  }
+  return _vercelApp;
+}
+export default async function handler(req, res) {
+  const app = await getVercelApp();
+  return app(req, res);
+}
+
+// --- Self-hosted Entry Point ---
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) startServer();
