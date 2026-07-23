@@ -76,6 +76,14 @@ Without `DATABASE_URL`, development uses a bounded in-memory repository. Product
 
 `db/init.sql` is intentionally not the schema source of truth.
 
+## Deployment
+
+See [docs/deployment.md](docs/deployment.md) for the full Render deployment
+guide: environment variables, Supabase configuration, migrations, health
+checks, smoke tests, and rollback procedure. See
+[.env.production.example](.env.production.example) for the complete
+environment variable reference.
+
 ## Security and providers
 
 See [docs/backend-security.md](docs/backend-security.md). Local health, storage, photo verification, cache, and scheduler adapters are deterministic development implementations. They are not production integrations. Production fails startup if development authentication, legacy mutation bypasses, or local providers are enabled.

@@ -1,96 +1,108 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { MemoryRouter } from 'react-router-dom';
+import { render, screen, waitFor } from '@testing-library/react';
+import { queryClient } from './lib/queryClient';
 import App from './App';
 
-describe('App', () => {
+const mockMe = {
+  id: 'dev-user',
+  displayName: 'Local Adventurer',
+  timezone: 'UTC',
+  totalXp: 300,
+  level: 2,
+  tier: 'Bronze',
+  xpIntoLevel: 50,
+  xpForCurrentLevel: 250,
+  xpToNextLevel: 200,
+  progressToNextLevel: 0.2,
+  streakDays: 3,
+  onboardingCompletedAt: '2026-01-01T00:00:00.000Z',
+};
+
+const mockQuest = {
+  id: '11111111-1111-4111-8111-111111111111',
+  title: 'Morning Mindfulness',
+  description: 'Complete a breathing ritual.',
+  category: 'Mind',
+  rarity: 'Rare',
+  cadence: 'daily',
+  status: 'active',
+  verificationType: 'TEXT',
+  progressValue: 0,
+  targetValue: 1,
+  unit: 'session',
+  xpReward: 120,
+  instructions: ['Sit quietly', 'Breathe for 10 minutes'],
+};
+
+vi.mock('./lib/supabase', () => ({ supabase: null, supabaseConfigured: false }));
+
+function renderApp(initialPath = '/app') {
+  queryClient.clear();
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter initialEntries={[initialPath]}>
+        <App />
+      </MemoryRouter>
+    </QueryClientProvider>,
+  );
+}
+
+describe('App (development auth mode)', () => {
   beforeEach(() => {
-    window.localStorage.clear();
-    global.fetch = vi.fn(() => Promise.reject(new Error('offline')));
+    global.fetch = vi.fn((url) => {
+      if (url.includes('/v1/me')) return jsonResponse(mockMe);
+      if (url.includes('/v1/quests/active')) return jsonResponse([mockQuest]);
+      if (url.includes('/v1/collectibles')) return jsonResponse([]);
+      return jsonResponse(null, 404);
+    });
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
-  it('renders the standalone dashboard heading', async () => {
-    render(<App />);
+  it('renders the dashboard with real profile data instead of hardcoded fallbacks', async () => {
+    renderApp('/app');
 
-    expect(screen.getByRole('heading', { name: /dashboard/i })).toBeInTheDocument();
-    expect(screen.getByRole('navigation', { name: /primary/i })).toBeInTheDocument();
-    expect(await screen.findByText(/using local collection/i)).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: /dashboard/i })).toBeInTheDocument();
+    expect((await screen.findAllByText(/morning mindfulness/i)).length).toBeGreaterThan(0);
+    expect(screen.queryByText(/1,240/)).not.toBeInTheDocument();
+    expect(screen.queryByText('24')).not.toBeInTheDocument();
   });
 
-  it('shows local-only sync messaging when the API is offline', async () => {
-    render(<App />);
+  it('does not render a community or leaderboard section', async () => {
+    renderApp('/app');
+    await screen.findByRole('heading', { name: /dashboard/i });
 
-    expect(await screen.findByText(/using local collection/i)).toBeInTheDocument();
+    expect(screen.queryByText(/leaderboard/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: /community/i })).not.toBeInTheDocument();
   });
 
-  it('adds a new quest from the create button', async () => {
-    render(<App />);
-    await screen.findByText(/using local collection/i);
+  it('navigates to the quest board and filters quests', async () => {
+    renderApp('/app/quests');
 
-    fireEvent.click(screen.getAllByRole('button', { name: /create a new hydration quest/i })[0]);
-
-    await waitFor(() => expect(screen.getAllByText(/hydration combo/i).length).toBeGreaterThanOrEqual(2));
-    await waitFor(() => expect(screen.getByText(/new quest added locally/i)).toBeInTheDocument());
+    await screen.findAllByRole('heading', { name: /quest board/i });
+    expect((await screen.findAllByText(/morning mindfulness/i)).length).toBeGreaterThan(0);
+    expect(screen.getByRole('button', { name: 'Daily' })).toBeInTheDocument();
   });
 
-  it('claims a reward and updates quest progress', async () => {
-    global.fetch = vi
-      .fn()
-      .mockRejectedValueOnce(new Error('offline'))
-      .mockRejectedValueOnce(new Error('offline'))
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          quest: { ...mockCompletedQuest, status: 'Completed', progress: 1 },
-          collectible: mockCollectible,
-        }),
-      });
+  it('shows the gallery empty state when no collectibles are unlocked', async () => {
+    renderApp('/app/gallery');
 
-    render(<App />);
-    await screen.findByText(/using local collection/i);
-
-    fireEvent.click(screen.getByRole('button', { name: /claim reward/i }));
-
-    await waitFor(() => expect(screen.getAllByText(/\+120 XP/i).length).toBeGreaterThan(0));
-    await waitFor(() => expect(screen.getByText(/collectible saved to your reward database/i)).toBeInTheDocument());
-    expect(screen.getByRole('heading', { name: /gallery/i })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /focus wisp/i })).toBeInTheDocument();
+    expect(await screen.findByText(/no stickers unlocked yet/i)).toBeInTheDocument();
   });
 
-  it('toggles light mode', async () => {
-    render(<App />);
-    await screen.findByText(/using local collection/i);
-
-    fireEvent.click(screen.getByRole('button', { name: /light mode/i }));
-
-    expect(screen.getByRole('button', { name: /dark mode/i })).toBeInTheDocument();
+  it('redirects unauthenticated dev-mode users straight into the app (no fake landing bypass)', async () => {
+    renderApp('/');
+    await waitFor(() => expect(screen.getByRole('heading', { name: /dashboard/i })).toBeInTheDocument());
   });
 });
 
-const mockCompletedQuest = {
-  id: 'daily-focus',
-  title: 'Morning Mindfulness',
-  summary: 'Complete a 10-minute breathing ritual and capture the feeling.',
-  detail: 'Sit somewhere calm, breathe slowly, and note one intention for the day.',
-  category: 'Mind',
-  rarity: 'Rare',
-  xp: 120,
-  status: 'Completed',
-  progress: 1,
-  target: '7/10 days',
-  instructions: ['Set a quiet timer', 'Breathe for 10 minutes', 'Write one line of gratitude'],
-  proofType: 'photo',
-  cadence: 'daily',
-};
-
-const mockCollectible = {
-  assetId: 'wisp-focus',
-  questId: 'daily-focus',
-  title: 'Focus Wisp',
-  category: 'Mind',
-  rarity: 'Rare',
-  caption: 'Unlocked for completing a mindful streak ritual.',
-  unlockedAt: '2026-07-05T00:00:00.000Z',
-};
+function jsonResponse(body, status = 200) {
+  return Promise.resolve({
+    ok: status >= 200 && status < 300,
+    status,
+    json: async () => body,
+  });
+}

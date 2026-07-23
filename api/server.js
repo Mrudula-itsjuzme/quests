@@ -98,6 +98,7 @@ export function createApp(options = {}) {
   app.post('/api/v1/quests/generate-weekly', writeLimiter, asyncRoute(async (req, res) => res.status(201).json(await engine.generateWeekly(req.identity, requireIdempotency(req)))));
   app.post('/api/v1/quests/:assignmentId/progress', writeLimiter, asyncRoute(async (req, res) => res.json(await engine.progress(req.identity, parse(assignmentIdSchema, req.params.assignmentId), parse(progressSchema, req.body), requireIdempotency(req)))));
   app.post('/api/v1/quests/:assignmentId/submissions', writeLimiter, asyncRoute(async (req, res) => res.status(201).json(await engine.submit(req.identity, parse(assignmentIdSchema, req.params.assignmentId), parse(submissionSchema, req.body), requireIdempotency(req)))));
+  app.get('/api/v1/collectibles', asyncRoute(async (req, res) => res.json(await repository.getCollectibles(req.identity.id))));
 
   app.get('/api/quests', asyncRoute(async (req, res) => {
     let active = await engine.active(req.identity);

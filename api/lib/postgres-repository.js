@@ -206,11 +206,11 @@ export class PostgresQuestRepository {
           if (bonusXp) await client.query(`UPDATE quest_users
             SET total_xp = total_xp + 150,
                 streak_days = CASE
-                  WHEN last_streak_period::date = $2::date - 1 THEN streak_days + 1
-                  WHEN last_streak_period = $2 THEN streak_days
+                  WHEN last_streak_period::date = $2::text::date - 1 THEN streak_days + 1
+                  WHEN last_streak_period = $2::text THEN streak_days
                   ELSE 1
                 END,
-                last_streak_period = $2,
+                last_streak_period = $2::text,
                 updated_at = NOW()
             WHERE id = $1`, [userId, dailyPeriodKey]);
           if (bonusXp) await client.query(`UPDATE quest_daily_states SET

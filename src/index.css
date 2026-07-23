@@ -1091,3 +1091,140 @@ p { margin: 0; color: var(--text-soft); line-height: 1.6; }
     scroll-behavior: auto !important;
   }
 }
+
+.landing-shell, .auth-shell, .onboarding-shell {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.landing-hero {
+  text-align: center;
+  max-width: 480px;
+  display: grid;
+  gap: 16px;
+  justify-items: center;
+}
+
+.landing-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.auth-card, .onboarding-card {
+  width: 100%;
+  max-width: 420px;
+  display: grid;
+  gap: 16px;
+}
+
+.auth-form, .onboarding-form {
+  display: grid;
+  gap: 8px;
+}
+
+.auth-form label, .onboarding-form label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+.auth-form input, .onboarding-form input, .onboarding-form textarea,
+.proof-form textarea, .proof-form input {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border, rgba(148, 163, 184, 0.4));
+  background: var(--surface, transparent);
+  color: inherit;
+  font: inherit;
+}
+
+.auth-form input:focus-visible, .onboarding-form input:focus-visible,
+.onboarding-form textarea:focus-visible, .proof-form textarea:focus-visible,
+.proof-form input:focus-visible {
+  outline: 2px solid var(--accent, #6366f1);
+  outline-offset: 2px;
+}
+
+.auth-switch {
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.field-hint {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 400 !important;
+}
+
+.form-error {
+  color: #dc2626;
+  font-size: 0.85rem;
+}
+
+.dev-auth-banner {
+  background: #fef3c7;
+  color: #92400e;
+  padding: 10px 16px;
+  font-size: 0.85rem;
+  text-align: center;
+  font-weight: 600;
+}
+
+.fullscreen-status {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty-state, .empty-gallery {
+  text-align: center;
+  padding: 32px 16px;
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+}
+
+.proof-form {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.proof-form label {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.page-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+button:focus-visible, a:focus-visible, input:focus-visible {
+  outline: 2px solid var(--accent, #6366f1);
+  outline-offset: 2px;
+}
+
+@media (max-width: 340px) {
+  .app-shell, .landing-shell, .auth-shell, .onboarding-shell {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .metric-strip, .collection-grid {
+    grid-template-columns: 1fr;
+  }
+}
