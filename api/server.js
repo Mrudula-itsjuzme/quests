@@ -55,7 +55,15 @@ export function createApp(options = {}) {
     res.setTimeout(10_000, () => { if (!res.headersSent) res.status(503).json({ error: { code: 'request_timeout', requestId: req.id } }); });
     next();
   });
-  app.use(helmet({ crossOriginResourcePolicy: { policy: 'same-site' } }));
+  app.use(helmet({
+    crossOriginResourcePolicy: { policy: 'same-site' },
+    contentSecurityPolicy: {
+      directives: {
+        ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+        'connect-src': ["'self'", ...(config.SUPABASE_URL ? [config.SUPABASE_URL] : [])],
+      },
+    },
+  }));
   const corsMiddleware = cors({
     origin(origin, callback) {
       if (!origin || config.corsOrigins.includes(origin)) return callback(null, true);

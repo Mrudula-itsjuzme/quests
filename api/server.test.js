@@ -23,6 +23,18 @@ describe('Quest API', () => {
     expect(ready.body).toEqual({ status: 'ready', database: 'memory' });
   });
 
+  it('allows browser fetches to the configured Supabase auth origin via CSP connect-src', async () => {
+    const app = createApp({ config: testConfig({ SUPABASE_URL: 'https://example-project.supabase.co', OIDC_AUDIENCE: 'authenticated' }) });
+    const health = await request(app).get('/health');
+    expect(health.headers['content-security-policy']).toContain("connect-src 'self' https://example-project.supabase.co");
+  });
+
+  it('scopes the CORS allowlist to /api and never blocks static assets by origin', async () => {
+    const app = createApp({ config: testConfig({ CORS_ORIGINS: 'https://app.example.com' }) });
+    const asset = await request(app).get('/does-not-exist-but-not-cors-checked').set('Origin', 'https://evil.example.com');
+    expect(asset.status).not.toBe(403);
+  });
+
   it('requires authentication when development identity is disabled', async () => {
     const app = createApp({ config: testConfig({ DEV_AUTH_ENABLED: 'false' }) });
     const response = await request(app).get('/api/v1/me');
