@@ -61,10 +61,10 @@ export function createApp(options = {}) {
       directives: {
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
         imgSrc: ["'self'", 'data:', 'blob:'],
         connectSrc: ["'self'", 'https://*.supabase.co'],
-        fontSrc: ["'self'", 'data:'],
+        fontSrc: ["'self'", 'data:', 'https://fonts.gstatic.com'],
         objectSrc: ["'none'"],
         frameAncestors: ["'none'"],
         baseUri: ["'self'"],
@@ -76,6 +76,8 @@ export function createApp(options = {}) {
   const corsMiddleware = cors({
     origin(origin, callback) {
       if (!origin || config.corsOrigins.includes(origin)) return callback(null, true);
+      // Allow same-origin requests (frontend served from this same server)
+      if (config.selfOrigin && origin === config.selfOrigin) return callback(null, true);
       return callback(new Error('cors_origin_denied'));
     },
     credentials: false,

@@ -30,6 +30,7 @@ const schema = z.object({
   RATE_LIMIT_WRITES: z.coerce.number().int().min(1).default(40),
   REQUEST_BODY_LIMIT: z.string().regex(/^\d+(kb|mb)$/i).default('128kb'),
   PROVIDER_MODE: z.enum(['local', 'disabled']).default('disabled'),
+  RENDER_EXTERNAL_URL: z.string().url().optional(),
 });
 
 export function loadConfig(env = process.env) {
@@ -50,6 +51,7 @@ export function loadConfig(env = process.env) {
   }
   config.databaseUrl = config.DATABASE_URL || config.POSTGRES_URL;
   config.corsOrigins = config.CORS_ORIGINS.split(',').map((origin) => origin.trim()).filter(Boolean);
+  config.selfOrigin = config.RENDER_EXTERNAL_URL?.replace(/\/$/, '') || null;
   config.listenHost = config.HOST || (config.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1');
 
   if (config.NODE_ENV === 'production') {
