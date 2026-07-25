@@ -43,17 +43,13 @@ class QuestController extends ChangeNotifier {
   bool isCompleting(String questId) => _completing.contains(questId);
 
   // ─── Derived data ──────────────────────────────────────────
-  List<Quest> get dailyQuests =>
-      _quests.where((q) => q.isDaily).toList();
+  List<Quest> get dailyQuests => _quests.where((q) => q.isDaily).toList();
 
-  List<Quest> get weeklyQuests =>
-      _quests.where((q) => q.isWeekly).toList();
+  List<Quest> get weeklyQuests => _quests.where((q) => q.isWeekly).toList();
 
-  Quest? get featuredWeekly =>
-      weeklyQuests.isEmpty ? null : weeklyQuests.first;
+  Quest? get featuredWeekly => weeklyQuests.isEmpty ? null : weeklyQuests.first;
 
-  int get completedDailyCount =>
-      dailyQuests.where((q) => q.isCompleted).length;
+  int get completedDailyCount => dailyQuests.where((q) => q.isCompleted).length;
 
   int get totalDailyCount => dailyQuests.length;
 
@@ -64,14 +60,10 @@ class QuestController extends ChangeNotifier {
   List<Quest> get filteredQuests {
     var result = _quests;
     if (_categoryFilter != null) {
-      result = result
-          .where((q) => q.category == _categoryFilter)
-          .toList();
+      result = result.where((q) => q.category == _categoryFilter).toList();
     }
     if (_statusFilter != null) {
-      result = result
-          .where((q) => q.status == _statusFilter)
-          .toList();
+      result = result.where((q) => q.status == _statusFilter).toList();
     }
     return result;
   }
@@ -115,7 +107,8 @@ class QuestController extends ChangeNotifier {
       _errorMessage = e.friendlyMessage;
     } catch (e) {
       _state = _quests.isEmpty ? LoadingState.error : LoadingState.loaded;
-      _errorMessage = 'Could not reach the quest server. Check your connection.';
+      _errorMessage =
+          'Could not reach the quest server. Check your connection.';
     }
     notifyListeners();
   }

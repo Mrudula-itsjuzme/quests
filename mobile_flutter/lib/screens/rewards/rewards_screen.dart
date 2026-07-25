@@ -55,8 +55,8 @@ class RewardsScreen extends StatelessWidget {
                     ),
                     const SizedBox(width: 10),
                     Expanded(
-                      child: _StatTile(
-                          value: '$streakDays', label: 'Day Streak'),
+                      child:
+                          _StatTile(value: '$streakDays', label: 'Day Streak'),
                     ),
                     const SizedBox(width: 10),
                     Expanded(

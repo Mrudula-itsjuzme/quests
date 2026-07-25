@@ -48,8 +48,8 @@ export function AuthPage({ mode }) {
 
   return (
     <main className="auth-shell">
-      <section className="panel auth-card">
-        <h1>{mode === 'sign-up' ? 'Create your account' : 'Welcome back'}</h1>
+      <section className="panel auth-card grain">
+        <h1>{mode === 'sign-up' ? 'Begin a new chapter' : 'Welcome back'}</h1>
         {confirmationSent ? (
           <p role="status">Check your email to confirm your account, then sign in.</p>
         ) : (

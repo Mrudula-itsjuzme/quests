@@ -1,11 +1,21 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Icon } from '../../components/Icon';
+import { NyxCat } from '../../components/NyxCat';
+import { useAuth } from '../auth/AuthContext';
 import { QuestRow } from '../quests/QuestCard';
 import { QuestDetail } from '../quests/QuestDetail';
 import { useActiveQuests, useMe } from '../quests/queries';
 
+function greeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Good morning';
+  if (hour < 18) return 'Good afternoon';
+  return 'Good evening';
+}
+
 export function DashboardPage() {
+  const { user } = useAuth();
   const { data: me, isLoading: meLoading, isError: meError } = useMe();
   const { data: quests, isLoading: questsLoading, isError: questsError } = useActiveQuests();
   const [selectedId, setSelectedId] = useState(null);
@@ -21,14 +31,20 @@ export function DashboardPage() {
   if (meLoading || questsLoading) return <p role="status">Loading your dashboard...</p>;
   if (meError) return <section className="panel" role="alert"><p>Could not load your profile. Please refresh.</p></section>;
 
+  const name = me?.displayName || user?.email?.split('@')[0] || 'traveler';
+
   return (
     <section className="dashboard-grid" aria-label="Dashboard">
       <div className="dashboard-heading">
         <div>
+          <h4>{greeting()}, {name}</h4>
           <h1>Dashboard</h1>
           <p>Complete quests and track your progress toward the next level.</p>
         </div>
-        <Link className="primary-action compact" to="/app/quests">View quest board</Link>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <NyxCat small />
+          <Link className="primary-action compact" to="/app/quests">Open quest board</Link>
+        </div>
       </div>
 
       <div className="metric-strip">

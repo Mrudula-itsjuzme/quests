@@ -65,8 +65,7 @@ void main() {
     );
   });
 
-  testWidgets('rewards screen shows empty collection state',
-      (tester) async {
+  testWidgets('rewards screen shows empty collection state', (tester) async {
     await tester.pumpWidget(HabbitQuestApp(httpClient: mockClient));
     await tester.pumpAndSettle();
 
@@ -76,8 +75,7 @@ void main() {
     expect(find.text('No relics yet.'), findsOneWidget);
   });
 
-  testWidgets('profile screen shows default profile info',
-      (tester) async {
+  testWidgets('profile screen shows default profile info', (tester) async {
     await tester.pumpWidget(HabbitQuestApp(httpClient: mockClient));
     await tester.pumpAndSettle();
 

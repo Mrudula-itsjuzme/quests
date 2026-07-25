@@ -53,6 +53,8 @@ describe('App (development auth mode)', () => {
     global.fetch = vi.fn((url) => {
       if (url.includes('/v1/me')) return jsonResponse(mockMe);
       if (url.includes('/v1/quests/active')) return jsonResponse([mockQuest]);
+      if (url.includes('/v1/quests/history')) return jsonResponse([]);
+      if (url.includes('/v1/quests/definitions')) return jsonResponse([]);
       if (url.includes('/v1/collectibles')) return jsonResponse([]);
       return jsonResponse(null, 404);
     });
@@ -82,9 +84,23 @@ describe('App (development auth mode)', () => {
   it('navigates to the quest board and filters quests', async () => {
     renderApp('/app/quests');
 
-    await screen.findAllByRole('heading', { name: /quest board/i });
+    await screen.findByRole('heading', { name: /^quests$/i });
     expect((await screen.findAllByText(/morning mindfulness/i)).length).toBeGreaterThan(0);
-    expect(screen.getByRole('button', { name: 'Daily' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Daily' })).toBeInTheDocument();
+  });
+
+  it('exposes the five reference destinations and honest guild state', async () => {
+    renderApp('/app/guild');
+    expect(await screen.findByText('Guild Hall')).toBeInTheDocument();
+    expect(screen.getByText(/not simulated/i)).toBeInTheDocument();
+    expect(screen.getAllByRole('link', { name: /rewards/i }).length).toBeGreaterThan(0);
+  });
+
+  it('renders profile progression from real account data', async () => {
+    renderApp('/app/profile');
+    expect(await screen.findByRole('heading', { name: /^profile$/i })).toBeInTheDocument();
+    expect(screen.getByText(/statistics/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /change title/i })).toBeInTheDocument();
   });
 
   it('shows the gallery empty state when no collectibles are unlocked', async () => {

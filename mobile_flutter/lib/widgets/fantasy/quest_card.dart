@@ -65,7 +65,8 @@ class QuestCard extends StatelessWidget {
                             vertical: 3,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.antiqueGold.withValues(alpha: 0.15),
+                            color:
+                                AppColors.antiqueGold.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(6),
                             border: Border.all(
                               color: AppColors.borderGold,

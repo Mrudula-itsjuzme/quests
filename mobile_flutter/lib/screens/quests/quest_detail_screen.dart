@@ -200,45 +200,47 @@ class QuestDetailSheet extends StatelessWidget {
 
                 // ─── Instructions ────────────────────────
                 if (liveQuest.instructions.isNotEmpty) ...[
-                  Text('Instructions',
-                      style: theme.textTheme.titleMedium),
+                  Text('Instructions', style: theme.textTheme.titleMedium),
                   const SizedBox(height: 8),
-                  ...liveQuest.instructions.asMap().entries.map((entry) =>
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 6),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              width: 22,
-                              height: 22,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: AppColors.antiqueGold
-                                    .withValues(alpha: 0.1),
-                                border: Border.all(
-                                    color: AppColors.borderGold, width: 0.5),
-                              ),
-                              alignment: Alignment.center,
-                              child: Text(
-                                '${entry.key + 1}',
-                                style: const TextStyle(
-                                  color: AppColors.antiqueGold,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w700,
+                  ...liveQuest.instructions
+                      .asMap()
+                      .entries
+                      .map((entry) => Padding(
+                            padding: const EdgeInsets.only(bottom: 6),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  width: 22,
+                                  height: 22,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: AppColors.antiqueGold
+                                        .withValues(alpha: 0.1),
+                                    border: Border.all(
+                                        color: AppColors.borderGold,
+                                        width: 0.5),
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    '${entry.key + 1}',
+                                    style: const TextStyle(
+                                      color: AppColors.antiqueGold,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
                                 ),
-                              ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    entry.value,
+                                    style: theme.textTheme.bodyMedium,
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                entry.value,
-                                style: theme.textTheme.bodyMedium,
-                              ),
-                            ),
-                          ],
-                        ),
-                      )),
+                          )),
                   const SizedBox(height: 10),
                 ],
 
@@ -263,8 +265,7 @@ class QuestDetailSheet extends StatelessWidget {
                     width: double.infinity,
                     height: 48,
                     child: FilledButton(
-                      onPressed:
-                          isCompleting ? null : () => _complete(context),
+                      onPressed: isCompleting ? null : () => _complete(context),
                       child: isCompleting
                           ? const SizedBox(
                               width: 20,

@@ -24,7 +24,8 @@ class HabbitQuestApp extends StatelessWidget {
   const HabbitQuestApp({super.key, this.services, this.httpClient});
 
   final QuestMobileServices? services;
-  final dynamic httpClient; // Using dynamic to avoid importing http in app.dart, but typically it would be typed or handled via a provider.
+  final dynamic
+      httpClient; // Using dynamic to avoid importing http in app.dart, but typically it would be typed or handled via a provider.
 
   @override
   Widget build(BuildContext context) {
@@ -124,20 +125,17 @@ class _QuestShellState extends State<QuestShell> {
   late final QuestController _controller;
 
   // Profile data (from services or defaults).
-  String get _displayName =>
-      widget.profile?.displayName ?? 'Adventurer';
+  String get _displayName => widget.profile?.displayName ?? 'Adventurer';
   int get _level => widget.profile?.level ?? 1;
   String get _tier => _tierForLevel(_level);
   int get _totalXp => widget.profile?.totalXp ?? 0;
   int get _xpIntoLevel => widget.profile?.xpIntoLevel ?? 0;
-  int get _xpForCurrentLevel =>
-      widget.profile?.xpForCurrentLevel ?? 250;
+  int get _xpForCurrentLevel => widget.profile?.xpForCurrentLevel ?? 250;
   int get _streakDays => widget.profile?.streakDays ?? 0;
   String? get _primaryPath => widget.profile?.primaryPath;
   String? get _reminderTime => widget.profile?.reminderTime;
   String get _timezone => widget.profile?.timezone ?? 'UTC';
-  String get _motionPref =>
-      widget.profile?.motionPreference ?? 'system';
+  String get _motionPref => widget.profile?.motionPreference ?? 'system';
 
   @override
   void initState() {
@@ -158,8 +156,7 @@ class _QuestShellState extends State<QuestShell> {
   }
 
   void _openQuestDetail(Quest quest) {
-    QuestDetailSheet.show(context,
-        quest: quest, controller: _controller);
+    QuestDetailSheet.show(context, quest: quest, controller: _controller);
   }
 
   @override
@@ -210,8 +207,7 @@ class _QuestShellState extends State<QuestShell> {
                 // Bottom navigation
                 FantasyBottomNav(
                   selectedIndex: _selectedIndex,
-                  onSelected: (i) =>
-                      setState(() => _selectedIndex = i),
+                  onSelected: (i) => setState(() => _selectedIndex = i),
                 ),
               ],
             );
@@ -231,8 +227,7 @@ class _QuestShellState extends State<QuestShell> {
             xpIntoLevel: _xpIntoLevel,
             xpForCurrentLevel: _xpForCurrentLevel,
             streakDays: _streakDays,
-            onViewAllQuests: () =>
-                setState(() => _selectedIndex = 1),
+            onViewAllQuests: () => setState(() => _selectedIndex = 1),
             onQuestTap: _openQuestDetail,
             onNotifications: () => _showMessage(
               'No new notices',
@@ -242,6 +237,10 @@ class _QuestShellState extends State<QuestShell> {
         1 => QuestsScreen(
             controller: _controller,
             onQuestTap: _openQuestDetail,
+            displayName: _displayName,
+            level: _level,
+            totalXp: _totalXp,
+            streakDays: _streakDays,
           ),
         2 => const GuildScreen(),
         3 => RewardsScreen(
@@ -257,6 +256,10 @@ class _QuestShellState extends State<QuestShell> {
             xpIntoLevel: _xpIntoLevel,
             xpForCurrentLevel: _xpForCurrentLevel,
             streakDays: _streakDays,
+            totalQuests: _controller.quests.length,
+            completedQuests:
+                _controller.quests.where((quest) => quest.isCompleted).length,
+            relicCount: _controller.collectibles.length,
             primaryPath: _primaryPath,
             reminderTime: _reminderTime,
             timezone: _timezone,
@@ -285,8 +288,7 @@ class _QuestShellState extends State<QuestShell> {
                             color: AppColors.parchment,
                             fontWeight: FontWeight.w700)),
                     Text(message,
-                        style:
-                            const TextStyle(color: AppColors.mutedText)),
+                        style: const TextStyle(color: AppColors.mutedText)),
                   ],
                 ),
               ),
@@ -320,11 +322,9 @@ class _LoadingScreen extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const CircularProgressIndicator(
-                  color: AppColors.antiqueGold),
+              const CircularProgressIndicator(color: AppColors.antiqueGold),
               const SizedBox(height: 18),
-              Text(label,
-                  style: Theme.of(context).textTheme.bodyMedium),
+              Text(label, style: Theme.of(context).textTheme.bodyMedium),
             ],
           ),
         ),
@@ -354,8 +354,7 @@ class _ErrorScreen extends StatelessWidget {
                 Text(message, textAlign: TextAlign.center),
                 const SizedBox(height: 20),
                 FilledButton(
-                    onPressed: onRetry,
-                    child: const Text('Try again')),
+                    onPressed: onRetry, child: const Text('Try again')),
               ],
             ),
           ),
@@ -387,15 +386,13 @@ class _ErrorBanner extends StatelessWidget {
           Expanded(
             child: Text(
               message,
-              style: const TextStyle(
-                  color: AppColors.parchment, fontSize: 12),
+              style: const TextStyle(color: AppColors.parchment, fontSize: 12),
               maxLines: 2,
             ),
           ),
           TextButton(
             onPressed: onRetry,
-            child: const Text('Retry',
-                style: TextStyle(fontSize: 12)),
+            child: const Text('Retry', style: TextStyle(fontSize: 12)),
           ),
           GestureDetector(
             onTap: onDismiss,
@@ -489,8 +486,7 @@ class _SimpleLoginPlaceholder extends StatelessWidget {
                 const Text(
                   'Supabase authentication is required.\nConfigure SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY.',
                   textAlign: TextAlign.center,
-                  style:
-                      TextStyle(color: AppColors.mutedText, fontSize: 12),
+                  style: TextStyle(color: AppColors.mutedText, fontSize: 12),
                 ),
               ],
             ),

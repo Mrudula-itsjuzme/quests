@@ -3,6 +3,9 @@ import '../../app/theme/app_colors.dart';
 import '../../models/quest.dart';
 import '../../state/quest_controller.dart';
 import '../../widgets/fantasy/quest_card.dart';
+import '../../widgets/fantasy/fantasy_panel.dart';
+import '../../widgets/fantasy/gold_progress_bar.dart';
+import '../../widgets/fantasy/reference_components.dart';
 
 /// The functional core quest log screen.
 ///
@@ -15,10 +18,18 @@ class QuestsScreen extends StatelessWidget {
     super.key,
     required this.controller,
     required this.onQuestTap,
+    required this.displayName,
+    required this.level,
+    required this.totalXp,
+    required this.streakDays,
   });
 
   final QuestController controller;
   final ValueChanged<Quest> onQuestTap;
+  final String displayName;
+  final int level;
+  final int totalXp;
+  final int streakDays;
 
   @override
   Widget build(BuildContext context) {
@@ -34,17 +45,24 @@ class QuestsScreen extends StatelessWidget {
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(16, 14, 16, 28),
               sliver: SliverList.list(children: [
+                ReferencePlayerHeader(
+                  page: 'Quests',
+                  displayName: displayName,
+                  level: level,
+                  totalXp: totalXp,
+                ),
+                const SizedBox(height: 14),
+                _FocusHero(
+                    quest: controller.quests.isEmpty
+                        ? null
+                        : controller.quests.first),
+                const SizedBox(height: 12),
+                _CadenceTabs(controller: controller),
+                const SizedBox(height: 16),
                 // ─── Page header ─────────────────────────────
                 Text(
-                  'ADVENTURE LOG',
+                  'ACTIVE QUESTS',
                   style: theme.textTheme.labelSmall,
-                ),
-                const SizedBox(height: 6),
-                Text('Quests', style: theme.textTheme.headlineLarge),
-                const SizedBox(height: 6),
-                Text(
-                  'Choose a path and keep moving.',
-                  style: theme.textTheme.bodyMedium,
                 ),
 
                 const SizedBox(height: 18),
@@ -85,17 +103,20 @@ class QuestsScreen extends StatelessWidget {
                         onTap: () => controller.setStatusFilter(null),
                         small: true,
                       ),
-                      ...['Not Started', 'In Progress', 'Awaiting Proof', 'Completed']
-                          .map((status) => Padding(
-                                padding: const EdgeInsets.only(left: 6),
-                                child: _FilterChip(
-                                  label: status,
-                                  selected: controller.statusFilter == status,
-                                  onTap: () =>
-                                      controller.setStatusFilter(status),
-                                  small: true,
-                                ),
-                              )),
+                      ...[
+                        'Not Started',
+                        'In Progress',
+                        'Awaiting Proof',
+                        'Completed'
+                      ].map((status) => Padding(
+                            padding: const EdgeInsets.only(left: 6),
+                            child: _FilterChip(
+                              label: status,
+                              selected: controller.statusFilter == status,
+                              onTap: () => controller.setStatusFilter(status),
+                              small: true,
+                            ),
+                          )),
                     ],
                   ),
                 ),
@@ -104,6 +125,22 @@ class QuestsScreen extends StatelessWidget {
 
                 // ─── Weekly progress summary ─────────────────
                 _WeeklyProgress(controller: controller),
+
+                const SizedBox(height: 14),
+
+                Row(children: [
+                  Expanded(
+                      child: _ProgressPanel(
+                          icon: Icons.local_fire_department_rounded,
+                          value: '$streakDays',
+                          label: 'day streak')),
+                  const SizedBox(width: 10),
+                  Expanded(
+                      child: _ProgressPanel(
+                          icon: Icons.explore_rounded,
+                          value: _rank(totalXp),
+                          label: 'path rank')),
+                ]),
 
                 const SizedBox(height: 14),
 
@@ -128,6 +165,13 @@ class QuestsScreen extends StatelessWidget {
         );
       },
     );
+  }
+
+  String _rank(int xp) {
+    if (xp >= 2000) return 'Gold I';
+    if (xp >= 1000) return 'Silver II';
+    if (xp >= 500) return 'Novice III';
+    return 'Novice I';
   }
 
   Future<void> _handleComplete(BuildContext context, Quest quest) async {
@@ -162,6 +206,127 @@ class QuestsScreen extends StatelessWidget {
       };
 }
 
+class _FocusHero extends StatelessWidget {
+  const _FocusHero({required this.quest});
+  final Quest? quest;
+
+  @override
+  Widget build(BuildContext context) {
+    final value = quest?.progress ?? 0;
+    return FantasyPanel(
+      goldBorder: true,
+      padding: const EdgeInsets.fromLTRB(14, 16, 14, 0),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        const Text("◆  TODAY'S FOCUS  ◆",
+            style: TextStyle(
+                color: AppColors.brightGold,
+                fontFamily: 'Cinzel',
+                letterSpacing: 1)),
+        const SizedBox(height: 12),
+        Row(children: [
+          GoldProgressRing(
+            value: value,
+            size: 126,
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              const Icon(Icons.menu_book_rounded,
+                  color: AppColors.brightGold, size: 32),
+              Text('${(value * 100).round()}%',
+                  style: const TextStyle(
+                      color: AppColors.parchment, fontWeight: FontWeight.w800)),
+            ]),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                Text(quest?.title ?? "The Scholar's Path",
+                    style: Theme.of(context).textTheme.headlineSmall),
+                const SizedBox(height: 4),
+                Text(quest?.summary ?? 'Generate a quest to begin your path.',
+                    maxLines: 3, overflow: TextOverflow.ellipsis),
+                const SizedBox(height: 10),
+                GoldProgressBar(value: value, height: 7),
+                const SizedBox(height: 8),
+                const Text('Knowledge is a blade. Sharpen it.',
+                    style: TextStyle(
+                        color: AppColors.antiqueGold,
+                        fontFamily: 'Cinzel',
+                        fontStyle: FontStyle.italic)),
+              ])),
+        ]),
+        const WayfarerPortrait(height: 220),
+      ]),
+    );
+  }
+}
+
+class _CadenceTabs extends StatelessWidget {
+  const _CadenceTabs({required this.controller});
+  final QuestController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+          color: AppColors.panel,
+          border: Border.all(color: AppColors.borderGold),
+          borderRadius: BorderRadius.circular(16)),
+      child: Row(children: [
+        _item(context, 'Daily', Icons.wb_sunny_outlined, null),
+        _item(context, 'Weekly', Icons.calendar_month_outlined, null),
+        _item(context, 'Story', Icons.menu_book_outlined,
+            'Story quests are not available yet.'),
+        _item(context, 'Event', Icons.auto_awesome_outlined,
+            'There is no active event.'),
+      ]),
+    );
+  }
+
+  Widget _item(
+          BuildContext context, String label, IconData icon, String? notice) =>
+      Expanded(
+        child: InkWell(
+          onTap: () {
+            if (notice != null)
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(SnackBar(content: Text(notice)));
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Column(children: [
+              Icon(icon,
+                  size: 19,
+                  color: notice == null
+                      ? AppColors.brightGold
+                      : AppColors.mutedText),
+              const SizedBox(height: 4),
+              Text(label, style: const TextStyle(fontSize: 10))
+            ]),
+          ),
+        ),
+      );
+}
+
+class _ProgressPanel extends StatelessWidget {
+  const _ProgressPanel(
+      {required this.icon, required this.value, required this.label});
+  final IconData icon;
+  final String value;
+  final String label;
+  @override
+  Widget build(BuildContext context) => FantasyPanel(
+        child: Column(children: [
+          Icon(icon, color: AppColors.brightGold, size: 34),
+          const SizedBox(height: 5),
+          Text(value,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.headlineSmall),
+          Text(label, style: Theme.of(context).textTheme.bodySmall),
+        ]),
+      );
+}
+
 // ─── Weekly progress bar ────────────────────────────────────────
 
 class _WeeklyProgress extends StatelessWidget {
@@ -172,8 +337,7 @@ class _WeeklyProgress extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final total = controller.quests.length;
-    final completed =
-        controller.quests.where((q) => q.isCompleted).length;
+    final completed = controller.quests.where((q) => q.isCompleted).length;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -184,7 +348,8 @@ class _WeeklyProgress extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.flag_rounded, color: AppColors.antiqueGold, size: 18),
+          const Icon(Icons.flag_rounded,
+              color: AppColors.antiqueGold, size: 18),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
@@ -248,7 +413,8 @@ class _FilterChip extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (icon != null) ...[
-              Icon(icon, size: small ? 14 : 16,
+              Icon(icon,
+                  size: small ? 14 : 16,
                   color: selected ? AppColors.parchment : AppColors.mutedText),
               const SizedBox(width: 5),
             ],

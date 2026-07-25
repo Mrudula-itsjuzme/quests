@@ -48,8 +48,7 @@ class ApiClient {
   }
 
   dynamic _decode(http.Response response) {
-    final payload =
-        response.body.isEmpty ? null : jsonDecode(response.body);
+    final payload = response.body.isEmpty ? null : jsonDecode(response.body);
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return payload;
@@ -76,18 +75,15 @@ class ApiException implements Exception {
   final int statusCode;
 
   String get friendlyMessage => switch (code) {
-        'authentication_required' || 'invalid_access_token' =>
+        'authentication_required' ||
+        'invalid_access_token' =>
           'Your session has ended. Please sign in again.',
-        'provider_not_configured' =>
-          'Verification is not connected yet.',
-        'quest_expired' =>
-          'This quest has expired. Refresh your path.',
-        'quest_not_found' =>
-          'This quest could not be found.',
+        'provider_not_configured' => 'Verification is not connected yet.',
+        'quest_expired' => 'This quest has expired. Refresh your path.',
+        'quest_not_found' => 'This quest could not be found.',
         'legacy_mutation_disabled' =>
           'Quest completion is not enabled on this server.',
-        'duplicate_submission' =>
-          'That proof was already submitted.',
+        'duplicate_submission' => 'That proof was already submitted.',
         _ => 'The quest service could not complete that action.',
       };
 

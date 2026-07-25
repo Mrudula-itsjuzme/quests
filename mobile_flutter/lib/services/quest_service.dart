@@ -18,20 +18,14 @@ class QuestService {
   Future<List<Quest>> fetchQuests() async {
     final data = await _client.get('/api/quests');
     if (data is! List) return const [];
-    return data
-        .cast<Map<String, dynamic>>()
-        .map(Quest.fromLegacyJson)
-        .toList();
+    return data.cast<Map<String, dynamic>>().map(Quest.fromLegacyJson).toList();
   }
 
   /// Fetch all unlocked collectibles.
   Future<List<Collectible>> fetchCollectibles() async {
     final data = await _client.get('/api/collectibles');
     if (data is! List) return const [];
-    return data
-        .cast<Map<String, dynamic>>()
-        .map(Collectible.fromJson)
-        .toList();
+    return data.cast<Map<String, dynamic>>().map(Collectible.fromJson).toList();
   }
 
   /// Complete a quest by ID. Returns the full response including

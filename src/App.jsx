@@ -7,9 +7,11 @@ import { ProtectedRoute } from './features/auth/ProtectedRoute';
 import { RequireOnboarding } from './features/auth/RequireOnboarding';
 import { DashboardPage } from './features/dashboard/DashboardPage';
 import { GalleryPage } from './features/gallery/GalleryPage';
+import { GuildPage } from './features/guild/GuildPage';
 import { OnboardingPage } from './features/onboarding/OnboardingPage';
 import { ProfilePage } from './features/profile/ProfilePage';
 import { QuestsPage } from './features/quests/QuestsPage';
+import { RewardsPage } from './features/rewards/RewardsPage';
 
 function App() {
   return (
@@ -24,6 +26,8 @@ function App() {
             <Route path="/app" element={<AppShell />}>
               <Route index element={<DashboardPage />} />
               <Route path="quests" element={<QuestsPage />} />
+              <Route path="guild" element={<GuildPage />} />
+              <Route path="rewards" element={<RewardsPage />} />
               <Route path="gallery" element={<GalleryPage />} />
               <Route path="profile" element={<ProfilePage />} />
             </Route>

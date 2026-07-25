@@ -66,11 +66,9 @@ class GuildScreen extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodyMedium,
                   ),
-
                   const SizedBox(height: 18),
                   const OrnamentalDivider(),
                   const SizedBox(height: 14),
-
                   Row(
                     children: [
                       const Icon(Icons.verified_user_outlined,
@@ -100,8 +98,7 @@ class GuildScreen extends StatelessWidget {
             _ComingSoonTile(
               icon: Icons.leaderboard_rounded,
               title: 'Leaderboard',
-              description:
-                  'Weekly rankings based on real quest completions.',
+              description: 'Weekly rankings based on real quest completions.',
             ),
             const SizedBox(height: 10),
             _ComingSoonTile(
@@ -181,11 +178,9 @@ class _ComingSoonTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title,
-                    style: Theme.of(context).textTheme.titleMedium),
+                Text(title, style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 2),
-                Text(description,
-                    style: Theme.of(context).textTheme.bodySmall),
+                Text(description, style: Theme.of(context).textTheme.bodySmall),
               ],
             ),
           ),

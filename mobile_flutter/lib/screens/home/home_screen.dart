@@ -104,7 +104,8 @@ class HomeScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
 
-                if (dailyQuests.isEmpty && controller.state == LoadingState.loaded)
+                if (dailyQuests.isEmpty &&
+                    controller.state == LoadingState.loaded)
                   _EmptyQuestNotice(),
 
                 ...dailyQuests.map((quest) => Padding(
@@ -246,9 +247,8 @@ class _PlayerHeader extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               GoldProgressBar(
-                value: xpForCurrentLevel > 0
-                    ? xpIntoLevel / xpForCurrentLevel
-                    : 0,
+                value:
+                    xpForCurrentLevel > 0 ? xpIntoLevel / xpForCurrentLevel : 0,
                 height: 6,
                 showLabel: true,
                 label: '$xpIntoLevel / $xpForCurrentLevel XP',
@@ -296,9 +296,7 @@ class _AvatarMedallion extends StatelessWidget {
             decoration: FantasyDecorations.avatarInner(),
             alignment: Alignment.center,
             child: Text(
-              displayName.isNotEmpty
-                  ? displayName[0].toUpperCase()
-                  : '?',
+              displayName.isNotEmpty ? displayName[0].toUpperCase() : '?',
               style: const TextStyle(
                 color: AppColors.brightGold,
                 fontSize: 22,
