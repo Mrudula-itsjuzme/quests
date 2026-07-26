@@ -4012,3 +4012,386 @@ body {
   .mobile-deck-card > p { font-size: .88rem; }
   .mobile-deck-actions { right: 13px; left: 13px; }
 }
+
+/* ==========================================================================
+   Desktop adventure command center
+   ========================================================================== */
+.desktop-command-center {
+  display: none;
+}
+
+@media (min-width: 1101px) {
+  .app-shell:has(.dashboard-reference) {
+    width: 100%;
+    max-width: none;
+    padding: 12px 22px 24px;
+  }
+
+  .workspace:has(.dashboard-reference) {
+    width: 100%;
+    max-width: 1680px;
+    margin: 0 auto;
+  }
+
+  .workspace:has(.dashboard-reference) > .topbar {
+    min-height: 84px;
+    margin-bottom: 16px;
+    border-radius: 0;
+  }
+
+  .workspace:has(.dashboard-reference) .brand-lockup strong {
+    color: var(--quest-gold-bright);
+    font-family: var(--font-display);
+    font-size: 1.45rem;
+    letter-spacing: .12em;
+  }
+
+  .workspace:has(.dashboard-reference) .top-nav {
+    align-self: stretch;
+  }
+
+  .workspace:has(.dashboard-reference) .top-nav a {
+    min-width: 100px;
+    justify-content: center;
+    border-radius: 0;
+    font-family: var(--font-display);
+  }
+
+  .dashboard-reference {
+    width: 100%;
+    max-width: none;
+    padding: 0;
+  }
+
+  .dashboard-reference > .reference-header,
+  .dashboard-reference > .focus-hero,
+  .dashboard-reference > .quest-tabs,
+  .dashboard-reference > .quest-content-grid,
+  .dashboard-reference > .dashboard-overview {
+    display: none;
+  }
+
+  .desktop-command-center {
+    display: grid;
+    grid-template-columns: minmax(0, 2.15fr) minmax(320px, .9fr);
+    gap: 18px;
+  }
+
+  .desktop-command-main,
+  .desktop-command-rail {
+    display: grid;
+    gap: 16px;
+    align-content: start;
+  }
+
+  .desktop-progression-hero {
+    position: relative;
+    min-height: 390px;
+    overflow: hidden;
+    border-radius: 10px;
+  }
+
+  .desktop-progression-hero > img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .desktop-progression-hero::after {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(3, 9, 12, .88), rgba(3, 9, 12, .2) 48%, rgba(3, 9, 12, .42));
+    pointer-events: none;
+  }
+
+  .desktop-welcome {
+    position: absolute;
+    z-index: 3;
+    top: 36px;
+    left: 42px;
+    max-width: 310px;
+  }
+
+  .desktop-welcome > span,
+  .desktop-welcome > p {
+    color: #f1dfc1 !important;
+    font-family: var(--font-display);
+    font-size: 1.16rem;
+    text-shadow: 0 2px 8px #000;
+  }
+
+  .desktop-welcome h1 {
+    margin: 3px 0 8px;
+    color: #f7e6c7 !important;
+    font-size: clamp(2.7rem, 4vw, 4.2rem);
+    line-height: .95;
+    text-shadow: 0 3px 12px #000;
+  }
+
+  .desktop-welcome > div {
+    display: flex;
+    gap: 12px;
+    margin-top: 50px;
+  }
+
+  .desktop-welcome article {
+    display: grid;
+    grid-template-columns: 42px auto;
+    min-width: 125px;
+    padding: 12px;
+    border: 1px solid var(--quest-gold-dim);
+    background: rgba(5, 12, 15, .82);
+  }
+
+  .desktop-welcome article svg {
+    grid-row: 1 / 4;
+    width: 35px;
+    height: 35px;
+    align-self: center;
+    color: var(--quest-gold-bright);
+  }
+
+  .desktop-welcome article span,
+  .desktop-welcome article small {
+    color: #d4bc92 !important;
+    font-size: .7rem;
+    text-transform: uppercase;
+  }
+
+  .desktop-welcome article strong {
+    color: #f7e6c7 !important;
+    font-family: var(--font-display);
+    font-size: 2rem;
+    line-height: 1;
+  }
+
+  .desktop-xp-orbit {
+    position: absolute;
+    z-index: 3;
+    top: 40px;
+    right: 42px;
+    display: grid;
+    width: 290px;
+    aspect-ratio: 1;
+    place-items: center;
+    border-radius: 50%;
+    background: conic-gradient(var(--quest-gold-bright) var(--progress), rgba(10, 20, 23, .82) 0);
+    box-shadow: 0 0 0 8px rgba(5, 12, 15, .85), 0 0 0 10px var(--quest-gold-dim), 0 0 34px rgba(237, 176, 66, .32);
+  }
+
+  .desktop-xp-orbit::before {
+    content: "";
+    position: absolute;
+    width: 82%;
+    aspect-ratio: 1;
+    border: 2px solid var(--quest-gold-dim);
+    border-radius: 50%;
+    background: rgba(5, 12, 15, .9);
+  }
+
+  .desktop-xp-orbit > div {
+    position: relative;
+    display: grid;
+    place-items: center;
+    color: #f7e6c7 !important;
+    font-family: var(--font-display);
+  }
+
+  .desktop-xp-orbit strong { font-size: 3.7rem; line-height: .9; }
+  .desktop-xp-orbit span { color: var(--quest-gold-bright) !important; font-size: 1.7rem; }
+  .desktop-xp-orbit small { margin-top: 8px; color: #d4bc92 !important; font-size: .95rem; }
+
+  .desktop-section-heading {
+    display: flex;
+    min-height: 48px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8px;
+    border-bottom: 1px solid rgba(201, 154, 75, .22);
+  }
+
+  .desktop-section-heading h2 {
+    color: var(--quest-gold-bright);
+    font-size: 1.55rem;
+    text-transform: uppercase;
+  }
+
+  .desktop-section-heading span {
+    color: var(--quest-muted);
+    font-family: var(--font-display);
+  }
+
+  .desktop-today-quests > div:last-child {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    padding-top: 12px;
+  }
+
+  .desktop-quest-tile {
+    display: grid;
+    grid-template-columns: 62px minmax(0, 1fr);
+    grid-template-rows: 1fr auto;
+    min-height: 220px;
+    padding: 16px;
+    overflow: hidden;
+    border: 1px solid var(--quest-gold-dim);
+    color: var(--quest-cream);
+    background: #101b1f;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .desktop-quest-tile.mind { background: #171729; }
+  .desktop-quest-tile.body { background: #102119; }
+  .desktop-quest-tile.discovery { background: #211b0f; }
+  .desktop-quest-tile > .round-emblem { width: 54px; height: 54px; }
+
+  .desktop-quest-tile-copy {
+    display: grid;
+    align-content: start;
+    gap: 5px;
+  }
+
+  .desktop-quest-tile-copy > small {
+    color: var(--quest-gold-bright);
+    font-size: .72rem;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+  }
+
+  .desktop-quest-tile-copy > strong {
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+  }
+
+  .desktop-quest-tile-copy > span {
+    min-height: 36px;
+    color: var(--quest-muted);
+    font-size: .85rem;
+    line-height: 1.3;
+  }
+
+  .desktop-quest-tile-copy > .gold-progress {
+    width: 100%;
+    height: 8px;
+    margin-top: 5px;
+  }
+
+  .desktop-quest-tile-copy > b {
+    color: var(--quest-cream);
+    font-family: var(--font-display);
+    font-size: 1rem;
+  }
+
+  .desktop-quest-tile-reward {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 12px -16px -16px;
+    padding: 10px 16px;
+    border-top: 1px solid rgba(201, 154, 75, .2);
+    background: rgba(3, 9, 12, .55);
+  }
+
+  .desktop-quest-tile-reward small { color: var(--quest-gold-bright); }
+  .desktop-quest-tile-reward strong { font-family: var(--font-display); font-size: 1.55rem; }
+  .desktop-quest-tile-reward b {
+    margin-left: auto;
+    padding: 4px 8px;
+    border: 1px solid var(--quest-gold-dim);
+    color: var(--quest-gold-bright);
+    font-size: .7rem;
+    font-weight: 500;
+    text-transform: uppercase;
+  }
+
+  .desktop-daily-chest {
+    display: grid;
+    grid-template-columns: 62px minmax(220px, auto) 1fr auto;
+    min-height: 88px;
+    gap: 14px;
+    align-items: center;
+    padding: 14px 20px;
+  }
+
+  .desktop-daily-chest > svg { width: 50px; height: 50px; color: var(--quest-gold-bright); }
+  .desktop-daily-chest h2 { color: var(--quest-gold-bright); font-size: 1.1rem; text-transform: uppercase; }
+  .desktop-daily-chest p { color: var(--quest-muted); font-size: .85rem; }
+  .desktop-daily-chest > a { color: var(--quest-gold-bright); font-family: var(--font-display); text-decoration: none; }
+
+  .desktop-command-rail > section {
+    border-radius: 8px;
+  }
+
+  .desktop-tier-card {
+    display: grid;
+    grid-template-columns: 105px minmax(0, 1fr);
+    gap: 14px;
+    min-height: 205px;
+    align-items: center;
+    padding: 22px;
+  }
+
+  .desktop-tier-card .section-title { grid-column: 1 / -1; justify-content: center; margin: 0; }
+  .desktop-tier-card > svg { width: 92px; height: 92px; color: #bec4c8; }
+  .desktop-tier-card > div:last-child { display: grid; gap: 9px; }
+  .desktop-tier-card strong { color: var(--quest-cream); font-family: var(--font-display); font-size: 2rem; }
+  .desktop-tier-card span,
+  .desktop-tier-card small { color: var(--quest-muted); font-family: var(--font-display); }
+
+  .desktop-bonus-card {
+    display: grid;
+    grid-template-columns: 1fr 110px;
+    min-height: 145px;
+    align-items: center;
+    padding: 22px;
+    background: #211329;
+  }
+
+  .desktop-bonus-card span,
+  .desktop-encounter-card > span { color: var(--quest-gold-bright); font-family: var(--font-display); text-transform: uppercase; }
+  .desktop-bonus-card h2 { margin-top: 7px; color: var(--quest-cream); font-size: 1.22rem; }
+  .desktop-bonus-card p { color: var(--quest-muted); }
+  .desktop-bonus-card strong { color: #e99aff; font-family: var(--font-display); font-size: 1.35rem; }
+  .desktop-bonus-card > svg { width: 88px; height: 88px; color: var(--quest-gold-bright); }
+
+  .desktop-encounter-card {
+    min-height: 190px;
+    padding: 28px;
+    background:
+      linear-gradient(90deg, rgba(5, 12, 15, .94), rgba(5, 12, 15, .42)),
+      url('/dashboard-castle-panorama.png') 80% center / cover;
+  }
+
+  .desktop-encounter-card h2 { margin: 12px 0 3px; color: var(--quest-cream); font-size: 1.7rem; }
+  .desktop-encounter-card p { max-width: 28ch; color: var(--quest-muted); }
+  .desktop-encounter-card strong { display: block; margin-top: 22px; color: var(--quest-gold-bright); font-family: var(--font-display); font-size: 1.2rem; }
+
+  .desktop-all-quests {
+    display: flex;
+    min-height: 54px;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    border: 1px solid var(--quest-gold-dim);
+    color: var(--quest-gold-bright);
+    font-family: var(--font-display);
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+}
+
+@media (min-width: 1101px) and (max-width: 1320px) {
+  .desktop-command-center { grid-template-columns: minmax(0, 1.85fr) minmax(290px, .75fr); }
+  .desktop-xp-orbit { width: 240px; top: 70px; right: 28px; }
+  .desktop-xp-orbit strong { font-size: 3rem; }
+  .desktop-welcome { left: 30px; }
+  .desktop-today-quests > div:last-child { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}

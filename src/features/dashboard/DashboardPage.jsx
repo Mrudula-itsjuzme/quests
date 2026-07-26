@@ -33,6 +33,52 @@ export function DashboardPage() {
     <main className="dashboard-reference fantasy-page" aria-label="Dashboard">
       <PlayerHeader me={me} page="Dashboard" />
 
+      <section className="desktop-command-center" aria-label="Desktop adventure dashboard">
+        <div className="desktop-command-main">
+          <section className="desktop-progression-hero ornate-panel">
+            <img src="/dashboard-castle-panorama.png" alt="" />
+            <div className="desktop-welcome">
+              <span>Welcome back,</span>
+              <h1>Adventurer!</h1>
+              <p>Your journey of growth continues.</p>
+              <div>
+                <article><Icon name="flame" /><span>Streak</span><strong>{me.streakDays || 0}</strong><small>Days</small></article>
+                <article><Icon name="shield" /><span>Level</span><strong>{me.level}</strong><small>{me.tier}</small></article>
+              </div>
+            </div>
+            <div className="desktop-xp-orbit" style={{ '--progress': `${me.progressToNextLevel * 360}deg` }}>
+              <div><strong>{me.totalXp.toLocaleString()}</strong><span>XP</span><small>of {(me.totalXp + me.xpForCurrentLevel - me.xpIntoLevel).toLocaleString()} XP</small></div>
+            </div>
+          </section>
+
+          <section className="desktop-today-quests">
+            <div className="desktop-section-heading"><h2>Today’s Quests</h2><span>Reset at midnight</span></div>
+            <div>
+              {activeQuests.slice(0, 3).map((quest) => (
+                <button key={quest.id} type="button" className={`desktop-quest-tile ${quest.category?.toLowerCase() || 'mind'}`} onClick={() => setSelectedId(quest.id)}>
+                  <span className="round-emblem"><Icon name={categoryIcon(quest.category)} /></span>
+                  <span className="desktop-quest-tile-copy"><small>{quest.category} quest</small><strong>{quest.title}</strong><span>{quest.description}</span><i className="gold-progress"><i style={{ width: `${questProgressRatio(quest) * 100}%` }} /></i><b>{quest.progressValue} / {quest.targetValue}</b></span>
+                  <span className="desktop-quest-tile-reward"><small>XP</small><strong>{quest.xpReward}</strong><b>{quest.status}</b></span>
+                </button>
+              ))}
+            </div>
+          </section>
+
+          <section className="desktop-daily-chest ornate-panel">
+            <Icon name="chest" /><div><h2>Daily Chest</h2><p>Complete all active quests to unlock today’s reward.</p></div>
+            <div className="gold-progress"><i style={{ width: `${activeProgress}%` }} /></div>
+            <Link to="/app/rewards">Open rewards <span>›</span></Link>
+          </section>
+        </div>
+
+        <aside className="desktop-command-rail">
+          <section className="ornate-panel desktop-tier-card"><div className="section-title"><h2>Tier Progress</h2></div><Icon name="shield" /><div><strong>{rank}</strong><div className="gold-progress"><i style={{ width: `${rankProgress * 100}%` }} /></div><span>{me.totalXp.toLocaleString()} / {nextRankXp.toLocaleString()} XP</span><small>Next: {rankNames[Math.min(rankIndex + 1, rankNames.length - 1)]}</small></div></section>
+          <section className="ornate-panel desktop-bonus-card"><div><span>Daily Bonus</span><h2>Complete all active quests</h2><p>Finish today’s path before reset.</p><strong>+150 XP</strong></div><Icon name="chest" /></section>
+          <section className="ornate-panel desktop-encounter-card"><span>Rare Encounter</span><h2>{featured?.title || 'Sunset Chaser'}</h2><p>{featured?.description || 'Capture today’s most memorable moment.'}</p><strong>{featured?.xpReward || 250} XP</strong></section>
+          <Link className="desktop-all-quests" to="/app/quests">View all quests <span>›</span></Link>
+        </aside>
+      </section>
+
       <section className="focus-hero ornate-panel dashboard-focus">
         <img className="focus-hero-art" src="/quest-scholar-hero.png" alt="" />
         <div className="focus-label"><span>◆</span> Today’s Focus <span>◆</span></div>

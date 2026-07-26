@@ -226,3 +226,48 @@ Differences retained intentionally:
   concept symbols literally.
 
 Interactive Quest Deck final result: passed
+
+### Deck fidelity correction
+
+- First-card evidence: `/tmp/quests-deck-match.png`
+- Second-card evidence: `/tmp/quests-deck-second-card.png`
+
+The initial implementation's next card was only a thin edge. The corrected
+deck keeps the previous, current, and next quests mounted simultaneously:
+
+- next card begins at 76% of the viewport-width deck and remains visibly
+  identifiable
+- neighboring cards use perspective, rotation, depth, dimming, and scale
+- card movement uses a 480ms eased transition in both directions
+- horizontal touch gestures advance or reverse after a 42px swipe threshold
+- arrows and direct dots remain available as accessible alternatives
+- browser verification confirmed Deep Work -> Stretch Session, with Deep Work
+  retained as previous and Photograph a Banyan Tree retained as next
+
+Deck animation and visual fidelity final result: passed
+
+## Desktop adventure command center
+
+- Source visual truth: user-provided wide PC dashboard reference
+- Before capture: `/tmp/dashboard-desktop-before.png`
+- Final capture: `/tmp/dashboard-desktop-command-final2.png`
+- Comparison viewport: 1440 x 900
+- Generated hero asset: `public/dashboard-castle-panorama.png`
+
+The prior centered, mobile-shaped desktop composition was replaced above
+1100px with:
+
+- full-width horizontal product navigation
+- panoramic castle progression hero
+- welcome, streak, level, and circular XP presentation
+- three live quest tiles across
+- Tier Progress, Daily Bonus, and Rare Encounter side rail
+- Daily Chest completion strip
+- direct Rewards and View All Quests navigation
+
+The desktop grid measured 967px / 405px at 1440px with no horizontal overflow.
+Clicking a Today quest opened the existing QuestDetail dialog. The desktop
+composition is isolated behind a minimum-width media query; phone Dashboard
+and mobile Quest Deck structure are unchanged.
+
+Desktop command center final result: passed
