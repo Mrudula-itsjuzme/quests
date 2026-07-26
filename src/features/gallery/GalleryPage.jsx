@@ -32,7 +32,7 @@ export function GalleryPage() {
   );
 
   return (
-    <main className="gallery-shell page-stack">
+    <main className="gallery-shell page-stack fantasy-page">
       <div className="page-heading">
         <div>
           <h1>Gallery</h1>

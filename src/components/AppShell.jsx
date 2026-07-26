@@ -9,6 +9,7 @@ const navItems = [
   { to: '/app/quests', label: 'Quests', icon: 'scroll' },
   { to: '/app/guild', label: 'Guild', icon: 'shield' },
   { to: '/app/rewards', label: 'Rewards', icon: 'chest' },
+  { to: '/app/gallery', label: 'Gallery', icon: 'grid' },
   { to: '/app/profile', label: 'Profile', icon: 'user' },
 ];
 

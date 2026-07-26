@@ -59,3 +59,26 @@ The generated scholar artwork has the same right-weighted character placement, d
 - P3: generated character art is an original close match rather than a pixel-identical copy of the source character.
 
 final result: passed
+
+## Cross-app theme extension
+
+The Quest visual system was subsequently extended across the rest of the application.
+
+- Home desktop/tablet: `/tmp/theme-home.png`
+- Home mobile: `/tmp/home-mobile-final.png`
+- Guild: `/tmp/theme-guild.png`
+- Rewards: `/tmp/theme-rewards.png`
+- Gallery: `/tmp/gallery-final.png`
+- Profile desktop/tablet: `/tmp/theme-profile.png`
+- Profile mobile: `/tmp/profile-mobile.png`
+
+Verified shared surfaces:
+
+- dark blue-black engraved panels and antique-gold borders
+- Cormorant display hierarchy and muted cream supporting text
+- six-state shared navigation including Gallery
+- single-column mobile dashboard reflow
+- generated scholar artwork reused consistently in Quest, Profile, and Landing
+- dark themed forms, dialogs, filters, empty states, quest details, and feedback surfaces
+
+Cross-app final result: passed

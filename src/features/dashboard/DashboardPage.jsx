@@ -34,7 +34,7 @@ export function DashboardPage() {
   const name = me?.displayName || user?.email?.split('@')[0] || 'traveler';
 
   return (
-    <section className="dashboard-grid" aria-label="Dashboard">
+    <section className="dashboard-grid fantasy-page" aria-label="Dashboard">
       <div className="dashboard-heading">
         <div>
           <h4>{greeting()}, {name}</h4>

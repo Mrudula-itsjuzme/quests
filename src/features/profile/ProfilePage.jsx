@@ -46,7 +46,7 @@ export function ProfilePage() {
       <PlayerHeader me={me} page="Profile" />
       <div className="profile-hero-grid">
         <section className="portrait-panel ornate-panel">
-          <div className="profile-wayfarer"><div className="moon-halo" /><div className="wayfarer-head" /><div className="wayfarer-hair" /><div className="wayfarer-body"><i /></div><div className="wayfarer-cloak" /></div>
+          <img className="profile-scholar-art" src="/quest-scholar-hero.png" alt="Scholar-adventurer overlooking a distant fantasy city" />
           <div className="portrait-caption"><Icon name="leaf" /><div><h2>{cosmetics.title}</h2><p>Wander. Discover. Become.</p></div></div>
         </section>
         <div className="profile-summary">
