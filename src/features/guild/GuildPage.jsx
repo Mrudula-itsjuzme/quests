@@ -2,7 +2,7 @@ import { Icon } from '../../components/Icon';
 
 export function GuildPage() {
   return (
-    <main className="page-stack fantasy-page">
+    <main className="guild-page page-stack fantasy-page">
       <header className="reference-header compact-header">
         <div className="avatar-medallion"><span>G</span></div>
         <div><p className="eyebrow">THE OAKBOUND</p><h1>Guild Hall</h1><p>Shared momentum, when the guild is ready.</p></div>

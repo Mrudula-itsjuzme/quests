@@ -26,45 +26,59 @@ export function OnboardingPage() {
   };
 
   return (
-    <main className="onboarding-shell">
-      <section className="panel onboarding-card grain">
-        <h4>Chapter One</h4>
-        <h1>Set up your quest journal</h1>
-        <p>This tailors your daily quests and keeps your streak calculated in your own timezone.</p>
-        <form onSubmit={onSubmit} className="onboarding-form">
-          <label htmlFor="displayName">Display name</label>
-          <input id="displayName" value={displayName} onChange={(event) => setDisplayName(event.target.value)} maxLength={120} />
-
-          <label htmlFor="timezone">Timezone</label>
-          <input id="timezone" value={timezone} onChange={(event) => setTimezone(event.target.value)} maxLength={80} />
-          <span className="field-hint">Detected automatically; edit if it's wrong.</span>
-
-          <fieldset>
-            <legend className="field-hint" style={{ marginTop: '10px' }}>Primary focus</legend>
-            <div className="path-options">
-              {['Mind', 'Body', 'Discovery'].map((path) => (
-                <label key={path} className={`path-option ${primaryPath === path ? 'selected' : ''}`}>
-                  <input
-                    type="radio"
-                    name="primaryPath"
-                    value={path}
-                    checked={primaryPath === path}
-                    onChange={() => setPrimaryPath(path)}
-                    style={{ position: 'absolute', opacity: 0 }}
-                  />
-                  <Icon name={categoryIcon(path)} />
-                  {path}
-                </label>
-              ))}
+    <main className="onboarding-shell celestial-onboarding">
+      <section className="onboarding-experience">
+        <aside className="onboarding-visual" aria-hidden="true">
+          <img src="/auth-celestial-aperture.png" alt="" />
+          <div className="onboarding-orbit"><Icon name={categoryIcon(primaryPath)} /></div>
+          <p>Your path is taking shape.</p>
+        </aside>
+        <div className="onboarding-card">
+          <div className="onboarding-chapter">
+            <span>01</span>
+            <div><small>CHAPTER ONE</small><strong>Choose your path</strong></div>
+          </div>
+          <h1>Shape your quest journal.</h1>
+          <p>This tunes your daily quests and keeps every streak aligned to your own timezone.</p>
+          <form onSubmit={onSubmit} className="onboarding-form">
+            <div className="auth-field">
+              <label htmlFor="displayName">Adventurer name</label>
+              <input id="displayName" value={displayName} onChange={(event) => setDisplayName(event.target.value)} maxLength={120} placeholder="How should the journal address you?" />
             </div>
-          </fieldset>
 
-          {updateMe.isError && <p role="alert" className="form-error">Could not save your profile. Please try again.</p>}
+            <div className="auth-field">
+              <label htmlFor="timezone">Timezone</label>
+              <input id="timezone" value={timezone} onChange={(event) => setTimezone(event.target.value)} maxLength={80} />
+              <span className="field-hint">Detected automatically; edit if it is incorrect.</span>
+            </div>
 
-          <button type="submit" className="primary-action" disabled={updateMe.isPending}>
-            {updateMe.isPending ? 'Saving...' : 'Start questing'}
-          </button>
-        </form>
+            <fieldset>
+              <legend>Primary focus</legend>
+              <div className="path-options">
+                {['Mind', 'Body', 'Discovery'].map((path) => (
+                  <label key={path} className={`path-option ${primaryPath === path ? 'selected' : ''}`}>
+                    <input
+                      type="radio"
+                      name="primaryPath"
+                      value={path}
+                      checked={primaryPath === path}
+                      onChange={() => setPrimaryPath(path)}
+                    />
+                    <span className="path-option-icon"><Icon name={categoryIcon(path)} /></span>
+                    <span><strong>{path}</strong><small>{path === 'Mind' ? 'Learn & reflect' : path === 'Body' ? 'Move & restore' : 'Explore & notice'}</small></span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+
+            {updateMe.isError && <p role="alert" className="form-error">Could not save your profile. Please try again.</p>}
+
+            <button type="submit" className="auth-submit" disabled={updateMe.isPending}>
+              <span>{updateMe.isPending ? 'Binding your journal…' : 'Begin the journey'}</span>
+              <Icon name={updateMe.isPending ? 'star' : 'compass'} />
+            </button>
+          </form>
+        </div>
       </section>
     </main>
   );

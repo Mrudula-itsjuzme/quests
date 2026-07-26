@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../features/auth/AuthContext';
 import { useMe } from '../features/quests/queries';
 import { Icon } from './Icon';
@@ -14,6 +14,7 @@ const navItems = [
 ];
 
 export function AppShell() {
+  const location = useLocation();
   const { signOut, devMode } = useAuth();
   const { data: me, isLoading, isError } = useMe();
   const [notice, setNotice] = useState('');
@@ -66,7 +67,9 @@ export function AppShell() {
           </div>
         </header>
 
-        <Outlet />
+        <div className="route-stage" key={location.pathname}>
+          <Outlet />
+        </div>
       </main>
 
       <nav className="bottom-nav" aria-label="Primary">

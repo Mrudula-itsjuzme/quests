@@ -271,3 +271,140 @@ composition is isolated behind a minimum-width media query; phone Dashboard
 and mobile Quest Deck structure are unchanged.
 
 Desktop command center final result: passed
+
+## Wide-screen system across all destinations
+
+Desktop captures at 1440 x 900:
+
+- Quests: `/tmp/pc-quests-allpages.png`
+- Guild: `/tmp/pc-guild-allpages.png`
+- Rewards: `/tmp/pc-rewards-allpages.png`
+- Gallery: `/tmp/pc-gallery-allpages.png`
+- Profile: `/tmp/pc-profile-allpages.png`
+
+Shared PC treatment:
+
+- consistent full-width 1680px-cap workspace and 84px navigation
+- rectangular engraved panels and denser desktop spacing
+- no reuse of phone bottom navigation above 1100px
+- real navigation, quest, reward, gallery, and profile interactions preserved
+- media-query isolation keeps phone-specific structures unchanged
+
+Page-specific structure:
+
+- Quests: full cinematic hero, two-column active journal, progression rail,
+  and three-column available quest archive
+- Rewards: full vault hero and three-column treasury panel grid
+- Profile: wide portrait/identity split with three-column detail regions
+- Guild: panoramic, honest unavailable state with no fabricated guild activity
+- Gallery: panoramic archive heading and two-column unlocked-memory journal
+
+All-page PC system final result: passed
+
+## Cross-app interaction language
+
+The Quest Deck interaction metaphor was extended with intentionally different
+motion patterns rather than copied literally:
+
+- Navigation: active emblems settle into their destination socket
+- Dashboard: command map reveals outward, XP orbit rotates into place, and
+  quest tiles deal upward with staggered timing and pointer lift
+- Rewards: season vault breathes subtly; treasury panels rise with sequential
+  delays, lift on pointer input, and press with physical depth
+- Profile: portrait unveils laterally, achievement medallions rotate and lift,
+  customization pieces move forward, and the equipment tray rises from below
+- Gallery: journal entries hinge from the archive edge; the empty-state relic
+  hovers; existing memory details retain their book-opening transition
+- Guild: the quiet hall reveals like a lowering banner, the emblem settles with
+  weight, and the panoramic environment drifts slowly
+- Touch: press states replace hover-only feedback
+- Accessibility: the existing global `prefers-reduced-motion` rule collapses
+  every animation and transition to a single near-instant frame
+
+Browser-computed verification:
+
+- Dashboard: `command-map-reveal`, `tactical-card-deal`
+- Rewards: `vault-breathe`, `treasury-rise`
+- Profile: `portrait-unveil`
+- Gallery: `archive-relic-hover`
+- Guild: `guild-hall-reveal`, `guild-sky-drift`,
+  `guild-standard-settle`
+
+Cross-app motion final result: passed
+
+## Compact phone Profile identity
+
+- Before: user-provided phone render with portrait consuming nearly the full
+  viewport
+- Final evidence: `/tmp/profile-compact-phone.png`
+- Comparison viewport: 410 x 844
+- Player header: 113px
+- Portrait identity card: 350px
+- Progress summary begins: 471px from viewport top
+- Development banner: hidden
+- Horizontal overflow: none
+
+The portrait reveal remains active, but Profile now uses a compact landscape
+identity card instead of repeating Dashboard's full cinematic hero. Level, XP,
+quest count, streak, and path rank enter the initial phone viewport.
+
+Compact Profile final result: passed
+
+### Continuous Profile artwork correction
+
+- User-reported issue: hard image/text split created an empty black block
+- Corrected evidence: `/tmp/profile-continuous-phone.png`
+- Comparison viewport: 461 x 844
+- Identity artwork: continuous 330px card
+- Artwork fill: 328px
+- Caption: 130px bottom overlay with a soft transparent fade
+- Progress summary begins: 455px
+- Horizontal overflow: none
+
+The artwork now fills the complete card and the Wayfarer identity floats over
+the lower image. The abrupt stacked-panel appearance has been removed.
+
+Continuous Profile card final result: passed
+
+## Celestial Aperture authentication
+
+- Selected visual: option 1, Celestial Aperture
+- Source concept:
+  `/home/mrudula/.codex/generated_images/019f9d9a-eeeb-7771-a217-3c9bed9f0640/call_rRxR5iZqg1VvlxMuUKSkNO8A.png`
+- Generated production artwork: `public/auth-celestial-aperture.png`
+- Production phone evidence: `/tmp/auth-production-mobile.png` at 390 x 844
+- Desktop evidence: `/tmp/auth-celestial-desktop.png` at 1440 x 900
+- App route-transition evidence: `/tmp/app-production-route-stage.png`
+
+Visible comparison:
+
+- the selected antique celestial-ring concept is preserved as the focal object
+- desktop uses a cinematic split composition with a readable, modern form
+- phone compresses the aperture to 190px so every primary field and action is
+  visible without excessive hero scrolling
+- text remains at readable input and body sizes on both viewports
+- no horizontal overflow or clipped controls was observed
+
+Interaction verification:
+
+- email and password fields accept input and expose visible focus states
+- password reveal changed the input type from `password` to `text`
+- submit displays an animated loading state
+- sign-in and sign-up routes share the new experience
+- no preview query, mock success, or simulated authentication path remains
+- configured production mode calls the existing Supabase methods exclusively
+- unconfigured local mode returns an explicit configuration error and never
+  pretends that authentication succeeded
+- onboarding uses the same celestial visual language, real profile mutation,
+  animated path selection, and a compact phone-first layout
+- every application route now resolves through a keyed entrance transition
+- active navigation emblems animate on route changes
+- `prefers-reduced-motion` continues to collapse animation durations
+
+Engineering verification:
+
+- production build: passed
+- full test suite: 94 passed, 14 skipped
+- `git diff --check`: passed
+
+Celestial Aperture final result: passed

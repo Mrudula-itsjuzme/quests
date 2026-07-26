@@ -1,84 +1,118 @@
 import { useState } from 'react';
 import { Navigate, Link, useLocation } from 'react-router-dom';
+import { Icon } from '../../components/Icon';
 import { supabaseConfigured } from '../../lib/supabase';
 import { useAuth } from './AuthContext';
 
 export function AuthPage({ mode }) {
-  const { isAuthenticated, signInWithPassword, signUpWithPassword } = useAuth();
+  const { devMode, isAuthenticated, signInWithPassword, signUpWithPassword } = useAuth();
   const location = useLocation();
+  const isSignUp = mode === 'sign-up';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [confirmationSent, setConfirmationSent] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [portalState, setPortalState] = useState('idle');
 
-  if (isAuthenticated) return <Navigate to={location.state?.from || '/app'} replace />;
-
-  if (!supabaseConfigured) {
-    return (
-      <main className="auth-shell">
-        <section className="panel auth-card">
-          <h1>Development mode</h1>
-          <p className="dev-auth-banner">
-            Supabase credentials are not configured. You are using a local development identity — this is not a real
-            account and must never be used in production.
-          </p>
-        </section>
-      </main>
-    );
-  }
+  if (isAuthenticated && !devMode) return <Navigate to={location.state?.from || '/app'} replace />;
 
   const onSubmit = async (event) => {
     event.preventDefault();
     setError('');
     setSubmitting(true);
+    setPortalState('opening');
     try {
-      if (mode === 'sign-up') {
+      if (!supabaseConfigured) {
+        throw new Error('Authentication is not configured on this environment. Add the Supabase URL and publishable key before signing in.');
+      }
+      if (isSignUp) {
         await signUpWithPassword(email, password);
         setConfirmationSent(true);
+        setPortalState('open');
       } else {
         await signInWithPassword(email, password);
       }
     } catch (err) {
       setError(err.message || 'Authentication failed');
+      setPortalState('idle');
     } finally {
       setSubmitting(false);
     }
   };
 
+  const switchPath = isSignUp ? '/sign-in' : '/sign-up';
+
   return (
-    <main className="auth-shell">
-      <section className="panel auth-card grain">
-        <h1>{mode === 'sign-up' ? 'Begin a new chapter' : 'Welcome back'}</h1>
-        {confirmationSent ? (
-          <p role="status">Check your email to confirm your account, then sign in.</p>
-        ) : (
-          <form onSubmit={onSubmit} className="auth-form">
-            <label htmlFor="email">Email</label>
-            <input id="email" type="email" required value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" />
-            <label htmlFor="password">Password</label>
-            <input
-              id="password"
-              type="password"
-              required
-              minLength={8}
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              autoComplete={mode === 'sign-up' ? 'new-password' : 'current-password'}
-            />
-            {error && <p role="alert" className="form-error">{error}</p>}
-            <button type="submit" className="primary-action" disabled={submitting}>
-              {submitting ? 'Please wait...' : mode === 'sign-up' ? 'Sign up' : 'Sign in'}
-            </button>
-          </form>
-        )}
-        <p className="auth-switch">
-          {mode === 'sign-up' ? (
-            <>Already have an account? <Link to="/sign-in">Sign in</Link></>
+    <main className="auth-shell celestial-auth" data-portal-state={portalState}>
+      <section className="auth-experience" aria-labelledby="auth-title">
+        <div className="auth-portal" aria-hidden="true">
+          <img src="/auth-celestial-aperture.png" alt="" />
+          <div className="auth-portal-emblem"><Icon name="compass" /></div>
+          <p>THE WAYFARER ARCHIVE</p>
+        </div>
+
+        <div className="auth-content">
+          <Link className="auth-brand" to="/" aria-label="Habbit home">
+            <span className="auth-brand-mark"><Icon name="compass" /></span>
+            <span>HABBIT</span>
+          </Link>
+
+          <div className="auth-copy">
+            <p className="auth-kicker"><Icon name="star" /> CELESTIAL GATE <Icon name="star" /></p>
+            <h1 id="auth-title">{isSignUp ? 'Begin your legend.' : 'Welcome back, Seeker.'}</h1>
+            <p>{isSignUp ? 'Create your sigil and take the first step.' : 'Your path remembers where you left off.'}</p>
+          </div>
+
+          {confirmationSent ? (
+            <div className="auth-success" role="status">
+              <span className="auth-success-icon"><Icon name="check" /></span>
+              <p className="auth-kicker">THE GATE IS OPEN</p>
+              <h2>{isSignUp ? 'Check your email.' : 'Welcome home.'}</h2>
+              <p>
+                Confirm your account from the message we sent, then return to continue.
+              </p>
+            </div>
           ) : (
-            <>New here? <Link to="/sign-up">Create an account</Link></>
+            <form onSubmit={onSubmit} className="auth-form celestial-form">
+              <div className="auth-field">
+                <label htmlFor="email">Email address</label>
+                <input id="email" type="email" required value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" placeholder="seeker@example.com" />
+              </div>
+              <div className="auth-field">
+                <label htmlFor="password">Passphrase</label>
+                <div className="auth-password">
+                  <input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    minLength={8}
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    autoComplete={isSignUp ? 'new-password' : 'current-password'}
+                    placeholder="At least 8 characters"
+                  />
+                  <button type="button" onClick={() => setShowPassword((visible) => !visible)} aria-label={showPassword ? 'Hide password' : 'Show password'}>
+                    {showPassword ? 'Hide' : 'Show'}
+                  </button>
+                </div>
+              </div>
+              {!isSignUp && <button className="auth-forgot" type="button" onClick={() => setError('Password recovery is available when Supabase authentication is configured.')}>Forgot passphrase?</button>}
+              {error && <p role="alert" className="form-error">{error}</p>}
+              <button type="submit" className="auth-submit" disabled={submitting}>
+                <span>{submitting ? 'Aligning the stars…' : isSignUp ? 'Create my sigil' : 'Enter the archive'}</span>
+                <Icon name={submitting ? 'star' : 'compass'} />
+              </button>
+            </form>
           )}
-        </p>
+
+          <p className="auth-switch">
+            {isSignUp ? 'Already carry a sigil?' : 'New to the path?'}{' '}
+            <Link to={switchPath}>{isSignUp ? 'Sign in' : 'Create an account'}</Link>
+          </p>
+          {!supabaseConfigured && <p className="auth-config-note" role="status">Local development identity is active. Configure Supabase environment variables to enable real account access.</p>}
+        </div>
       </section>
     </main>
   );
