@@ -1,105 +1,99 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Icon } from '../../components/Icon';
-import { NyxCat } from '../../components/NyxCat';
-import { useAuth } from '../auth/AuthContext';
-import { QuestRow } from '../quests/QuestCard';
+import { Icon, categoryIcon } from '../../components/Icon';
 import { QuestDetail } from '../quests/QuestDetail';
+import { PlayerHeader } from '../quests/QuestsPage';
+import { questProgressRatio } from '../quests/QuestCard';
 import { useActiveQuests, useMe } from '../quests/queries';
 
-function greeting() {
-  const hour = new Date().getHours();
-  if (hour < 12) return 'Good morning';
-  if (hour < 18) return 'Good afternoon';
-  return 'Good evening';
-}
-
 export function DashboardPage() {
-  const { user } = useAuth();
   const { data: me, isLoading: meLoading, isError: meError } = useMe();
   const { data: quests, isLoading: questsLoading, isError: questsError } = useActiveQuests();
   const [selectedId, setSelectedId] = useState(null);
 
-  const selectedQuest = (quests || []).find((quest) => quest.id === selectedId) || (quests || [])[0] || null;
-  const completedCount = useMemo(() => (quests || []).filter((quest) => quest.status === 'completed').length, [quests]);
-  const activeProgress = useMemo(() => {
-    if (!quests || quests.length === 0) return 0;
-    const total = quests.reduce((sum, quest) => sum + (quest.targetValue ? quest.progressValue / quest.targetValue : 0), 0);
-    return Math.round((total / quests.length) * 100);
-  }, [quests]);
+  const activeQuests = useMemo(() => quests || [], [quests]);
+  const featured = activeQuests[0] || null;
+  const selected = activeQuests.find((quest) => quest.id === selectedId) || null;
+  const completedCount = activeQuests.filter((quest) => quest.status === 'completed').length;
+  const activeProgress = activeQuests.length
+    ? Math.round(activeQuests.reduce((sum, quest) => sum + questProgressRatio(quest), 0) / activeQuests.length * 100)
+    : 0;
 
-  if (meLoading || questsLoading) return <p role="status">Loading your dashboard...</p>;
-  if (meError) return <section className="panel" role="alert"><p>Could not load your profile. Please refresh.</p></section>;
+  if (meLoading || questsLoading) return <main className="dashboard-reference"><div className="skeleton player-skeleton" /><div className="skeleton hero-skeleton" /><div className="skeleton list-skeleton" /><p className="sr-only" role="status">Loading your dashboard…</p></main>;
+  if (meError) return <section className="ornate-panel error-state" role="alert"><h2>Your dashboard could not be opened</h2><p>Please check the quest service and try again.</p></section>;
 
-  const name = me?.displayName || user?.email?.split('@')[0] || 'traveler';
+  const featuredRatio = featured ? questProgressRatio(featured) : 0;
+  const rankIndex = Math.max(0, Math.floor((me.totalXp || 0) / 500));
+  const rankNames = ['Novice I', 'Novice II', 'Novice III', 'Silver I', 'Silver II', 'Gold I'];
+  const rank = rankNames[Math.min(rankIndex, rankNames.length - 1)];
+  const nextRankXp = (rankIndex + 1) * 500;
+  const rankProgress = Math.min(1, (me.totalXp || 0) / nextRankXp);
 
   return (
-    <section className="dashboard-grid fantasy-page" aria-label="Dashboard">
-      <div className="dashboard-heading">
+    <main className="dashboard-reference fantasy-page" aria-label="Dashboard">
+      <PlayerHeader me={me} page="Dashboard" />
+
+      <section className="focus-hero ornate-panel dashboard-focus">
+        <img className="focus-hero-art" src="/quest-scholar-hero.png" alt="" />
+        <div className="focus-label"><span>◆</span> Today’s Focus <span>◆</span></div>
+        <div className="quest-ring" style={{ '--progress': `${featuredRatio * 360}deg` }}>
+          <div><Icon name={featured ? categoryIcon(featured.category) : 'compass'} /><span>{Math.round(featuredRatio * 100)}%</span></div>
+        </div>
+        <div className="focus-copy">
+          <p className="eyebrow">{featured?.category || 'Begin your path'}</p>
+          <h2>{featured?.title || 'Your Adventure Awaits'}</h2>
+          <span>Objective</span>
+          <p>{featured?.description || 'Open the quest board and choose the path you want to follow today.'}</p>
+          <strong className="focus-count">{featured ? `${featured.progressValue} / ${featured.targetValue}` : '0 / 1'}</strong>
+          <div className="gold-progress" role="progressbar" aria-valuenow={Math.round(featuredRatio * 100)} aria-valuemin="0" aria-valuemax="100"><i style={{ width: `${featuredRatio * 100}%` }} /></div>
+          <blockquote>Every path begins with one deliberate step.</blockquote>
+        </div>
+        <div className="character-dialogue"><Icon name="leaf" /><span>Your next chapter is ready. Keep moving forward!</span></div>
+      </section>
+
+      <nav className="quest-tabs dashboard-path-tabs" aria-label="Dashboard shortcuts">
+        <Link className="active" to="/app/quests"><Icon name="sun" /><span>Quest Board</span></Link>
+        <Link to="/app/profile"><Icon name="shield" /><span>Level {me.level}</span></Link>
+        <Link to="/app/rewards"><Icon name="chest" /><span>Rewards</span></Link>
+        <Link to="/app/gallery"><Icon name="grid" /><span>Gallery</span></Link>
+      </nav>
+
+      <div className="quest-content-grid dashboard-content">
+        <section className="ornate-panel active-list">
+          <div className="section-title"><h2>Active Quests</h2><span>{activeQuests.filter((quest) => quest.status === 'active').length} active</span></div>
+          {questsError && <p role="alert" className="empty-state">Your active quests could not be loaded.</p>}
+          {!questsError && activeQuests.length === 0 && <div className="empty-state"><Icon name="scroll" /><p>No active quests yet.</p><Link className="gold-button" to="/app/quests">Open quest board</Link></div>}
+          {!questsError && activeQuests.slice(0, 4).map((quest) => (
+            <button key={quest.id} type="button" className="reference-quest-row" onClick={() => setSelectedId(quest.id)}>
+              <span className="round-emblem"><Icon name={categoryIcon(quest.category)} /></span>
+              <span className="quest-copy"><strong>{quest.title}</strong><small>{quest.description}</small><span className="gold-progress"><i style={{ width: `${questProgressRatio(quest) * 100}%` }} /></span></span>
+              <span className="quest-numbers"><b>{quest.progressValue}/{quest.targetValue}</b><span>XP<br /><strong>{quest.xpReward}</strong></span></span>
+            </button>
+          ))}
+          {activeQuests.length > 0 && <Link className="dashboard-view-all" to="/app/quests">View all active quests <span>›</span></Link>}
+        </section>
+
+        <aside className="progress-side">
+          <section className="ornate-panel streak-card"><h2>Weekly Streak</h2><Icon name="flame" /><strong>{me.streakDays || 0}</strong><span>days</span><p>Keep the flame alive!</p></section>
+          <section className="ornate-panel rank-card"><h2>Path Rank</h2><Icon name="compass" /><strong>{rank}</strong><div className="gold-progress"><i style={{ width: `${rankProgress * 100}%` }} /></div><span>{me.totalXp.toLocaleString()} / {nextRankXp.toLocaleString()} XP</span><Link className="gold-button" to="/app/profile">View Progress</Link></section>
+        </aside>
+      </div>
+
+      <section className="ornate-panel dashboard-overview">
+        <div className="section-title"><h2>Path Overview</h2><span>Your journey at a glance</span></div>
         <div>
-          <h4>{greeting()}, {name}</h4>
-          <h1>Dashboard</h1>
-          <p>Complete quests and track your progress toward the next level.</p>
+          <OverviewStat icon="star" label="Board charge" value={`${activeProgress}%`} />
+          <OverviewStat icon="shield" label="Current level" value={me.level} />
+          <OverviewStat icon="check" label="Completed" value={completedCount} />
+          <OverviewStat icon="bookmark" label="Day streak" value={me.streakDays || 0} />
         </div>
-        <div className="dashboard-cta">
-          <NyxCat small />
-          <Link className="primary-action compact" to="/app/quests">Open quest board</Link>
-        </div>
-      </div>
+      </section>
 
-      <div className="metric-strip">
-        <MetricCard icon="star" label="Board charge" value={`${activeProgress}%`} detail="Active quest progress" />
-        <MetricCard icon="shield" label="Level" value={me.level} detail={`${me.tier} · ${me.xpIntoLevel}/${me.xpForCurrentLevel} XP`} />
-        <MetricCard icon="check" label="Quests Completed" value={completedCount} detail="Currently active set" />
-        <MetricCard icon="bookmark" label="Streak" value={me.streakDays ?? 0} detail="Day streak" />
-      </div>
-
-      {questsError && (
-        <section className="panel" role="alert">
-          <p>Could not load your quests right now.</p>
-        </section>
-      )}
-
-      {!questsError && (!quests || quests.length === 0) && (
-        <section className="panel empty-state">
-          <p>No active quests yet. Head to the quest board to generate today's set.</p>
-          <Link className="primary-action compact" to="/app/quests">Go to quests</Link>
-        </section>
-      )}
-
-      {!questsError && quests && quests.length > 0 && (
-        <>
-          <section className="panel quest-board">
-            <div className="panel-header">
-              <div>
-                <h2>Active Quests</h2>
-                <span>{quests.filter((quest) => quest.status === 'active').length} in progress</span>
-              </div>
-            </div>
-            <div className="quest-list">
-              {quests.map((quest) => (
-                <QuestRow key={quest.id} quest={quest} selected={selectedQuest?.id === quest.id} onSelect={setSelectedId} />
-              ))}
-            </div>
-          </section>
-          <QuestDetail quest={selectedQuest} />
-        </>
-      )}
-    </section>
+      {selected && <div className="quest-detail-overlay" role="dialog" aria-modal="true" aria-label={`${selected.title} details`} onMouseDown={(event) => event.target === event.currentTarget && setSelectedId(null)}><div><button className="detail-close" type="button" onClick={() => setSelectedId(null)} aria-label="Close quest details">×</button><QuestDetail quest={selected} /></div></div>}
+    </main>
   );
 }
 
-function MetricCard({ icon, label, value, detail }) {
-  return (
-    <article className="metric-card">
-      <span className="metric-icon" aria-hidden="true">
-        <Icon name={icon} />
-      </span>
-      <div>
-        <p>{label}</p>
-        <strong>{value}</strong>
-        <span>{detail}</span>
-      </div>
-    </article>
-  );
+function OverviewStat({ icon, label, value }) {
+  return <article><span className="round-emblem"><Icon name={icon} /></span><div><small>{label}</small><strong>{value}</strong></div></article>;
 }

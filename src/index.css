@@ -2547,3 +2547,429 @@ body {
   .dashboard-grid .quest-target { grid-column: 1 / -1; grid-row: 3; }
   .dashboard-grid .quest-row .progress-wrap { grid-row: 4; width: 100%; }
 }
+
+/* Quest-reference dashboard composition */
+.dashboard-reference {
+  width: min(944px, 100%);
+  margin: 0 auto;
+  padding-bottom: 18px;
+}
+
+.dashboard-path-tabs a {
+  display: flex;
+  min-height: 70px;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid rgba(201, 154, 75, .18);
+  color: var(--quest-muted);
+  font-family: var(--font-display);
+  font-size: 1.08rem;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+.dashboard-path-tabs a.active {
+  color: var(--quest-gold-bright);
+  background: radial-gradient(circle at 50% 100%, rgba(201, 154, 75, .19), transparent 72%);
+  box-shadow: inset 0 -2px var(--quest-gold);
+}
+.dashboard-path-tabs a svg { width: 24px; height: 24px; }
+
+.dashboard-content { margin-top: 0; }
+.dashboard-view-all {
+  display: flex;
+  min-height: 54px;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 12px;
+  border: 1px solid rgba(201, 154, 75, .22);
+  color: var(--quest-gold-bright);
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  text-decoration: none;
+}
+.dashboard-view-all span { font-size: 1.7rem; }
+.rank-card .gold-button { width: 100%; margin-top: 12px; }
+
+.dashboard-overview {
+  margin-top: 18px;
+  padding: 22px;
+}
+.dashboard-overview > div:last-child {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.dashboard-overview article {
+  display: flex;
+  min-width: 0;
+  gap: 13px;
+  align-items: center;
+  padding: 14px;
+  border: 1px solid rgba(201, 154, 75, .22);
+  border-radius: 12px;
+  background: rgba(8, 16, 19, .72);
+}
+.dashboard-overview .round-emblem { width: 54px; height: 54px; flex: 0 0 auto; }
+.dashboard-overview article div { display: grid; gap: 3px; min-width: 0; }
+.dashboard-overview small { color: var(--quest-muted); text-transform: uppercase; }
+.dashboard-overview strong { color: var(--quest-cream); font-family: var(--font-display); font-size: 1.7rem; }
+
+@media (max-width: 780px) {
+  .dashboard-reference { padding-bottom: 12px; }
+  .dashboard-path-tabs a {
+    min-height: 58px;
+    flex-direction: column;
+    gap: 4px;
+    font-size: .7rem;
+    text-align: center;
+  }
+  .dashboard-overview { margin: 10px 8px 0; padding: 16px 10px; }
+  .dashboard-overview > div:last-child { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .dashboard-overview article { padding: 10px; }
+}
+
+@media (max-width: 390px) {
+  .dashboard-overview .round-emblem { width: 44px; height: 44px; }
+}
+
+/* Preserve the supplied 944px dashboard composition on narrow render canvases. */
+.app-shell:has(.dashboard-reference) > .dev-auth-banner { display: none; }
+.app-shell:has(.dashboard-reference) .bottom-nav {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+.app-shell:has(.dashboard-reference) .bottom-nav a[href="/app/gallery"] { display: none; }
+
+@media (max-width: 780px) {
+  .app-shell:has(.dashboard-reference) {
+    width: 944px;
+    max-width: none;
+    padding: 0 0 118px;
+    zoom: calc(100vw / 944px);
+  }
+
+  .dashboard-reference {
+    width: 944px;
+    max-width: none;
+    padding-bottom: 18px;
+  }
+
+  .dashboard-reference .reference-header {
+    grid-template-columns: 152px minmax(0, 1fr) auto;
+    min-height: 180px;
+    padding: 12px 36px 18px;
+    border-radius: 34px 34px 0 0;
+  }
+  .dashboard-reference .avatar-medallion {
+    width: 116px;
+    height: 116px;
+    font-size: 3rem;
+    box-shadow: 0 0 0 2px var(--quest-gold), 0 0 0 9px #121b1e, 0 0 0 11px var(--quest-gold-dim), 0 14px 35px #000;
+  }
+  .dashboard-reference .avatar-medallion b {
+    right: -10px;
+    width: 43px;
+    height: 43px;
+    font-size: 1.25rem;
+  }
+  .dashboard-reference .player-heading h1 { font-size: 3.5rem; }
+  .dashboard-reference .player-heading p { font-size: 1.3rem; }
+  .dashboard-reference .player-heading > span { font-size: 1.25rem; }
+  .dashboard-reference .header-orbit { position: static; gap: 24px; }
+  .dashboard-reference .header-orbit button { display: grid; width: 74px; height: 74px; font-size: 1.8rem; }
+
+  .dashboard-reference .focus-hero {
+    grid-template-columns: minmax(240px, .8fr) minmax(300px, .9fr) minmax(350px, 1.1fr);
+    min-height: 470px;
+    margin: 16px 0;
+    padding: 64px 42px 30px;
+    border-radius: 16px;
+  }
+  .dashboard-reference .focus-label { top: 24px; left: 38px; font-size: 1.1rem; }
+  .dashboard-reference .quest-ring { width: 260px; }
+  .dashboard-reference .quest-ring > div { font-size: 4.3rem; }
+  .dashboard-reference .focus-copy { padding: 20px; }
+  .dashboard-reference .focus-copy h2 { font-size: 3.4rem; }
+  .dashboard-reference .focus-copy > p:not(.eyebrow) { font-size: 1.2rem; }
+  .dashboard-reference .focus-count { font-size: 2.8rem; }
+  .dashboard-reference .focus-copy blockquote { font-size: 1.25rem; }
+  .dashboard-reference .focus-hero-art { object-position: center; opacity: .92; }
+  .dashboard-reference .character-dialogue { right: 20px; bottom: 18px; width: 330px; padding: 15px 20px; font-size: 1.05rem; }
+
+  .dashboard-reference .quest-tabs { margin: 12px 0 18px; border-radius: 30px; }
+  .dashboard-reference .dashboard-path-tabs a {
+    min-height: 70px;
+    flex-direction: row;
+    gap: 10px;
+    font-size: 1.08rem;
+  }
+  .dashboard-reference .quest-content-grid { display: grid; grid-template-columns: minmax(0, 2fr) minmax(270px, .85fr); gap: 18px; padding: 0; }
+  .dashboard-reference .active-list { padding: 24px; }
+  .dashboard-reference .progress-side { grid-template-columns: 1fr; margin-top: 0; }
+  .dashboard-reference .streak-card,
+  .dashboard-reference .rank-card { min-height: 245px; padding: 22px; }
+  .dashboard-reference .reference-quest-row { grid-template-columns: 76px minmax(0, 1fr) auto; min-height: 108px; gap: 16px; padding: 12px; }
+  .dashboard-reference .round-emblem { width: 66px; height: 66px; font-size: 1.8rem; }
+  .dashboard-reference .quest-copy strong { font-size: 1.45rem; }
+  .dashboard-reference .quest-numbers { grid-column: auto; justify-content: initial; font-size: initial; }
+  .dashboard-reference .quest-numbers > span { padding: 8px 13px; }
+  .dashboard-reference .dashboard-overview { margin: 18px 0 0; padding: 22px; }
+  .dashboard-reference .dashboard-overview > div:last-child { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+  .dashboard-reference .dashboard-overview article { padding: 14px; }
+  .dashboard-reference .dashboard-overview .round-emblem { width: 54px; height: 54px; }
+
+  .app-shell:has(.dashboard-reference) .bottom-nav {
+    right: 0;
+    left: 0;
+    bottom: 0;
+    min-height: 100px;
+    border-radius: 30px 30px 0 0;
+  }
+  .app-shell:has(.dashboard-reference) .bottom-nav a {
+    min-height: 84px;
+    font-size: 1rem;
+  }
+  .app-shell:has(.dashboard-reference) .bottom-nav a svg { width: 30px; height: 30px; }
+}
+
+/* Rewards reference composition */
+.rewards-reference {
+  width: min(944px, 100%);
+  margin: 0 auto;
+  padding-bottom: 18px;
+}
+.rewards-hero {
+  min-height: 520px;
+  margin: 16px 0;
+  overflow: hidden;
+}
+.rewards-hero > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+.rewards-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(4, 10, 13, .08), rgba(4, 10, 13, .18) 56%, rgba(4, 10, 13, .8));
+  pointer-events: none;
+}
+.rewards-hero-copy {
+  position: absolute;
+  z-index: 2;
+  top: 36px;
+  left: 90px;
+  text-align: center;
+}
+.rewards-hero-copy .eyebrow { font-family: var(--font-display); font-size: 1.6rem; }
+.rewards-hero-copy h1 { max-width: 390px; margin-top: 6px; color: var(--quest-cream); font-size: 1.5rem; }
+.season-progress {
+  position: absolute;
+  z-index: 2;
+  bottom: 34px;
+  left: 90px;
+  display: grid;
+  width: 360px;
+  gap: 8px;
+  color: var(--quest-gold-bright);
+  font-family: var(--font-display);
+  text-align: center;
+}
+.season-progress strong { color: var(--quest-cream); font-size: 1.8rem; }
+.season-progress span { font-size: 1.2rem; }
+.rewards-hero .character-dialogue { z-index: 3; }
+
+.rewards-panel-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.reward-reference-panel {
+  min-height: 242px;
+  padding: 20px;
+}
+.reward-reference-panel .section-title { justify-content: center; margin-bottom: 18px; }
+.reward-reference-panel .section-title h2 { font-size: 1.25rem; text-align: center; }
+.reward-track-panel {
+  display: grid;
+  grid-template-columns: 105px 1fr 100px;
+  gap: 16px;
+  align-items: center;
+}
+.reward-track-panel .section-title { grid-column: 1 / -1; }
+.reward-level-shield {
+  display: grid;
+  min-height: 120px;
+  place-items: center;
+  align-content: center;
+  color: var(--quest-gold-bright);
+  border: 1px solid var(--quest-gold-dim);
+  background: #111b1e;
+  clip-path: polygon(12% 0, 88% 0, 100% 16%, 92% 80%, 50% 100%, 8% 80%, 0 16%);
+}
+.reward-level-shield strong { font-family: var(--font-display); font-size: 2.7rem; }
+.reward-level-shield span { color: var(--quest-muted); }
+.reward-track-panel h3 { font-size: 1.45rem; }
+.reward-track-panel p { margin-top: 8px; }
+.reward-banner {
+  display: grid;
+  min-height: 142px;
+  place-items: center;
+  color: var(--quest-gold-bright);
+  background: linear-gradient(160deg, #39264c, #151224);
+  clip-path: polygon(8% 0, 92% 0, 92% 83%, 50% 100%, 8% 83%);
+}
+.reward-banner svg { width: 52px; height: 52px; }
+
+.badge-row,
+.loot-row,
+.chest-row,
+.claim-row {
+  display: grid;
+  gap: 10px;
+}
+.badge-row { grid-template-columns: repeat(3, 1fr); }
+.badge-row article,
+.chest-row article,
+.claim-row article {
+  display: grid;
+  gap: 5px;
+  place-items: center;
+  color: var(--quest-gold-bright);
+  text-align: center;
+}
+.badge-row article.locked { opacity: .38; filter: grayscale(1); }
+.badge-row .round-emblem { width: 76px; height: 76px; }
+.badge-row small,
+.chest-row span,
+.claim-row span { color: var(--quest-muted); }
+.badges-panel > a,
+.chest-panel > a,
+.loot-panel > button,
+.current-rank-panel > button {
+  display: flex;
+  width: 100%;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 14px;
+  border: 0;
+  border-top: 1px solid rgba(201, 154, 75, .2);
+  color: var(--quest-gold-bright);
+  background: transparent;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.loot-row { grid-template-columns: repeat(4, 1fr); }
+.loot-row article,
+.claim-row article {
+  display: grid;
+  min-height: 112px;
+  gap: 5px;
+  place-items: center;
+  padding: 9px;
+  border: 1px solid rgba(201, 154, 75, .25);
+  border-radius: 10px;
+  color: var(--quest-gold-bright);
+  background: rgba(8, 16, 19, .8);
+  text-align: center;
+}
+.loot-row article svg,
+.claim-row article svg,
+.chest-row article svg { width: 42px; height: 42px; }
+.loot-row article strong { max-width: 10ch; color: var(--quest-cream); font-size: .8rem; }
+.loot-row article span { color: var(--quest-muted); font-size: .72rem; }
+.reward-empty { grid-column: 1 / -1; min-height: 112px; display: grid; place-items: center; text-align: center; }
+
+.chest-row { grid-template-columns: repeat(3, 1fr); }
+.chest-row article { min-height: 128px; }
+.chest-row article svg { color: var(--quest-gold-bright); }
+.chest-row article:nth-child(2) svg { color: #a8afb3; }
+.chest-row article:nth-child(3) svg { color: #e5ad4c; }
+
+.claim-row { grid-template-columns: repeat(3, 1fr); }
+.claim-all-button {
+  width: 100%;
+  min-height: 50px;
+  margin-top: 14px;
+  border: 1px solid var(--quest-gold-bright);
+  border-radius: 28px;
+  color: var(--quest-cream);
+  background: linear-gradient(180deg, #9c722e, #5d3e17);
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+.current-rank-panel {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 18px;
+  align-items: center;
+}
+.current-rank-panel .section-title,
+.current-rank-panel > button { grid-column: 1 / -1; }
+.rank-crest {
+  position: relative;
+  display: grid;
+  width: 132px;
+  height: 150px;
+  place-items: center;
+  color: var(--quest-cream);
+  border: 1px solid var(--quest-gold-dim);
+  background: linear-gradient(160deg, #293136, #0c1317);
+  clip-path: polygon(12% 0, 88% 0, 100% 16%, 91% 78%, 50% 100%, 9% 78%, 0 16%);
+}
+.rank-crest svg:first-child { width: 70px; height: 70px; }
+.rank-crest svg:last-child { position: absolute; width: 36px; height: 36px; color: var(--quest-gold-bright); }
+.current-rank-panel h2 { color: var(--quest-gold-bright); font-size: 1.5rem; text-transform: uppercase; }
+.current-rank-panel > div > span { color: var(--quest-muted); }
+.current-rank-panel > div > strong { display: block; margin: 5px 0; color: var(--quest-cream); font-family: var(--font-display); font-size: 2.4rem; }
+
+.app-shell:has(.rewards-reference) > .dev-auth-banner { display: none; }
+.app-shell:has(.rewards-reference) .bottom-nav {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+.app-shell:has(.rewards-reference) .bottom-nav a[href="/app/gallery"] { display: none; }
+
+@media (max-width: 780px) {
+  .app-shell:has(.rewards-reference) {
+    width: 944px;
+    max-width: none;
+    padding: 0 0 118px;
+    zoom: calc(100vw / 944px);
+  }
+  .rewards-reference { width: 944px; max-width: none; padding-bottom: 18px; }
+  .rewards-reference .reference-header {
+    grid-template-columns: 152px minmax(0, 1fr) auto;
+    min-height: 180px;
+    padding: 12px 36px 18px;
+    border-radius: 34px 34px 0 0;
+  }
+  .rewards-reference .avatar-medallion { width: 116px; height: 116px; font-size: 3rem; }
+  .rewards-reference .avatar-medallion b { right: -10px; width: 43px; height: 43px; font-size: 1.25rem; }
+  .rewards-reference .player-heading h1 { font-size: 3.5rem; }
+  .rewards-reference .player-heading p { font-size: 1.3rem; }
+  .rewards-reference .player-heading > span { font-size: 1.25rem; }
+  .rewards-reference .header-orbit { position: static; gap: 24px; }
+  .rewards-reference .header-orbit button { display: grid; width: 74px; height: 74px; font-size: 1.8rem; }
+  .rewards-panel-grid { grid-template-columns: 1fr 1fr; }
+  .app-shell:has(.rewards-reference) .bottom-nav {
+    right: 0;
+    left: 0;
+    bottom: 0;
+    min-height: 100px;
+    border-radius: 30px 30px 0 0;
+  }
+  .app-shell:has(.rewards-reference) .bottom-nav a { min-height: 84px; font-size: 1rem; }
+  .app-shell:has(.rewards-reference) .bottom-nav a svg { width: 30px; height: 30px; }
+}

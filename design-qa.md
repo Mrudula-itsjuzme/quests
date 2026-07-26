@@ -82,3 +82,55 @@ Verified shared surfaces:
 - dark themed forms, dialogs, filters, empty states, quest details, and feedback surfaces
 
 Cross-app final result: passed
+
+## Dashboard reference rebuild
+
+- Source visual truth: user-provided Quest dashboard reference image in the current conversation
+- Previous Dashboard evidence: user-provided 551 x 892 render
+- Rebuilt Dashboard mobile evidence: `/tmp/dashboard-reference-pass1.png`
+- Rebuilt Dashboard full-frame evidence: `/tmp/dashboard-reference-final.png`
+- Comparison viewport: 944 x 1672 CSS px at 1x
+
+The old parchment-style Home card stack was replaced with the reference composition:
+
+- player medallion header and action orbits
+- painted scholar focus hero
+- circular quest-progress emblem
+- central objective/progress copy
+- lower-right character dialogue
+- four-segment shortcut strip
+- dense active-quest list and progression rail
+- full-width ornate overview panel
+- fixed shared navigation
+
+Live quest, XP, level, streak, and rank data remain connected. Quest rows open the existing actionable detail dialog, and all shortcut and progression actions navigate to real routes.
+
+Dashboard final result: passed
+
+### Narrow render correction
+
+- User-reported narrow render: 551 x 892
+- Corrected scaled-canvas evidence: `/tmp/dashboard-scaled-reference.png`
+
+The narrow Dashboard now preserves the 944px reference composition and scales it proportionally rather than switching to a simplified mobile reflow. The hero, split quest/progression region, typography, artwork, and five-item navigation retain the same relative geometry. Lower-page cropping is expected because the supplied reference has a taller aspect ratio than the 551 x 892 render viewport; content remains scrollable and is not vertically distorted.
+
+## Rewards reference rebuild
+
+- Source visual truth: user-provided Rewards dashboard reference image in the current conversation
+- Full-frame evidence: `/tmp/rewards-reference-full.png`
+- Narrow scaled-canvas evidence: `/tmp/rewards-reference-narrow.png`
+- Comparison viewports: 944 x 1672 and 551 x 892
+
+Verified reference structure:
+
+- player header and action orbits
+- generated black-iron and antique-gold season chest hero
+- presenting scholar character and dialogue card
+- reward track and badge panels
+- rare loot and chest collection panels
+- claimable rewards and current rank panels
+- five-item Rewards-active navigation
+
+XP, level, rank, badge, collectible, rarity, and chest counts are derived from live app state. Inventory, reward-claiming, and leaderboard actions return explicit unavailable notices because those backend operations do not exist.
+
+Rewards final result: passed
