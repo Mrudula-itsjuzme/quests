@@ -41,7 +41,7 @@ export function DashboardPage() {
           <h1>Dashboard</h1>
           <p>Complete quests and track your progress toward the next level.</p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+        <div className="dashboard-cta">
           <NyxCat small />
           <Link className="primary-action compact" to="/app/quests">Open quest board</Link>
         </div>

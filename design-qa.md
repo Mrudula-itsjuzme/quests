@@ -1,57 +1,61 @@
-# Premium Quest Experience — Design QA
+# Design QA
 
-## Evidence
+- Source visual truth: user-provided Quest dashboard reference image in the current conversation
+- Implementation screenshot: `/tmp/quests-reference-final3.png`
+- Viewport: 944 x 1672 CSS px
+- Source pixels: 944 x 1672
+- Implementation pixels: 944 x 1672
+- Density normalization: both artifacts compared at 1x and equal pixel dimensions
+- State: Quest page, Daily tab, populated local development identity
+- Primary interactions represented: cadence tabs, quest selection rows, accept-quest actions, header actions, and navigation remain live
+- Console/runtime check: page and all API-backed regions rendered without an error state; production build and automated tests are recorded separately
 
-- Source visual truth: `/home/mrudula/.codex/generated_images/019f5102-1f38-76e2-ad16-dffdac9943dd/exec-0169c0bc-1b7f-4360-924d-4fac02330c40.png`
-- Browser-rendered desktop implementation: `/tmp/quest-premium-desktop-final-v2.png`
-- Browser-rendered mobile implementation: `/tmp/quest-premium-mobile-final.png`
-- Source and mobile implementation comparison: `/tmp/quest-design-qa-comparison.png`
-- Focused Quest Compass render: `/tmp/quest-compass-render.png`
-- Viewports: 1440 × 900 desktop and 390 × 844 mobile capture (375 CSS-pixel content width reported by Chromium)
-- State: public landing, default dark theme, compass `idle`
+## Full-view comparison evidence
 
-The approved source is an authenticated mobile dashboard while the implementation evidence is the newly requested public landing route. It is therefore an art-direction target rather than a one-to-one screen clone. The comparison evaluates shared identity, hierarchy, materials, compass prominence, typography, density, and mobile behavior without claiming identical information architecture.
+The final implementation capture reproduces the reference's vertical composition at the same 944 x 1672 frame:
 
-## Full-view comparison
+- profile/header block
+- illustrated focus hero
+- four-part cadence control
+- active-quest list with two-card progression rail
+- three-column available-quest grid
+- fixed five-item bottom navigation
 
-- Fonts and typography: locally hosted Cormorant Garamond preserves the source's cinematic editorial display voice; Manrope gives auth, navigation, and control copy a clearer interface rhythm. Headline wrapping remains deliberate at desktop and mobile widths.
-- Spacing and layout rhythm: desktop uses a spacious two-column hero and restrained top navigation. Mobile moves the compass below the conversion copy, keeps both primary actions fully visible, and has no horizontal overflow (`clientWidth: 375`, `scrollWidth: 375`).
-- Colors and tokens: charcoal, forest-black, aged bronze, muted gold, parchment, and restrained green map consistently to the visual source. CTA contrast and muted body copy remain readable against the dark ground.
-- Image and asset quality: the hero is a real 394 KB PBR GLB with a 156 KB rendered poster fallback. Its bronze rim, obsidian face, gold needle, and green path markers match the source's material language without copying character artwork or approximating the compass with HTML/CSS shapes.
-- Copy and content: the promised concise hierarchy is present: “Build habits. Live the quest.”, one supporting sentence, two actions, and short trust cues. Supporting sections remain compact and task-focused.
+The generated scholar artwork has the same right-weighted character placement, dark mountain-city setting, green cloak, and warm antique-gold lighting as the source. App text remains live rather than rasterized.
 
-## Focused comparison
+## Focused region comparison evidence
 
-The dedicated 800 × 800 compass render was inspected at original resolution. The rim lighting, needle silhouette, state badge, emissive center, and category markers remain sharp without raster halos. The GLB is lazy-loaded, caps DPR at 1.5, pauses when hidden/off-screen, and preserves the static fallback.
+- Hero: right-aligned scholar, left-side circular progress emblem, central objective copy, and lower-right dialogue card all remain readable without collision.
+- Quest content: active rows retain the source's emblem/copy/progress/reward hierarchy; progression cards remain aligned in the right rail.
+- Lower frame: all three available cards and their Accept Quest actions appear above the fixed navigation at the target viewport.
 
-## Findings
+## Required fidelity surfaces
 
-- No actionable P0, P1, or P2 visual mismatch remains for the requested landing experience.
-- [P3] The WebGL chunk remains large even after removing the unused 3D utility package. It is route/lazy isolated behind the poster, so it does not block the initial text and navigation experience; further meshopt/Draco work is optional polish.
-- [P3] Flutter uses the approved pre-rendered compass layer rather than a true authored Rive state machine because no editable Rive source was available. Reduced-motion and content fallbacks are complete; richer native state animation is a later asset-authoring pass.
-
-## Browser interactions tested
-
-- Public landing loaded with meaningful content and no Vite error overlay.
-- Desktop `Sign in` navigated to `/login` and rendered “Welcome back.”
-- Mobile navigation expanded and exposed How it works, Quests, and Rewards.
-- WebGL canvas rendered successfully.
-- Mobile width had no horizontal overflow.
-
-The authenticated browser journey could not be live-driven because this environment blocked the separate API listener. Route, authentication, onboarding, tour, header/idempotency, quest action, and error behavior are covered by the passing web and API test suites.
+- Fonts and typography: Cormorant Garamond provides the high-contrast fantasy display voice; Manrope remains limited to functional supporting text. Hierarchy and wrapping are stable at the target viewport.
+- Spacing and layout rhythm: the target's header, hero, tabs, two-column content region, available cards, and fixed navigation all fit within the same frame.
+- Colors and visual tokens: deep blue-black, warm cream, and antique gold closely track the supplied reference.
+- Image quality and asset fidelity: the prior CSS-drawn figure was replaced with a dedicated high-resolution painted scholar/city asset. The final crop is sharp and correctly weighted.
+- Copy and content: structure matches the reference while player values and quest content remain backed by the app's real local state.
 
 ## Comparison history
 
-1. Initial comparison found no P0/P1/P2 visual defect. The implementation already preserved the source palette, premium serif hierarchy, strong compass focal point, readable mobile controls, and uncluttered composition.
-2. Post-comparison engineering refinement removed `@react-three/drei` and its deprecated transitive mesh dependency. The final desktop browser capture confirmed no visual regression.
+1. Initial capture: blocked by an incorrect local API target.
+   - Fix: pointed Vite at the documented `127.0.0.1:3001` development API.
+2. Second capture: blocked by authentication/onboarding state.
+   - Fix: enabled the documented development identity, completed local-only onboarding, and generated local sample quests.
+3. First populated comparison:
+   - P1: shared development banner and top bar appeared above the Quest design.
+   - P2: excess shell height pushed Available Quests below the target frame.
+   - Fix: hid shared shell chrome only when `.quest-reference` is active and constrained the Quest surface to the reference width.
+4. Second populated comparison:
+   - P2: hero height and available-card density remained too tall; dialogue card was missing at the target width.
+   - Fix: tightened the hero and cards and restored the lower-right dialogue card.
+5. Final comparison: `/tmp/quests-reference-final3.png`
+   - No remaining actionable P0, P1, or P2 differences.
 
-## Implementation checklist
+## Follow-up polish
 
-- [x] Public desktop and mobile hierarchy verified.
-- [x] Real GLB and static fallback installed.
-- [x] Navigation, sign-in route, and mobile menu verified.
-- [x] Reduced-motion behavior covered in tests.
-- [x] No horizontal mobile overflow.
-- [x] P0/P1/P2 findings resolved.
+- P3: live local quest titles and zero-progress values intentionally differ from the static sample data in the reference.
+- P3: generated character art is an original close match rather than a pixel-identical copy of the source character.
 
 final result: passed

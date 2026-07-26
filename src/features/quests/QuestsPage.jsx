@@ -77,6 +77,7 @@ export function QuestsPage() {
       <PlayerHeader me={me} page="Quests" />
 
       <section className="focus-hero ornate-panel">
+        <img className="focus-hero-art" src="/quest-scholar-hero.png" alt="" />
         <div className="focus-label"><span>◆</span> Today’s Focus <span>◆</span></div>
         <div className="quest-ring" style={{ '--progress': `${featuredRatio * 360}deg` }}>
           <div><Icon name={featured ? categoryIcon(featured.category) : 'book'} /><span>{Math.round(featuredRatio * 100)}%</span></div>
@@ -90,7 +91,6 @@ export function QuestsPage() {
           <div className="gold-progress" role="progressbar" aria-valuenow={Math.round(featuredRatio * 100)} aria-valuemin="0" aria-valuemax="100"><i style={{ width: `${featuredRatio * 100}%` }} /></div>
           <blockquote>Knowledge is a blade. Sharpen it.</blockquote>
         </div>
-        <WayfarerArt />
         <div className="character-dialogue"><Icon name="leaf" /><span>Every step forward brings you closer to legend. Keep going!</span></div>
       </section>
 
@@ -160,10 +160,6 @@ export function PlayerHeader({ me, page }) {
       <div className="header-orbit"><button type="button" aria-label="Notifications" onClick={() => window.dispatchEvent(new CustomEvent('habbit-notice', { detail: 'No new notices. Your path is clear.' }))}><Icon name="bell" /></button><button type="button" aria-label="Open path compass" onClick={() => window.dispatchEvent(new CustomEvent('habbit-notice', { detail: `Your current path rank is ${me.tier || 'Novice'}.` }))}><Icon name="compass" /></button></div>
     </header>
   );
-}
-
-function WayfarerArt() {
-  return <div className="wayfarer-art" role="img" aria-label="Original illustrated silhouette of a cloaked wayfarer"><div className="moon-halo" /><div className="wayfarer-head" /><div className="wayfarer-hair" /><div className="wayfarer-body"><i /></div><div className="wayfarer-cloak" /></div>;
 }
 
 function QuestSkeleton() {
