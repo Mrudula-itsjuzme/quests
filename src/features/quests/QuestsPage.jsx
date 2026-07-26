@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Icon, categoryIcon } from '../../components/Icon';
 import { derivePlayerPresentation } from '../../lib/playerPresentation';
 import { QuestDetail } from './QuestDetail';
@@ -39,6 +39,8 @@ export function QuestsPage() {
   const [tab, setTab] = useState('daily');
   const [selectedId, setSelectedId] = useState(null);
   const [notice, setNotice] = useState('');
+  const [deckIndex, setDeckIndex] = useState(0);
+  const [deckTouchStart, setDeckTouchStart] = useState(null);
 
   const quests = useMemo(() => activeQuery.data || [], [activeQuery.data]);
   const history = historyQuery.data || [];
@@ -51,6 +53,8 @@ export function QuestsPage() {
     const activeDefinitionIds = new Set(quests.map((quest) => quest.definitionId));
     return (definitionsQuery.data || []).filter((item) => !activeDefinitionIds.has(item.id)).slice(0, 3);
   }, [definitionsQuery.data, quests]);
+
+  useEffect(() => setDeckIndex(0), [tab]);
 
   if (activeQuery.isLoading || meQuery.isLoading) return <QuestSkeleton />;
   if (activeQuery.isError || meQuery.isError) {
@@ -71,10 +75,103 @@ export function QuestsPage() {
       onError: () => setNotice('The quest could not be accepted. Please try again.'),
     });
   };
+  const moveDeck = (direction) => {
+    setDeckIndex((index) => Math.max(0, Math.min(visible.length - 1, index + direction)));
+  };
+  const finishDeckSwipe = (clientX) => {
+    if (deckTouchStart === null) return;
+    const distance = clientX - deckTouchStart;
+    if (Math.abs(distance) > 42) moveDeck(distance < 0 ? 1 : -1);
+    setDeckTouchStart(null);
+  };
 
   return (
     <main className="quest-reference fantasy-page" aria-label="Quests">
       <PlayerHeader me={me} page="Quests" />
+
+      <section className="mobile-quest-board" aria-label="Mobile quest deck">
+        <nav className="mobile-cadence-tabs" aria-label="Mobile quest cadence">
+          {tabs.map((item) => (
+            <button key={item.id} type="button" aria-pressed={tab === item.id} className={tab === item.id ? 'active' : ''} onClick={() => setTab(item.id)}>
+              <Icon name={item.icon} /><span>{item.label}</span>
+            </button>
+          ))}
+        </nav>
+
+        {(tab === 'story' || tab === 'event') ? (
+          <section className="mobile-deck-empty ornate-panel">
+            <Icon name={tab === 'story' ? 'book' : 'star'} />
+            <h2>{tab === 'story' ? 'Story quests are being written' : 'No active event'}</h2>
+            <p>This path is not available from the current quest service yet.</p>
+          </section>
+        ) : visible.length ? (
+          <>
+            <div
+              className="mobile-deck-window"
+              onTouchStart={(event) => setDeckTouchStart(event.touches[0].clientX)}
+              onTouchEnd={(event) => finishDeckSwipe(event.changedTouches[0].clientX)}
+            >
+              {visible.map((quest, index) => {
+                const offset = index - deckIndex;
+                if (offset < -1 || offset > 1) return null;
+                const ratio = questProgressRatio(quest);
+                const position = offset === 0 ? 'current' : offset < 0 ? 'previous' : 'next';
+                return (
+                  <article key={quest.id} className={`mobile-deck-card ${position}`} aria-hidden={offset !== 0}>
+                    <div className="mobile-deck-category"><span className="round-emblem"><Icon name={categoryIcon(quest.category)} /></span><strong>{quest.category}</strong></div>
+                    <h2>{quest.title}</h2>
+                    <p>{quest.description}</p>
+                    <div className="mobile-deck-divider" />
+                    <strong className="mobile-deck-progress">{quest.progressValue} / {quest.targetValue}<small>{quest.unit || 'progress'}</small></strong>
+                    <div className="gold-progress"><i style={{ width: `${ratio * 100}%` }} /></div>
+                    <div className="mobile-deck-reward"><span>XP</span><strong>{quest.xpReward}</strong></div>
+                    <div className="mobile-deck-actions">
+                      <button className="gold-button" type="button" onClick={() => setSelectedId(quest.id)}>Resume <span>›</span></button>
+                      <button type="button" onClick={() => setSelectedId(quest.id)}>Details</button>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+
+            <div className="mobile-deck-controls" aria-label="Quest deck controls">
+              <button type="button" onClick={() => moveDeck(-1)} disabled={deckIndex === 0} aria-label="Previous quest">‹</button>
+              <div>{visible.map((quest, index) => <button key={quest.id} type="button" className={index === deckIndex ? 'active' : ''} onClick={() => setDeckIndex(index)} aria-label={`Show ${quest.title}`} />)}</div>
+              <button type="button" onClick={() => moveDeck(1)} disabled={deckIndex === visible.length - 1} aria-label="Next quest">›</button>
+            </div>
+
+            <section className="mobile-today-summary ornate-panel">
+              <div className="section-title"><h2>Today’s Summary</h2><span>Daily path</span></div>
+              <div>
+                <article><Icon name="check" /><strong>{visible.filter((quest) => quest.status === 'completed').length}</strong><span>Completed</span></article>
+                <article><Icon name="compass" /><strong>{visible.filter((quest) => quest.status !== 'completed').length}</strong><span>Remaining</span></article>
+              </div>
+            </section>
+          </>
+        ) : (
+          <section className="mobile-deck-empty ornate-panel">
+            <Icon name="scroll" /><h2>No {tab} quests yet</h2>
+            <p>Generate a new set to begin this path.</p>
+            <button className="gold-button" type="button" onClick={() => accept(tab)}>Generate {tab} quests</button>
+          </section>
+        )}
+
+        <section className="mobile-available-rail">
+          <div className="section-title"><h2>Available Quests</h2><span>Swipe to explore</span></div>
+          <div>
+            {definitions.map((quest) => (
+              <article key={quest.id}>
+                <span className="round-emblem"><Icon name={categoryIcon(quest.category)} /></span>
+                <strong>{quest.title}</strong>
+                <small>{quest.description}</small>
+                <span>{quest.xpReward} XP</span>
+                <button type="button" onClick={() => accept(quest.cadence)} disabled={generateDaily.isPending || generateWeekly.isPending}>Accept</button>
+              </article>
+            ))}
+            {!definitionsQuery.isLoading && definitions.length === 0 && <p className="empty-state">Every available quest is already active.</p>}
+          </div>
+        </section>
+      </section>
 
       <section className="focus-hero ornate-panel">
         <img className="focus-hero-art" src="/quest-scholar-hero.png" alt="" />

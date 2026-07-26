@@ -107,18 +107,22 @@ Live quest, XP, level, streak, and rank data remain connected. Quest rows open t
 
 Dashboard final result: passed
 
-### Narrow render correction
+### Native mobile readability correction
 
 - User-reported narrow render: 551 x 892
-- Corrected scaled-canvas evidence: `/tmp/dashboard-scaled-reference.png`
+- Corrected native-width Dashboard evidence: `/tmp/dashboard-native-mobile.png`
 
-The narrow Dashboard now preserves the 944px reference composition and scales it proportionally rather than switching to a simplified mobile reflow. The hero, split quest/progression region, typography, artwork, and five-item navigation retain the same relative geometry. Lower-page cropping is expected because the supplied reference has a taller aspect ratio than the 551 x 892 render viewport; content remains scrollable and is not vertically distorted.
+The narrow Dashboard no longer scales a 944px desktop canvas. It now composes
+directly at the phone viewport width, with a 42px page title, 48px feature
+title, 20px section titles, and readable supporting text. The hero, active
+quests, progression cards, overview, and five-item navigation retain the
+reference hierarchy without horizontal overflow.
 
 ## Rewards reference rebuild
 
 - Source visual truth: user-provided Rewards dashboard reference image in the current conversation
 - Full-frame evidence: `/tmp/rewards-reference-full.png`
-- Narrow scaled-canvas evidence: `/tmp/rewards-reference-narrow.png`
+- Native-width readable evidence: `/tmp/rewards-native-mobile.png`
 - Comparison viewports: 944 x 1672 and 551 x 892
 
 Verified reference structure:
@@ -134,3 +138,91 @@ Verified reference structure:
 XP, level, rank, badge, collectible, rarity, and chest counts are derived from live app state. Inventory, reward-claiming, and leaderboard actions return explicit unavailable notices because those backend operations do not exist.
 
 Rewards final result: passed
+
+### Rewards mobile typography gate
+
+At 551 CSS pixels, browser inspection confirmed:
+
+- document width: 551px; scroll width: 551px
+- page heading: 42.4px
+- vault statement: 43.2px
+- panel headings: 20px
+- navigation and panel actions: 16px
+- supporting labels: 14.4px or larger
+
+The Rewards lower grid changes to a single column on phones, removing the
+source of the miniature two-column text while preserving the visual order and
+ornate card treatment. Primary navigation and Quest cadence controls were
+rechecked in the running app.
+
+Mobile readability final result: passed
+
+## Compact mobile height correction
+
+- User-reported viewport: approximately 410 x 844
+- Corrected evidence: `/tmp/dashboard-compact-mobile.png`
+- Header height: 123px
+- Focus hero height: 430px
+- Shortcut strip height: 61px
+- Horizontal overflow: none
+
+The dialogue is now overlaid within the bottom of the hero instead of adding a
+separate grid row. Header spacing, progress emblem, feature copy, and shortcut
+height were tightened without reintroducing scaled or miniature typography.
+The first Active Quests card is visible in the initial phone viewport.
+
+Compact mobile final result: passed
+
+## Phone Quest-board hierarchy
+
+- Corrected evidence: `/tmp/quests-phone-board.png`
+- Comparison viewport: 410 x 844
+- Repeated Quest hero: removed on phone
+- Player header height: 113px
+- Cadence tabs height: 58px
+- Active Quests begins: 189px from viewport top
+- Horizontal overflow: none
+
+The cinematic focus hero remains on Dashboard, where it communicates the
+current focus. Quests now opens directly into cadence selection and real active
+quest controls, avoiding duplicated artwork and shortening the main workflow.
+Available quests remain a readable horizontal card rail below progression.
+
+Phone Quest hierarchy final result: passed
+
+## Interactive Quest Deck — selected concept 3
+
+- Visual target: third displayed ImageGen direction from the latest ideation set
+- Target image: `/home/mrudula/.codex/generated_images/019f9d9a-eeeb-7771-a217-3c9bed9f0640/call_nAVjljrPwOFh6Uow8pVaO9lg.png`
+- Implemented capture: `/tmp/quests-option3-implemented.png`
+- Comparison viewport: 390 x 844
+
+Verified visual structure:
+
+- compact player identity and notification action
+- four-part cadence selector
+- foreground quest deck with visible next-card preview
+- category emblem, large title, objective, progress, and XP
+- primary Resume and secondary Details actions
+- previous/next arrows and direct position dots
+- concise Today summary
+- horizontally scrollable Available Quests rail
+- five-item Quests-active bottom navigation
+
+Verified behavior:
+
+- Next changed the foreground quest from Deep Work to Stretch Session
+- direct deck position buttons are exposed with accessible quest names
+- Resume and Details open the real QuestDetail dialog
+- cadence controls remain real tabs backed by active quest data
+- Available Quest acceptance uses the existing generation mutations
+- no horizontal overflow or runtime error state at 390 x 844
+
+Differences retained intentionally:
+
+- P3: live quest titles, XP, and progress reflect current server state rather
+  than the concept's illustrative sample data.
+- P3: existing app icon assets are retained instead of copying ornamental
+  concept symbols literally.
+
+Interactive Quest Deck final result: passed
