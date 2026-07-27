@@ -56,6 +56,10 @@ describe('App (development auth mode)', () => {
       if (url.includes('/v1/quests/history')) return jsonResponse([]);
       if (url.includes('/v1/quests/definitions')) return jsonResponse([]);
       if (url.includes('/v1/collectibles')) return jsonResponse([]);
+      if (url.includes('/v1/feed')) return jsonResponse([]);
+      if (url.includes('/v1/leaderboard')) return jsonResponse([]);
+      if (url.includes('/v1/notifications')) return jsonResponse([]);
+      if (url.includes('/v1/rewards')) return jsonResponse([]);
       return jsonResponse(null, 404);
     });
   });
@@ -89,10 +93,10 @@ describe('App (development auth mode)', () => {
     expect(screen.getByRole('tab', { name: 'Daily' })).toBeInTheDocument();
   });
 
-  it('exposes the five reference destinations and honest guild state', async () => {
+  it('exposes the five reference destinations and the community surface', async () => {
     renderApp('/app/guild');
-    expect(await screen.findByText('Guild Hall')).toBeInTheDocument();
-    expect(screen.getByText(/not simulated/i)).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Community' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /quest feed/i })).toBeInTheDocument();
     expect(screen.getAllByRole('link', { name: /rewards/i }).length).toBeGreaterThan(0);
   });
 

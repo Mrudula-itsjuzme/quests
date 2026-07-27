@@ -54,6 +54,16 @@ export function weeklyPeriod(now) {
   return { key: startsAt.toISOString().slice(0, 10), startsAt, expiresAt };
 }
 
+export function monthlyPeriod(now, timeZone = 'UTC') {
+  const current = zonedParts(now, timeZone);
+  const nextMonth = current.month === 12 ? { year: current.year + 1, month: 1 } : { year: current.year, month: current.month + 1 };
+  return {
+    key: `${current.year}-${String(current.month).padStart(2, '0')}`,
+    startsAt: localMidnightToUtc(current.year, current.month, 1, timeZone),
+    expiresAt: localMidnightToUtc(nextMonth.year, nextMonth.month, 1, timeZone),
+  };
+}
+
 function localMidnightToUtc(year, month, day, timeZone) {
   let candidate = new Date(Date.UTC(year, month - 1, day));
   for (let attempt = 0; attempt < 3; attempt += 1) {
@@ -64,4 +74,3 @@ function localMidnightToUtc(year, month, day, timeZone) {
   }
   return candidate;
 }
-

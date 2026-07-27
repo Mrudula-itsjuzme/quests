@@ -29,7 +29,11 @@ const schema = z.object({
   RATE_LIMIT_READS: z.coerce.number().int().min(1).default(240),
   RATE_LIMIT_WRITES: z.coerce.number().int().min(1).default(40),
   REQUEST_BODY_LIMIT: z.string().regex(/^\d+(kb|mb)$/i).default('128kb'),
-  PROVIDER_MODE: z.enum(['local', 'disabled']).default('disabled'),
+  PROVIDER_MODE: z.enum(['local', 'disabled', 'http']).default('disabled'),
+  QUEST_AI_VERIFY_URL: z.string().url().optional(),
+  QUEST_PROVIDER_SECRET: z.string().min(16).optional(),
+  QUEST_NOTIFICATION_URL: z.string().url().optional(),
+  CRON_SECRET: z.string().min(16).optional(),
   RENDER_EXTERNAL_URL: z.string().url().optional(),
 });
 
@@ -57,8 +61,9 @@ export function loadConfig(env = process.env) {
   if (config.NODE_ENV === 'production') {
     const missingOidc = !config.OIDC_ISSUER || !config.OIDC_AUDIENCE;
     const insecureOidc = [config.OIDC_ISSUER, config.OIDC_JWKS_URL].filter(Boolean).some((value) => new URL(value).protocol !== 'https:');
-    if (!config.databaseUrl || config.DEV_AUTH_ENABLED || config.DEV_ALLOW_LEGACY_MUTATIONS || config.PROVIDER_MODE === 'local' || missingOidc || insecureOidc) {
-      throw new Error('Production requires PostgreSQL, HTTPS OIDC, disabled development auth, disabled legacy mutations, and non-local providers.');
+    const missingProviders = config.PROVIDER_MODE !== 'http' || !config.QUEST_AI_VERIFY_URL || !config.QUEST_PROVIDER_SECRET || !config.CRON_SECRET;
+    if (!config.databaseUrl || config.DEV_AUTH_ENABLED || config.DEV_ALLOW_LEGACY_MUTATIONS || missingProviders || missingOidc || insecureOidc) {
+      throw new Error('Production requires PostgreSQL, HTTPS OIDC, disabled development auth, disabled legacy mutations, and configured HTTP quest providers.');
     }
   }
 

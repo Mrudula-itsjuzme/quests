@@ -26,9 +26,11 @@ React app from one origin.
    providers — email confirmation links use the Site URL.)
 4. In **Authentication → Providers → Email**, keep "Confirm email" on for
    production so `sign-up` requires verification before `sign-in` succeeds.
-5. No Supabase database is used by this app — Postgres for quest data is
-   Render's managed Postgres, configured separately below. Supabase here is
-   the identity provider only.
+5. In **Storage**, create a private bucket named `quest-proofs`. Add an
+   authenticated insert policy scoped to the current user's folder:
+   `bucket_id = 'quest-proofs' AND (storage.foldername(name))[1] = auth.uid()::text`.
+   Do not make this bucket public. Quest state still lives in Render Postgres;
+   Supabase is used only for identity and private proof objects.
 
 ## 3. Create Render's managed PostgreSQL
 
@@ -74,7 +76,11 @@ Required in production:
 | `TRUST_PROXY` | `1` |
 | `DEV_AUTH_ENABLED` | `false` (or omit — defaults to false) |
 | `DEV_ALLOW_LEGACY_MUTATIONS` | `false` (or omit) |
-| `PROVIDER_MODE` | `disabled` (or omit — this is the schema default) |
+| `PROVIDER_MODE` | `http` |
+| `QUEST_AI_VERIFY_URL` | HTTPS endpoint for the proof verifier |
+| `QUEST_PROVIDER_SECRET` | random verifier credential, at least 16 characters |
+| `CRON_SECRET` | random scheduler credential, at least 16 characters |
+| `QUEST_NOTIFICATION_URL` | optional HTTPS delivery webhook |
 
 `PORT` does not need to be set — Render injects its own `PORT`, and the app
 reads `process.env.PORT` with a default of `3001`; Render's injected value
@@ -136,9 +142,9 @@ cause Render to cycle the instance).
 8. Open a TEXT-verification quest, submit a proof ≥ 8 characters — status
    should move to `completed` and XP should increase by exactly that quest's
    reward, once.
-9. Open a PHOTO-verification quest and attempt to upload — since
-   `PROVIDER_MODE=disabled` in production, expect the honest
-   "Photo verification is not available yet" message, not a fake approval.
+9. Open a PHOTO-verification quest and upload a new JPEG/PNG/WEBP. Confirm the
+   object remains private, the verifier returns a perceptual hash and
+   confidence, and the API either approves, rejects, or queues review.
 10. Visit **Gallery** — should reflect only collectibles the backend actually
     unlocked (empty state if none yet).
 11. Visit **Profile**, edit display name/timezone, save, reload — confirm
@@ -159,20 +165,19 @@ Render keeps prior deploys. To roll back:
    with the current schema before rolling back the app alone. This
    repository's migrations to date are additive (new tables/columns), so
    rollback of app code alone is safe for the current migration set
-   (`001`–`005`).
+   (`001`–`006`).
 4. If a bad migration must be undone, write and apply a new forward migration
    that reverses it — do not hand-edit `schema_migrations` or delete rows
    from it.
 
 ## 11. Known limitations
 
-- **Photo and automatic health verification are disabled in production**
-  (`PROVIDER_MODE=disabled`). Endpoints that require them return
-  `provider_not_configured` (HTTP 503), and the frontend shows this honestly
-  rather than faking approval. Enabling real verification requires wiring a
-  real storage provider (e.g. S3/Supabase Storage) and a real photo/health
-  verification service into `api/lib/providers.js`, which is out of scope for
-  this deployment.
+- **Automatic health verification is intentionally not implemented.** PHOTO
+  proof uses private Supabase Storage uploads plus the configured HTTP
+  verifier. AUTO/health quests fail closed with `provider_not_configured`.
+- On Render, configure an external hourly cron to call
+  `GET /api/internal/scheduler` with `Authorization: Bearer <CRON_SECRET>`.
+  Vercel deployments use the checked-in hourly cron configuration.
 - Flutter parity, CI hardening beyond the steps listed in
   `.github/workflows/ci.yml`, and multi-region/multi-instance scaling are not
   covered by this guide.

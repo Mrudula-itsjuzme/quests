@@ -1,5 +1,5 @@
 import { dailyPeriod } from './time.js';
-import { discoveryWeights, weeklyWeights } from './quest-definitions.js';
+import { discoveryWeights, monthlyWeights, weeklyWeights } from './quest-definitions.js';
 import { cadenceStrategies, createVerificationStrategies } from './strategies.js';
 
 export class QuestEngine {
@@ -62,7 +62,10 @@ export class QuestEngine {
           const recent = await transaction.recentAssignments(user.id, 'daily', new Date(now.getTime() - 90 * 86400000));
           const selected = [];
           for (const category of cadenceStrategies.daily.categories) {
-            const pool = await transaction.listDefinitions({ cadence: 'daily', category });
+            const definitions = await transaction.listDefinitions({ cadence: 'daily', category });
+            const pool = this.providers.capabilities?.health === false
+              ? definitions.filter((definition) => definition.verificationType !== 'AUTO')
+              : definitions;
             selected.push(selectWithCooldown(pool, recent, now, category === 'Discovery' ? discoveryWeights : null, this.random));
           }
           return selected.map((definition) => assignmentFrom(definition, user.id, period, now));
@@ -93,6 +96,28 @@ export class QuestEngine {
     });
   }
 
+  async generateMonthly(identity, idempotencyKey) {
+    const user = await this.repository.ensureUser(identity);
+    const now = this.providers.clock.now();
+    const period = cadenceStrategies.monthly.period(now, user);
+    return this.repository.runIdempotent(user.id, 'generate_monthly', idempotencyKey, async () => {
+      await this.repository.expireAssignments(user.id, now);
+      const [created] = await this.repository.runGenerationTransaction({
+        userId: user.id,
+        cadence: 'monthly',
+        periodKey: period.key,
+        idempotencyKey,
+        select: async (transaction) => {
+          const pool = await transaction.listDefinitions({ cadence: 'monthly' });
+          const recent = await transaction.recentAssignments(user.id, 'monthly', new Date(now.getTime() - 365 * 86400000));
+          const eligible = pool.filter((definition) => !recent.some((item) => item.definitionId === definition.id));
+          return [assignmentFrom(weightedPick(eligible.length ? eligible : pool, monthlyWeights, this.random), user.id, period, now)];
+        },
+      });
+      return created;
+    });
+  }
+
   async progress(identity, assignmentId, payload, idempotencyKey) {
     const user = await this.repository.ensureUser(identity);
     return this.repository.runIdempotent(user.id, `progress:${assignmentId}`, idempotencyKey, async () => {
@@ -113,12 +138,42 @@ export class QuestEngine {
       const now = this.providers.clock.now();
       const strategy = this.verificationStrategies[assignment.verificationType];
       if (!strategy?.submit) throw domainError('unsupported_verification_type', 409);
-      const { decision, imageHash, confidence } = await strategy.submit(assignment, payload, user);
+      const { decision, imageHash, confidence, metadata, uploadId } = await strategy.submit(assignment, payload, user);
 
-      const submission = await this.repository.createSubmission({ userId: user.id, assignmentId, verificationType: assignment.verificationType, status: decision, imageHash, confidence, feedPosted: assignment.category === 'Discovery' && payload.feedOptIn !== false, createdAt: now.toISOString() });
-      if (decision === 'approved') return { submission, ...(await this.complete(user, assignment)) };
+      const defaultFeedOptIn = ['Discovery', 'Weekly', 'Monthly'].includes(assignment.category);
+      const submission = await this.repository.createSubmission({ userId: user.id, assignmentId, verificationType: assignment.verificationType, status: decision, imageHash, confidence, metadata: metadata || {}, uploadId: uploadId || null, feedPosted: defaultFeedOptIn && payload.feedOptIn !== false, createdAt: now.toISOString() });
+      if (decision === 'approved') {
+        const progressValue = assignment.verificationType === 'PHOTO'
+          ? Math.min(assignment.targetValue, assignment.progressValue + 1)
+          : assignment.targetValue;
+        const progressed = await this.repository.updateAssignment(assignment.id, { progressValue, status: 'active', updatedAt: now.toISOString() });
+        if (progressValue >= assignment.targetValue) {
+          const completion = await this.complete(user, progressed);
+          if (submission.feedPosted) {
+            await this.repository.createFeedEntry({
+              userId: user.id,
+              assignmentId: assignment.id,
+              submissionId: submission.id,
+              questName: assignment.title,
+              displayName: user.displayName,
+              xpEarned: completion.xpCredited,
+              rankTitle: rankTitleForXp(completion.user.totalXp),
+              imageRef: payload.uploadId || null,
+              createdAt: now.toISOString(),
+            });
+          }
+          await this.repository.createNotification({ userId: user.id, kind: 'quest_completed', title: 'Quest complete', body: `${assignment.title} awarded ${completion.xpCredited} XP.` });
+          return { submission, ...completion };
+        }
+        return { submission, assignment: progressed, completed: false, proofsRemaining: assignment.targetValue - progressValue };
+      }
       const rejectedAttempts = decision === 'rejected' ? await this.repository.countRejectedSubmissions(assignment.id) : 0;
-      const status = decision === 'manual_review' ? 'pending_verification' : rejectedAttempts >= 3 ? 'abandoned' : 'rejected';
+      if (decision === 'rejected' && rejectedAttempts >= 3) {
+        const abandoned = await this.repository.updateAssignment(assignment.id, { status: 'abandoned', updatedAt: now.toISOString() });
+        const replacement = await this.reassign(user, abandoned);
+        return { submission, assignment: abandoned, replacement, completed: false };
+      }
+      const status = decision === 'manual_review' ? 'pending_verification' : 'rejected';
       return { submission, assignment: await this.repository.updateAssignment(assignment.id, { status, updatedAt: now.toISOString() }), completed: false };
     });
   }
@@ -160,7 +215,104 @@ export class QuestEngine {
   async complete(user, assignment) {
     const now = this.providers.clock.now();
     const result = await this.repository.completeAssignment({ userId: user.id, assignmentId: assignment.id, now, dailyPeriodKey: assignment.periodKey });
-    return { ...result, completed: true };
+    const previousXp = Math.max(0, result.user.totalXp - result.xpCredited - result.bonusXp);
+    const before = calculateProgression(previousXp);
+    const after = calculateProgression(result.user.totalXp);
+    return {
+      ...result,
+      user: { ...result.user, ...after },
+      completed: true,
+      levelUp: after.level > before.level,
+      previousLevel: before.level,
+      newLevel: after.level,
+    };
+  }
+
+  async reassign(user, assignment) {
+    const pool = await this.repository.listDefinitions({ cadence: assignment.cadence, category: assignment.category });
+    const candidates = pool.filter((definition) => definition.id !== assignment.definitionId);
+    if (!candidates.length) return null;
+    const definition = candidates[Math.floor(this.random() * candidates.length)];
+    const replacement = assignmentFrom(definition, user.id, {
+      key: `${assignment.periodKey}:replacement:${assignment.id}`,
+      startsAt: new Date(assignment.startsAt),
+      expiresAt: new Date(assignment.expiresAt),
+    }, this.providers.clock.now());
+    return this.repository.createReplacementAssignment(replacement, assignment.id);
+  }
+
+  async feed(identity) {
+    await this.repository.ensureUser(identity);
+    return this.repository.listFeed(identity.id);
+  }
+
+  async leaderboard(identity) {
+    await this.repository.ensureUser(identity);
+    return this.repository.listLeaderboard(identity.id);
+  }
+
+  async rewards(identity) {
+    await this.repository.ensureUser(identity);
+    return this.repository.listRewards(identity.id);
+  }
+
+  async claimRewards(identity) {
+    const user = await this.repository.ensureUser(identity);
+    return this.repository.claimRewards(user.id);
+  }
+
+  async notifications(identity) {
+    const user = await this.repository.ensureUser(identity);
+    return this.repository.listNotifications(user.id);
+  }
+
+  async markNotificationRead(identity, notificationId) {
+    const user = await this.repository.ensureUser(identity);
+    const notification = await this.repository.markNotificationRead(user.id, notificationId);
+    if (!notification) throw domainError('notification_not_found', 404);
+    return notification;
+  }
+
+  async reviewSubmission(identity, submissionId, decision, reason) {
+    if (!identity.isAdmin) throw domainError('admin_required', 403);
+    const submission = await this.repository.getSubmission(submissionId);
+    if (!submission) throw domainError('submission_not_found', 404);
+    if (submission.status !== 'manual_review') throw domainError('submission_not_reviewable', 409);
+    const now = this.providers.clock.now();
+    const status = decision === 'approve' ? 'approved' : 'rejected';
+    const reviewed = await this.repository.updateSubmission(submissionId, { status, reviewedAt: now.toISOString(), reviewedBy: identity.id, reviewReason: reason || null });
+    const assignment = await this.repository.getAssignment(submission.userId, submission.assignmentId);
+    const user = await this.repository.getUser(submission.userId);
+    if (decision === 'approve') {
+      const progressValue = Math.min(assignment.targetValue, assignment.progressValue + 1);
+      const progressed = await this.repository.updateAssignment(assignment.id, { progressValue, status: 'active', updatedAt: now.toISOString() });
+      if (progressValue >= assignment.targetValue) return { submission: reviewed, ...(await this.complete(user, progressed)) };
+      return { submission: reviewed, assignment: progressed, completed: false };
+    }
+    const rejectedAttempts = await this.repository.countRejectedSubmissions(assignment.id);
+    const updated = await this.repository.updateAssignment(assignment.id, { status: rejectedAttempts >= 3 ? 'abandoned' : 'rejected', updatedAt: now.toISOString() });
+    return { submission: reviewed, assignment: updated, completed: false };
+  }
+
+  async reviewQueue(identity) {
+    if (!identity.isAdmin) throw domainError('admin_required', 403);
+    return this.repository.listReviewQueue();
+  }
+
+  async runScheduler() {
+    const users = await this.repository.listUsers();
+    const results = [];
+    for (const user of users) {
+      const identity = { id: user.id, displayName: user.displayName, timezone: user.timezone };
+      const daily = await this.generateDaily(identity, `scheduler-daily-${dailyPeriod(this.providers.clock.now(), user.timezone).key}`);
+      const weekly = await this.generateWeekly(identity, `scheduler-weekly-${cadenceStrategies.weekly.period(this.providers.clock.now(), user).key}`);
+      const monthly = await this.generateMonthly(identity, `scheduler-monthly-${cadenceStrategies.monthly.period(this.providers.clock.now(), user).key}`);
+      const periodKey = dailyPeriod(this.providers.clock.now(), user.timezone).key;
+      const notification = await this.repository.createNotification({ userId: user.id, kind: 'quests_ready', dedupeKey: `quests-ready:${periodKey}`, title: 'New quests are ready', body: 'Your adventure awaits.' });
+      await this.providers.notifications?.send({ userId: user.id, notification }).catch(() => {});
+      results.push({ userId: user.id, daily: daily.length, weekly: Boolean(weekly), monthly: Boolean(monthly) });
+    }
+    return { processedUsers: results.length, users: results };
   }
 
   async requireActive(userId, assignmentId) {
@@ -218,3 +370,11 @@ export function calculateProgression(totalXp = 0) {
 
 function xpForLevel(level) { if (level <= 20) return 250; if (level <= 40) return 500; if (level <= 60) return 750; if (level <= 80) return 1000; if (level <= 100) return 1500; return 2000; }
 function tierForLevel(level) { if (level <= 20) return 'Bronze'; if (level <= 40) return 'Silver'; if (level <= 60) return 'Gold'; if (level <= 80) return 'Platinum'; if (level <= 100) return 'Mythril'; if (level <= 120) return 'Diamond'; return 'Ascendant'; }
+function rankTitleForXp(totalXp) {
+  if (totalXp >= 100_000) return 'Legend Circle';
+  if (totalXp >= 50_000) return 'Mythril Knight';
+  if (totalXp >= 20_000) return 'Pathfinder';
+  if (totalXp >= 10_000) return 'Guardian';
+  if (totalXp >= 5_000) return 'Scout';
+  return 'Adventurer';
+}

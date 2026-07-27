@@ -13,6 +13,10 @@ export class MemoryQuestRepository {
     this.bonusPeriods = new Set();
     this.generationRuns = new Map();
     this.dailyStates = new Map();
+    this.feedEntries = [];
+    this.notifications = [];
+    this.userRewards = [];
+    this.inventory = [];
   }
 
   async ensureUser(user) {
@@ -22,6 +26,7 @@ export class MemoryQuestRepository {
   }
 
   async getUser(userId) { return clone(this.users.get(userId)); }
+  async listUsers() { return [...this.users.values()].map(clone); }
   async updateUserProfile(userId, patch) {
     const current = this.users.get(userId);
     if (!current) return null;
@@ -56,6 +61,10 @@ export class MemoryQuestRepository {
       this.assignments.set(assignment.id, assignment);
       created.push(clone(assignment));
     }
+    return created;
+  }
+  async createReplacementAssignment(item, replacedAssignmentId) {
+    const [created] = await this.createAssignments([{ ...item, replacedAssignmentId }]);
     return created;
   }
   async runGenerationTransaction({ userId, cadence, periodKey, idempotencyKey, select }) {
@@ -95,6 +104,21 @@ export class MemoryQuestRepository {
     }
   }
   async hasImageHash(userId, hash) { return this.imageHashes.has(`${userId}:${hash}`); }
+  async hasSimilarImageHash(userId, hash, threshold = 0.95) {
+    return [...this.imageHashes].some((value) => {
+      const [storedUserId, ...hashParts] = value.split(':');
+      return storedUserId === userId && hashSimilarity(hashParts.join(':'), hash) >= threshold;
+    });
+  }
+  async hasGlobalSimilarImageHash(userId, hash, threshold = 0.95) {
+    return [...this.imageHashes].some((value) => {
+      const [storedUserId, ...hashParts] = value.split(':');
+      return storedUserId !== userId && hashSimilarity(hashParts.join(':'), hash) >= threshold;
+    });
+  }
+  async countRecentRejectedSubmissions(userId, since) {
+    return [...this.submissions.values()].filter((item) => item.userId === userId && item.status === 'rejected' && new Date(item.createdAt) >= since).length;
+  }
   async createSubmission(submission) {
     const imageKey = submission.imageHash ? `${submission.userId}:${submission.imageHash}` : null;
     if (imageKey && this.imageHashes.has(imageKey)) throw conflict('duplicate_submission');
@@ -104,6 +128,17 @@ export class MemoryQuestRepository {
     return clone(value);
   }
   async countRejectedSubmissions(assignmentId) { return [...this.submissions.values()].filter((item) => item.assignmentId === assignmentId && item.status === 'rejected').length; }
+  async getSubmission(submissionId) { return clone(this.submissions.get(submissionId)); }
+  async listReviewQueue() {
+    return [...this.submissions.values()].filter((item) => item.status === 'manual_review').sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)).map(clone);
+  }
+  async updateSubmission(submissionId, patch) {
+    const current = this.submissions.get(submissionId);
+    if (!current) return null;
+    const updated = { ...current, ...patch };
+    this.submissions.set(submissionId, updated);
+    return clone(updated);
+  }
   async completeAssignment({ userId, assignmentId, now, dailyPeriodKey }) {
     const assignment = this.assignments.get(assignmentId);
     if (!assignment || assignment.userId !== userId) return null;
@@ -118,6 +153,16 @@ export class MemoryQuestRepository {
       xpCredited = assignment.xpReward;
       this.ledger.push({ key: ledgerKey, userId, assignmentId, amount: xpCredited, reason: 'quest_completion', createdAt: now.toISOString() });
       this.users.get(userId).totalXp += xpCredited;
+      if (['Discovery', 'Weekly', 'Monthly'].includes(assignment.category)) {
+        const assetId = `${assignment.definitionId}:${assignment.id}`;
+        this.collectibles.push({ userId, assetId, questId: assignment.id, title: assignment.title, category: assignment.category, rarity: assignment.rarity, caption: `Earned by completing ${assignment.title}.`, unlockedAt: now.toISOString() });
+      }
+      const level = levelFromXp(this.users.get(userId).totalXp);
+      for (const reward of defaultLevelRewards.filter((item) => item.level <= level)) {
+        if (!this.userRewards.some((item) => item.userId === userId && item.level === reward.level)) {
+          this.userRewards.push({ ...reward, userId, status: 'claimable', unlockedAt: now.toISOString(), claimedAt: null });
+        }
+      }
     }
 
     let bonusXp = 0;
@@ -146,6 +191,51 @@ export class MemoryQuestRepository {
     return { assignment: clone(assignment), user: await this.getUser(userId), xpCredited, bonusXp };
   }
   async getCollectibles(userId) { return this.collectibles.filter((item) => item.userId === userId).map(clone); }
+  async createFeedEntry(entry) {
+    if (this.feedEntries.some((item) => item.submissionId === entry.submissionId)) return clone(this.feedEntries.find((item) => item.submissionId === entry.submissionId));
+    const value = { id: randomUUID(), createdAt: new Date().toISOString(), ...entry };
+    this.feedEntries.unshift(value);
+    return clone(value);
+  }
+  async listFeed() { return this.feedEntries.slice(0, 100).map(clone); }
+  async listLeaderboard(userId) {
+    const ranked = [...this.users.values()].sort((a, b) => b.totalXp - a.totalXp);
+    return ranked.map((user, index) => ({ position: index + 1, userId: user.id, displayName: user.displayName, totalXp: user.totalXp, rankTitle: rankTitleForPosition(index, ranked.length), isCurrentUser: user.id === userId }));
+  }
+  async listRewards(userId) { return this.userRewards.filter((item) => item.userId === userId).map(clone); }
+  async claimRewards(userId) {
+    const now = new Date().toISOString();
+    const claimed = this.userRewards.filter((item) => item.userId === userId && item.status === 'claimable');
+    for (const item of claimed) {
+      item.status = 'claimed'; item.claimedAt = now;
+      if (item.rewardType === 'xp') {
+        const key = `${userId}:level-reward:${item.level}`;
+        if (!this.ledger.some((entry) => entry.key === key)) {
+          this.ledger.push({ key, userId, amount: item.amount, reason: 'level_reward', createdAt: now });
+          this.users.get(userId).totalXp += item.amount;
+        }
+      } else if (!this.inventory.some((entry) => entry.userId === userId && entry.itemKey === item.rewardKey)) {
+        this.inventory.push({ userId, itemKey: item.rewardKey, itemType: item.rewardType, quantity: item.amount, label: item.label, acquiredAt: now });
+      }
+    }
+    return claimed.map(clone);
+  }
+  async createNotification(notification) {
+    if (notification.dedupeKey) {
+      const existing = this.notifications.find((item) => item.userId === notification.userId && item.dedupeKey === notification.dedupeKey);
+      if (existing) return clone(existing);
+    }
+    const value = { id: randomUUID(), readAt: null, createdAt: new Date().toISOString(), ...notification };
+    this.notifications.unshift(value);
+    return clone(value);
+  }
+  async listNotifications(userId) { return this.notifications.filter((item) => item.userId === userId).map(clone); }
+  async markNotificationRead(userId, notificationId) {
+    const item = this.notifications.find((entry) => entry.userId === userId && entry.id === notificationId);
+    if (!item) return null;
+    item.readAt = new Date().toISOString();
+    return clone(item);
+  }
   async runIdempotent(userId, operation, key, callback) {
     const compound = `${userId}:${operation}:${key}`;
     if (this.idempotency.has(compound)) return clone(await this.idempotency.get(compound));
@@ -173,3 +263,47 @@ function daysBetweenDateKeys(previous, current) {
   return Number.isFinite(previousDate) && Number.isFinite(currentDate) ? (currentDate - previousDate) / 86400000 : Number.POSITIVE_INFINITY;
 }
 function conflict(code) { const error = new Error(code); error.code = code; error.status = 409; return error; }
+
+const defaultLevelRewards = [
+  { level: 5, rewardType: 'chest', rewardKey: 'bronze_chest', amount: 1, label: 'Bronze Chest' },
+  { level: 10, rewardType: 'badge', rewardKey: 'steadfast_badge', amount: 1, label: 'Steadfast Badge' },
+  { level: 18, rewardType: 'chest', rewardKey: 'mythril_chest', amount: 1, label: 'Mythril Chest' },
+  { level: 19, rewardType: 'title', rewardKey: 'path_scholar', amount: 1, label: 'Path Scholar' },
+  { level: 20, rewardType: 'badge', rewardKey: 'rare_path_badge', amount: 1, label: 'Rare Path Badge' },
+  { level: 21, rewardType: 'xp', rewardKey: 'silver_arrival_bonus', amount: 250, label: 'Silver Arrival Bonus' },
+  { level: 40, rewardType: 'title', rewardKey: 'golden_wayfarer', amount: 1, label: 'Golden Wayfarer' },
+  { level: 60, rewardType: 'chest', rewardKey: 'platinum_chest', amount: 1, label: 'Platinum Chest' },
+  { level: 80, rewardType: 'title', rewardKey: 'mythril_explorer', amount: 1, label: 'Mythril Explorer' },
+  { level: 100, rewardType: 'badge', rewardKey: 'diamond_legend', amount: 1, label: 'Diamond Legend' },
+  { level: 120, rewardType: 'title', rewardKey: 'ascendant', amount: 1, label: 'The Ascendant' },
+];
+function levelFromXp(totalXp) {
+  let remaining = totalXp;
+  let level = 1;
+  const cost = (value) => value <= 20 ? 250 : value <= 40 ? 500 : value <= 60 ? 750 : value <= 80 ? 1000 : value <= 100 ? 1500 : 2000;
+  while (remaining >= cost(level)) { remaining -= cost(level); level += 1; }
+  return level;
+}
+function rankTitleForPosition(index, total) {
+  const percentile = total ? ((index + 1) / total) * 100 : 100;
+  if (percentile <= .1) return 'Legend Circle';
+  if (percentile <= 1) return 'Mythril Knight';
+  if (percentile <= 5) return 'Pathfinder';
+  if (percentile <= 10) return 'Guardian';
+  if (percentile <= 25) return 'Scout';
+  return 'Adventurer';
+}
+function hashSimilarity(left, right) {
+  const a = String(left || '');
+  const b = String(right || '');
+  if (!a || a.length !== b.length) return a === b ? 1 : 0;
+  if (/^[a-f0-9]+$/i.test(a) && /^[a-f0-9]+$/i.test(b)) {
+    let differingBits = 0;
+    for (let index = 0; index < a.length; index += 1) differingBits += bitCount(parseInt(a[index], 16) ^ parseInt(b[index], 16));
+    return 1 - differingBits / (a.length * 4);
+  }
+  let equal = 0;
+  for (let index = 0; index < a.length; index += 1) if (a[index] === b[index]) equal += 1;
+  return equal / a.length;
+}
+function bitCount(value) { let bits = value; let count = 0; while (bits) { count += bits & 1; bits >>>= 1; } return count; }

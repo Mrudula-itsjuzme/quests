@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../features/auth/AuthContext';
 import { useMe } from '../features/quests/queries';
+import { useMarkNotificationRead, useNotifications } from '../features/quests/queries';
 import { Icon } from './Icon';
 
 const navItems = [
@@ -17,12 +18,23 @@ export function AppShell() {
   const location = useLocation();
   const { signOut, devMode } = useAuth();
   const { data: me, isLoading, isError } = useMe();
+  const notificationsQuery = useNotifications();
+  const markNotificationRead = useMarkNotificationRead();
   const [notice, setNotice] = useState('');
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [levelUp, setLevelUp] = useState(null);
+  const notifications = notificationsQuery.data || [];
+  const unreadCount = notifications.filter((item) => !item.readAt).length;
 
   useEffect(() => {
     const onNotice = (event) => setNotice(event.detail);
+    const onLevelUp = (event) => setLevelUp(event.detail);
     window.addEventListener('habbit-notice', onNotice);
-    return () => window.removeEventListener('habbit-notice', onNotice);
+    window.addEventListener('habbit-level-up', onLevelUp);
+    return () => {
+      window.removeEventListener('habbit-notice', onNotice);
+      window.removeEventListener('habbit-level-up', onLevelUp);
+    };
   }, []);
 
   return (
@@ -62,7 +74,10 @@ export function AppShell() {
                 </div>
               </>
             )}
-            <button type="button" className="round-action" aria-label="Notifications" onClick={() => window.dispatchEvent(new CustomEvent('habbit-notice', { detail: 'No new notices. Your path is clear.' }))}><Icon name="bell" /></button>
+            <div className="shell-notifications">
+              <button type="button" className="round-action" aria-label={`Notifications${unreadCount ? `, ${unreadCount} unread` : ''}`} aria-expanded={notificationsOpen} onClick={() => setNotificationsOpen((open) => !open)}><Icon name="bell" />{unreadCount > 0 && <span>{unreadCount}</span>}</button>
+              {notificationsOpen && <section className="notification-popover" aria-label="Notifications"><div><strong>Notifications</strong><button type="button" onClick={() => setNotificationsOpen(false)} aria-label="Close notifications">×</button></div>{notifications.length === 0 ? <p>Your path is clear.</p> : notifications.slice(0, 8).map((item) => <button key={item.id} type="button" className={item.readAt ? '' : 'unread'} onClick={() => markNotificationRead.mutate(item.id)}><strong>{item.title}</strong><span>{item.body}</span></button>)}</section>}
+            </div>
             <button type="button" className="ghost-action" onClick={signOut}>Sign out</button>
           </div>
         </header>
@@ -81,6 +96,7 @@ export function AppShell() {
         ))}
       </nav>
       {notice && <div className="toast-notice" role="status"><span>{notice}</span><button type="button" onClick={() => setNotice('')} aria-label="Dismiss notification">×</button></div>}
+      {levelUp && <div className="level-up-celebration" role="dialog" aria-modal="true" aria-label="Level up"><div className="level-up-rays" /><section><span className="eyebrow">Path advanced</span><Icon name="compass" /><h2>Level {levelUp.level}</h2><p>{levelUp.tier} · +{levelUp.xp} XP</p><button type="button" className="primary-action" onClick={() => setLevelUp(null)}>Continue the journey</button></section></div>}
     </div>
   );
 }

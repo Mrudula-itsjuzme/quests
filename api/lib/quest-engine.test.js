@@ -4,7 +4,7 @@ import { questDefinitions } from './quest-definitions.js';
 import { MemoryQuestRepository } from './memory-repository.js';
 import { createProviders } from './providers.js';
 import { rarityXp } from './quest-definitions.js';
-import { dailyPeriod, weeklyPeriod } from './time.js';
+import { dailyPeriod, monthlyPeriod, weeklyPeriod } from './time.js';
 
 const identity = { id: '00000000-0000-4000-8000-000000000001', displayName: 'Tester', timezone: 'UTC' };
 
@@ -40,6 +40,44 @@ describe('QuestEngine', () => {
     expect(replay).toEqual(daily);
     expect(weekly.verificationType).toBe('PHOTO');
     expect(weekly.cadence).toBe('weekly');
+  });
+
+  it('creates one monthly expedition per local calendar month', async () => {
+    const { engine } = harness();
+    const monthly = await engine.generateMonthly(identity, 'monthly-key-001');
+    const replay = await engine.generateMonthly(identity, 'monthly-key-001');
+    expect(monthly).toEqual(expect.objectContaining({ cadence: 'monthly', category: 'Monthly' }));
+    expect(replay).toEqual(monthly);
+    expect(monthlyPeriod(new Date('2026-07-31T23:00:00.000Z'), 'Asia/Kolkata').key).toBe('2026-08');
+  });
+
+  it('requires every photo in a multi-proof quest before awarding XP', async () => {
+    const { engine, repository } = harness();
+    await engine.getMe(identity);
+    const definition = questDefinitions.find((item) => item.id === 'weekly-sunrises');
+    const [assignment] = await repository.createAssignments([{
+      userId: identity.id, definitionId: definition.id, title: definition.title, description: definition.description,
+      category: definition.category, rarity: definition.rarity, cadence: definition.cadence,
+      verificationType: definition.verificationType, subjectTag: definition.subjectTag,
+      targetValue: definition.targetValue, unit: definition.unit, xpReward: definition.xpReward,
+      instructions: definition.instructions, periodKey: '2026-07-13', assignedAt: '2026-07-13T00:00:00.000Z',
+      startsAt: '2026-07-13T00:00:00.000Z', expiresAt: '2026-07-20T00:00:00.000Z',
+    }]);
+    const first = await engine.submit(identity, assignment.id, { uploadId: 'local_proof0001' }, 'multi-1');
+    const second = await engine.submit(identity, assignment.id, { uploadId: 'local_proof0002' }, 'multi-2');
+    const third = await engine.submit(identity, assignment.id, { uploadId: 'local_proof0003' }, 'multi-3');
+    expect(first).toEqual(expect.objectContaining({ completed: false, proofsRemaining: 2 }));
+    expect(second).toEqual(expect.objectContaining({ completed: false, proofsRemaining: 1 }));
+    expect(third.completed).toBe(true);
+    expect((await engine.getMe(identity)).totalXp).toBe(definition.xpReward);
+  });
+
+  it('deduplicates scheduler notifications for repeated ticks', async () => {
+    const { engine, repository } = harness();
+    await engine.getMe(identity);
+    await engine.runScheduler();
+    await engine.runScheduler();
+    expect((await repository.listNotifications(identity.id)).filter((item) => item.kind === 'quests_ready')).toHaveLength(1);
   });
 
   it('respects recent quest cooldowns on the next local day', async () => {

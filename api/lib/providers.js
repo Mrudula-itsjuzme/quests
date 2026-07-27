@@ -8,9 +8,10 @@ export class ProviderNotConfiguredError extends Error {
   }
 }
 
-export function createProviders({ mode = 'local', now = () => new Date() } = {}) {
+export function createProviders({ mode = 'local', now = () => new Date(), aiVerifyUrl, providerSecret, notificationUrl } = {}) {
   if (mode === 'disabled') {
     return {
+      capabilities: { health: false, photo: false },
       clock: { now },
       cache: new BoundedMemoryCache(500),
       scheduler: { async tick() { return { status: 'disabled' }; } },
@@ -20,7 +21,49 @@ export function createProviders({ mode = 'local', now = () => new Date() } = {})
     };
   }
 
+  if (mode === 'http') {
+    const call = async (url, body) => {
+      if (!url || !providerSecret) throw new ProviderNotConfiguredError('http');
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', authorization: `Bearer ${providerSecret}` },
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(10_000),
+      });
+      if (!response.ok) throw invalidProof('provider_request_failed');
+      return response.json();
+    };
+    return {
+      capabilities: { health: false, photo: true },
+      clock: { now },
+      cache: new BoundedMemoryCache(500),
+      scheduler: { async tick(callback) { return callback ? callback(now()) : { status: 'idle' }; } },
+      health: { async readMetric() { throw new ProviderNotConfiguredError('health'); } },
+      storage: {
+        async resolveUpload(uploadId) {
+          if (!/^[a-zA-Z0-9/_-]{8,240}$/.test(String(uploadId || '')) || String(uploadId).includes('..')) throw invalidProof('invalid_upload_reference');
+          return { uploadId, objectKey: uploadId };
+        },
+      },
+      photo: {
+        async verify({ uploadId, subjectTag }) {
+          const result = await call(aiVerifyUrl, { uploadId, subjectTag });
+          const confidence = Number(result.confidence);
+          if (!Number.isFinite(confidence) || confidence < 0 || confidence > 1 || !result.perceptualHash) throw invalidProof('invalid_verification_response');
+          return { confidence, imageHash: String(result.perceptualHash), metadata: result.metadata || {} };
+        },
+      },
+      notifications: {
+        async send(event) {
+          if (!notificationUrl) return { status: 'disabled' };
+          return call(notificationUrl, event);
+        },
+      },
+    };
+  }
+
   return {
+    capabilities: { health: true, photo: true },
     clock: { now },
     cache: new BoundedMemoryCache(500),
     scheduler: { async tick(callback) { return callback ? callback(now()) : { status: 'idle' }; } },
@@ -43,6 +86,7 @@ export function createProviders({ mode = 'local', now = () => new Date() } = {})
         return { confidence: 0.8, imageHash: hash, decision: 'approved' };
       },
     },
+    notifications: { async send() { return { status: 'local' }; } },
   };
 }
 

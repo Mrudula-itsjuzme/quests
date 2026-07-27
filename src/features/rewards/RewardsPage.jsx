@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Icon, categoryIcon } from '../../components/Icon';
 import { PlayerHeader } from '../quests/QuestsPage';
-import { useCollectibles, useMe } from '../quests/queries';
+import { useClaimRewards, useCollectibles, useLeaderboard, useMe, useRewards } from '../quests/queries';
 
 const badgeDefinitions = [
   { icon: 'sun', label: 'First Light', threshold: 1 },
@@ -13,26 +13,26 @@ const badgeDefinitions = [
 export function RewardsPage() {
   const collectionQuery = useCollectibles();
   const meQuery = useMe();
+  const rewardsQuery = useRewards();
+  const leaderboardQuery = useLeaderboard();
+  const claimRewards = useClaimRewards();
   const [notice, setNotice] = useState('');
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
 
-  if (collectionQuery.isLoading || meQuery.isLoading) {
+  if (collectionQuery.isLoading || meQuery.isLoading || rewardsQuery.isLoading || leaderboardQuery.isLoading) {
     return <main className="rewards-reference"><div className="skeleton player-skeleton" /><div className="skeleton hero-skeleton" /><div className="skeleton list-skeleton" /><p className="sr-only" role="status">Opening the reward vault…</p></main>;
   }
-  if (collectionQuery.isError || meQuery.isError) {
+  if (collectionQuery.isError || meQuery.isError || rewardsQuery.isError || leaderboardQuery.isError) {
     return <section className="ornate-panel error-state" role="alert"><h2>The reward vault is sealed</h2><p>Please check the quest service and try again.</p></section>;
   }
 
   const me = meQuery.data;
   const collection = collectionQuery.data || [];
+  const rewards = rewardsQuery.data || [];
+  const leaderboard = leaderboardQuery.data || [];
   const seasonTarget = 10000;
   const seasonProgress = Math.min(1, me.totalXp / seasonTarget);
-  const rankIndex = Math.max(0, Math.floor(me.totalXp / 500));
-  const rankNames = ['Iron I', 'Iron II', 'Iron III', 'Silver I', 'Silver II', 'Gold I'];
-  const rank = rankNames[Math.min(rankIndex, rankNames.length - 1)];
-  const nextRankXp = (rankIndex + 1) * 500;
-  const rankProgress = Math.min(1, me.totalXp / nextRankXp);
-  const unlockedBadges = badgeDefinitions.filter((badge) => collection.length >= badge.threshold).length;
-
+  const currentRank = leaderboard.find((entry) => entry.isCurrentUser) || { position: '—', rankTitle: 'Adventurer', totalXp: me.totalXp };
   const unavailable = (message) => setNotice(message);
 
   return (
@@ -84,20 +84,20 @@ export function RewardsPage() {
 
         <RewardPanel title="Claimable Rewards" className="claim-panel">
           <div className="claim-row">
-            <article><Icon name="star" /><strong>{me.xpIntoLevel}</strong><span>XP earned</span></article>
-            <article><Icon name="scroll" /><strong>{collection.length}</strong><span>Relics</span></article>
-            <article><Icon name="chest" /><strong>{unlockedBadges}</strong><span>Badges</span></article>
+            {rewards.filter((reward) => reward.status === 'claimable').slice(0, 3).map((reward) => <article key={reward.level}><Icon name={reward.rewardType === 'badge' ? 'star' : reward.rewardType === 'title' ? 'scroll' : 'chest'} /><strong>{reward.amount}</strong><span>{reward.label}</span></article>)}
+            {!rewards.some((reward) => reward.status === 'claimable') && <p className="reward-empty">Your next milestone reward is still ahead.</p>}
           </div>
-          <button className="claim-all-button" type="button" onClick={() => unavailable('Reward claiming is not connected to the quest service yet.')}>Claim All</button>
+          <button className="claim-all-button" type="button" disabled={claimRewards.isPending || !rewards.some((reward) => reward.status === 'claimable')} onClick={async () => { const claimed = await claimRewards.mutateAsync(); setNotice(claimed.length ? `${claimed.length} milestone reward${claimed.length === 1 ? '' : 's'} claimed.` : 'No rewards are ready yet.'); }}>Claim All</button>
         </RewardPanel>
 
         <RewardPanel title="Current Rank" className="current-rank-panel">
           <span className="rank-crest"><Icon name="shield" /><Icon name="compass" /></span>
-          <div><h2>{rank}</h2><span>Honor Score</span><strong>{me.totalXp.toLocaleString()}</strong><div className="gold-progress"><i style={{ width: `${rankProgress * 100}%` }} /></div><p>{me.totalXp.toLocaleString()} / {nextRankXp.toLocaleString()}</p></div>
-          <button type="button" onClick={() => unavailable('Leaderboards require the future guild service.')}>View leaderboard <span>›</span></button>
+          <div><h2>{currentRank.rankTitle}</h2><span>Global position</span><strong>#{currentRank.position}</strong><div className="gold-progress"><i style={{ width: `${me.progressToNextLevel * 100}%` }} /></div><p>{me.totalXp.toLocaleString()} cumulative XP</p></div>
+          <button type="button" onClick={() => setShowLeaderboard(true)}>View leaderboard <span>›</span></button>
         </RewardPanel>
       </div>
 
+      {showLeaderboard && <div className="modal-backdrop" role="presentation" onMouseDown={() => setShowLeaderboard(false)}><section className="quest-modal leaderboard-modal" role="dialog" aria-modal="true" aria-labelledby="leaderboard-title" onMouseDown={(event) => event.stopPropagation()}><div className="section-title"><h2 id="leaderboard-title">Global Leaderboard</h2><button type="button" onClick={() => setShowLeaderboard(false)} aria-label="Close leaderboard">×</button></div><div className="leaderboard-list">{leaderboard.map((entry) => <article key={entry.userId} className={entry.isCurrentUser ? 'current' : ''}><strong>#{entry.position}</strong><span>{entry.displayName}<small>{entry.rankTitle}</small></span><b>{entry.totalXp.toLocaleString()} XP</b></article>)}</div></section></div>}
       {notice && <div className="toast-notice" role="status"><span>{notice}</span><button type="button" onClick={() => setNotice('')} aria-label="Dismiss notification">×</button></div>}
     </main>
   );

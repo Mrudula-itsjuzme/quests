@@ -7,6 +7,7 @@ import {
   useActiveQuests,
   useCollectibles,
   useGenerateDaily,
+  useGenerateMonthly,
   useGenerateWeekly,
   useMe,
   useQuestDefinitions,
@@ -16,8 +17,7 @@ import {
 const tabs = [
   { id: 'daily', label: 'Daily', icon: 'sun' },
   { id: 'weekly', label: 'Weekly', icon: 'grid' },
-  { id: 'story', label: 'Story', icon: 'book' },
-  { id: 'event', label: 'Event', icon: 'star' },
+  { id: 'monthly', label: 'Expedition', icon: 'compass' },
 ];
 
 function resetLabel() {
@@ -36,6 +36,7 @@ export function QuestsPage() {
   const definitionsQuery = useQuestDefinitions();
   const generateDaily = useGenerateDaily();
   const generateWeekly = useGenerateWeekly();
+  const generateMonthly = useGenerateMonthly();
   const [tab, setTab] = useState('daily');
   const [selectedId, setSelectedId] = useState(null);
   const [notice, setNotice] = useState('');
@@ -65,13 +66,13 @@ export function QuestsPage() {
   const featuredRatio = featured ? questProgressRatio(featured) : 0;
   const hasCadence = (cadence) => quests.some((quest) => quest.cadence === cadence);
   const accept = (cadence) => {
-    const mutation = cadence === 'weekly' ? generateWeekly : generateDaily;
+    const mutation = cadence === 'monthly' ? generateMonthly : cadence === 'weekly' ? generateWeekly : generateDaily;
     if (hasCadence(cadence)) {
       setNotice(`Your ${cadence} quests are already active.`);
       return;
     }
     mutation.mutate(undefined, {
-      onSuccess: () => setNotice(`${cadence === 'weekly' ? 'Weekly quest' : 'Daily quests'} accepted.`),
+      onSuccess: () => setNotice(`${cadence === 'monthly' ? 'Monthly expedition' : cadence === 'weekly' ? 'Weekly quest' : 'Daily quests'} accepted.`),
       onError: () => setNotice('The quest could not be accepted. Please try again.'),
     });
   };
@@ -98,13 +99,7 @@ export function QuestsPage() {
           ))}
         </nav>
 
-        {(tab === 'story' || tab === 'event') ? (
-          <section className="mobile-deck-empty ornate-panel">
-            <Icon name={tab === 'story' ? 'book' : 'star'} />
-            <h2>{tab === 'story' ? 'Story quests are being written' : 'No active event'}</h2>
-            <p>This path is not available from the current quest service yet.</p>
-          </section>
-        ) : visible.length ? (
+        {visible.length ? (
           <>
             <div
               className="mobile-deck-window"
@@ -165,7 +160,7 @@ export function QuestsPage() {
                 <strong>{quest.title}</strong>
                 <small>{quest.description}</small>
                 <span>{quest.xpReward} XP</span>
-                <button type="button" onClick={() => accept(quest.cadence)} disabled={generateDaily.isPending || generateWeekly.isPending}>Accept</button>
+                <button type="button" onClick={() => accept(quest.cadence)} disabled={generateDaily.isPending || generateWeekly.isPending || generateMonthly.isPending}>Accept</button>
               </article>
             ))}
             {!definitionsQuery.isLoading && definitions.length === 0 && <p className="empty-state">Every available quest is already active.</p>}
@@ -199,14 +194,7 @@ export function QuestsPage() {
         ))}
       </div>
 
-      {(tab === 'story' || tab === 'event') ? (
-        <section className="ornate-panel unavailable-panel cadence-unavailable">
-          <Icon name={tab === 'story' ? 'book' : 'star'} />
-          <h2>{tab === 'story' ? 'Story quests are being written' : 'No active event'}</h2>
-          <p>This quest type is not available from the current service yet. Your daily and weekly progress remains safe.</p>
-        </section>
-      ) : (
-        <div className="quest-content-grid">
+      <div className="quest-content-grid">
           <section className="ornate-panel active-list">
             <div className="section-title"><h2>Active Quests</h2><span>{visible.length} active</span></div>
             {visible.length === 0 && (
@@ -224,8 +212,7 @@ export function QuestsPage() {
             <section className="ornate-panel streak-card"><h2>Weekly Streak</h2><Icon name="flame" /><strong>{me.streakDays || 0}</strong><span>days</span><p>Keep the flame alive!</p></section>
             <section className="ornate-panel rank-card"><h2>Path Rank</h2><Icon name="compass" /><strong>{presentation.rank}</strong><div className="gold-progress"><i style={{ width: `${presentation.rankProgress * 100}%` }} /></div><span>{me.totalXp.toLocaleString()} / {presentation.nextRankXp.toLocaleString()} XP</span></section>
           </aside>
-        </div>
-      )}
+      </div>
 
       <section className="ornate-panel available-quests">
         <div className="section-title"><h2>Available Quests</h2><span>⌛ New quests in {resetLabel()}</span></div>
@@ -236,7 +223,7 @@ export function QuestsPage() {
               <span className="round-emblem"><Icon name={categoryIcon(quest.category)} /></span>
               <h3>{quest.title}</h3><p>{quest.description}</p>
               <div><span>◈ {quest.xpReward} XP</span><span>{quest.cadence}</span></div>
-              <button className="gold-button" type="button" onClick={() => accept(quest.cadence)} disabled={generateDaily.isPending || generateWeekly.isPending}>Accept Quest</button>
+              <button className="gold-button" type="button" onClick={() => accept(quest.cadence)} disabled={generateDaily.isPending || generateWeekly.isPending || generateMonthly.isPending}>Accept Quest</button>
             </article>
           ))}
           {!definitionsQuery.isLoading && definitions.length === 0 && <p className="empty-state">All currently available quests are already on your board.</p>}

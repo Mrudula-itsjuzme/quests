@@ -10,7 +10,14 @@
 
 ## Production requirements
 
-Set `NODE_ENV=production`, configure `DATABASE_URL`, set `DEV_AUTH_ENABLED=false`, `DEV_ALLOW_LEGACY_MUTATIONS=false`, `PROVIDER_MODE=disabled`, and configure HTTPS OIDC metadata. Startup rejects an ephemeral repository or plaintext OIDC endpoint in production. Replace disabled providers with reviewed live adapters before enabling their quest types. Use PostgreSQL credentials limited to the quest schema and enable `DATABASE_SSL` where the database connection crosses a network boundary.
+Set `NODE_ENV=production`, configure `DATABASE_URL`, set
+`DEV_AUTH_ENABLED=false`, `DEV_ALLOW_LEGACY_MUTATIONS=false`,
+`PROVIDER_MODE=http`, configure the HTTPS verifier and its secret, set a
+separate cron secret, and configure HTTPS OIDC metadata. Startup rejects an
+ephemeral repository, local/disabled providers, or plaintext OIDC/provider
+endpoints in production. Use PostgreSQL credentials limited to the quest
+schema and enable `DATABASE_SSL` where the connection crosses a network
+boundary.
 
 Idempotency responses are retained for seven days. A processing reservation older than two minutes is recoverable so a crashed worker cannot permanently block the key; all reward mutations remain protected by assignment, ledger, period, and photo-hash uniqueness constraints.
 
@@ -22,10 +29,10 @@ Idempotency responses are retained for seven days. A processing reservation olde
 
 Request logs contain request ID, method, route, and normalized error code only. Raw authorization tokens, text proof, health values, image references, provider responses, and request bodies are not logged. Live adapters must preserve this rule.
 
-## Deferred providers
+## Provider status
 
-- Object storage: presigned opaque upload IDs and server-side metadata validation.
-- Photo AI: subject-specific confidence plus provider-neutral image hash.
-- Health: minimum-scope provider tokens and normalized numeric metrics.
+- Object storage: private per-user Supabase Storage paths; no public URLs are persisted.
+- Photo AI: authenticated HTTP verifier with subject confidence, perceptual hash, and metadata signals.
+- Health: deliberately deferred; AUTO quests fail closed.
 - Redis: optional shared rate/idempotency cache; the bounded memory cache is development-only.
-- Scheduler: safe periodic pre-generation; lazy read reconciliation remains the correctness backstop.
+- Scheduler: authenticated periodic pre-generation with per-period idempotency and deduplicated notices.

@@ -45,6 +45,7 @@ Without `DATABASE_URL`, development uses a bounded in-memory repository. Product
 
 - Daily generation creates one Mind, one Body, and one Discovery quest in the user's IANA timezone.
 - Weekly generation creates one photo quest per Monday-Sunday UTC period.
+- Monthly generation creates one multi-proof expedition per local calendar month.
 - Discovery and weekly selection use the documented rarity weights and cooldowns.
 - Quest, daily-bonus, and streak rewards are transactionally idempotent.
 - Versioned writes require an `Idempotency-Key` header.
@@ -59,8 +60,16 @@ Without `DATABASE_URL`, development uses a bounded in-memory repository. Product
 - `GET /api/v1/quests/definitions`
 - `POST /api/v1/quests/generate-daily`
 - `POST /api/v1/quests/generate-weekly`
+- `POST /api/v1/quests/generate-monthly`
 - `POST /api/v1/quests/:assignmentId/progress`
 - `POST /api/v1/quests/:assignmentId/submissions`
+- `GET /api/v1/feed`
+- `GET /api/v1/leaderboard`
+- `GET /api/v1/rewards`
+- `POST /api/v1/rewards/claim`
+- `GET /api/v1/notifications`
+- `GET /api/v1/admin/submissions/review-queue`
+- `POST /api/v1/admin/submissions/:submissionId/review`
 
 ## Database
 
@@ -68,9 +77,9 @@ Without `DATABASE_URL`, development uses a bounded in-memory repository. Product
 
 - users and provider-neutral OIDC subjects;
 - quest definitions and immutable assignment snapshots;
-- submissions and duplicate-image hashes;
+- submissions, private upload references, perceptual-hash checks, and review decisions;
 - transactional generation-run records and per-day bonus/streak state;
-- XP ledger entries, daily bonuses, and streak state;
+- XP ledger entries, daily bonuses, milestone inventory, and streak state;
 - idempotency keys and collectible hooks.
 - onboarding path, reminder, motion, and tour-version preferences.
 
@@ -86,7 +95,12 @@ environment variable reference.
 
 ## Security and providers
 
-See [docs/backend-security.md](docs/backend-security.md). Local health, storage, photo verification, cache, and scheduler adapters are deterministic development implementations. They are not production integrations. Production fails startup if development authentication, legacy mutation bypasses, or local providers are enabled.
+See [docs/backend-security.md](docs/backend-security.md). Local health, storage,
+photo verification, cache, and scheduler adapters are deterministic development
+implementations. Production requires the HTTP photo-verification adapter and a
+cron secret; it fails startup if development authentication, legacy mutation
+bypasses, or local providers are enabled. Health integration is deliberately
+not included.
 
 ## Verification
 

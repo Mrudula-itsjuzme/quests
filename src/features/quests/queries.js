@@ -31,6 +31,48 @@ export function useCollectibles() {
   return useQuery({ queryKey: ['collectibles'], queryFn: ({ signal }) => api.getCollectibles(signal) });
 }
 
+export function useFeed() {
+  const api = useApiClient();
+  return useQuery({ queryKey: ['feed'], queryFn: ({ signal }) => api.getFeed(signal) });
+}
+
+export function useLeaderboard() {
+  const api = useApiClient();
+  return useQuery({ queryKey: ['leaderboard'], queryFn: ({ signal }) => api.getLeaderboard(signal) });
+}
+
+export function useRewards() {
+  const api = useApiClient();
+  return useQuery({ queryKey: ['rewards'], queryFn: ({ signal }) => api.getRewards(signal) });
+}
+
+export function useClaimRewards() {
+  const api = useApiClient();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => api.claimRewards(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['rewards'] });
+      queryClient.invalidateQueries({ queryKey: ['me'] });
+      queryClient.invalidateQueries({ queryKey: ['collectibles'] });
+    },
+  });
+}
+
+export function useNotifications() {
+  const api = useApiClient();
+  return useQuery({ queryKey: ['notifications'], queryFn: ({ signal }) => api.getNotifications(signal) });
+}
+
+export function useMarkNotificationRead() {
+  const api = useApiClient();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (notificationId) => api.markNotificationRead(notificationId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notifications'] }),
+  });
+}
+
 export function useQuestDefinitions(filters = {}) {
   const api = useApiClient();
   return useQuery({
@@ -62,6 +104,15 @@ export function useGenerateWeekly() {
   const invalidate = useInvalidateQuestState();
   return useMutation({
     mutationFn: () => api.generateWeekly(newIdempotencyKey()),
+    onSuccess: invalidate,
+  });
+}
+
+export function useGenerateMonthly() {
+  const api = useApiClient();
+  const invalidate = useInvalidateQuestState();
+  return useMutation({
+    mutationFn: () => api.generateMonthly(newIdempotencyKey()),
     onSuccess: invalidate,
   });
 }

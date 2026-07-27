@@ -3,6 +3,7 @@ import { ApiError } from '../../lib/api';
 import { Icon, categoryColors, categoryIcon } from '../../components/Icon';
 import { ProgressBar, questProgressRatio, questStatusLabel } from './QuestCard';
 import { usePostProgress, useSubmitProof } from './queries';
+import { supabaseConfigured, uploadQuestProof } from '../../lib/supabase';
 
 const MAX_PHOTO_BYTES = 8 * 1024 * 1024;
 const ACCEPTED_PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
@@ -13,6 +14,7 @@ export function QuestDetail({ quest }) {
   const [textProof, setTextProof] = useState('');
   const [fileError, setFileError] = useState('');
   const [serviceMessage, setServiceMessage] = useState('');
+  const [shareToFeed, setShareToFeed] = useState(true);
 
   if (!quest) {
     return (
@@ -39,7 +41,10 @@ export function QuestDetail({ quest }) {
       return;
     }
     try {
-      await submitProof.mutateAsync({ assignmentId: quest.id, payload: { uploadId: `local_${crypto.randomUUID()}` } });
+      const uploadId = supabaseConfigured ? await uploadQuestProof(file) : `local_${crypto.randomUUID()}`;
+      const result = await submitProof.mutateAsync({ assignmentId: quest.id, payload: { uploadId, feedOptIn: shareToFeed } });
+      announceCompletion(result, quest);
+      if (!result.completed && result.proofsRemaining) setServiceMessage(`Proof accepted. ${result.proofsRemaining} more ${result.proofsRemaining === 1 ? 'submission' : 'submissions'} required.`);
     } catch (error) {
       if (error instanceof ApiError && (error.code === 'provider_not_configured' || error.status === 503)) {
         setServiceMessage('Photo verification is not available yet. Your quest will stay pending for manual review once it launches.');
@@ -53,7 +58,8 @@ export function QuestDetail({ quest }) {
     event.preventDefault();
     setServiceMessage('');
     try {
-      await submitProof.mutateAsync({ assignmentId: quest.id, payload: { text: textProof } });
+      const result = await submitProof.mutateAsync({ assignmentId: quest.id, payload: { text: textProof } });
+      announceCompletion(result, quest);
       setTextProof('');
     } catch {
       setServiceMessage('Could not submit your reflection. Please check the length and try again.');
@@ -63,7 +69,8 @@ export function QuestDetail({ quest }) {
   const onLogProgress = async (value) => {
     setServiceMessage('');
     try {
-      await postProgress.mutateAsync({ assignmentId: quest.id, value });
+      const result = await postProgress.mutateAsync({ assignmentId: quest.id, value });
+      announceCompletion(result, quest);
     } catch (error) {
       if (error instanceof ApiError && (error.code === 'provider_not_configured' || error.status === 503)) {
         setServiceMessage('Automatic progress tracking is not available yet.');
@@ -139,6 +146,7 @@ export function QuestDetail({ quest }) {
         <div className="proof-form">
           <label htmlFor="proof-photo">Upload photo proof (JPEG/PNG/WEBP, up to 8MB)</label>
           <input id="proof-photo" type="file" accept="image/jpeg,image/png,image/webp" onChange={onFileChange} disabled={submitProof.isPending} />
+          <label className="feed-opt-in"><input type="checkbox" checked={shareToFeed} onChange={(event) => setShareToFeed(event.target.checked)} /> Share this verified completion with the community</label>
           {fileError && <p role="alert" className="form-error">{fileError}</p>}
         </div>
       )}
@@ -146,4 +154,13 @@ export function QuestDetail({ quest }) {
       {serviceMessage && <p role="status" className="form-error">{serviceMessage}</p>}
     </aside>
   );
+}
+
+function announceCompletion(result, quest) {
+  if (!result?.completed) return;
+  window.dispatchEvent(new CustomEvent(result.levelUp ? 'habbit-level-up' : 'habbit-notice', {
+    detail: result.levelUp
+      ? { level: result.newLevel, tier: result.user?.tier, xp: result.xpCredited + result.bonusXp }
+      : `${quest.title} complete — ${result.xpCredited + result.bonusXp} XP earned.`,
+  }));
 }

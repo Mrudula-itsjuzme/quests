@@ -63,9 +63,16 @@ export function createApiClient(getToken) {
     getQuestHistory: async (signal) => request('/quests/history', await withToken({ signal })),
     generateDaily: async (idempotencyKey) => request('/quests/generate-daily', await withToken({ method: 'POST', idempotencyKey })),
     generateWeekly: async (idempotencyKey) => request('/quests/generate-weekly', await withToken({ method: 'POST', idempotencyKey })),
+    generateMonthly: async (idempotencyKey) => request('/quests/generate-monthly', await withToken({ method: 'POST', idempotencyKey })),
     postProgress: async (assignmentId, value, idempotencyKey) =>
       request(`/quests/${assignmentId}/progress`, await withToken({ method: 'POST', body: { value }, idempotencyKey })),
     submitProof: async (assignmentId, payload, idempotencyKey) =>
       request(`/quests/${assignmentId}/submissions`, await withToken({ method: 'POST', body: payload, idempotencyKey })),
+    getFeed: async (signal) => request('/feed', await withToken({ signal })),
+    getLeaderboard: async (signal) => request('/leaderboard', await withToken({ signal })),
+    getRewards: async (signal) => request('/rewards', await withToken({ signal })),
+    claimRewards: async () => request('/rewards/claim', await withToken({ method: 'POST' })),
+    getNotifications: async (signal) => request('/notifications', await withToken({ signal })),
+    markNotificationRead: async (notificationId) => request(`/notifications/${notificationId}/read`, await withToken({ method: 'POST' })),
   };
 }

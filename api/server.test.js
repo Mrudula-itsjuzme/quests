@@ -213,7 +213,7 @@ describe('Quest API', () => {
     const quests = await request(app).get('/api/quests?account=another-user');
     const collectibles = await request(app).get('/api/collectibles?account=another-user');
     expect(quests.status).toBe(200);
-    expect(quests.body).toHaveLength(4);
+    expect(quests.body).toHaveLength(5);
     expect(quests.body[0]).toEqual(expect.objectContaining({ id: expect.any(String), title: expect.any(String), xp: expect.any(Number), proofType: expect.any(String) }));
     expect(collectibles.body).toEqual([]);
   });

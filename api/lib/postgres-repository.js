@@ -14,6 +14,7 @@ export class PostgresQuestRepository {
     return mapUser(rows[0]);
   }
   async getUser(userId) { const { rows } = await this.pool.query('SELECT * FROM quest_users WHERE id = $1', [userId]); return rows[0] ? mapUser(rows[0]) : null; }
+  async listUsers() { const { rows } = await this.pool.query('SELECT * FROM quest_users ORDER BY id'); return rows.map(mapUser); }
   async updateUserProfile(userId, patch) {
     const fields = {
       displayName: 'display_name',
@@ -76,6 +77,10 @@ export class PostgresQuestRepository {
       );
       created.push(mapAssignment(rows[0]));
     }
+    return created;
+  }
+  async createReplacementAssignment(item) {
+    const [created] = await this.createAssignments([item]);
     return created;
   }
   async runGenerationTransaction({ userId, cadence, periodKey, idempotencyKey, select }) {
@@ -152,12 +157,24 @@ export class PostgresQuestRepository {
   }
   async expireAssignments(userId, now) { await this.pool.query(`UPDATE quest_assignments SET status = 'expired', updated_at = NOW() WHERE user_id = $1 AND status = ANY($2) AND expires_at <= $3`, [userId, ['active', 'pending_verification', 'rejected'], now]); }
   async hasImageHash(userId, hash) { const { rowCount } = await this.pool.query('SELECT 1 FROM quest_submissions WHERE user_id = $1 AND image_hash = $2 LIMIT 1', [userId, hash]); return rowCount > 0; }
+  async hasSimilarImageHash(userId, hash, threshold = 0.95) {
+    const { rows } = await this.pool.query('SELECT image_hash FROM quest_submissions WHERE user_id = $1 AND image_hash IS NOT NULL', [userId]);
+    return rows.some((row) => hashSimilarity(row.image_hash, hash) >= threshold);
+  }
+  async hasGlobalSimilarImageHash(userId, hash, threshold = 0.95) {
+    const { rows } = await this.pool.query('SELECT image_hash FROM quest_submissions WHERE user_id <> $1 AND image_hash IS NOT NULL', [userId]);
+    return rows.some((row) => hashSimilarity(row.image_hash, hash) >= threshold);
+  }
+  async countRecentRejectedSubmissions(userId, since) {
+    const { rows } = await this.pool.query("SELECT COUNT(*)::int AS count FROM quest_submissions WHERE user_id=$1 AND status='rejected' AND created_at >= $2", [userId, since]);
+    return rows[0].count;
+  }
   async createSubmission(value) {
     try {
       const { rows } = await this.pool.query(
-        `INSERT INTO quest_submissions (id, user_id, assignment_id, verification_type, status, image_hash, confidence, feed_posted, created_at)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
-        [randomUUID(), value.userId, value.assignmentId, value.verificationType, value.status, value.imageHash, value.confidence, value.feedPosted, value.createdAt],
+        `INSERT INTO quest_submissions (id, user_id, assignment_id, verification_type, status, image_hash, confidence, feed_posted, upload_id, metadata, created_at)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *`,
+        [randomUUID(), value.userId, value.assignmentId, value.verificationType, value.status, value.imageHash, value.confidence, value.feedPosted, value.uploadId, JSON.stringify(value.metadata || {}), value.createdAt],
       );
       return mapSubmission(rows[0]);
     } catch (error) {
@@ -168,6 +185,21 @@ export class PostgresQuestRepository {
   async countRejectedSubmissions(assignmentId) {
     const { rows } = await this.pool.query("SELECT COUNT(*)::int AS count FROM quest_submissions WHERE assignment_id = $1 AND status = 'rejected'", [assignmentId]);
     return rows[0].count;
+  }
+  async getSubmission(submissionId) {
+    const { rows } = await this.pool.query('SELECT * FROM quest_submissions WHERE id=$1', [submissionId]);
+    return rows[0] ? mapSubmission(rows[0]) : null;
+  }
+  async listReviewQueue() {
+    const { rows } = await this.pool.query("SELECT * FROM quest_submissions WHERE status='manual_review' ORDER BY created_at ASC LIMIT 200");
+    return rows.map(mapSubmission);
+  }
+  async updateSubmission(submissionId, patch) {
+    const { rows } = await this.pool.query(`UPDATE quest_submissions SET
+      status=COALESCE($2,status), reviewed_at=COALESCE($3,reviewed_at),
+      reviewed_by=COALESCE($4,reviewed_by), review_reason=COALESCE($5,review_reason)
+      WHERE id=$1 RETURNING *`, [submissionId, patch.status, patch.reviewedAt, patch.reviewedBy, patch.reviewReason]);
+    return rows[0] ? mapSubmission(rows[0]) : null;
   }
   async completeAssignment({ userId, assignmentId, now, dailyPeriodKey }) {
     const client = await this.pool.connect();
@@ -222,6 +254,20 @@ export class PostgresQuestRepository {
             WHERE user_id = $1 AND period_key = $2`, [userId, dailyPeriodKey, now]);
         }
       }
+      if (xpCredited && ['Discovery', 'Weekly', 'Monthly'].includes(assignment.category)) {
+        await client.query(`INSERT INTO collectible_unlocks
+          (user_id, asset_id, quest_id, title, category, rarity, caption, unlocked_at)
+          VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+          ON CONFLICT (user_id, asset_id) DO NOTHING`,
+        [userId, `${assignment.definition_id}:${assignmentId}`, assignmentId, assignment.title, assignment.category, assignment.rarity, `Earned by completing ${assignment.title}.`, now]);
+      }
+      if (xpCredited || bonusXp) {
+        const currentXp = await client.query('SELECT total_xp FROM quest_users WHERE id = $1', [userId]);
+        const currentLevel = levelFromXp(Number(currentXp.rows[0].total_xp));
+        await client.query(`INSERT INTO quest_user_rewards (user_id, level)
+          SELECT $1, level FROM quest_level_rewards WHERE level <= $2
+          ON CONFLICT (user_id, level) DO NOTHING`, [userId, currentLevel]);
+      }
       const updatedAssignment = await client.query('SELECT * FROM quest_assignments WHERE id = $1', [assignmentId]);
       const updatedUser = await client.query('SELECT * FROM quest_users WHERE id = $1', [userId]);
       await client.query('COMMIT');
@@ -229,6 +275,75 @@ export class PostgresQuestRepository {
     } catch (error) { await client.query('ROLLBACK'); throw error; } finally { client.release(); }
   }
   async getCollectibles(userId) { const { rows } = await this.pool.query('SELECT * FROM collectible_unlocks WHERE user_id = $1 ORDER BY unlocked_at DESC', [userId]); return rows.map((row) => ({ assetId: row.asset_id, questId: row.quest_id, title: row.title, category: row.category, rarity: row.rarity, caption: row.caption, unlockedAt: row.unlocked_at })); }
+  async createFeedEntry(entry) {
+    const { rows } = await this.pool.query(`INSERT INTO quest_feed_entries
+      (id,user_id,assignment_id,submission_id,quest_name,display_name,xp_earned,rank_title,image_ref,created_at)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+      ON CONFLICT (submission_id) DO UPDATE SET submission_id = EXCLUDED.submission_id RETURNING *`,
+    [randomUUID(), entry.userId, entry.assignmentId, entry.submissionId, entry.questName, entry.displayName, entry.xpEarned, entry.rankTitle, entry.imageRef, entry.createdAt]);
+    return mapFeedEntry(rows[0]);
+  }
+  async listFeed() {
+    const { rows } = await this.pool.query('SELECT * FROM quest_feed_entries ORDER BY created_at DESC LIMIT 100');
+    return rows.map(mapFeedEntry);
+  }
+  async listLeaderboard(userId) {
+    const { rows } = await this.pool.query(`SELECT id, display_name, total_xp,
+      RANK() OVER (ORDER BY total_xp DESC) AS position,
+      PERCENT_RANK() OVER (ORDER BY total_xp DESC) * 100 AS percentile
+      FROM quest_users ORDER BY total_xp DESC LIMIT 100`);
+    return rows.map((row) => ({ position: Number(row.position), userId: row.id, displayName: row.display_name, totalXp: Number(row.total_xp), rankTitle: rankTitleForPercentile(Number(row.percentile)), isCurrentUser: row.id === userId }));
+  }
+  async listRewards(userId) {
+    const { rows } = await this.pool.query(`SELECT r.level,r.reward_type,r.reward_key,r.amount,r.label,u.status,u.unlocked_at,u.claimed_at
+      FROM quest_user_rewards u JOIN quest_level_rewards r ON r.level = u.level WHERE u.user_id = $1 ORDER BY r.level`, [userId]);
+    return rows.map(mapReward);
+  }
+  async claimRewards(userId) {
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      await client.query('SELECT id FROM quest_users WHERE id=$1 FOR UPDATE', [userId]);
+      const { rows } = await client.query(`UPDATE quest_user_rewards u SET status='claimed', claimed_at=NOW()
+        FROM quest_level_rewards r WHERE u.level=r.level AND u.user_id=$1 AND u.status='claimable'
+        RETURNING r.level,r.reward_type,r.reward_key,r.amount,r.label,u.status,u.unlocked_at,u.claimed_at`, [userId]);
+      for (const reward of rows) {
+        if (reward.reward_type === 'xp') {
+          const credited = await client.query(`INSERT INTO quest_xp_ledger
+            (id,ledger_key,user_id,amount,reason) VALUES ($1,$2,$3,$4,'level_reward')
+            ON CONFLICT (ledger_key) DO NOTHING RETURNING amount`,
+          [randomUUID(), `${userId}:level-reward:${reward.level}`, userId, reward.amount]);
+          if (credited.rowCount) await client.query('UPDATE quest_users SET total_xp=total_xp+$2,updated_at=NOW() WHERE id=$1', [userId, reward.amount]);
+        } else {
+          await client.query(`INSERT INTO quest_inventory (user_id,item_key,item_type,quantity,label)
+            VALUES ($1,$2,$3,$4,$5)
+            ON CONFLICT (user_id,item_key) DO UPDATE SET quantity=quest_inventory.quantity+EXCLUDED.quantity`,
+          [userId, reward.reward_key, reward.reward_type, reward.amount, reward.label]);
+        }
+      }
+      await client.query('COMMIT');
+      return rows.map(mapReward);
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+  async createNotification(notification) {
+    const { rows } = await this.pool.query(`INSERT INTO quest_notifications (id,user_id,kind,title,body,dedupe_key) VALUES ($1,$2,$3,$4,$5,$6)
+      ON CONFLICT (user_id,dedupe_key) WHERE dedupe_key IS NOT NULL DO UPDATE SET dedupe_key=EXCLUDED.dedupe_key RETURNING *`,
+      [randomUUID(), notification.userId, notification.kind, notification.title, notification.body, notification.dedupeKey || null]);
+    return mapNotification(rows[0]);
+  }
+  async listNotifications(userId) {
+    const { rows } = await this.pool.query('SELECT * FROM quest_notifications WHERE user_id=$1 ORDER BY created_at DESC LIMIT 100', [userId]);
+    return rows.map(mapNotification);
+  }
+  async markNotificationRead(userId, notificationId) {
+    const { rows } = await this.pool.query('UPDATE quest_notifications SET read_at=NOW() WHERE id=$1 AND user_id=$2 RETURNING *', [notificationId, userId]);
+    return rows[0] ? mapNotification(rows[0]) : null;
+  }
   async runIdempotent(userId, operation, key, callback) {
     await this.pool.query(`DELETE FROM quest_idempotency_keys
       WHERE user_id = $1 AND (
@@ -254,5 +369,37 @@ export class PostgresQuestRepository {
 function mapUser(row) { return { id: row.id, displayName: row.display_name, timezone: row.timezone, totalXp: Number(row.total_xp), streakDays: Number(row.streak_days), lastStreakPeriod: row.last_streak_period, primaryPath: row.primary_path ?? null, reminderTime: row.reminder_time ? String(row.reminder_time).slice(0, 5) : null, motionPreference: row.motion_preference || 'system', onboardingCompletedAt: row.onboarding_completed_at ?? null, tourVersionSeen: Number(row.tour_version_seen || 0) }; }
 function mapDefinition(row) { return { id: row.id, title: row.title, description: row.description, category: row.category, rarity: row.rarity, cadence: row.cadence, verificationType: row.verification_type, subjectTag: row.subject_tag, targetValue: Number(row.target_value), unit: row.unit, cooldownDays: Number(row.cooldown_days), xpReward: Number(row.xp_reward), enabled: row.enabled, instructions: row.instructions || [] }; }
 function mapAssignment(row) { return { id: row.id, userId: row.user_id, definitionId: row.definition_id, title: row.title, description: row.description, category: row.category, rarity: row.rarity, cadence: row.cadence, verificationType: row.verification_type, subjectTag: row.subject_tag, targetValue: Number(row.target_value), progressValue: Number(row.progress_value), unit: row.unit, xpReward: Number(row.xp_reward), instructions: row.instructions || [], periodKey: row.period_key, status: row.status, assignedAt: row.assigned_at, startsAt: row.starts_at, expiresAt: row.expires_at, completedAt: row.completed_at, updatedAt: row.updated_at }; }
-function mapSubmission(row) { return { id: row.id, userId: row.user_id, assignmentId: row.assignment_id, verificationType: row.verification_type, status: row.status, imageHash: row.image_hash, confidence: row.confidence == null ? null : Number(row.confidence), feedPosted: row.feed_posted, createdAt: row.created_at }; }
+function mapSubmission(row) { return { id: row.id, userId: row.user_id, assignmentId: row.assignment_id, verificationType: row.verification_type, status: row.status, imageHash: row.image_hash, confidence: row.confidence == null ? null : Number(row.confidence), metadata: row.metadata || {}, uploadId: row.upload_id, feedPosted: row.feed_posted, createdAt: row.created_at }; }
+function mapFeedEntry(row) { return { id: row.id, userId: row.user_id, assignmentId: row.assignment_id, submissionId: row.submission_id, questName: row.quest_name, displayName: row.display_name, xpEarned: Number(row.xp_earned), rankTitle: row.rank_title, imageRef: row.image_ref, createdAt: row.created_at }; }
+function mapReward(row) { return { level: Number(row.level), rewardType: row.reward_type, rewardKey: row.reward_key, amount: Number(row.amount), label: row.label, status: row.status, unlockedAt: row.unlocked_at, claimedAt: row.claimed_at }; }
+function mapNotification(row) { return { id: row.id, userId: row.user_id, kind: row.kind, title: row.title, body: row.body, readAt: row.read_at, createdAt: row.created_at }; }
 function conflict(code) { const error = new Error(code); error.code = code; error.status = 409; return error; }
+function levelFromXp(totalXp) {
+  let remaining = totalXp;
+  let level = 1;
+  const cost = (value) => value <= 20 ? 250 : value <= 40 ? 500 : value <= 60 ? 750 : value <= 80 ? 1000 : value <= 100 ? 1500 : 2000;
+  while (remaining >= cost(level)) { remaining -= cost(level); level += 1; }
+  return level;
+}
+function rankTitleForPercentile(percentile) {
+  if (percentile <= .1) return 'Legend Circle';
+  if (percentile <= 1) return 'Mythril Knight';
+  if (percentile <= 5) return 'Pathfinder';
+  if (percentile <= 10) return 'Guardian';
+  if (percentile <= 25) return 'Scout';
+  return 'Adventurer';
+}
+function hashSimilarity(left, right) {
+  const a = String(left || '');
+  const b = String(right || '');
+  if (!a || a.length !== b.length) return a === b ? 1 : 0;
+  if (/^[a-f0-9]+$/i.test(a) && /^[a-f0-9]+$/i.test(b)) {
+    let differingBits = 0;
+    for (let index = 0; index < a.length; index += 1) differingBits += bitCount(parseInt(a[index], 16) ^ parseInt(b[index], 16));
+    return 1 - differingBits / (a.length * 4);
+  }
+  let equal = 0;
+  for (let index = 0; index < a.length; index += 1) if (a[index] === b[index]) equal += 1;
+  return equal / a.length;
+}
+function bitCount(value) { let bits = value; let count = 0; while (bits) { count += bits & 1; bits >>>= 1; } return count; }

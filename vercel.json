@@ -8,6 +8,9 @@
       "maxDuration": 10
     }
   },
+  "crons": [
+    { "path": "/api/internal/scheduler", "schedule": "0 * * * *" }
+  ],
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/server.js" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }

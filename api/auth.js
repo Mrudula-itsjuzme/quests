@@ -23,7 +23,8 @@ export function createAuthMiddleware(config, options = {}) {
       const { payload } = await jwtVerify(token, jwks, { issuer: config.OIDC_ISSUER, audience: config.OIDC_AUDIENCE, algorithms: ['RS256', 'ES256'], clockTolerance: 5 });
       if (typeof payload.sub !== 'string' || payload.sub.length < 1 || payload.sub.length > 200) throw new Error('invalid_subject');
       if (config.SUPABASE_AUTH && payload.role !== 'authenticated') throw new Error('invalid_role');
-      req.identity = { id: payload.sub, displayName: safeClaim(payload.name, 'Adventurer'), timezone: safeTimeZone(payload.zoneinfo) };
+      const appRole = typeof payload.app_metadata === 'object' && payload.app_metadata ? payload.app_metadata.role : null;
+      req.identity = { id: payload.sub, displayName: safeClaim(payload.name, 'Adventurer'), timezone: safeTimeZone(payload.zoneinfo), isAdmin: appRole === 'admin' };
       return next();
     } catch {
       return res.status(401).json({ error: { code: 'invalid_access_token', requestId: req.id } });

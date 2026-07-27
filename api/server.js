@@ -19,6 +19,9 @@ import { PostgresQuestRepository } from './lib/postgres-repository.js';
 
 const idempotencySchema = z.string().min(8).max(160).regex(/^[A-Za-z0-9._:-]+$/);
 const assignmentIdSchema = z.string().uuid();
+const notificationIdSchema = z.string().uuid();
+const submissionIdSchema = z.string().uuid();
+const reviewSchema = z.object({ decision: z.enum(['approve', 'reject']), reason: z.string().trim().max(1000).optional() }).strict();
 const progressSchema = z.object({ value: z.coerce.number().finite().min(0).max(10_000_000) }).strict();
 const profileSchema = z.object({
   displayName: z.string().trim().min(1).max(120).optional(),
@@ -43,7 +46,7 @@ const legacyQuestSchema = z.object({
 export function createApp(options = {}) {
   const config = options.config || loadConfig();
   const repository = options.repository || new MemoryQuestRepository({ definitions: questDefinitions });
-  const providers = options.providers || createProviders({ mode: config.PROVIDER_MODE });
+  const providers = options.providers || createProviders({ mode: config.PROVIDER_MODE, aiVerifyUrl: config.QUEST_AI_VERIFY_URL, providerSecret: config.QUEST_PROVIDER_SECRET, notificationUrl: config.QUEST_NOTIFICATION_URL });
   const engine = options.engine || new QuestEngine({ repository, providers });
   const app = express();
 
@@ -103,28 +106,50 @@ export function createApp(options = {}) {
     }
   });
 
+  app.post('/api/internal/scheduler', writeLimiter, asyncRoute(async (req, res) => {
+    if (!config.CRON_SECRET || req.get('authorization') !== `Bearer ${config.CRON_SECRET}`) return res.status(401).json({ error: { code: 'invalid_cron_secret', requestId: req.id } });
+    return res.json(await engine.runScheduler());
+  }));
+  app.get('/api/internal/scheduler', writeLimiter, asyncRoute(async (req, res) => {
+    if (!config.CRON_SECRET || req.get('authorization') !== `Bearer ${config.CRON_SECRET}`) return res.status(401).json({ error: { code: 'invalid_cron_secret', requestId: req.id } });
+    return res.json(await engine.runScheduler());
+  }));
+
   app.use('/api', authLimiter);
   app.use('/api', authenticate);
   app.use('/api', readLimiter);
   app.get('/api/v1/me', asyncRoute(async (req, res) => res.json(await engine.getMe(req.identity))));
   app.patch('/api/v1/me', writeLimiter, asyncRoute(async (req, res) => res.json(await engine.updateMe(req.identity, parse(profileSchema, req.body)))));
   app.get('/api/v1/quests/definitions', asyncRoute(async (req, res) => res.json(await engine.definitions(req.identity, {
-    cadence: optionalEnum(req.query.cadence, ['daily', 'weekly']),
-    category: optionalEnum(req.query.category, ['Mind', 'Body', 'Discovery', 'Weekly']),
+    cadence: optionalEnum(req.query.cadence, ['daily', 'weekly', 'monthly']),
+    category: optionalEnum(req.query.category, ['Mind', 'Body', 'Discovery', 'Weekly', 'Monthly']),
   }))));
   app.get('/api/v1/quests/active', asyncRoute(async (req, res) => res.json(await engine.active(req.identity))));
   app.get('/api/v1/quests/history', asyncRoute(async (req, res) => res.json(await engine.history(req.identity))));
   app.post('/api/v1/quests/generate-daily', writeLimiter, asyncRoute(async (req, res) => res.status(201).json(await engine.generateDaily(req.identity, requireIdempotency(req)))));
   app.post('/api/v1/quests/generate-weekly', writeLimiter, asyncRoute(async (req, res) => res.status(201).json(await engine.generateWeekly(req.identity, requireIdempotency(req)))));
+  app.post('/api/v1/quests/generate-monthly', writeLimiter, asyncRoute(async (req, res) => res.status(201).json(await engine.generateMonthly(req.identity, requireIdempotency(req)))));
   app.post('/api/v1/quests/:assignmentId/progress', writeLimiter, asyncRoute(async (req, res) => res.json(await engine.progress(req.identity, parse(assignmentIdSchema, req.params.assignmentId), parse(progressSchema, req.body), requireIdempotency(req)))));
   app.post('/api/v1/quests/:assignmentId/submissions', writeLimiter, asyncRoute(async (req, res) => res.status(201).json(await engine.submit(req.identity, parse(assignmentIdSchema, req.params.assignmentId), parse(submissionSchema, req.body), requireIdempotency(req)))));
   app.get('/api/v1/collectibles', asyncRoute(async (req, res) => res.json(await repository.getCollectibles(req.identity.id))));
+  app.get('/api/v1/feed', asyncRoute(async (req, res) => res.json(await engine.feed(req.identity))));
+  app.get('/api/v1/leaderboard', asyncRoute(async (req, res) => res.json(await engine.leaderboard(req.identity))));
+  app.get('/api/v1/rewards', asyncRoute(async (req, res) => res.json(await engine.rewards(req.identity))));
+  app.post('/api/v1/rewards/claim', writeLimiter, asyncRoute(async (req, res) => res.json(await engine.claimRewards(req.identity))));
+  app.get('/api/v1/notifications', asyncRoute(async (req, res) => res.json(await engine.notifications(req.identity))));
+  app.post('/api/v1/notifications/:notificationId/read', writeLimiter, asyncRoute(async (req, res) => res.json(await engine.markNotificationRead(req.identity, parse(notificationIdSchema, req.params.notificationId)))));
+  app.post('/api/v1/admin/submissions/:submissionId/review', writeLimiter, asyncRoute(async (req, res) => {
+    const body = parse(reviewSchema, req.body);
+    res.json(await engine.reviewSubmission(req.identity, parse(submissionIdSchema, req.params.submissionId), body.decision, body.reason));
+  }));
+  app.get('/api/v1/admin/submissions/review-queue', asyncRoute(async (req, res) => res.json(await engine.reviewQueue(req.identity))));
 
   app.get('/api/quests', asyncRoute(async (req, res) => {
     let active = await engine.active(req.identity);
     const dateKey = new Date().toISOString().slice(0, 10);
     if (!active.some((item) => item.cadence === 'daily')) await engine.generateDaily(req.identity, `legacy-daily-${dateKey}`);
     if (!active.some((item) => item.cadence === 'weekly')) await engine.generateWeekly(req.identity, `legacy-weekly-${dateKey}`);
+    if (!active.some((item) => item.cadence === 'monthly')) await engine.generateMonthly(req.identity, `legacy-monthly-${dateKey}`);
     active = await engine.active(req.identity);
     res.json(active.map(mapLegacyQuest));
   }));
@@ -170,7 +195,7 @@ export async function createRuntime(env = process.env) {
   } else {
     repository = new MemoryQuestRepository({ definitions: questDefinitions });
   }
-  const providers = createProviders({ mode: config.PROVIDER_MODE });
+  const providers = createProviders({ mode: config.PROVIDER_MODE, aiVerifyUrl: config.QUEST_AI_VERIFY_URL, providerSecret: config.QUEST_PROVIDER_SECRET, notificationUrl: config.QUEST_NOTIFICATION_URL });
   return { config, pool, repository, providers, engine: new QuestEngine({ repository, providers }) };
 }
 
