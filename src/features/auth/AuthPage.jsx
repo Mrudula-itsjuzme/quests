@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Navigate, Link, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Icon } from '../../components/Icon';
 import { supabaseConfigured } from '../../lib/supabase';
 import { useAuth } from './AuthContext';
+import { playHover, playTap } from '../../lib/useSoundEffects';
 
 export function AuthPage({ mode }) {
   const { devMode, isAuthenticated, signInWithPassword, signUpWithPassword } = useAuth();
@@ -20,6 +22,7 @@ export function AuthPage({ mode }) {
 
   const onSubmit = async (event) => {
     event.preventDefault();
+    playTap();
     setError('');
     setSubmitting(true);
     setPortalState('opening');
@@ -46,7 +49,13 @@ export function AuthPage({ mode }) {
 
   return (
     <main className="auth-shell celestial-auth" data-portal-state={portalState}>
-      <section className="auth-experience" aria-labelledby="auth-title">
+      <motion.section
+        className="auth-experience"
+        aria-labelledby="auth-title"
+        initial={{ opacity: 0, y: 15, scale: 0.97 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ type: 'spring', stiffness: 350, damping: 25 }}
+      >
         <div className="auth-portal" aria-hidden="true">
           <img src="/auth-celestial-aperture.png" alt="" />
           <div className="auth-portal-emblem"><Icon name="compass" /></div>
@@ -54,7 +63,7 @@ export function AuthPage({ mode }) {
         </div>
 
         <div className="auth-content">
-          <Link className="auth-brand" to="/" aria-label="Habbit home">
+          <Link className="auth-brand" to="/" aria-label="Habbit home" onClick={playTap} onMouseEnter={playHover}>
             <span className="auth-brand-mark"><Icon name="compass" /></span>
             <span>HABBIT</span>
           </Link>
@@ -93,27 +102,34 @@ export function AuthPage({ mode }) {
                     autoComplete={isSignUp ? 'new-password' : 'current-password'}
                     placeholder="At least 8 characters"
                   />
-                  <button type="button" onClick={() => setShowPassword((visible) => !visible)} aria-label={showPassword ? 'Hide password' : 'Show password'}>
+                  <button type="button" onClick={() => { playTap(); setShowPassword((visible) => !visible); }} aria-label={showPassword ? 'Hide password' : 'Show password'}>
                     {showPassword ? 'Hide' : 'Show'}
                   </button>
                 </div>
               </div>
-              {!isSignUp && <button className="auth-forgot" type="button" onClick={() => setError('Password recovery is available when Supabase authentication is configured.')}>Forgot passphrase?</button>}
+              {!isSignUp && <button className="auth-forgot" type="button" onClick={() => { playTap(); setError('Password recovery is available when Supabase authentication is configured.'); }}>Forgot passphrase?</button>}
               {error && <p role="alert" className="form-error">{error}</p>}
-              <button type="submit" className="auth-submit" disabled={submitting}>
+              <motion.button
+                type="submit"
+                className="auth-submit"
+                disabled={submitting}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                onMouseEnter={playHover}
+              >
                 <span>{submitting ? 'Aligning the stars…' : isSignUp ? 'Create my sigil' : 'Enter the archive'}</span>
                 <Icon name={submitting ? 'star' : 'compass'} />
-              </button>
+              </motion.button>
             </form>
           )}
 
           <p className="auth-switch">
             {isSignUp ? 'Already carry a sigil?' : 'New to the path?'}{' '}
-            <Link to={switchPath}>{isSignUp ? 'Sign in' : 'Create an account'}</Link>
+            <Link to={switchPath} onClick={playTap} onMouseEnter={playHover}>{isSignUp ? 'Sign in' : 'Create an account'}</Link>
           </p>
           {!supabaseConfigured && <p className="auth-config-note" role="status">Local development identity is active. Configure Supabase environment variables to enable real account access.</p>}
         </div>
-      </section>
+      </motion.section>
     </main>
   );
 }

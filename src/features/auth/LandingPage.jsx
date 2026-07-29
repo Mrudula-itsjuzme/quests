@@ -1,6 +1,8 @@
 import { Navigate, Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { NyxCat } from '../../components/NyxCat';
 import { useAuth } from './AuthContext';
+import { playHover, playTap } from '../../lib/useSoundEffects';
 
 export function LandingPage() {
   const { isAuthenticated } = useAuth();
@@ -8,16 +10,25 @@ export function LandingPage() {
 
   return (
     <main className="landing-shell">
-      <section className="landing-hero">
+      <motion.section
+        className="landing-hero"
+        initial={{ opacity: 0, y: 20, scale: 0.96 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ type: 'spring', stiffness: 350, damping: 25 }}
+      >
         <div className="landing-nyx"><NyxCat small /></div>
         <span className="brand-mark" aria-hidden="true">Q</span>
         <h1>HABBIT QUESTS</h1>
         <p>An enchanted personal archive for daily and weekly wellness quests. Earn XP, build streaks, and fill your journal with collectibles as you grow.</p>
         <div className="landing-actions">
-          <Link className="primary-action" to="/sign-up">Open your journal</Link>
-          <Link className="ghost-action" to="/sign-in">Sign in</Link>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Link className="primary-action" to="/sign-up" onClick={playTap} onMouseEnter={playHover}>Open your journal</Link>
+          </motion.div>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Link className="ghost-action" to="/sign-in" onClick={playTap} onMouseEnter={playHover}>Sign in</Link>
+          </motion.div>
         </div>
-      </section>
+      </motion.section>
     </main>
   );
 }

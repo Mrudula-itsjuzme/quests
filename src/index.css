@@ -95,16 +95,34 @@ body {
   text-decoration: none;
 }
 .top-nav a {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 7px;
   padding: 10px 14px;
   border-radius: 8px;
 }
+.top-nav a > svg,
+.top-nav a > span,
+.bottom-nav a > svg,
+.bottom-nav a > span {
+  position: relative;
+  z-index: 1;
+}
+.bottom-nav a {
+  position: relative;
+}
+.active-indicator {
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--quest-gold-dim);
+  border-radius: inherit;
+  background: rgba(201, 154, 75, 0.16);
+  z-index: 0;
+  pointer-events: none;
+}
 .top-nav a.active {
   color: var(--quest-gold-bright);
-  background: rgba(201,154,75,.12);
-  box-shadow: inset 0 0 0 1px rgba(201,154,75,.32);
 }
 .round-action {
   display: grid;
@@ -356,7 +374,9 @@ body {
   border-radius: 30px;
   background: #0c161a;
 }
-.quest-tabs button {
+.quest-tabs button,
+.community-tabs button {
+  position: relative;
   display: flex;
   min-height: 70px;
   gap: 10px;
@@ -371,7 +391,25 @@ body {
   text-transform: uppercase;
   cursor: pointer;
 }
-.quest-tabs button.active { color: var(--quest-gold-bright); background: radial-gradient(circle at 50% 100%, rgba(201,154,75,.19), transparent 72%); box-shadow: inset 0 -2px var(--quest-gold); }
+.quest-tabs button > svg,
+.quest-tabs button > span,
+.community-tabs button > svg,
+.community-tabs button > span {
+  position: relative;
+  z-index: 1;
+}
+.active-tab-bg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 100%, rgba(201,154,75,.22), transparent 72%);
+  border-bottom: 2px solid var(--quest-gold);
+  z-index: 0;
+  pointer-events: none;
+}
+.quest-tabs button.active,
+.community-tabs button.active {
+  color: var(--quest-gold-bright);
+}
 .quest-tabs svg { font-size: 1.55rem; }
 .quest-content-grid { display: grid; grid-template-columns: minmax(0, 2fr) minmax(270px, .85fr); gap: 18px; }
 .active-list, .available-quests { padding: 24px; }
@@ -3725,6 +3763,7 @@ body {
     margin: 16px -10px 0 -2px;
     overflow: hidden;
     perspective: 900px;
+    perspective-origin: 52% 45%;
     touch-action: pan-y;
   }
 
@@ -3737,46 +3776,80 @@ body {
     align-content: start;
     padding: 20px 18px 16px;
     overflow: hidden;
-    border: 1px solid var(--quest-gold-dim);
-    border-radius: 7px;
+    border: 1px solid rgba(244, 190, 91, .56);
+    border-radius: 8px;
     color: var(--quest-cream);
-    background: #101d22;
-    box-shadow: inset 0 0 0 3px #071013, 0 14px 30px rgba(0, 0, 0, .45);
+    background:
+      radial-gradient(circle at 74% 8%, rgba(244, 190, 91, .09), transparent 22%),
+      linear-gradient(145deg, rgba(20, 36, 42, .98), rgba(7, 16, 20, .98));
+    box-shadow:
+      inset 0 0 0 3px #071013,
+      inset 0 0 34px rgba(244, 190, 91, .035),
+      0 20px 42px rgba(0, 0, 0, .58);
     backface-visibility: hidden;
+    transform-style: preserve-3d;
     transition:
-      left .48s cubic-bezier(.2, .82, .25, 1),
+      left .58s cubic-bezier(.16, 1, .3, 1),
       opacity .38s ease,
-      transform .48s cubic-bezier(.2, .82, .25, 1),
+      transform .58s cubic-bezier(.16, 1, .3, 1),
       filter .38s ease;
     will-change: left, transform, opacity;
+  }
+
+  .mobile-deck-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: .38;
+    background: linear-gradient(115deg, transparent 0 32%, rgba(255, 214, 135, .16) 45%, transparent 58% 100%);
+    transform: translateX(-120%);
   }
 
   .mobile-deck-card.current {
     left: 2px;
     z-index: 3;
     opacity: 1;
-    transform: translateY(0) rotateY(0) rotateZ(0) scale(1);
+    transform: translateY(0) translateZ(34px) rotateY(0) rotateZ(0) scale(1);
     filter: brightness(1);
+    animation: quest-card-arrive .48s cubic-bezier(.16, 1, .3, 1) both;
+  }
+
+  .mobile-deck-card.current::before {
+    animation: quest-card-shine .72s ease-out both;
   }
 
   .mobile-deck-card.next {
-    left: 76%;
+    left: 72%;
     z-index: 2;
-    opacity: .78;
-    transform: translateY(18px) rotateY(-7deg) rotateZ(2deg) scale(.94);
+    opacity: .82;
+    transform: translateY(22px) translateZ(-24px) rotateY(-14deg) rotateZ(2.5deg) scale(.91);
     transform-origin: left center;
-    filter: brightness(.72);
+    filter: brightness(.68) saturate(.9);
     pointer-events: none;
   }
 
   .mobile-deck-card.previous {
-    left: -83%;
+    left: -78%;
     z-index: 1;
-    opacity: .3;
-    transform: translateY(18px) rotateY(7deg) rotateZ(-2deg) scale(.94);
+    opacity: .42;
+    transform: translateY(24px) translateZ(-40px) rotateY(16deg) rotateZ(-2.5deg) scale(.9);
     transform-origin: right center;
-    filter: brightness(.62);
+    filter: brightness(.58) saturate(.82);
     pointer-events: none;
+  }
+
+  .mobile-deck-window[data-motion="next"] .mobile-deck-card.current {
+    animation-name: quest-card-forward;
+  }
+
+  .mobile-deck-window[data-motion="previous"] .mobile-deck-card.current {
+    animation-name: quest-card-backward;
+  }
+
+  .mobile-deck-window[data-motion="next"] .mobile-deck-card.next,
+  .mobile-deck-window[data-motion="previous"] .mobile-deck-card.previous {
+    animation: quest-side-card-pulse .42s ease both;
   }
 
   .mobile-deck-category {
@@ -3881,6 +3954,11 @@ body {
     background: var(--quest-gold-bright);
   }
 
+  .mobile-deck-actions button:active,
+  .mobile-deck-controls > button:active {
+    transform: translateY(2px) scale(.98);
+  }
+
   .mobile-deck-controls {
     display: grid;
     grid-template-columns: 42px 1fr 42px;
@@ -3918,6 +3996,51 @@ body {
   .mobile-deck-controls > div button.active {
     background: var(--quest-gold-bright);
     box-shadow: 0 0 10px rgba(244, 190, 91, .8);
+  }
+
+  .quest-detail-overlay {
+    animation: quest-overlay-fade .18s ease both;
+  }
+
+  .quest-detail-overlay > div {
+    animation: quest-detail-rise .34s cubic-bezier(.16, 1, .3, 1) both;
+  }
+
+  @keyframes quest-card-arrive {
+    from { opacity: .72; transform: translateY(18px) translateZ(-18px) rotateY(-8deg) scale(.96); }
+    to { opacity: 1; transform: translateY(0) translateZ(34px) rotateY(0) scale(1); }
+  }
+
+  @keyframes quest-card-forward {
+    from { opacity: .76; transform: translate(34px, 18px) translateZ(-18px) rotateY(-12deg) rotateZ(2deg) scale(.94); }
+    70% { opacity: 1; transform: translate(-3px, -4px) translateZ(42px) rotateY(1deg) rotateZ(-.5deg) scale(1.012); }
+    to { opacity: 1; transform: translateY(0) translateZ(34px) rotateY(0) rotateZ(0) scale(1); }
+  }
+
+  @keyframes quest-card-backward {
+    from { opacity: .76; transform: translate(-34px, 18px) translateZ(-18px) rotateY(12deg) rotateZ(-2deg) scale(.94); }
+    70% { opacity: 1; transform: translate(3px, -4px) translateZ(42px) rotateY(-1deg) rotateZ(.5deg) scale(1.012); }
+    to { opacity: 1; transform: translateY(0) translateZ(34px) rotateY(0) rotateZ(0) scale(1); }
+  }
+
+  @keyframes quest-side-card-pulse {
+    0%, 100% { opacity: .8; }
+    50% { opacity: .95; filter: brightness(.82) saturate(1); }
+  }
+
+  @keyframes quest-card-shine {
+    from { transform: translateX(-120%); }
+    to { transform: translateX(120%); }
+  }
+
+  @keyframes quest-overlay-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes quest-detail-rise {
+    from { opacity: 0; transform: translateY(28px) scale(.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
   }
 
   .mobile-today-summary {
@@ -5439,4 +5562,220 @@ body {
   .celestial-onboarding .path-options { grid-template-columns: 1fr; }
   .celestial-onboarding .path-option { min-height: 58px; }
   .celestial-onboarding .path-option small { font-size: .68rem; }
+}
+
+/* Structured-output inspired card motion: sequenced, tactile, and reusable. */
+.quest-reference,
+.dashboard-reference,
+.rewards-reference,
+.guild-page,
+.profile-reference,
+.gallery-shell {
+  --motion-ease-out: cubic-bezier(.16, 1, .3, 1);
+  --motion-ease-press: cubic-bezier(.2, .8, .2, 1);
+}
+
+.reference-quest-row,
+.available-card,
+.reward-reference-panel,
+.feed-card,
+.leaderboard-list article,
+.dashboard-reference .overview-strip article,
+.dashboard-reference .quick-map a,
+.profile-reference .achievement-card,
+.gallery-memory-card {
+  transform: translateZ(0);
+  transition:
+    transform .34s var(--motion-ease-out),
+    border-color .24s ease,
+    box-shadow .34s var(--motion-ease-out),
+    filter .24s ease,
+    background-color .24s ease;
+  will-change: transform;
+}
+
+.reference-quest-row:hover,
+.available-card:hover,
+.reward-reference-panel:hover,
+.feed-card:hover,
+.leaderboard-list article:hover,
+.dashboard-reference .overview-strip article:hover,
+.dashboard-reference .quick-map a:hover,
+.profile-reference .achievement-card:hover,
+.gallery-memory-card:hover {
+  transform: translate3d(0, -5px, 0) scale(1.01);
+  border-color: rgba(255, 213, 126, .7);
+  box-shadow:
+    0 18px 44px rgba(0, 0, 0, .42),
+    0 0 0 1px rgba(255, 213, 126, .12),
+    inset 0 0 26px rgba(255, 196, 84, .045);
+  filter: brightness(1.05);
+}
+
+.reference-quest-row:active,
+.available-card:active,
+.reward-reference-panel:active,
+.feed-card:active,
+.dashboard-reference .quick-map a:active {
+  transform: translate3d(0, -1px, 0) scale(.992);
+  transition-duration: .12s;
+}
+
+.reference-quest-row::after,
+.available-card::after,
+.reward-reference-panel::after,
+.feed-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(115deg, transparent 0 35%, rgba(255, 220, 150, .2) 48%, transparent 62% 100%);
+  transform: translateX(-120%);
+  transition: opacity .2s ease;
+}
+
+.reference-quest-row:hover::after,
+.available-card:hover::after,
+.reward-reference-panel:hover::after,
+.feed-card:hover::after {
+  opacity: .72;
+  animation: structured-card-sweep .86s ease both;
+}
+
+.reference-quest-row,
+.available-card,
+.reward-reference-panel,
+.feed-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.quest-reference .reference-quest-row:nth-of-type(1),
+.rewards-panel-grid .reward-reference-panel:nth-child(1),
+.community-feed .feed-card:nth-child(1) { animation-delay: .02s; }
+.quest-reference .reference-quest-row:nth-of-type(2),
+.rewards-panel-grid .reward-reference-panel:nth-child(2),
+.community-feed .feed-card:nth-child(2) { animation-delay: .08s; }
+.quest-reference .reference-quest-row:nth-of-type(3),
+.rewards-panel-grid .reward-reference-panel:nth-child(3),
+.community-feed .feed-card:nth-child(3) { animation-delay: .14s; }
+.quest-reference .reference-quest-row:nth-of-type(4),
+.rewards-panel-grid .reward-reference-panel:nth-child(4),
+.community-feed .feed-card:nth-child(4) { animation-delay: .2s; }
+
+.quest-reference .reference-quest-row,
+.rewards-panel-grid .reward-reference-panel,
+.community-feed .feed-card {
+  animation-name: structured-card-enter;
+  animation-duration: .58s;
+  animation-timing-function: var(--motion-ease-out);
+  animation-fill-mode: both;
+}
+
+.gold-button,
+.primary-action,
+.auth-submit,
+.claim-all-button,
+.mobile-deck-actions button,
+.community-tabs button,
+.quest-tabs button,
+.mobile-cadence-tabs button {
+  transition:
+    transform .22s var(--motion-ease-press),
+    box-shadow .24s ease,
+    filter .2s ease,
+    background-color .2s ease;
+}
+
+.gold-button:hover,
+.primary-action:hover,
+.auth-submit:hover,
+.claim-all-button:hover,
+.mobile-deck-actions button:hover,
+.community-tabs button:hover,
+.quest-tabs button:hover,
+.mobile-cadence-tabs button:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+}
+
+.gold-button:active,
+.primary-action:active,
+.auth-submit:active,
+.claim-all-button:active,
+.mobile-deck-actions button:active,
+.community-tabs button:active,
+.quest-tabs button:active,
+.mobile-cadence-tabs button:active {
+  transform: translateY(1px) scale(.985);
+  filter: brightness(.98);
+}
+
+@media (max-width: 780px) {
+  .mobile-deck-card {
+    box-shadow:
+      inset 0 0 0 3px #071013,
+      inset 0 0 40px rgba(244, 190, 91, .04),
+      0 24px 54px rgba(0, 0, 0, .62);
+  }
+
+  .mobile-deck-card.current {
+    box-shadow:
+      inset 0 0 0 3px #071013,
+      inset 0 0 44px rgba(244, 190, 91, .06),
+      0 28px 60px rgba(0, 0, 0, .68),
+      0 0 0 1px rgba(255, 213, 126, .16);
+  }
+
+  .mobile-deck-card.current:hover,
+  .mobile-deck-card.current:focus-within {
+    transform: translateY(-4px) translateZ(46px) rotateY(0) rotateZ(0) scale(1.006);
+  }
+
+  .mobile-deck-category .round-emblem,
+  .mobile-deck-card .gold-progress i,
+  .mobile-deck-reward {
+    animation: structured-detail-pop .52s var(--motion-ease-out) both;
+  }
+
+  .mobile-deck-card h2,
+  .mobile-deck-card > p,
+  .mobile-deck-progress,
+  .mobile-deck-actions {
+    animation: structured-copy-rise .52s var(--motion-ease-out) both;
+  }
+
+  .mobile-deck-card h2 { animation-delay: .04s; }
+  .mobile-deck-card > p { animation-delay: .08s; }
+  .mobile-deck-progress { animation-delay: .12s; }
+  .mobile-deck-actions { animation-delay: .16s; }
+}
+
+@keyframes structured-card-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0) scale(.975);
+    filter: blur(4px) brightness(.8);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0) brightness(1);
+  }
+}
+
+@keyframes structured-card-sweep {
+  from { transform: translateX(-120%); }
+  to { transform: translateX(120%); }
+}
+
+@keyframes structured-detail-pop {
+  from { opacity: 0; transform: translateY(9px) scale(.86); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes structured-copy-rise {
+  from { opacity: 0; transform: translateY(11px); }
+  to { opacity: 1; transform: translateY(0); }
 }

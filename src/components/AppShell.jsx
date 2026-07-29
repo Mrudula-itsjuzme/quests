@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from '../features/auth/AuthContext';
-import { useMe } from '../features/quests/queries';
-import { useMarkNotificationRead, useNotifications } from '../features/quests/queries';
+import { useMe, useMarkNotificationRead, useNotifications } from '../features/quests/queries';
 import { Icon } from './Icon';
+import { playHover, playLevelUp, playTap } from '../lib/useSoundEffects';
 
 const navItems = [
   { to: '/app', label: 'Home', icon: 'home', end: true },
@@ -27,8 +28,14 @@ export function AppShell() {
   const unreadCount = notifications.filter((item) => !item.readAt).length;
 
   useEffect(() => {
-    const onNotice = (event) => setNotice(event.detail);
-    const onLevelUp = (event) => setLevelUp(event.detail);
+    const onNotice = (event) => {
+      setNotice(event.detail);
+      playTap();
+    };
+    const onLevelUp = (event) => {
+      setLevelUp(event.detail);
+      playLevelUp();
+    };
     window.addEventListener('habbit-notice', onNotice);
     window.addEventListener('habbit-level-up', onLevelUp);
     return () => {
@@ -46,17 +53,40 @@ export function AppShell() {
       )}
       <main className="workspace">
         <header className="topbar">
-          <div className="brand-lockup">
+          <motion.div
+            className="brand-lockup"
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            onMouseEnter={playHover}
+          >
             <span className="brand-mark" aria-hidden="true">H</span>
             <div>
               <strong>HABBIT QUESTS</strong>
             </div>
-          </div>
+          </motion.div>
           <nav className="top-nav" aria-label="Primary">
             {navItems.map((item) => (
-              <NavLink key={item.to} to={item.to} end={item.end} className={({ isActive }) => (isActive ? 'active' : '')}>
-                <Icon name={item.icon} />
-                <span>{item.label}</span>
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.end}
+                className={({ isActive }) => (isActive ? 'active' : '')}
+                onClick={playTap}
+                onMouseEnter={playHover}
+              >
+                {({ isActive }) => (
+                  <>
+                    {isActive && (
+                      <motion.div
+                        className="active-indicator"
+                        layoutId="topNavIndicator"
+                        transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                      />
+                    )}
+                    <Icon name={item.icon} />
+                    <span>{item.label}</span>
+                  </>
+                )}
               </NavLink>
             ))}
           </nav>
@@ -64,39 +94,218 @@ export function AppShell() {
             {isError && <span className="sync-status" role="status">Could not load your profile</span>}
             {!isLoading && !isError && me && (
               <>
-                <div className="quick-stat shell-xp">
+                <motion.div
+                  className="quick-stat shell-xp"
+                  whileHover={{ scale: 1.05, y: -1 }}
+                  onMouseEnter={playHover}
+                >
                   <strong>{me.totalXp.toLocaleString()}</strong>
                   <span>XP</span>
-                </div>
-                <div className="quick-stat">
+                </motion.div>
+                <motion.div
+                  className="quick-stat"
+                  whileHover={{ scale: 1.05, y: -1 }}
+                  onMouseEnter={playHover}
+                >
                   <strong>{me.level}</strong>
                   <span>{me.tier}</span>
-                </div>
+                </motion.div>
               </>
             )}
             <div className="shell-notifications">
-              <button type="button" className="round-action" aria-label={`Notifications${unreadCount ? `, ${unreadCount} unread` : ''}`} aria-expanded={notificationsOpen} onClick={() => setNotificationsOpen((open) => !open)}><Icon name="bell" />{unreadCount > 0 && <span>{unreadCount}</span>}</button>
-              {notificationsOpen && <section className="notification-popover" aria-label="Notifications"><div><strong>Notifications</strong><button type="button" onClick={() => setNotificationsOpen(false)} aria-label="Close notifications">×</button></div>{notifications.length === 0 ? <p>Your path is clear.</p> : notifications.slice(0, 8).map((item) => <button key={item.id} type="button" className={item.readAt ? '' : 'unread'} onClick={() => markNotificationRead.mutate(item.id)}><strong>{item.title}</strong><span>{item.body}</span></button>)}</section>}
+              <motion.button
+                type="button"
+                className="round-action"
+                aria-label={`Notifications${unreadCount ? `, ${unreadCount} unread` : ''}`}
+                aria-expanded={notificationsOpen}
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.92 }}
+                onClick={() => {
+                  playTap();
+                  setNotificationsOpen((open) => !open);
+                }}
+                onMouseEnter={playHover}
+              >
+                <Icon name="bell" />
+                {unreadCount > 0 && (
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: 'spring', stiffness: 600, damping: 20 }}
+                  >
+                    {unreadCount}
+                  </motion.span>
+                )}
+              </motion.button>
+              <AnimatePresence>
+                {notificationsOpen && (
+                  <motion.section
+                    className="notification-popover"
+                    aria-label="Notifications"
+                    initial={{ opacity: 0, y: 12, scale: 0.96 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                    transition={{ type: 'spring', stiffness: 450, damping: 30 }}
+                  >
+                    <div>
+                      <strong>Notifications</strong>
+                      <motion.button
+                        type="button"
+                        onClick={() => {
+                          playTap();
+                          setNotificationsOpen(false);
+                        }}
+                        aria-label="Close notifications"
+                        whileHover={{ scale: 1.2 }}
+                        whileTap={{ scale: 0.9 }}
+                      >
+                        ×
+                      </motion.button>
+                    </div>
+                    {notifications.length === 0 ? (
+                      <p>Your path is clear.</p>
+                    ) : (
+                      notifications.slice(0, 8).map((item) => (
+                        <motion.button
+                          key={item.id}
+                          type="button"
+                          className={item.readAt ? '' : 'unread'}
+                          whileHover={{ x: 4 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => {
+                            playTap();
+                            markNotificationRead.mutate(item.id);
+                          }}
+                        >
+                          <strong>{item.title}</strong>
+                          <span>{item.body}</span>
+                        </motion.button>
+                      ))
+                    )}
+                  </motion.section>
+                )}
+              </AnimatePresence>
             </div>
-            <button type="button" className="ghost-action" onClick={signOut}>Sign out</button>
+            <motion.button
+              type="button"
+              className="ghost-action"
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => {
+                playTap();
+                signOut();
+              }}
+              onMouseEnter={playHover}
+            >
+              Sign out
+            </motion.button>
           </div>
         </header>
 
-        <div className="route-stage" key={location.pathname}>
-          <Outlet />
-        </div>
+        <AnimatePresence mode="wait">
+          <motion.div
+            className="route-stage"
+            key={location.pathname}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.22, ease: 'easeOut' }}
+          >
+            <Outlet />
+          </motion.div>
+        </AnimatePresence>
       </main>
 
       <nav className="bottom-nav" aria-label="Primary">
         {navItems.map((item) => (
-          <NavLink key={item.to} to={item.to} end={item.end} className={({ isActive }) => (isActive ? 'active' : '')}>
-            <Icon name={item.icon} />
-            <span>{item.label}</span>
+          <NavLink
+            key={item.to}
+            to={item.to}
+            end={item.end}
+            className={({ isActive }) => (isActive ? 'active' : '')}
+            onClick={playTap}
+            onMouseEnter={playHover}
+          >
+            {({ isActive }) => (
+              <>
+                {isActive && (
+                  <motion.div
+                    className="active-indicator"
+                    layoutId="bottomNavIndicator"
+                    transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                  />
+                )}
+                <Icon name={item.icon} />
+                <span>{item.label}</span>
+              </>
+            )}
           </NavLink>
         ))}
       </nav>
-      {notice && <div className="toast-notice" role="status"><span>{notice}</span><button type="button" onClick={() => setNotice('')} aria-label="Dismiss notification">×</button></div>}
-      {levelUp && <div className="level-up-celebration" role="dialog" aria-modal="true" aria-label="Level up"><div className="level-up-rays" /><section><span className="eyebrow">Path advanced</span><Icon name="compass" /><h2>Level {levelUp.level}</h2><p>{levelUp.tier} · +{levelUp.xp} XP</p><button type="button" className="primary-action" onClick={() => setLevelUp(null)}>Continue the journey</button></section></div>}
+
+      <AnimatePresence>
+        {notice && (
+          <motion.div
+            className="toast-notice"
+            role="status"
+            initial={{ opacity: 0, y: 20, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            transition={{ type: 'spring', stiffness: 450, damping: 25 }}
+          >
+            <span>{notice}</span>
+            <button
+              type="button"
+              onClick={() => {
+                playTap();
+                setNotice('');
+              }}
+              aria-label="Dismiss notification"
+            >
+              ×
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {levelUp && (
+          <motion.div
+            className="level-up-celebration"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Level up"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <div className="level-up-rays" />
+            <motion.section
+              initial={{ scale: 0.8, y: 30 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.8, y: 30 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+            >
+              <span className="eyebrow">Path advanced</span>
+              <Icon name="compass" />
+              <h2>Level {levelUp.level}</h2>
+              <p>{levelUp.tier} · +{levelUp.xp} XP</p>
+              <motion.button
+                type="button"
+                className="primary-action"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => {
+                  playTap();
+                  setLevelUp(null);
+                }}
+              >
+                Continue the journey
+              </motion.button>
+            </motion.section>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

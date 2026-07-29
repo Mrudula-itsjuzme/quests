@@ -3,6 +3,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { AnimatedCollectible } from '../../components/AnimatedCollectible';
 import { Icon, categoryColors, categoryIcon } from '../../components/Icon';
 import { useCollectibles } from '../quests/queries';
+import { playHover, playTap } from '../../lib/useSoundEffects';
 
 const filters = [
   { id: 'all', label: 'All' },
@@ -59,7 +60,16 @@ export function GalleryPage() {
         <section className="panel" aria-label="Memory journal">
           <div className="segmented-control" role="group" aria-label="Filter memories by category">
             {filters.map((item) => (
-              <button key={item.id} type="button" className={filter === item.id ? 'active' : ''} onClick={() => setFilter(item.id)}>
+              <button
+                key={item.id}
+                type="button"
+                className={filter === item.id ? 'active' : ''}
+                onClick={() => {
+                  playTap();
+                  setFilter(item.id);
+                }}
+                onMouseEnter={playHover}
+              >
                 {item.label}
               </button>
             ))}
@@ -69,29 +79,41 @@ export function GalleryPage() {
             <p className="empty-state">No memories in this category yet.</p>
           ) : (
             <div className="journal-timeline">
-              {filtered.map((item) => (
-                <button
-                  key={item.assetId}
-                  type="button"
-                  className="journal-entry"
-                  onClick={() => setSelected(item)}
-                >
-                  <span className="journal-thumb" aria-hidden="true">
-                    <Icon name={categoryIcon(item.category)} />
-                  </span>
-                  <span className="journal-entry-copy">
-                    <strong>{item.title}</strong>
-                    <span className="journal-entry-meta">
-                      <span className={`pill ${categoryColors[item.category] || ''}`}>{item.category}</span>
-                      <span>{item.rarity}</span>
-                      {formatDate(item.unlockedAt) && <span>{formatDate(item.unlockedAt)}</span>}
+              <AnimatePresence mode="popLayout">
+                {filtered.map((item) => (
+                  <motion.button
+                    key={item.assetId}
+                    type="button"
+                    className="journal-entry"
+                    whileHover={{ scale: 1.015, x: 4 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => {
+                      playTap();
+                      setSelected(item);
+                    }}
+                    onMouseEnter={playHover}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ type: 'spring', stiffness: 350, damping: 25 }}
+                  >
+                    <span className="journal-thumb" aria-hidden="true">
+                      <Icon name={categoryIcon(item.category)} />
                     </span>
-                  </span>
-                  <span className="journal-entry-side">
-                    <Icon name="bookmark" />
-                  </span>
-                </button>
-              ))}
+                    <span className="journal-entry-copy">
+                      <strong>{item.title}</strong>
+                      <span className="journal-entry-meta">
+                        <span className={`pill ${categoryColors[item.category] || ''}`}>{item.category}</span>
+                        <span>{item.rarity}</span>
+                        {formatDate(item.unlockedAt) && <span>{formatDate(item.unlockedAt)}</span>}
+                      </span>
+                    </span>
+                    <span className="journal-entry-side">
+                      <Icon name="bookmark" />
+                    </span>
+                  </motion.button>
+                ))}
+              </AnimatePresence>
             </div>
           )}
         </section>
@@ -99,7 +121,7 @@ export function GalleryPage() {
 
       <AnimatePresence>
         {selected && (
-          <MemoryDetail item={selected} onClose={() => setSelected(null)} reduceMotion={shouldReduceMotion} />
+          <MemoryDetail item={selected} onClose={() => { playTap(); setSelected(null); }} reduceMotion={shouldReduceMotion} />
         )}
       </AnimatePresence>
     </main>

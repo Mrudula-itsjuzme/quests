@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Icon, categoryIcon } from '../../components/Icon';
 import { derivePlayerPresentation } from '../../lib/playerPresentation';
 import { QuestDetail } from './QuestDetail';
 import { questProgressRatio } from './QuestCard';
+import { playHover, playTap } from '../../lib/useSoundEffects';
 import {
   useActiveQuests,
   useCollectibles,
@@ -42,6 +44,7 @@ export function QuestsPage() {
   const [notice, setNotice] = useState('');
   const [deckIndex, setDeckIndex] = useState(0);
   const [deckTouchStart, setDeckTouchStart] = useState(null);
+  const [deckMotion, setDeckMotion] = useState('settled');
 
   const quests = useMemo(() => activeQuery.data || [], [activeQuery.data]);
   const history = historyQuery.data || [];
@@ -66,6 +69,7 @@ export function QuestsPage() {
   const featuredRatio = featured ? questProgressRatio(featured) : 0;
   const hasCadence = (cadence) => quests.some((quest) => quest.cadence === cadence);
   const accept = (cadence) => {
+    playTap();
     const mutation = cadence === 'monthly' ? generateMonthly : cadence === 'weekly' ? generateWeekly : generateDaily;
     if (hasCadence(cadence)) {
       setNotice(`Your ${cadence} quests are already active.`);
@@ -77,6 +81,8 @@ export function QuestsPage() {
     });
   };
   const moveDeck = (direction) => {
+    playTap();
+    setDeckMotion(direction > 0 ? 'next' : 'previous');
     setDeckIndex((index) => Math.max(0, Math.min(visible.length - 1, index + direction)));
   };
   const finishDeckSwipe = (clientX) => {
@@ -93,9 +99,20 @@ export function QuestsPage() {
       <section className="mobile-quest-board" aria-label="Mobile quest deck">
         <nav className="mobile-cadence-tabs" aria-label="Mobile quest cadence">
           {tabs.map((item) => (
-            <button key={item.id} type="button" aria-pressed={tab === item.id} className={tab === item.id ? 'active' : ''} onClick={() => setTab(item.id)}>
+            <motion.button
+              key={item.id}
+              type="button"
+              aria-pressed={tab === item.id}
+              className={tab === item.id ? 'active' : ''}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => {
+                playTap();
+                setTab(item.id);
+              }}
+              onMouseEnter={playHover}
+            >
               <Icon name={item.icon} /><span>{item.label}</span>
-            </button>
+            </motion.button>
           ))}
         </nav>
 
@@ -103,8 +120,10 @@ export function QuestsPage() {
           <>
             <div
               className="mobile-deck-window"
+              data-motion={deckMotion}
               onTouchStart={(event) => setDeckTouchStart(event.touches[0].clientX)}
               onTouchEnd={(event) => finishDeckSwipe(event.changedTouches[0].clientX)}
+              onTransitionEnd={() => setDeckMotion('settled')}
             >
               {visible.map((quest, index) => {
                 const offset = index - deckIndex;
@@ -112,26 +131,33 @@ export function QuestsPage() {
                 const ratio = questProgressRatio(quest);
                 const position = offset === 0 ? 'current' : offset < 0 ? 'previous' : 'next';
                 return (
-                  <article key={quest.id} className={`mobile-deck-card ${position}`} aria-hidden={offset !== 0}>
+                  <motion.article
+                    key={quest.id}
+                    className={`mobile-deck-card ${position}`}
+                    aria-hidden={offset !== 0}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ type: 'spring', stiffness: 350, damping: 25 }}
+                  >
                     <div className="mobile-deck-category"><span className="round-emblem"><Icon name={categoryIcon(quest.category)} /></span><strong>{quest.category}</strong></div>
                     <h2>{quest.title}</h2>
                     <p>{quest.description}</p>
                     <div className="mobile-deck-divider" />
                     <strong className="mobile-deck-progress">{quest.progressValue} / {quest.targetValue}<small>{quest.unit || 'progress'}</small></strong>
-                    <div className="gold-progress"><i style={{ width: `${ratio * 100}%` }} /></div>
+                    <div className="gold-progress"><motion.i initial={{ width: 0 }} animate={{ width: `${ratio * 100}%` }} transition={{ type: 'spring', stiffness: 300, damping: 30 }} /></div>
                     <div className="mobile-deck-reward"><span>XP</span><strong>{quest.xpReward}</strong></div>
                     <div className="mobile-deck-actions">
-                      <button className="gold-button" type="button" onClick={() => setSelectedId(quest.id)}>Resume <span>›</span></button>
-                      <button type="button" onClick={() => setSelectedId(quest.id)}>Details</button>
+                      <motion.button className="gold-button" type="button" whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }} onClick={() => { playTap(); setSelectedId(quest.id); }}>Resume <span>›</span></motion.button>
+                      <motion.button type="button" whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }} onClick={() => { playTap(); setSelectedId(quest.id); }}>Details</motion.button>
                     </div>
-                  </article>
+                  </motion.article>
                 );
               })}
             </div>
 
             <div className="mobile-deck-controls" aria-label="Quest deck controls">
               <button type="button" onClick={() => moveDeck(-1)} disabled={deckIndex === 0} aria-label="Previous quest">‹</button>
-              <div>{visible.map((quest, index) => <button key={quest.id} type="button" className={index === deckIndex ? 'active' : ''} onClick={() => setDeckIndex(index)} aria-label={`Show ${quest.title}`} />)}</div>
+              <div>{visible.map((quest, index) => <button key={quest.id} type="button" className={index === deckIndex ? 'active' : ''} onClick={() => { playTap(); setDeckMotion(index > deckIndex ? 'next' : 'previous'); setDeckIndex(index); }} aria-label={`Show ${quest.title}`} />)}</div>
               <button type="button" onClick={() => moveDeck(1)} disabled={deckIndex === visible.length - 1} aria-label="Next quest">›</button>
             </div>
 
@@ -147,7 +173,7 @@ export function QuestsPage() {
           <section className="mobile-deck-empty ornate-panel">
             <Icon name="scroll" /><h2>No {tab} quests yet</h2>
             <p>Generate a new set to begin this path.</p>
-            <button className="gold-button" type="button" onClick={() => accept(tab)}>Generate {tab} quests</button>
+            <motion.button className="gold-button" type="button" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => accept(tab)}>Generate {tab} quests</motion.button>
           </section>
         )}
 
@@ -155,20 +181,20 @@ export function QuestsPage() {
           <div className="section-title"><h2>Available Quests</h2><span>Swipe to explore</span></div>
           <div>
             {definitions.map((quest) => (
-              <article key={quest.id}>
+              <motion.article key={quest.id} whileHover={{ y: -3 }} onMouseEnter={playHover}>
                 <span className="round-emblem"><Icon name={categoryIcon(quest.category)} /></span>
                 <strong>{quest.title}</strong>
                 <small>{quest.description}</small>
                 <span>{quest.xpReward} XP</span>
-                <button type="button" onClick={() => accept(quest.cadence)} disabled={generateDaily.isPending || generateWeekly.isPending || generateMonthly.isPending}>Accept</button>
-              </article>
+                <motion.button type="button" whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.94 }} onClick={() => accept(quest.cadence)} disabled={generateDaily.isPending || generateWeekly.isPending || generateMonthly.isPending}>Accept</motion.button>
+              </motion.article>
             ))}
             {!definitionsQuery.isLoading && definitions.length === 0 && <p className="empty-state">Every available quest is already active.</p>}
           </div>
         </section>
       </section>
 
-      <section className="focus-hero ornate-panel">
+      <motion.section className="focus-hero ornate-panel" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', stiffness: 350, damping: 25 }}>
         <img className="focus-hero-art" src="/quest-scholar-hero.png" alt="" />
         <div className="focus-label"><span>◆</span> Today’s Focus <span>◆</span></div>
         <div className="quest-ring" style={{ '--progress': `${featuredRatio * 360}deg` }}>
@@ -180,38 +206,70 @@ export function QuestsPage() {
           <span>Objective</span>
           <p>{featured?.description || 'Generate today’s quests to begin your adventure.'}</p>
           <strong className="focus-count">{featured ? `${featured.progressValue} / ${featured.targetValue}` : '0 / 3'}</strong>
-          <div className="gold-progress" role="progressbar" aria-valuenow={Math.round(featuredRatio * 100)} aria-valuemin="0" aria-valuemax="100"><i style={{ width: `${featuredRatio * 100}%` }} /></div>
+          <div className="gold-progress" role="progressbar" aria-valuenow={Math.round(featuredRatio * 100)} aria-valuemin="0" aria-valuemax="100"><motion.i initial={{ width: 0 }} animate={{ width: `${featuredRatio * 100}%` }} transition={{ type: 'spring', stiffness: 300, damping: 30 }} /></div>
           <blockquote>Knowledge is a blade. Sharpen it.</blockquote>
         </div>
         <div className="character-dialogue"><Icon name="leaf" /><span>Every step forward brings you closer to legend. Keep going!</span></div>
-      </section>
+      </motion.section>
 
       <div className="quest-tabs" role="tablist" aria-label="Quest cadence">
         {tabs.map((item) => (
-          <button key={item.id} role="tab" aria-selected={tab === item.id} className={tab === item.id ? 'active' : ''} onClick={() => setTab(item.id)}>
+          <motion.button
+            key={item.id}
+            role="tab"
+            aria-selected={tab === item.id}
+            className={tab === item.id ? 'active' : ''}
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.96 }}
+            onClick={() => {
+              playTap();
+              setTab(item.id);
+            }}
+            onMouseEnter={playHover}
+          >
+            {tab === item.id && (
+              <motion.div className="active-tab-bg" layoutId="questTabBg" transition={{ type: 'spring', stiffness: 500, damping: 35 }} />
+            )}
             <Icon name={item.icon} /><span>{item.label}</span>
-          </button>
+          </motion.button>
         ))}
       </div>
 
       <div className="quest-content-grid">
-          <section className="ornate-panel active-list">
-            <div className="section-title"><h2>Active Quests</h2><span>{visible.length} active</span></div>
-            {visible.length === 0 && (
-              <div className="empty-state"><Icon name="scroll" /><p>No {tab} quests yet.</p><button className="gold-button" type="button" onClick={() => accept(tab)}>Generate {tab} quests</button></div>
-            )}
+        <section className="ornate-panel active-list">
+          <div className="section-title"><h2>Active Quests</h2><span>{visible.length} active</span></div>
+          {visible.length === 0 && (
+            <div className="empty-state"><Icon name="scroll" /><p>No {tab} quests yet.</p><motion.button className="gold-button" type="button" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => accept(tab)}>Generate {tab} quests</motion.button></div>
+          )}
+          <AnimatePresence mode="popLayout">
             {visible.map((quest) => (
-              <button key={quest.id} type="button" className="reference-quest-row" onClick={() => setSelectedId(quest.id)}>
+              <motion.button
+                key={quest.id}
+                type="button"
+                className="reference-quest-row"
+                whileHover={{ scale: 1.015, x: 4 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => {
+                  playTap();
+                  setSelectedId(quest.id);
+                }}
+                onMouseEnter={playHover}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+              >
                 <span className="round-emblem"><Icon name={categoryIcon(quest.category)} /></span>
-                <span className="quest-copy"><strong>{quest.title}</strong><small>{quest.description}</small><span className="gold-progress"><i style={{ width: `${questProgressRatio(quest) * 100}%` }} /></span></span>
+                <span className="quest-copy"><strong>{quest.title}</strong><small>{quest.description}</small><span className="gold-progress"><motion.i initial={{ width: 0 }} animate={{ width: `${questProgressRatio(quest) * 100}%` }} transition={{ type: 'spring', stiffness: 300, damping: 30 }} /></span></span>
                 <span className="quest-numbers"><b>{quest.progressValue}/{quest.targetValue}</b><span>XP<br /><strong>{quest.xpReward}</strong></span></span>
-              </button>
+              </motion.button>
             ))}
-          </section>
-          <aside className="progress-side">
-            <section className="ornate-panel streak-card"><h2>Weekly Streak</h2><Icon name="flame" /><strong>{me.streakDays || 0}</strong><span>days</span><p>Keep the flame alive!</p></section>
-            <section className="ornate-panel rank-card"><h2>Path Rank</h2><Icon name="compass" /><strong>{presentation.rank}</strong><div className="gold-progress"><i style={{ width: `${presentation.rankProgress * 100}%` }} /></div><span>{me.totalXp.toLocaleString()} / {presentation.nextRankXp.toLocaleString()} XP</span></section>
-          </aside>
+          </AnimatePresence>
+        </section>
+        <aside className="progress-side">
+          <motion.section className="ornate-panel streak-card" whileHover={{ y: -3 }} onMouseEnter={playHover}><h2>Weekly Streak</h2><Icon name="flame" /><strong>{me.streakDays || 0}</strong><span>days</span><p>Keep the flame alive!</p></motion.section>
+          <motion.section className="ornate-panel rank-card" whileHover={{ y: -3 }} onMouseEnter={playHover}><h2>Path Rank</h2><Icon name="compass" /><strong>{presentation.rank}</strong><div className="gold-progress"><motion.i initial={{ width: 0 }} animate={{ width: `${presentation.rankProgress * 100}%` }} transition={{ type: 'spring', stiffness: 300, damping: 30 }} /></div><span>{me.totalXp.toLocaleString()} / {presentation.nextRankXp.toLocaleString()} XP</span></motion.section>
+        </aside>
       </div>
 
       <section className="ornate-panel available-quests">
@@ -219,19 +277,57 @@ export function QuestsPage() {
         {definitionsQuery.isLoading && <p role="status">Consulting the quest archive…</p>}
         <div className="available-grid">
           {definitions.map((quest) => (
-            <article key={quest.id} className="available-card">
+            <motion.article key={quest.id} className="available-card" whileHover={{ y: -4, scale: 1.02 }} onMouseEnter={playHover}>
               <span className="round-emblem"><Icon name={categoryIcon(quest.category)} /></span>
               <h3>{quest.title}</h3><p>{quest.description}</p>
               <div><span>◈ {quest.xpReward} XP</span><span>{quest.cadence}</span></div>
-              <button className="gold-button" type="button" onClick={() => accept(quest.cadence)} disabled={generateDaily.isPending || generateWeekly.isPending || generateMonthly.isPending}>Accept Quest</button>
-            </article>
+              <motion.button className="gold-button" type="button" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => accept(quest.cadence)} disabled={generateDaily.isPending || generateWeekly.isPending || generateMonthly.isPending}>Accept Quest</motion.button>
+            </motion.article>
           ))}
           {!definitionsQuery.isLoading && definitions.length === 0 && <p className="empty-state">All currently available quests are already on your board.</p>}
         </div>
       </section>
 
-      {selected && <div className="quest-detail-overlay" role="dialog" aria-modal="true" aria-label={`${selected.title} details`} onMouseDown={(event) => event.target === event.currentTarget && setSelectedId(null)}><div><button className="detail-close" type="button" onClick={() => setSelectedId(null)} aria-label="Close quest details">×</button><QuestDetail quest={selected} /></div></div>}
-      {notice && <div className="toast-notice" role="status"><span>{notice}</span><button type="button" onClick={() => setNotice('')} aria-label="Dismiss notification">×</button></div>}
+      <AnimatePresence>
+        {selected && (
+          <motion.div
+            className="quest-detail-overlay"
+            role="dialog"
+            aria-modal="true"
+            aria-label={`${selected.title} details`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onMouseDown={(event) => event.target === event.currentTarget && setSelectedId(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              transition={{ type: 'spring', stiffness: 450, damping: 30 }}
+            >
+              <button className="detail-close" type="button" onClick={() => { playTap(); setSelectedId(null); }} aria-label="Close quest details">×</button>
+              <QuestDetail quest={selected} />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {notice && (
+          <motion.div
+            className="toast-notice"
+            role="status"
+            initial={{ opacity: 0, y: 20, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            transition={{ type: 'spring', stiffness: 450, damping: 25 }}
+          >
+            <span>{notice}</span>
+            <button type="button" onClick={() => { playTap(); setNotice(''); }} aria-label="Dismiss notification">×</button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }
@@ -239,9 +335,22 @@ export function QuestsPage() {
 export function PlayerHeader({ me, page }) {
   return (
     <header className="reference-header">
-      <div className="avatar-medallion"><span>{(me.displayName || 'S')[0].toUpperCase()}</span><b>{me.level}</b></div>
-      <div className="player-heading"><h1>{page}</h1><p>{me.displayName || 'Mind in progress'} <i /></p><span><Icon name="shield" /> {me.totalXp.toLocaleString()} XP</span></div>
-      <div className="header-orbit"><button type="button" aria-label="Notifications" onClick={() => window.dispatchEvent(new CustomEvent('habbit-notice', { detail: 'No new notices. Your path is clear.' }))}><Icon name="bell" /></button><button type="button" aria-label="Open path compass" onClick={() => window.dispatchEvent(new CustomEvent('habbit-notice', { detail: `Your current path rank is ${me.tier || 'Novice'}.` }))}><Icon name="compass" /></button></div>
+      <motion.div className="avatar-medallion" whileHover={{ scale: 1.08, rotate: 3 }} onMouseEnter={playHover}>
+        <span>{(me.displayName || 'S')[0].toUpperCase()}</span><b>{me.level}</b>
+      </motion.div>
+      <div className="player-heading">
+        <h1>{page}</h1>
+        <p>{me.displayName || 'Mind in progress'} <i /></p>
+        <span><Icon name="shield" /> {me.totalXp.toLocaleString()} XP</span>
+      </div>
+      <div className="header-orbit">
+        <motion.button type="button" aria-label="Notifications" whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }} onClick={() => { playTap(); window.dispatchEvent(new CustomEvent('habbit-notice', { detail: 'No new notices. Your path is clear.' })); }}>
+          <Icon name="bell" />
+        </motion.button>
+        <motion.button type="button" aria-label="Open path compass" whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }} onClick={() => { playTap(); window.dispatchEvent(new CustomEvent('habbit-notice', { detail: `Your current path rank is ${me.tier || 'Novice'}.` })); }}>
+          <Icon name="compass" />
+        </motion.button>
+      </div>
     </header>
   );
 }

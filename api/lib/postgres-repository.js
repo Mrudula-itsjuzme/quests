@@ -1,7 +1,10 @@
 import { randomUUID } from 'node:crypto';
 
 export class PostgresQuestRepository {
-  constructor(pool) { this.pool = pool; }
+  constructor(pool) {
+    this.pool = pool;
+    this._definitionCache = null;
+  }
 
   async ensureUser(user) {
     const { rows } = await this.pool.query(
@@ -42,14 +45,17 @@ export class PostgresQuestRepository {
         AND (last_streak_period IS NULL OR last_streak_period::date < $2::date - 1)`, [userId, currentPeriodKey]);
   }
   async listDefinitions(filters = {}) {
-    const values = [];
-    const where = ['enabled = TRUE'];
-    if (filters.cadence) { values.push(filters.cadence); where.push(`cadence = $${values.length}`); }
-    if (filters.category) { values.push(filters.category); where.push(`category = $${values.length}`); }
-    const { rows } = await this.pool.query(`SELECT * FROM quest_definitions WHERE ${where.join(' AND ')} ORDER BY id`, values);
-    return rows.map(mapDefinition);
+    if (!this._definitionCache) {
+      const { rows } = await this.pool.query('SELECT * FROM quest_definitions WHERE enabled = TRUE ORDER BY id');
+      this._definitionCache = rows.map(mapDefinition);
+    }
+    let result = this._definitionCache;
+    if (filters.cadence) result = result.filter((d) => d.cadence === filters.cadence);
+    if (filters.category) result = result.filter((d) => d.category === filters.category);
+    return result;
   }
   async createDefinition(definition) {
+    this._definitionCache = null;
     const { rows } = await this.pool.query(
       `INSERT INTO quest_definitions (id,title,description,category,rarity,cadence,verification_type,subject_tag,target_value,unit,cooldown_days,xp_reward,instructions,enabled)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,TRUE)

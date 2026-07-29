@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Icon, categoryIcon } from '../../components/Icon';
 import { PlayerHeader } from '../quests/QuestsPage';
 import { useClaimRewards, useCollectibles, useLeaderboard, useMe, useRewards } from '../quests/queries';
+import { playHover, playSuccess, playTap } from '../../lib/useSoundEffects';
 
 const badgeDefinitions = [
   { icon: 'sun', label: 'First Light', threshold: 1 },
@@ -33,13 +35,13 @@ export function RewardsPage() {
   const seasonTarget = 10000;
   const seasonProgress = Math.min(1, me.totalXp / seasonTarget);
   const currentRank = leaderboard.find((entry) => entry.isCurrentUser) || { position: '—', rankTitle: 'Adventurer', totalXp: me.totalXp };
-  const unavailable = (message) => setNotice(message);
+  const unavailable = (message) => { playTap(); setNotice(message); };
 
   return (
     <main className="rewards-reference fantasy-page" aria-label="Rewards">
       <PlayerHeader me={me} page="Rewards" />
 
-      <section className="rewards-hero ornate-panel">
+      <motion.section className="rewards-hero ornate-panel" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', stiffness: 350, damping: 25 }}>
         <img src="/rewards-season-chest.png" alt="" />
         <div className="rewards-hero-copy">
           <p className="eyebrow">◆ &nbsp; Season Chest &nbsp; ◆</p>
@@ -47,27 +49,27 @@ export function RewardsPage() {
         </div>
         <div className="season-progress">
           <strong>{me.totalXp.toLocaleString()} / {seasonTarget.toLocaleString()}</strong>
-          <div className="gold-progress"><i style={{ width: `${seasonProgress * 100}%` }} /></div>
+          <div className="gold-progress"><motion.i initial={{ width: 0 }} animate={{ width: `${seasonProgress * 100}%` }} transition={{ type: 'spring', stiffness: 300, damping: 30 }} /></div>
           <span>{Math.round(seasonProgress * 100)}% to next reward</span>
         </div>
         <div className="character-dialogue"><Icon name="leaf" /><span>Every quest brings you closer to glory.</span></div>
-      </section>
+      </motion.section>
 
       <div className="rewards-panel-grid">
         <RewardPanel title="Reward Track" className="reward-track-panel">
           <div className="reward-level-shield"><strong>{me.level}</strong><span>Level</span></div>
-          <div><h3>{me.tier} Seeker</h3><div className="gold-progress"><i style={{ width: `${me.progressToNextLevel * 100}%` }} /></div><p>{me.xpIntoLevel.toLocaleString()} / {me.xpForCurrentLevel.toLocaleString()} XP</p></div>
+          <div><h3>{me.tier} Seeker</h3><div className="gold-progress"><motion.i initial={{ width: 0 }} animate={{ width: `${me.progressToNextLevel * 100}%` }} transition={{ type: 'spring', stiffness: 300, damping: 30 }} /></div><p>{me.xpIntoLevel.toLocaleString()} / {me.xpForCurrentLevel.toLocaleString()} XP</p></div>
           <span className="reward-banner"><Icon name="compass" /></span>
         </RewardPanel>
 
         <RewardPanel title="Badges" className="badges-panel">
-          <div className="badge-row">{badgeDefinitions.map((badge) => <article key={badge.label} className={collection.length >= badge.threshold ? '' : 'locked'}><span className="round-emblem"><Icon name={badge.icon} /></span><strong>{collection.length >= badge.threshold ? badge.threshold : 0}</strong><small>{badge.label}</small></article>)}</div>
-          <Link to="/app/gallery">View all badges <span>›</span></Link>
+          <div className="badge-row">{badgeDefinitions.map((badge) => <motion.article key={badge.label} className={collection.length >= badge.threshold ? '' : 'locked'} whileHover={{ scale: 1.05 }} onMouseEnter={playHover}><span className="round-emblem"><Icon name={badge.icon} /></span><strong>{collection.length >= badge.threshold ? badge.threshold : 0}</strong><small>{badge.label}</small></motion.article>)}</div>
+          <Link to="/app/gallery" onClick={playTap}>View all badges <span>›</span></Link>
         </RewardPanel>
 
         <RewardPanel title="Rare Loot" className="loot-panel">
           <div className="loot-row">
-            {collection.slice(0, 4).map((item) => <article key={item.assetId}><Icon name={categoryIcon(item.category)} /><strong>{item.title}</strong><span>{item.rarity}</span></article>)}
+            {collection.slice(0, 4).map((item) => <motion.article key={item.assetId} whileHover={{ y: -3 }} onMouseEnter={playHover}><Icon name={categoryIcon(item.category)} /><strong>{item.title}</strong><span>{item.rarity}</span></motion.article>)}
             {collection.length === 0 && <p className="reward-empty">Complete verified quests to discover rare loot.</p>}
           </div>
           <button type="button" onClick={() => unavailable('Inventory management is not connected yet.')}>View inventory <span>›</span></button>
@@ -75,34 +77,61 @@ export function RewardsPage() {
 
         <RewardPanel title="Chest Collection" className="chest-panel">
           <div className="chest-row">
-            <article><Icon name="chest" /><strong>{collection.filter((item) => item.rarity === 'Common').length}</strong><span>Bronze</span></article>
-            <article><Icon name="chest" /><strong>{collection.filter((item) => item.rarity === 'Rare').length}</strong><span>Silver</span></article>
-            <article><Icon name="chest" /><strong>{collection.filter((item) => ['Epic', 'Legendary'].includes(item.rarity)).length}</strong><span>Golden</span></article>
+            <motion.article whileHover={{ y: -3 }} onMouseEnter={playHover}><Icon name="chest" /><strong>{collection.filter((item) => item.rarity === 'Common').length}</strong><span>Bronze</span></motion.article>
+            <motion.article whileHover={{ y: -3 }} onMouseEnter={playHover}><Icon name="chest" /><strong>{collection.filter((item) => item.rarity === 'Rare').length}</strong><span>Silver</span></motion.article>
+            <motion.article whileHover={{ y: -3 }} onMouseEnter={playHover}><Icon name="chest" /><strong>{collection.filter((item) => ['Epic', 'Legendary'].includes(item.rarity)).length}</strong><span>Golden</span></motion.article>
           </div>
-          <Link to="/app/gallery">View collection <span>›</span></Link>
+          <Link to="/app/gallery" onClick={playTap}>View collection <span>›</span></Link>
         </RewardPanel>
 
         <RewardPanel title="Claimable Rewards" className="claim-panel">
           <div className="claim-row">
-            {rewards.filter((reward) => reward.status === 'claimable').slice(0, 3).map((reward) => <article key={reward.level}><Icon name={reward.rewardType === 'badge' ? 'star' : reward.rewardType === 'title' ? 'scroll' : 'chest'} /><strong>{reward.amount}</strong><span>{reward.label}</span></article>)}
+            {rewards.filter((reward) => reward.status === 'claimable').slice(0, 3).map((reward) => <motion.article key={reward.level} whileHover={{ scale: 1.04 }} onMouseEnter={playHover}><Icon name={reward.rewardType === 'badge' ? 'star' : reward.rewardType === 'title' ? 'scroll' : 'chest'} /><strong>{reward.amount}</strong><span>{reward.label}</span></motion.article>)}
             {!rewards.some((reward) => reward.status === 'claimable') && <p className="reward-empty">Your next milestone reward is still ahead.</p>}
           </div>
-          <button className="claim-all-button" type="button" disabled={claimRewards.isPending || !rewards.some((reward) => reward.status === 'claimable')} onClick={async () => { const claimed = await claimRewards.mutateAsync(); setNotice(claimed.length ? `${claimed.length} milestone reward${claimed.length === 1 ? '' : 's'} claimed.` : 'No rewards are ready yet.'); }}>Claim All</button>
+          <motion.button className="claim-all-button" type="button" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} disabled={claimRewards.isPending || !rewards.some((reward) => reward.status === 'claimable')} onClick={async () => { playSuccess(); const claimed = await claimRewards.mutateAsync(); setNotice(claimed.length ? `${claimed.length} milestone reward${claimed.length === 1 ? '' : 's'} claimed.` : 'No rewards are ready yet.'); }}>Claim All</motion.button>
         </RewardPanel>
 
         <RewardPanel title="Current Rank" className="current-rank-panel">
           <span className="rank-crest"><Icon name="shield" /><Icon name="compass" /></span>
-          <div><h2>{currentRank.rankTitle}</h2><span>Global position</span><strong>#{currentRank.position}</strong><div className="gold-progress"><i style={{ width: `${me.progressToNextLevel * 100}%` }} /></div><p>{me.totalXp.toLocaleString()} cumulative XP</p></div>
-          <button type="button" onClick={() => setShowLeaderboard(true)}>View leaderboard <span>›</span></button>
+          <div><h2>{currentRank.rankTitle}</h2><span>Global position</span><strong>#{currentRank.position}</strong><div className="gold-progress"><motion.i initial={{ width: 0 }} animate={{ width: `${me.progressToNextLevel * 100}%` }} transition={{ type: 'spring', stiffness: 300, damping: 30 }} /></div><p>{me.totalXp.toLocaleString()} cumulative XP</p></div>
+          <button type="button" onClick={() => { playTap(); setShowLeaderboard(true); }}>View leaderboard <span>›</span></button>
         </RewardPanel>
       </div>
 
-      {showLeaderboard && <div className="modal-backdrop" role="presentation" onMouseDown={() => setShowLeaderboard(false)}><section className="quest-modal leaderboard-modal" role="dialog" aria-modal="true" aria-labelledby="leaderboard-title" onMouseDown={(event) => event.stopPropagation()}><div className="section-title"><h2 id="leaderboard-title">Global Leaderboard</h2><button type="button" onClick={() => setShowLeaderboard(false)} aria-label="Close leaderboard">×</button></div><div className="leaderboard-list">{leaderboard.map((entry) => <article key={entry.userId} className={entry.isCurrentUser ? 'current' : ''}><strong>#{entry.position}</strong><span>{entry.displayName}<small>{entry.rankTitle}</small></span><b>{entry.totalXp.toLocaleString()} XP</b></article>)}</div></section></div>}
-      {notice && <div className="toast-notice" role="status"><span>{notice}</span><button type="button" onClick={() => setNotice('')} aria-label="Dismiss notification">×</button></div>}
+      <AnimatePresence>
+        {showLeaderboard && (
+          <motion.div className="modal-backdrop" role="presentation" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onMouseDown={() => setShowLeaderboard(false)}>
+            <motion.section className="quest-modal leaderboard-modal" role="dialog" aria-modal="true" aria-labelledby="leaderboard-title" initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} transition={{ type: 'spring', stiffness: 450, damping: 30 }} onMouseDown={(event) => event.stopPropagation()}>
+              <div className="section-title"><h2 id="leaderboard-title">Global Leaderboard</h2><button type="button" onClick={() => { playTap(); setShowLeaderboard(false); }} aria-label="Close leaderboard">×</button></div>
+              <div className="leaderboard-list">
+                {leaderboard.map((entry) => (
+                  <motion.article key={entry.userId} className={entry.isCurrentUser ? 'current' : ''} whileHover={{ x: 4 }} onMouseEnter={playHover}>
+                    <strong>#{entry.position}</strong><span>{entry.displayName}<small>{entry.rankTitle}</small></span><b>{entry.totalXp.toLocaleString()} XP</b>
+                  </motion.article>
+                ))}
+              </div>
+            </motion.section>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {notice && (
+          <motion.div className="toast-notice" role="status" initial={{ opacity: 0, y: 20, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 20, scale: 0.9 }} transition={{ type: 'spring', stiffness: 450, damping: 25 }}>
+            <span>{notice}</span><button type="button" onClick={() => { playTap(); setNotice(''); }} aria-label="Dismiss notification">×</button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }
 
 function RewardPanel({ title, className, children }) {
-  return <section className={`ornate-panel reward-reference-panel ${className}`}><div className="section-title"><h2>◆ &nbsp; {title} &nbsp; ◆</h2></div>{children}</section>;
+  return (
+    <motion.section className={`ornate-panel reward-reference-panel ${className}`} whileHover={{ y: -2 }} onMouseEnter={playHover}>
+      <div className="section-title"><h2>◆ &nbsp; {title} &nbsp; ◆</h2></div>
+      {children}
+    </motion.section>
+  );
 }

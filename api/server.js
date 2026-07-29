@@ -3,7 +3,7 @@ import helmet from 'helmet';
 import cors from 'cors';
 import { ipKeyGenerator, rateLimit } from 'express-rate-limit';
 import { Pool } from 'pg';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { dirname, resolve } from 'node:path';
 import { existsSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
@@ -53,8 +53,15 @@ export function createApp(options = {}) {
   app.disable('x-powered-by');
   app.set('trust proxy', config.TRUST_PROXY);
   app.use((req, res, next) => {
+    const startTime = process.hrtime.bigint();
     req.id = safeRequestId(req.get('x-request-id'));
     res.setHeader('x-request-id', req.id);
+    const originalJson = res.json;
+    res.json = function (body) {
+      const durationMs = Number(process.hrtime.bigint() - startTime) / 1e6;
+      if (!res.headersSent) res.setHeader('Server-Timing', `total;dur=${durationMs.toFixed(2)}`);
+      return originalJson.call(this, body);
+    };
     res.setTimeout(10_000, () => { if (!res.headersSent) res.status(503).json({ error: { code: 'request_timeout', requestId: req.id } }); });
     next();
   });
@@ -120,7 +127,7 @@ export function createApp(options = {}) {
   app.use('/api', readLimiter);
   app.get('/api/v1/me', asyncRoute(async (req, res) => res.json(await engine.getMe(req.identity))));
   app.patch('/api/v1/me', writeLimiter, asyncRoute(async (req, res) => res.json(await engine.updateMe(req.identity, parse(profileSchema, req.body)))));
-  app.get('/api/v1/quests/definitions', asyncRoute(async (req, res) => res.json(await engine.definitions(req.identity, {
+  app.get('/api/v1/quests/definitions', asyncRoute(async (req, res) => sendCachedJson(req, res, await engine.definitions(req.identity, {
     cadence: optionalEnum(req.query.cadence, ['daily', 'weekly', 'monthly']),
     category: optionalEnum(req.query.category, ['Mind', 'Body', 'Discovery', 'Weekly', 'Monthly']),
   }))));
@@ -131,7 +138,7 @@ export function createApp(options = {}) {
   app.post('/api/v1/quests/generate-monthly', writeLimiter, asyncRoute(async (req, res) => res.status(201).json(await engine.generateMonthly(req.identity, requireIdempotency(req)))));
   app.post('/api/v1/quests/:assignmentId/progress', writeLimiter, asyncRoute(async (req, res) => res.json(await engine.progress(req.identity, parse(assignmentIdSchema, req.params.assignmentId), parse(progressSchema, req.body), requireIdempotency(req)))));
   app.post('/api/v1/quests/:assignmentId/submissions', writeLimiter, asyncRoute(async (req, res) => res.status(201).json(await engine.submit(req.identity, parse(assignmentIdSchema, req.params.assignmentId), parse(submissionSchema, req.body), requireIdempotency(req)))));
-  app.get('/api/v1/collectibles', asyncRoute(async (req, res) => res.json(await repository.getCollectibles(req.identity.id))));
+  app.get('/api/v1/collectibles', asyncRoute(async (req, res) => sendCachedJson(req, res, await repository.getCollectibles(req.identity.id))));
   app.get('/api/v1/feed', asyncRoute(async (req, res) => res.json(await engine.feed(req.identity))));
   app.get('/api/v1/leaderboard', asyncRoute(async (req, res) => res.json(await engine.leaderboard(req.identity))));
   app.get('/api/v1/rewards', asyncRoute(async (req, res) => res.json(await engine.rewards(req.identity))));
@@ -216,6 +223,14 @@ export async function startServer(env = process.env) {
   return server;
 }
 
+function sendCachedJson(req, res, data) {
+  const payload = JSON.stringify(data);
+  const hash = `W/"${createHash('sha256').update(payload).digest('hex').slice(0, 16)}"`;
+  res.setHeader('ETag', hash);
+  res.setHeader('Cache-Control', 'private, no-cache');
+  if (req.get('if-none-match') === hash) return res.status(304).end();
+  return res.type('json').send(payload);
+}
 function parse(schema, value) { return schema.parse(value); }
 function requireIdempotency(req) {
   const result = idempotencySchema.safeParse(req.get('idempotency-key'));
