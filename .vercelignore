@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+
+# Tests
+**/*.test.js
+**/*.test.jsx
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.js
+src/setupTests.js
+
+# Dev-only files
+docker-compose.yml
+Dockerfile
+.dockerignore
+scripts/
+docs/
+*.md
+.env.example
+.env.production.example
+test-output.txt
+
+# IDE / tooling
+.vscode/
+.idea/
+.github/
+.agents/
+.claude/
+.codex/
+.kilo/
+.hintrc
+
+# Flutter mobile app
+mobile_flutter/
