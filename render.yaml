@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: quests-app
+    env: node
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: quests-db
+          property: connectionString
+
+  - type: cron
+    name: quests-scheduler
+    env: node
+    schedule: "0 * * * *"
+    buildCommand: npm ci
+    startCommand: node scripts/run-scheduler.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: quests-db
+          property: connectionString
+
+databases:
+  - name: quests-db
+    databaseName: questdb
+    user: questuser
