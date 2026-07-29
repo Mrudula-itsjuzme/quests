@@ -152,7 +152,7 @@ export class PostgresQuestRepository {
   }
   async getAssignment(userId, assignmentId) { const { rows } = await this.pool.query('SELECT * FROM quest_assignments WHERE user_id = $1 AND id = $2', [userId, assignmentId]); return rows[0] ? mapAssignment(rows[0]) : null; }
   async updateAssignment(assignmentId, patch) {
-    const allowed = { status: 'status', progressValue: 'progress_value', completedAt: 'completed_at', updatedAt: 'updated_at' };
+    const allowed = { status: 'status', progressValue: 'progress_value', completedAt: 'completed_at' };
     const entries = Object.entries(patch).filter(([key]) => allowed[key]);
     if (!entries.length) return null;
     const values = entries.map(([, value]) => value);
