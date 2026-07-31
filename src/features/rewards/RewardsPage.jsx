@@ -6,7 +6,7 @@ import { PlayerHeader } from '../quests/QuestsPage';
 import { useClaimRewards, useCollectibles, useLeaderboard, useMe, useRewards } from '../quests/queries';
 import { playHover, playSuccess, playTap } from '../../lib/useSoundEffects';
 import { AnimatedCounter } from '../../components/motion/AnimatedCounter';
-import { DashboardSkeleton } from '../../components/motion/SkeletonLoader';
+import { DashboardSkeleton, RewardsSkeleton } from '../../components/motion/SkeletonLoader';
 import { IntentionalEmptyState } from '../../components/motion/EmptyState';
 import { staggerContainer, staggerItem, springConfig } from '../../components/motion/MotionVariants';
 
@@ -25,22 +25,62 @@ export function RewardsPage() {
   const [notice, setNotice] = useState('');
   const [showLeaderboard, setShowLeaderboard] = useState(false);
 
-  if (collectionQuery.isLoading || meQuery.isLoading || rewardsQuery.isLoading || leaderboardQuery.isLoading) {
-    return (
-      <main className="rewards-reference">
-        <DashboardSkeleton />
-        <p className="sr-only" role="status">Opening the reward vault…</p>
-      </main>
-    );
-  }
-  if (collectionQuery.isError || meQuery.isError || rewardsQuery.isError || leaderboardQuery.isError) {
-    return <section className="ornate-panel error-state" role="alert"><h2>The reward vault is sealed</h2><p>Please check the quest service and try again.</p></section>;
-  }
+  const isRewardsLoading = collectionQuery.isLoading || meQuery.isLoading || rewardsQuery.isLoading || leaderboardQuery.isLoading;
+  const isRewardsError = collectionQuery.isError || meQuery.isError || rewardsQuery.isError || leaderboardQuery.isError;
 
-  const me = meQuery.data;
-  const collection = collectionQuery.data || [];
-  const rewards = rewardsQuery.data || [];
-  const leaderboard = leaderboardQuery.data || [];
+  return (
+    <AnimatePresence mode="wait">
+      {isRewardsLoading ? (
+        <motion.main
+          key="rewards-skeleton"
+          className="rewards-reference"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0, filter: 'blur(8px)', transition: { duration: 0.22 } }}
+        >
+          <RewardsSkeleton />
+          <p className="sr-only" role="status">Opening the reward vault…</p>
+        </motion.main>
+      ) : isRewardsError ? (
+        <motion.section
+          key="rewards-error"
+          className="ornate-panel error-state"
+          role="alert"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <h2>The reward vault is sealed</h2>
+          <p>Please check the quest service and try again.</p>
+        </motion.section>
+      ) : (
+        <RewardsContent
+          key="rewards-content"
+          me={meQuery.data}
+          collection={collectionQuery.data || []}
+          rewards={rewardsQuery.data || []}
+          leaderboard={leaderboardQuery.data || []}
+          claimRewards={claimRewards}
+          notice={notice}
+          setNotice={setNotice}
+          showLeaderboard={showLeaderboard}
+          setShowLeaderboard={setShowLeaderboard}
+        />
+      )}
+    </AnimatePresence>
+  );
+}
+
+function RewardsContent({
+  me,
+  collection,
+  rewards,
+  leaderboard,
+  claimRewards,
+  notice,
+  setNotice,
+  showLeaderboard,
+  setShowLeaderboard,
+}) {
   const seasonTarget = 10000;
   const seasonProgress = Math.min(1, me.totalXp / seasonTarget);
   const currentRank = leaderboard.find((entry) => entry.isCurrentUser) || { position: '—', rankTitle: 'Adventurer', totalXp: me.totalXp };
@@ -53,6 +93,7 @@ export function RewardsPage() {
       variants={staggerContainer(0.05, 0.04)}
       initial="hidden"
       animate="show"
+      exit={{ opacity: 0, filter: 'blur(6px)', transition: { duration: 0.18 } }}
     >
       <motion.div variants={staggerItem}>
         <PlayerHeader me={me} page="Rewards" />
@@ -106,7 +147,7 @@ export function RewardsPage() {
             {rewards.filter((reward) => reward.status === 'claimable').slice(0, 3).map((reward) => <motion.article key={reward.level} whileHover={{ scale: 1.04 }} onMouseEnter={playHover} transition={springConfig.tactile}><Icon name={reward.rewardType === 'badge' ? 'star' : reward.rewardType === 'title' ? 'scroll' : 'chest'} /><strong>{reward.amount}</strong><span>{reward.label}</span></motion.article>)}
             {!rewards.some((reward) => reward.status === 'claimable') && <p className="reward-empty">Your next milestone reward is still ahead.</p>}
           </div>
-          <motion.button className="claim-all-button" type="button" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} disabled={claimRewards.isPending || !rewards.some((reward) => reward.status === 'claimable')} onClick={async () => { playSuccess(); const claimed = await claimRewards.mutateAsync(); setNotice(claimed.length ? `${claimed.length} milestone reward${claimed.length === 1 ? '' : 's'} claimed.` : 'No rewards are ready yet.'); }}>Claim All</motion.button>
+          <motion.button className="claim-all-button" type="button" whileHover={{ scale: 1.05, boxShadow: '0 0 20px rgba(201,154,75,0.4)' }} whileTap={{ scale: 0.98 }} transition={springConfig.cinematic} disabled={claimRewards.isPending || !rewards.some((reward) => reward.status === 'claimable')} onClick={async () => { playSuccess(); const claimed = await claimRewards.mutateAsync(); setTimeout(() => setNotice(claimed.length ? `${claimed.length} milestone reward${claimed.length === 1 ? '' : 's'} claimed.` : 'No rewards are ready yet.'), 600); }}>Claim All</motion.button>
         </RewardPanel>
 
         <RewardPanel title="Current Rank" className="current-rank-panel">

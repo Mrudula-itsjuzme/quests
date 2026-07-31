@@ -4,35 +4,63 @@ import { Icon } from '../../components/Icon';
 import { useFeed, useLeaderboard } from '../quests/queries';
 import { playHover, playTap } from '../../lib/useSoundEffects';
 import { AnimatedCounter } from '../../components/motion/AnimatedCounter';
-import { DashboardSkeleton } from '../../components/motion/SkeletonLoader';
+import { DashboardSkeleton, GuildSkeleton } from '../../components/motion/SkeletonLoader';
 import { IntentionalEmptyState } from '../../components/motion/EmptyState';
-import { staggerContainer, staggerItem, springConfig } from '../../components/motion/MotionVariants';
+import { calmStaggerContainer, calmFade, staggerContainer, staggerItem, springConfig } from '../../components/motion/MotionVariants';
 
 export function GuildPage() {
   const feedQuery = useFeed();
   const leaderboardQuery = useLeaderboard();
   const [tab, setTab] = useState('feed');
 
-  if (feedQuery.isLoading || leaderboardQuery.isLoading) {
-    return (
-      <main className="guild-page page-stack fantasy-page" aria-busy="true">
-        <DashboardSkeleton />
-      </main>
-    );
-  }
-  if (feedQuery.isError || leaderboardQuery.isError) {
-    return <section className="ornate-panel error-state" role="alert"><h2>The community path is unavailable</h2><p>Please check the quest service and try again.</p></section>;
-  }
+  const isGuildLoading = feedQuery.isLoading || leaderboardQuery.isLoading;
+  const isGuildError = feedQuery.isError || leaderboardQuery.isError;
 
-  const feed = feedQuery.data || [];
-  const leaderboard = leaderboardQuery.data || [];
+  return (
+    <AnimatePresence mode="wait">
+      {isGuildLoading ? (
+        <motion.main
+          key="guild-skeleton"
+          className="guild-page page-stack fantasy-page"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0, filter: 'blur(8px)', transition: { duration: 0.22 } }}
+        >
+          <GuildSkeleton />
+          <p className="sr-only" role="status">Gathering community activity…</p>
+        </motion.main>
+      ) : isGuildError ? (
+        <motion.section
+          key="guild-error"
+          className="ornate-panel error-state"
+          role="alert"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <h2>The community path is unavailable</h2>
+          <p>Please check the quest service and try again.</p>
+        </motion.section>
+      ) : (
+        <GuildContent
+          key="guild-content"
+          feed={feedQuery.data || []}
+          leaderboard={leaderboardQuery.data || []}
+          tab={tab}
+          setTab={setTab}
+        />
+      )}
+    </AnimatePresence>
+  );
+}
 
+function GuildContent({ feed, leaderboard, tab, setTab }) {
   return (
     <motion.main
       className="guild-page page-stack fantasy-page"
-      variants={staggerContainer(0.05, 0.04)}
+      variants={calmStaggerContainer()}
       initial="hidden"
       animate="show"
+      exit={{ opacity: 0, filter: 'blur(6px)', transition: { duration: 0.4 } }}
     >
       <motion.header className="reference-header compact-header" variants={staggerItem}>
         <motion.div className="avatar-medallion" whileHover={{ scale: 1.08 }} onMouseEnter={playHover} transition={springConfig.tactile}>
@@ -79,7 +107,7 @@ export function GuildPage() {
         {tab === 'feed' && (
           <motion.section key="feed" className="community-feed" aria-label="Quest completion feed" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.22 }}>
             {feed.map((entry) => (
-              <motion.article key={entry.id} className="ornate-panel feed-card" whileHover={{ scale: 1.015, x: 4, boxShadow: '0 8px 24px rgba(0, 0, 0, 0.25)' }} onMouseEnter={playHover} transition={springConfig.tactile}>
+              <motion.article key={entry.id} className="ornate-panel feed-card" variants={calmFade} whileHover={{ scale: 1.015, x: 4, boxShadow: '0 8px 24px rgba(0, 0, 0, 0.25)' }} onMouseEnter={playHover} transition={springConfig.tactile}>
                 <div className="round-emblem"><Icon name="compass" /></div>
                 <div><span>{entry.rankTitle}</span><h2>{entry.displayName}</h2><p>Completed <strong>{entry.questName}</strong></p><small>{new Date(entry.createdAt).toLocaleString()}</small></div>
                 <strong className="feed-xp">+<AnimatedCounter value={entry.xpEarned} /> XP</strong>

@@ -5,7 +5,7 @@ import { useAuth } from './AuthContext';
 import { playHover, playTap } from '../../lib/useSoundEffects';
 
 export function LandingPage() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, enterAsGuest } = useAuth();
   if (isAuthenticated) return <Navigate to="/app" replace />;
 
   return (
@@ -26,6 +26,20 @@ export function LandingPage() {
           </motion.div>
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Link className="ghost-action" to="/sign-in" onClick={playTap} onMouseEnter={playHover}>Sign in</Link>
+          </motion.div>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <button
+              type="button"
+              className="ghost-action guest-action-btn"
+              onClick={() => {
+                playTap();
+                enterAsGuest();
+              }}
+              onMouseEnter={playHover}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+            >
+              Enter as Guest <span>›</span>
+            </button>
           </motion.div>
         </div>
       </motion.section>

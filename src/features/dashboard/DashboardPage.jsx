@@ -25,15 +25,65 @@ export function DashboardPage() {
     ? Math.round(activeQuests.reduce((sum, quest) => sum + questProgressRatio(quest), 0) / activeQuests.length * 100)
     : 0;
 
-  if (meLoading || questsLoading) return <main className="dashboard-reference"><DashboardSkeleton /><p className="sr-only" role="status">Loading your dashboard…</p></main>;
-  if (meError) return <section className="ornate-panel error-state" role="alert"><h2>Your dashboard could not be opened</h2><p>Please check the quest service and try again.</p></section>;
+  const isDashboardLoading = meLoading || questsLoading;
 
+  return (
+    <AnimatePresence mode="wait">
+      {isDashboardLoading ? (
+        <motion.main
+          key="dashboard-skeleton"
+          className="dashboard-reference"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0, filter: 'blur(8px)', transition: { duration: 0.22 } }}
+        >
+          <DashboardSkeleton />
+          <p className="sr-only" role="status">Loading your dashboard…</p>
+        </motion.main>
+      ) : meError ? (
+        <motion.section
+          key="dashboard-error"
+          className="ornate-panel error-state"
+          role="alert"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <h2>Your dashboard could not be opened</h2>
+          <p>Please check the quest service and try again.</p>
+        </motion.section>
+      ) : (
+        <DashboardContent
+          key="dashboard-content"
+          me={me}
+          activeQuests={activeQuests}
+          questsError={questsError}
+          featured={featured}
+          selected={selected}
+          setSelectedId={setSelectedId}
+          completedCount={completedCount}
+          activeProgress={activeProgress}
+        />
+      )}
+    </AnimatePresence>
+  );
+}
+
+function DashboardContent({
+  me,
+  activeQuests,
+  questsError,
+  featured,
+  selected,
+  setSelectedId,
+  completedCount,
+  activeProgress,
+}) {
   const featuredRatio = featured ? questProgressRatio(featured) : 0;
-  const rankIndex = Math.max(0, Math.floor((me.totalXp || 0) / 500));
+  const rankIndex = Math.max(0, Math.floor(((me?.totalXp) || 0) / 500));
   const rankNames = ['Novice I', 'Novice II', 'Novice III', 'Silver I', 'Silver II', 'Gold I'];
   const rank = rankNames[Math.min(rankIndex, rankNames.length - 1)];
   const nextRankXp = (rankIndex + 1) * 500;
-  const rankProgress = Math.min(1, (me.totalXp || 0) / nextRankXp);
+  const rankProgress = Math.min(1, ((me?.totalXp) || 0) / nextRankXp);
 
   return (
     <motion.main
@@ -42,6 +92,7 @@ export function DashboardPage() {
       variants={staggerContainer(0.06, 0.05)}
       initial="hidden"
       animate="show"
+      exit={{ opacity: 0, filter: 'blur(6px)', transition: { duration: 0.18 } }}
     >
       <motion.div variants={staggerItem}>
         <PlayerHeader me={me} page="Dashboard" />
@@ -49,10 +100,7 @@ export function DashboardPage() {
 
       <section className="desktop-command-center" aria-label="Desktop adventure dashboard">
         <div className="desktop-command-main">
-          <motion.section
-            className="desktop-progression-hero ornate-panel"
-            variants={staggerItem}
-          >
+          <motion.section className="desktop-progression-hero ornate-panel" variants={staggerItem}>
             <img src="/dashboard-castle-panorama.png" alt="" />
             <div className="desktop-welcome">
               <span>Welcome back,</span>
@@ -67,11 +115,11 @@ export function DashboardPage() {
                 </motion.article>
               </div>
             </div>
-            <div className="desktop-xp-orbit" style={{ '--progress': `${me.progressToNextLevel * 360}deg` }}>
+            <div className="desktop-xp-orbit" style={{ '--progress': `${(me.progressToNextLevel || 0) * 360}deg` }}>
               <div>
                 <strong><AnimatedCounter value={me.totalXp} /></strong>
                 <span>XP</span>
-                <small>of {(me.totalXp + me.xpForCurrentLevel - me.xpIntoLevel).toLocaleString()} XP</small>
+                <small>of {(me.totalXp + (me.xpForCurrentLevel || 500) - (me.xpIntoLevel || 0)).toLocaleString()} XP</small>
               </div>
             </div>
           </motion.section>
@@ -139,10 +187,7 @@ export function DashboardPage() {
         </motion.aside>
       </section>
 
-      <motion.section
-        className="focus-hero ornate-panel dashboard-focus"
-        variants={staggerItem}
-      >
+      <motion.section className="focus-hero ornate-panel dashboard-focus" variants={staggerItem}>
         <img className="focus-hero-art" src="/quest-scholar-hero.png" alt="" />
         <div className="focus-label"><span>◆</span> Today’s Focus <span>◆</span></div>
         <div className="quest-ring" style={{ '--progress': `${featuredRatio * 360}deg` }}>

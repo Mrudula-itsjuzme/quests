@@ -1,134 +1,601 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Navigate, Link, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Icon } from '../../components/Icon';
+import { NyxCat } from '../../components/NyxCat';
 import { supabaseConfigured } from '../../lib/supabase';
 import { useAuth } from './AuthContext';
-import { playHover, playTap } from '../../lib/useSoundEffects';
+import { AuthParticles } from './AuthParticles';
+import { playHover, playTap, playSuccess } from '../../lib/useSoundEffects';
+
+/* ─── helpers ─────────────────────────────────────────────────────────────── */
+
+const REMEMBERED_KEY = 'habbit_remembered_email';
+
+function getRememberedEmail() {
+  try { return localStorage.getItem(REMEMBERED_KEY) || ''; } catch { return ''; }
+}
+function setRememberedEmail(email) {
+  try { localStorage.setItem(REMEMBERED_KEY, email); } catch { /* ignore */ }
+}
+function clearRememberedEmail() {
+  try { localStorage.removeItem(REMEMBERED_KEY); } catch { /* ignore */ }
+}
+
+function emailIsValid(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function getPasswordStrength(pw) {
+  if (!pw) return 0;
+  let score = 0;
+  if (pw.length >= 8) score++;
+  if (/[a-z]/.test(pw) && /[A-Z]/.test(pw)) score++;
+  if (/\d/.test(pw)) score++;
+  if (/[^a-zA-Z0-9]/.test(pw)) score++;
+  return score; // 0-4
+}
+
+const strengthLabels = ['', 'Weak', 'Fair', 'Good', 'Strong'];
+const strengthColors = ['transparent', '#e05a3a', '#e0a03a', '#8bc56c', '#eab552'];
+
+/* ─── animation variants ──────────────────────────────────────────────────── */
+
+const cardVariants = {
+  enter: (dir) => ({ opacity: 0, x: dir > 0 ? 60 : -60, scale: 0.97 }),
+  center: { opacity: 1, x: 0, scale: 1 },
+  exit: (dir) => ({ opacity: 0, x: dir > 0 ? -60 : 60, scale: 0.97 }),
+};
+
+const fieldStagger = {
+  hidden: { opacity: 0, y: 18 },
+  show: (i) => ({
+    opacity: 1, y: 0,
+    transition: { delay: 0.08 * i, type: 'spring', stiffness: 400, damping: 28 },
+  }),
+};
+
+/* ─── EyeIcon SVG ─────────────────────────────────────────────────────────── */
+
+function EyeIcon({ open }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" className="auth-eye-icon">
+      <motion.path
+        d={open
+          ? 'M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12Z'
+          : 'M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12Z'}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <motion.circle
+        cx="12" cy="12"
+        r={open ? 3.5 : 0}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        animate={{ r: open ? 3.5 : 0, opacity: open ? 1 : 0 }}
+        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+      />
+      {!open && (
+        <motion.line
+          x1="2" y1="2" x2="22" y2="22"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          initial={{ pathLength: 0 }}
+          animate={{ pathLength: 1 }}
+          transition={{ duration: 0.2 }}
+        />
+      )}
+    </svg>
+  );
+}
+
+/* ─── PasswordStrengthMeter ───────────────────────────────────────────────── */
+
+function PasswordStrengthMeter({ strength }) {
+  return (
+    <div className="auth-strength" aria-label={`Password strength: ${strengthLabels[strength]}`}>
+      <div className="auth-strength-bars">
+        {[1, 2, 3, 4].map((level) => (
+          <motion.div
+            key={level}
+            className="auth-strength-segment"
+            animate={{
+              backgroundColor: strength >= level ? strengthColors[strength] : 'rgba(255,255,255,0.06)',
+              scaleX: strength >= level ? 1 : 1,
+            }}
+            transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+          />
+        ))}
+      </div>
+      <AnimatePresence mode="wait">
+        {strength > 0 && (
+          <motion.span
+            key={strength}
+            className="auth-strength-label"
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            style={{ color: strengthColors[strength] }}
+          >
+            {strengthLabels[strength]}
+          </motion.span>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+/* ─── SubmitButton with loading morph ─────────────────────────────────────── */
+
+function SubmitButton({ state, isSignUp, onClick }) {
+  const label = isSignUp ? 'Begin journey' : 'Enter your space';
+  const loadingLabel = 'Opening...';
+
+  return (
+    <motion.button
+      type="submit"
+      className="auth-submit"
+      data-state={state}
+      disabled={state === 'loading' || state === 'success'}
+      onClick={onClick}
+      onMouseEnter={playHover}
+      layout
+      transition={{ layout: { type: 'spring', stiffness: 400, damping: 30 } }}
+    >
+      <AnimatePresence mode="wait" initial={false}>
+        {state === 'idle' && (
+          <motion.span key="idle" className="auth-submit-content"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ duration: 0.15 }}
+          >
+            <span>{label}</span>
+            <Icon name="compass" />
+          </motion.span>
+        )}
+        {state === 'loading' && (
+          <motion.span key="loading" className="auth-submit-spinner"
+            initial={{ opacity: 0, rotate: -90 }}
+            animate={{ opacity: 1, rotate: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            aria-label={loadingLabel}
+          >
+            <svg viewBox="0 0 36 36" className="auth-ring">
+              <circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" strokeWidth="2.5" opacity="0.15" />
+              <circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" strokeWidth="2.5"
+                strokeDasharray="94.2"
+                strokeDashoffset="72"
+                strokeLinecap="round"
+                className="auth-ring-arc"
+              />
+            </svg>
+          </motion.span>
+        )}
+        {state === 'success' && (
+          <motion.span key="success" className="auth-submit-check"
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ type: 'spring', stiffness: 500, damping: 22 }}
+          >
+            <Icon name="check" />
+          </motion.span>
+        )}
+      </AnimatePresence>
+    </motion.button>
+  );
+}
+
+/* ─── Main AuthPage ───────────────────────────────────────────────────────── */
 
 export function AuthPage({ mode }) {
-  const { devMode, isAuthenticated, signInWithPassword, signUpWithPassword } = useAuth();
+  const { devMode, isAuthenticated, signInWithPassword, signUpWithPassword, enterAsGuest } = useAuth();
   const location = useLocation();
   const isSignUp = mode === 'sign-up';
-  const [email, setEmail] = useState('');
+
+  // Remembered email
+  const remembered = useMemo(() => getRememberedEmail(), []);
+  const [email, setEmail] = useState(remembered);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-  const [confirmationSent, setConfirmationSent] = useState(false);
+  const [submitState, setSubmitState] = useState('idle'); // idle | loading | success
   const [showPassword, setShowPassword] = useState(false);
-  const [portalState, setPortalState] = useState('idle');
+  const [emailTouched, setEmailTouched] = useState(false);
+  const [passwordTouched, setPasswordTouched] = useState(false);
+  const [direction, setDirection] = useState(0); // for AnimatePresence direction
+  const [isTyping, setIsTyping] = useState(false);
+  const typingTimeout = useRef(null);
 
+  const emailValid = emailIsValid(email);
+  const passwordStrength = getPasswordStrength(password);
+
+  // Redirect if already authed
   if (isAuthenticated && !devMode) return <Navigate to={location.state?.from || '/app'} replace />;
+
+  const handleTyping = useCallback(() => {
+    setIsTyping(true);
+    clearTimeout(typingTimeout.current);
+    typingTimeout.current = setTimeout(() => setIsTyping(false), 800);
+  }, []);
+
+  const [emailSent, setEmailSent] = useState(false);
+  const [resendSeconds, setResendSeconds] = useState(0);
+
+  useEffect(() => {
+    if (resendSeconds <= 0) return;
+    const timer = setInterval(() => setResendSeconds((s) => s - 1), 1000);
+    return () => clearInterval(timer);
+  }, [resendSeconds]);
 
   const onSubmit = async (event) => {
     event.preventDefault();
     playTap();
     setError('');
-    setSubmitting(true);
-    setPortalState('opening');
+    setSubmitState('loading');
+
     try {
       if (!supabaseConfigured) {
-        throw new Error('Authentication is not configured on this environment. Add the Supabase URL and publishable key before signing in.');
+        throw new Error('Authentication is not configured. Add Supabase credentials to enable sign in.');
       }
       if (isSignUp) {
-        await signUpWithPassword(email, password);
-        setConfirmationSent(true);
-        setPortalState('open');
+        const res = await signUpWithPassword(email, password);
+        setRememberedEmail(email);
+        playSuccess();
+        setSubmitState('success');
+        if (!res?.session) {
+          setEmailSent(true);
+          setResendSeconds(60);
+          return;
+        }
       } else {
         await signInWithPassword(email, password);
       }
+
+      // Remember email on success
+      setRememberedEmail(email);
+      playSuccess();
+      setSubmitState('success');
+
+      // Let celebration play, then redirect happens via auth state change
     } catch (err) {
-      setError(err.message || 'Authentication failed');
-      setPortalState('idle');
-    } finally {
-      setSubmitting(false);
+      setError(err.message || 'Authentication failed. Please try again.');
+      setSubmitState('idle');
     }
   };
 
+  // Direction for mode transition
   const switchPath = isSignUp ? '/sign-in' : '/sign-up';
+  const handleModeSwitch = () => {
+    setDirection(isSignUp ? -1 : 1);
+    setError('');
+    setPassword('');
+    setPasswordTouched(false);
+    playTap();
+  };
+
+  const isReturning = !isSignUp && remembered && email === remembered;
+
+  if (emailSent) {
+    return (
+      <main className="auth-shell auth-premium">
+        <AuthParticles />
+        <motion.div
+          className="auth-card-container ornate-panel email-verify-card"
+          initial={{ opacity: 0, scale: 0.94 }}
+          animate={{ opacity: 1, scale: 1 }}
+        >
+          <div className="auth-brand">
+            <span className="brand-badge"><Icon name="feather" /></span>
+            <h1>Verification Scroll Sent</h1>
+            <p>We sent a confirmation link to <strong>{email}</strong>. Open the scroll to activate your sanctuary access.</p>
+          </div>
+          <div className="email-verify-actions">
+            <button
+              type="button"
+              className="primary-btn"
+              disabled={resendSeconds > 0}
+              onClick={() => {
+                playTap();
+                setResendSeconds(60);
+                window.dispatchEvent(new CustomEvent('habbit-notice', { detail: 'Verification link resent to your email.' }));
+              }}
+            >
+              {resendSeconds > 0 ? `Resend scroll in ${resendSeconds}s` : 'Resend Verification Scroll'}
+            </button>
+            <Link to="/sign-in" className="secondary-btn-link" onClick={() => { playTap(); setEmailSent(false); }}>
+              Return to Sign In ›
+            </Link>
+          </div>
+        </motion.div>
+      </main>
+    );
+  }
 
   return (
-    <main className="auth-shell celestial-auth" data-portal-state={portalState}>
+    <main className="auth-shell auth-premium" data-submit-state={submitState}>
+      {/* Ambient background */}
+      <AuthParticles />
+      <div className="auth-ambient-gradient" aria-hidden="true" />
+
+      {/* Glassmorphic card */}
       <motion.section
-        className="auth-experience"
+        className="auth-glass-card"
         aria-labelledby="auth-title"
-        initial={{ opacity: 0, y: 15, scale: 0.97 }}
+        initial={{ opacity: 0, y: 24, scale: 0.96 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ type: 'spring', stiffness: 350, damping: 25 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 26, delay: 0.1 }}
       >
-        <div className="auth-portal" aria-hidden="true">
-          <img src="/auth-celestial-aperture.png" alt="" />
-          <div className="auth-portal-emblem"><Icon name="compass" /></div>
-          <p>THE WAYFARER ARCHIVE</p>
+        {/* Brand */}
+        <Link className="auth-brand" to="/" aria-label="Habbit home" onClick={playTap} onMouseEnter={playHover}>
+          <span className="auth-brand-mark"><Icon name="compass" /></span>
+          <span>HABBIT</span>
+        </Link>
+
+        {/* NyxCat companion */}
+        <div className={`auth-nyx ${isTyping ? 'alert' : ''}`} aria-hidden="true">
+          <NyxCat small />
         </div>
 
-        <div className="auth-content">
-          <Link className="auth-brand" to="/" aria-label="Habbit home" onClick={playTap} onMouseEnter={playHover}>
-            <span className="auth-brand-mark"><Icon name="compass" /></span>
-            <span>HABBIT</span>
-          </Link>
+        {/* Animated form content */}
+        <AnimatePresence mode="wait" custom={direction}>
+          <motion.div
+            key={mode}
+            className="auth-form-area"
+            custom={direction}
+            variants={cardVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ type: 'spring', stiffness: 350, damping: 28 }}
+          >
+            {/* Header */}
+            <div className="auth-header">
+              <motion.p
+                className="auth-kicker"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.15 }}
+              >
+                <Icon name="star" />
+                {isSignUp ? 'NEW JOURNEY' : 'WELCOME HOME'}
+                <Icon name="star" />
+              </motion.p>
 
-          <div className="auth-copy">
-            <p className="auth-kicker"><Icon name="star" /> CELESTIAL GATE <Icon name="star" /></p>
-            <h1 id="auth-title">{isSignUp ? 'Begin your legend.' : 'Welcome back, Seeker.'}</h1>
-            <p>{isSignUp ? 'Create your sigil and take the first step.' : 'Your path remembers where you left off.'}</p>
-          </div>
+              <h1 id="auth-title">
+                {isSignUp
+                  ? 'Create your space.'
+                  : isReturning
+                    ? 'Welcome back.'
+                    : 'Enter your space.'}
+              </h1>
 
-          {confirmationSent ? (
-            <div className="auth-success" role="status">
-              <span className="auth-success-icon"><Icon name="check" /></span>
-              <p className="auth-kicker">THE GATE IS OPEN</p>
-              <h2>{isSignUp ? 'Check your email.' : 'Welcome home.'}</h2>
-              <p>
-                Confirm your account from the message we sent, then return to continue.
+              <p className="auth-subtitle">
+                {isSignUp
+                  ? 'A personal sanctuary for your quests awaits.'
+                  : isReturning
+                    ? 'Your path remembers where you left off.'
+                    : 'Step into your personal quest archive.'}
               </p>
             </div>
-          ) : (
-            <form onSubmit={onSubmit} className="auth-form celestial-form">
-              <div className="auth-field">
-                <label htmlFor="email">Email address</label>
-                <input id="email" type="email" required value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" placeholder="seeker@example.com" />
-              </div>
-              <div className="auth-field">
-                <label htmlFor="password">Passphrase</label>
-                <div className="auth-password">
+
+            {/* Success celebration */}
+            {submitState === 'success' ? (
+              <motion.div
+                className="auth-success-celebration"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 22 }}
+                role="status"
+              >
+                <motion.div
+                  className="auth-success-ring"
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: 'spring', stiffness: 200, damping: 18, delay: 0.1 }}
+                >
+                  <Icon name="check" />
+                </motion.div>
+                <motion.h2
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.25 }}
+                >
+                  {isSignUp ? 'Check your email.' : 'Welcome home.'}
+                </motion.h2>
+                <motion.p
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.35 }}
+                >
+                  {isSignUp
+                    ? 'Confirm your account from the message we sent, then return to continue.'
+                    : 'Preparing your sanctuary...'}
+                </motion.p>
+              </motion.div>
+            ) : (
+              /* Form */
+              <form onSubmit={onSubmit} className="auth-form" noValidate>
+                {/* Email field — floating label */}
+                <motion.div
+                  className={`auth-floating-field ${emailTouched && email && !emailValid ? 'invalid' : ''} ${emailTouched && emailValid ? 'valid' : ''}`}
+                  variants={fieldStagger}
+                  initial="hidden"
+                  animate="show"
+                  custom={0}
+                >
                   <input
-                    id="password"
+                    id="auth-email"
+                    type="email"
+                    required
+                    value={email}
+                    placeholder=" "
+                    autoComplete="email"
+                    onChange={(e) => { setEmail(e.target.value); handleTyping(); }}
+                    onBlur={() => setEmailTouched(true)}
+                  />
+                  <label htmlFor="auth-email">Email address</label>
+                  <div className="auth-field-indicator">
+                    {emailTouched && emailValid && (
+                      <motion.span
+                        className="auth-valid-check"
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+                      >
+                        <Icon name="check" />
+                      </motion.span>
+                    )}
+                  </div>
+
+                  {/* Remembered email hint */}
+                  {isReturning && (
+                    <button
+                      type="button"
+                      className="auth-not-you"
+                      onClick={() => { clearRememberedEmail(); setEmail(''); setEmailTouched(false); playTap(); }}
+                    >
+                      Not you?
+                    </button>
+                  )}
+                </motion.div>
+
+                {/* Password field — floating label + reveal + strength */}
+                <motion.div
+                  className="auth-floating-field auth-password-wrap"
+                  variants={fieldStagger}
+                  initial="hidden"
+                  animate="show"
+                  custom={1}
+                >
+                  <input
+                    id="auth-password"
                     type={showPassword ? 'text' : 'password'}
                     required
                     minLength={8}
                     value={password}
-                    onChange={(event) => setPassword(event.target.value)}
+                    placeholder=" "
                     autoComplete={isSignUp ? 'new-password' : 'current-password'}
-                    placeholder="At least 8 characters"
+                    onChange={(e) => { setPassword(e.target.value); handleTyping(); }}
+                    onBlur={() => setPasswordTouched(true)}
                   />
-                  <button type="button" onClick={() => { playTap(); setShowPassword((visible) => !visible); }} aria-label={showPassword ? 'Hide password' : 'Show password'}>
-                    {showPassword ? 'Hide' : 'Show'}
+                  <label htmlFor="auth-password">
+                    {isSignUp ? 'Create a passphrase' : 'Passphrase'}
+                  </label>
+
+                  {/* Animated eye toggle */}
+                  <button
+                    type="button"
+                    className="auth-reveal-btn"
+                    onClick={() => { playTap(); setShowPassword((v) => !v); }}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    <EyeIcon open={showPassword} />
                   </button>
-                </div>
-              </div>
-              {!isSignUp && <button className="auth-forgot" type="button" onClick={() => { playTap(); setError('Password recovery is available when Supabase authentication is configured.'); }}>Forgot passphrase?</button>}
-              {error && <p role="alert" className="form-error">{error}</p>}
-              <motion.button
-                type="submit"
-                className="auth-submit"
-                disabled={submitting}
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
+                </motion.div>
+
+                {/* Password strength meter (signup only) */}
+                {isSignUp && passwordTouched && password.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                  >
+                    <PasswordStrengthMeter strength={passwordStrength} />
+                  </motion.div>
+                )}
+
+                {/* Forgot password (login only) */}
+                {!isSignUp && (
+                  <motion.button
+                    className="auth-forgot"
+                    type="button"
+                    variants={fieldStagger}
+                    initial="hidden"
+                    animate="show"
+                    custom={2}
+                    onClick={() => { playTap(); setError('Password recovery is available when Supabase authentication is configured.'); }}
+                  >
+                    Forgot passphrase?
+                  </motion.button>
+                )}
+
+                {/* Error */}
+                <AnimatePresence>
+                  {error && (
+                    <motion.p
+                      role="alert"
+                      className="auth-error"
+                      initial={{ opacity: 0, y: -8, height: 0 }}
+                      animate={{ opacity: 1, y: 0, height: 'auto' }}
+                      exit={{ opacity: 0, y: -8, height: 0 }}
+                    >
+                      {error}
+                    </motion.p>
+                  )}
+                </AnimatePresence>
+
+                {/* Submit with loading morph */}
+                <motion.div
+                  variants={fieldStagger}
+                  initial="hidden"
+                  animate="show"
+                  custom={isSignUp ? 2 : 3}
+                >
+                  <SubmitButton state={submitState} isSignUp={isSignUp} />
+                </motion.div>
+              </form>
+            )}
+
+            {/* Mode switch */}
+            <motion.p
+              className="auth-switch"
+              variants={fieldStagger}
+              initial="hidden"
+              animate="show"
+              custom={isSignUp ? 3 : 4}
+            >
+              {isSignUp ? 'Already have a space?' : 'New to the path?'}{' '}
+              <Link to={switchPath} onClick={handleModeSwitch} onMouseEnter={playHover}>
+                {isSignUp ? 'Sign in' : 'Create an account'}
+              </Link>
+            </motion.p>
+
+            <motion.div
+              className="auth-guest-option"
+              variants={fieldStagger}
+              initial="hidden"
+              animate="show"
+              custom={isSignUp ? 4 : 5}
+              style={{ textAlign: 'center', marginTop: '14px' }}
+            >
+              <button
+                type="button"
+                className="auth-forgot"
+                style={{ fontSize: '0.82rem', textDecoration: 'underline', cursor: 'pointer', color: 'var(--auth-gold)' }}
+                onClick={() => {
+                  playTap();
+                  enterAsGuest();
+                }}
                 onMouseEnter={playHover}
               >
-                <span>{submitting ? 'Aligning the stars…' : isSignUp ? 'Create my sigil' : 'Enter the archive'}</span>
-                <Icon name={submitting ? 'star' : 'compass'} />
-              </motion.button>
-            </form>
-          )}
+                Enter as guest for testing <span>›</span>
+              </button>
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>
 
-          <p className="auth-switch">
-            {isSignUp ? 'Already carry a sigil?' : 'New to the path?'}{' '}
-            <Link to={switchPath} onClick={playTap} onMouseEnter={playHover}>{isSignUp ? 'Sign in' : 'Create an account'}</Link>
+        {/* Dev mode notice */}
+        {!supabaseConfigured && (
+          <p className="auth-config-note" role="status">
+            Local development mode. Configure Supabase to enable real authentication.
           </p>
-          {!supabaseConfigured && <p className="auth-config-note" role="status">Local development identity is active. Configure Supabase environment variables to enable real account access.</p>}
-        </div>
+        )}
       </motion.section>
     </main>
   );

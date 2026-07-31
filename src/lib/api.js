@@ -45,34 +45,114 @@ async function request(path, { method = 'GET', body, token, idempotencyKey, sign
   return payload;
 }
 
+import {
+  GUEST_USER,
+  GUEST_ACTIVE_QUESTS,
+  GUEST_HISTORY,
+  GUEST_COLLECTIBLES,
+  GUEST_DEFINITIONS,
+  GUEST_FEED,
+  GUEST_LEADERBOARD,
+  GUEST_REWARDS,
+} from './guestData';
+
+async function guestDelay(data, ms = 450) {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+  return JSON.parse(JSON.stringify(data));
+}
+
 export function createApiClient(getToken) {
   const withToken = async (options) => ({ ...options, token: await getToken() });
 
   return {
-    getMe: async (signal) => request('/me', await withToken({ signal })),
-    updateMe: async (patch) => request('/me', await withToken({ method: 'PATCH', body: patch })),
+    getMe: async (signal) => {
+      const token = await getToken();
+      if (token === 'guest') return guestDelay(GUEST_USER, 400);
+      return request('/me', { signal, token });
+    },
+    updateMe: async (patch) => {
+      const token = await getToken();
+      if (token === 'guest') return guestDelay({ ...GUEST_USER, ...patch }, 200);
+      return request('/me', { method: 'PATCH', body: patch, token });
+    },
     getDefinitions: async (filters = {}, signal) => {
+      const token = await getToken();
+      if (token === 'guest') return guestDelay(GUEST_DEFINITIONS, 450);
       const params = new URLSearchParams();
       if (filters.cadence) params.set('cadence', filters.cadence);
       if (filters.category) params.set('category', filters.category);
       const query = params.toString();
-      return request(`/quests/definitions${query ? `?${query}` : ''}`, await withToken({ signal }));
+      return request(`/quests/definitions${query ? `?${query}` : ''}`, { signal, token });
     },
-    getActiveQuests: async (signal) => request('/quests/active', await withToken({ signal })),
-    getCollectibles: async (signal) => request('/collectibles', await withToken({ signal })),
-    getQuestHistory: async (signal) => request('/quests/history', await withToken({ signal })),
-    generateDaily: async (idempotencyKey) => request('/quests/generate-daily', await withToken({ method: 'POST', idempotencyKey })),
-    generateWeekly: async (idempotencyKey) => request('/quests/generate-weekly', await withToken({ method: 'POST', idempotencyKey })),
-    generateMonthly: async (idempotencyKey) => request('/quests/generate-monthly', await withToken({ method: 'POST', idempotencyKey })),
-    postProgress: async (assignmentId, value, idempotencyKey) =>
-      request(`/quests/${assignmentId}/progress`, await withToken({ method: 'POST', body: { value }, idempotencyKey })),
-    submitProof: async (assignmentId, payload, idempotencyKey) =>
-      request(`/quests/${assignmentId}/submissions`, await withToken({ method: 'POST', body: payload, idempotencyKey })),
-    getFeed: async (signal) => request('/feed', await withToken({ signal })),
-    getLeaderboard: async (signal) => request('/leaderboard', await withToken({ signal })),
-    getRewards: async (signal) => request('/rewards', await withToken({ signal })),
-    claimRewards: async () => request('/rewards/claim', await withToken({ method: 'POST' })),
-    getNotifications: async (signal) => request('/notifications', await withToken({ signal })),
-    markNotificationRead: async (notificationId) => request(`/notifications/${notificationId}/read`, await withToken({ method: 'POST' })),
+    getActiveQuests: async (signal) => {
+      const token = await getToken();
+      if (token === 'guest') return guestDelay(GUEST_ACTIVE_QUESTS, 500);
+      return request('/quests/active', { signal, token });
+    },
+    getCollectibles: async (signal) => {
+      const token = await getToken();
+      if (token === 'guest') return guestDelay(GUEST_COLLECTIBLES, 450);
+      return request('/collectibles', { signal, token });
+    },
+    getQuestHistory: async (signal) => {
+      const token = await getToken();
+      if (token === 'guest') return guestDelay(GUEST_HISTORY, 400);
+      return request('/quests/history', { signal, token });
+    },
+    generateDaily: async (idempotencyKey) => {
+      const token = await getToken();
+      if (token === 'guest') return guestDelay(GUEST_ACTIVE_QUESTS, 300);
+      return request('/quests/generate-daily', { method: 'POST', idempotencyKey, token });
+    },
+    generateWeekly: async (idempotencyKey) => {
+      const token = await getToken();
+      if (token === 'guest') return guestDelay(GUEST_ACTIVE_QUESTS, 300);
+      return request('/quests/generate-weekly', { method: 'POST', idempotencyKey, token });
+    },
+    generateMonthly: async (idempotencyKey) => {
+      const token = await getToken();
+      if (token === 'guest') return guestDelay(GUEST_ACTIVE_QUESTS, 300);
+      return request('/quests/generate-monthly', { method: 'POST', idempotencyKey, token });
+    },
+    postProgress: async (assignmentId, value, idempotencyKey) => {
+      const token = await getToken();
+      if (token === 'guest') return guestDelay({ success: true }, 200);
+      return request(`/quests/${assignmentId}/progress`, { method: 'POST', body: { value }, idempotencyKey, token });
+    },
+    submitProof: async (assignmentId, payload, idempotencyKey) => {
+      const token = await getToken();
+      if (token === 'guest') return guestDelay({ success: true }, 200);
+      return request(`/quests/${assignmentId}/submissions`, { method: 'POST', body: payload, idempotencyKey, token });
+    },
+    getFeed: async (signal) => {
+      const token = await getToken();
+      if (token === 'guest') return guestDelay(GUEST_FEED, 550);
+      return request('/feed', { signal, token });
+    },
+    getLeaderboard: async (signal) => {
+      const token = await getToken();
+      if (token === 'guest') return guestDelay(GUEST_LEADERBOARD, 450);
+      return request('/leaderboard', { signal, token });
+    },
+    getRewards: async (signal) => {
+      const token = await getToken();
+      if (token === 'guest') return guestDelay(GUEST_REWARDS, 500);
+      return request('/rewards', { signal, token });
+    },
+    claimRewards: async () => {
+      const token = await getToken();
+      if (token === 'guest') return guestDelay([{ level: 15 }], 300);
+      return request('/rewards/claim', { method: 'POST', token });
+    },
+    getNotifications: async (signal) => {
+      const token = await getToken();
+      if (token === 'guest') return guestDelay([], 300);
+      return request('/notifications', { signal, token });
+    },
+    markNotificationRead: async (notificationId) => {
+      const token = await getToken();
+      if (token === 'guest') return guestDelay(null, 100);
+      return request(`/notifications/${notificationId}/read`, { method: 'POST', token });
+    },
   };
 }

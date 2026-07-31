@@ -3,6 +3,11 @@ import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from '../features/auth/AuthContext';
 import { useMe, useMarkNotificationRead, useNotifications } from '../features/quests/queries';
+import { OfflineSanctuary } from './OfflineSanctuary';
+import { SettingsModal } from './SettingsModal';
+import { LogoutDialog } from './LogoutDialog';
+import { JournalTransition } from './motion/JournalTransition';
+import { WaxSealCeremony } from './motion/WaxSealCeremony';
 import { Icon } from './Icon';
 import { playHover, playLevelUp, playTap } from '../lib/useSoundEffects';
 
@@ -23,6 +28,8 @@ export function AppShell() {
   const markNotificationRead = useMarkNotificationRead();
   const [notice, setNotice] = useState('');
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const [levelUp, setLevelUp] = useState(null);
   const notifications = notificationsQuery.data || [];
   const unreadCount = notifications.filter((item) => !item.readAt).length;
@@ -46,6 +53,7 @@ export function AppShell() {
 
   return (
     <div className="app-shell">
+      <OfflineSanctuary />
       {devMode && (
         <div className="dev-auth-banner" role="status">
           Development auth active — this is a local identity, not a real account.
@@ -188,12 +196,26 @@ export function AppShell() {
             </div>
             <motion.button
               type="button"
+              className="round-action"
+              aria-label="Settings"
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.92 }}
+              onClick={() => {
+                playTap();
+                setSettingsOpen(true);
+              }}
+              onMouseEnter={playHover}
+            >
+              <Icon name="gear" />
+            </motion.button>
+            <motion.button
+              type="button"
               className="ghost-action"
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => {
                 playTap();
-                signOut();
+                setLogoutDialogOpen(true);
               }}
               onMouseEnter={playHover}
             >
@@ -203,16 +225,9 @@ export function AppShell() {
         </header>
 
         <AnimatePresence mode="wait">
-          <motion.div
-            className="route-stage"
-            key={location.pathname}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.22, ease: 'easeOut' }}
-          >
+          <JournalTransition key={location.pathname} className="route-stage">
             <Outlet />
-          </motion.div>
+          </JournalTransition>
         </AnimatePresence>
       </main>
 
@@ -270,40 +285,32 @@ export function AppShell() {
 
       <AnimatePresence>
         {levelUp && (
-          <motion.div
-            className="level-up-celebration"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Level up"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <div className="level-up-rays" />
-            <motion.section
-              initial={{ scale: 0.8, y: 30 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.8, y: 30 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-            >
-              <span className="eyebrow">Path advanced</span>
-              <Icon name="compass" />
-              <h2>Level {levelUp.level}</h2>
-              <p>{levelUp.tier} · +{levelUp.xp} XP</p>
-              <motion.button
-                type="button"
-                className="primary-action"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => {
-                  playTap();
-                  setLevelUp(null);
-                }}
-              >
-                Continue the journey
-              </motion.button>
-            </motion.section>
-          </motion.div>
+          <WaxSealCeremony levelUp={levelUp} onComplete={() => setLevelUp(null)} />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {settingsOpen && (
+          <SettingsModal
+            user={me}
+            onClose={() => setSettingsOpen(false)}
+            onLogout={() => {
+              setSettingsOpen(false);
+              setLogoutDialogOpen(true);
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {logoutDialogOpen && (
+          <LogoutDialog
+            onConfirm={() => {
+              setLogoutDialogOpen(false);
+              signOut();
+            }}
+            onCancel={() => setLogoutDialogOpen(false)}
+          />
         )}
       </AnimatePresence>
     </div>

@@ -30,21 +30,43 @@ export function AnimatedButton({
     >
       <motion.span
         className="btn-content"
-        animate={{ opacity: isLoading || isSuccess ? 0.2 : 1 }}
-        transition={{ duration: 0.15 }}
+        animate={{ opacity: isLoading || isSuccess ? 0.15 : 1 }}
+        transition={{ duration: 0.18 }}
       >
         {children}
       </motion.span>
       {isLoading && (
         <motion.span
-          className="btn-spinner"
-          initial={{ opacity: 0, rotate: 0 }}
-          animate={{ opacity: 1, rotate: 360 }}
-          transition={{
-            rotate: { repeat: Infinity, duration: 0.8, ease: 'linear' },
-            opacity: { duration: 0.2 },
-          }}
-        />
+          className="btn-ring-spinner"
+          initial={{ opacity: 0, scale: 0.6 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.6 }}
+          transition={springConfig.soft}
+        >
+          <svg className="btn-svg-ring" viewBox="0 0 32 32">
+            <circle
+              className="btn-ring-bg"
+              cx="16"
+              cy="16"
+              r="12"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+              opacity="0.2"
+            />
+            <circle
+              className="btn-ring-arc"
+              cx="16"
+              cy="16"
+              r="12"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+              strokeDasharray="75.4"
+              strokeLinecap="round"
+            />
+          </svg>
+        </motion.span>
       )}
       {isSuccess && (
         <motion.span

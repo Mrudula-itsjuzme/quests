@@ -5,9 +5,9 @@ import { Icon, categoryColors, categoryIcon } from '../../components/Icon';
 import { useCollectibles } from '../quests/queries';
 import { playHover, playTap } from '../../lib/useSoundEffects';
 import { PhysicalCard } from '../../components/motion/PhysicalCard';
-import { DashboardSkeleton } from '../../components/motion/SkeletonLoader';
+import { DashboardSkeleton, GallerySkeleton } from '../../components/motion/SkeletonLoader';
 import { IntentionalEmptyState } from '../../components/motion/EmptyState';
-import { staggerContainer, staggerItem, springConfig } from '../../components/motion/MotionVariants';
+import { calmStaggerContainer, calmFade, staggerContainer, staggerItem, springConfig } from '../../components/motion/MotionVariants';
 
 const filters = [
   { id: 'all', label: 'All' },
@@ -36,33 +36,65 @@ export function GalleryPage() {
     [collection, filter],
   );
 
-  if (isLoading) {
-    return (
-      <main className="gallery-shell page-stack fantasy-page">
-        <DashboardSkeleton />
-      </main>
-    );
-  }
+  return (
+    <AnimatePresence mode="wait">
+      {isLoading ? (
+        <motion.main
+          key="gallery-skeleton"
+          className="gallery-shell page-stack fantasy-page"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0, filter: 'blur(8px)', transition: { duration: 0.22 } }}
+        >
+          <GallerySkeleton />
+          <p className="sr-only" role="status">Loading your journal gallery…</p>
+        </motion.main>
+      ) : isError ? (
+        <motion.section
+          key="gallery-error"
+          className="ornate-panel error-state"
+          role="alert"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <h2>Your gallery is currently unreachable</h2>
+          <p>Please check your connection and try again.</p>
+        </motion.section>
+      ) : (
+        <GalleryContent
+          key="gallery-content"
+          collection={collection || []}
+          filtered={filtered}
+          filter={filter}
+          setFilter={setFilter}
+          selected={selected}
+          setSelected={setSelected}
+          shouldReduceMotion={shouldReduceMotion}
+        />
+      )}
+    </AnimatePresence>
+  );
+}
 
-  if (isError) {
-    return (
-      <main className="gallery-shell page-stack fantasy-page">
-        <section className="panel ornate-panel" role="alert">
-          <h2>Gallery sealed</h2>
-          <p>Could not retrieve your journal entries right now.</p>
-        </section>
-      </main>
-    );
-  }
+function GalleryContent({
+  collection,
+  filtered,
+  filter,
+  setFilter,
+  selected,
+  setSelected,
+  shouldReduceMotion,
+}) {
 
   return (
     <motion.main
       className="gallery-shell page-stack fantasy-page"
-      variants={staggerContainer(0.05, 0.04)}
+      variants={calmStaggerContainer(0.06, 0.04)}
       initial="hidden"
       animate="show"
+      exit={{ opacity: 0, filter: 'blur(6px)', transition: { duration: 0.4 } }}
     >
-      <motion.div className="page-heading" variants={staggerItem}>
+      <motion.div className="page-heading" variants={calmFade}>
         <div>
           <h1>Gallery</h1>
           <p>A chronological journal of every milestone unlocked during your quest journey.</p>
@@ -70,7 +102,7 @@ export function GalleryPage() {
       </motion.div>
 
       {!collection || collection.length === 0 ? (
-        <motion.div variants={staggerItem}>
+        <motion.div variants={calmFade}>
           <IntentionalEmptyState
             icon="star"
             title="No stickers unlocked yet"
@@ -78,7 +110,7 @@ export function GalleryPage() {
           />
         </motion.div>
       ) : (
-        <motion.section className="panel ornate-panel" aria-label="Memory journal" variants={staggerItem}>
+        <motion.section className="panel ornate-panel" aria-label="Memory journal" variants={calmFade}>
           <div className="segmented-control" role="group" aria-label="Filter memories by category">
             {filters.map((item) => (
               <button
@@ -102,18 +134,18 @@ export function GalleryPage() {
             <div className="journal-timeline">
               <AnimatePresence mode="popLayout">
                 {filtered.map((item) => (
-                  <PhysicalCard
-                    key={item.assetId}
-                    className="journal-entry-card"
-                    onClick={() => {
-                      playTap();
-                      setSelected(item);
-                    }}
-                  >
-                    <div className="journal-entry-content">
-                      <span className="journal-thumb" aria-hidden="true">
-                        <Icon name={categoryIcon(item.category)} />
-                      </span>
+                  <motion.div variants={calmFade} key={item.assetId} layout>
+                    <PhysicalCard
+                      className="journal-entry-card"
+                      onClick={() => {
+                        playTap();
+                        setSelected(item);
+                      }}
+                    >
+                      <div className="journal-entry-content">
+                        <span className="journal-thumb" aria-hidden="true">
+                          <Icon name={categoryIcon(item.category)} />
+                        </span>
                       <span className="journal-entry-copy">
                         <strong>{item.title}</strong>
                         <span className="journal-entry-meta">
@@ -122,11 +154,12 @@ export function GalleryPage() {
                           {formatDate(item.unlockedAt) && <span>{formatDate(item.unlockedAt)}</span>}
                         </span>
                       </span>
-                      <span className="journal-entry-side">
-                        <Icon name="bookmark" />
-                      </span>
-                    </div>
-                  </PhysicalCard>
+                        <span className="journal-entry-side">
+                          <Icon name="bookmark" />
+                        </span>
+                      </div>
+                    </PhysicalCard>
+                  </motion.div>
                 ))}
               </AnimatePresence>
             </div>

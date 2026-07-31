@@ -158,6 +158,9 @@ export function QuestDetail({ quest }) {
 
 function announceCompletion(result, quest) {
   if (!result?.completed) return;
+  window.dispatchEvent(new CustomEvent('habbit-quest-completed', {
+    detail: { quest, xp: result.xpCredited + result.bonusXp }
+  }));
   window.dispatchEvent(new CustomEvent(result.levelUp ? 'habbit-level-up' : 'habbit-notice', {
     detail: result.levelUp
       ? { level: result.newLevel, tier: result.user?.tier, xp: result.xpCredited + result.bonusXp }

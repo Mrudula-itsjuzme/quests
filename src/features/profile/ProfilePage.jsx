@@ -10,6 +10,10 @@ import {
 import { PlayerHeader } from '../quests/QuestsPage';
 import { useActiveQuests, useCollectibles, useMe, useQuestHistory } from '../quests/queries';
 import { playHover, playTap } from '../../lib/useSoundEffects';
+import { AnimatedCounter } from '../../components/motion/AnimatedCounter';
+import { DashboardSkeleton, ProfileSkeleton } from '../../components/motion/SkeletonLoader';
+import { IntentionalEmptyState } from '../../components/motion/EmptyState';
+import { staggerContainer, staggerItem, springConfig } from '../../components/motion/MotionVariants';
 
 export function ProfilePage() {
   const meQuery = useMe();
@@ -21,21 +25,69 @@ export function ProfilePage() {
   const [saved, setSaved] = useState('');
 
   useEffect(() => saveCosmetics(cosmetics), [cosmetics]);
-  const presentation = useMemo(
-    () => derivePlayerPresentation(meQuery.data, activeQuery.data || [], historyQuery.data || [], collectionQuery.data || []),
-    [meQuery.data, activeQuery.data, historyQuery.data, collectionQuery.data],
+
+  const isProfileLoading = meQuery.isLoading || activeQuery.isLoading || historyQuery.isLoading || collectionQuery.isLoading;
+  const isProfileError = meQuery.isError || activeQuery.isError || historyQuery.isError || collectionQuery.isError;
+
+  return (
+    <AnimatePresence mode="wait">
+      {isProfileLoading ? (
+        <motion.main
+          key="profile-skeleton"
+          className="profile-reference"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0, filter: 'blur(8px)', transition: { duration: 0.22 } }}
+        >
+          <ProfileSkeleton />
+          <p className="sr-only" role="status">Loading your profile…</p>
+        </motion.main>
+      ) : isProfileError ? (
+        <motion.section
+          key="profile-error"
+          className="ornate-panel error-state"
+          role="alert"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <h2>Your journal could not be opened</h2>
+          <p>Please check the quest service and try again.</p>
+        </motion.section>
+      ) : (
+        <ProfileContent
+          key="profile-content"
+          me={meQuery.data}
+          history={historyQuery.data || []}
+          collectibles={collectionQuery.data || []}
+          activeQuests={activeQuery.data || []}
+          cosmetics={cosmetics}
+          setCosmetics={setCosmetics}
+          picker={picker}
+          setPicker={setPicker}
+          saved={saved}
+          setSaved={setSaved}
+        />
+      )}
+    </AnimatePresence>
   );
+}
 
-  if (meQuery.isLoading || activeQuery.isLoading || historyQuery.isLoading || collectionQuery.isLoading) {
-    return <main className="profile-reference"><div className="skeleton player-skeleton" /><div className="skeleton profile-skeleton" /><p className="sr-only" role="status">Loading your profile…</p></main>;
-  }
-  if (meQuery.isError || activeQuery.isError || historyQuery.isError || collectionQuery.isError) {
-    return <section className="ornate-panel error-state" role="alert"><h2>Your journal could not be opened</h2><p>Please check the quest service and try again.</p></section>;
-  }
-
-  const me = meQuery.data;
-  const history = historyQuery.data || [];
-  const collectibles = collectionQuery.data || [];
+function ProfileContent({
+  me,
+  history,
+  collectibles,
+  activeQuests,
+  cosmetics,
+  setCosmetics,
+  picker,
+  setPicker,
+  saved,
+  setSaved,
+}) {
+  const presentation = useMemo(
+    () => derivePlayerPresentation(me, activeQuests, history, collectibles),
+    [me, activeQuests, history, collectibles],
+  );
   const xpRatio = me.xpForCurrentLevel ? me.xpIntoLevel / me.xpForCurrentLevel : 0;
   const choose = (key, value) => {
     playTap();
@@ -45,7 +97,13 @@ export function ProfilePage() {
   };
 
   return (
-    <main className="profile-reference fantasy-page">
+    <motion.main
+      className="profile-reference fantasy-page"
+      variants={staggerContainer(0.05, 0.04)}
+      initial="hidden"
+      animate="show"
+      exit={{ opacity: 0, filter: 'blur(6px)', transition: { duration: 0.18 } }}
+    >
       <PlayerHeader me={me} page="Profile" />
       <div className="profile-hero-grid">
         <motion.section className="portrait-panel ornate-panel" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', stiffness: 350, damping: 25 }}>
@@ -155,7 +213,7 @@ export function ProfilePage() {
           </motion.div>
         )}
       </AnimatePresence>
-    </main>
+    </motion.main>
   );
 }
 

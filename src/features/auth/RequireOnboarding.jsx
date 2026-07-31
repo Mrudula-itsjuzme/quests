@@ -5,8 +5,8 @@ import { FullScreenStatus } from './ProtectedRoute';
 export function RequireOnboarding() {
   const { data: me, isLoading, isError } = useMe();
 
-  if (isLoading) return <FullScreenStatus text="Loading your profile..." />;
+  if (isLoading) return <FullScreenStatus text="Preparing your sanctuary..." />;
   if (isError) return <FullScreenStatus text="We could not reach the quest service. Please refresh." />;
-  if (!me.onboardingCompletedAt) return <Navigate to="/onboarding" replace />;
+  if (me && !me.onboardingCompletedAt) return <Navigate to="/onboarding" replace />;
   return <Outlet />;
 }

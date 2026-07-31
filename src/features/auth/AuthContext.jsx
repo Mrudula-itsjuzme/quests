@@ -6,6 +6,7 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(supabaseConfigured);
+  const [isGuest, setIsGuest] = useState(() => localStorage.getItem('habbit_guest_mode') === 'true');
   const devMode = !supabaseConfigured;
 
   useEffect(() => {
@@ -24,32 +25,48 @@ export function AuthProvider({ children }) {
     return () => subscription.subscription.unsubscribe();
   }, []);
 
+  const enterAsGuest = () => {
+    localStorage.setItem('habbit_guest_mode', 'true');
+    setIsGuest(true);
+  };
+
+  const exitGuest = () => {
+    localStorage.removeItem('habbit_guest_mode');
+    setIsGuest(false);
+  };
+
   const value = useMemo(
     () => ({
       devMode,
+      isGuest,
+      enterAsGuest,
       loading,
       session,
       user: session?.user ?? null,
-      isAuthenticated: devMode || Boolean(session),
+      isAuthenticated: isGuest || Boolean(session),
       getToken: async () => {
+        if (isGuest) return 'guest';
         if (devMode) return null;
         const { data } = await supabase.auth.getSession();
         return data.session?.access_token ?? null;
       },
       signInWithPassword: async (email, password) => {
+        exitGuest();
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
       },
       signUpWithPassword: async (email, password) => {
+        exitGuest();
         const { error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
       },
       signOut: async () => {
+        exitGuest();
         if (devMode) return;
         await supabase.auth.signOut();
       },
     }),
-    [devMode, loading, session],
+    [devMode, isGuest, loading, session],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

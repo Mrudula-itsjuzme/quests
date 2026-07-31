@@ -6,8 +6,9 @@ import { QuestDetail } from './QuestDetail';
 import { questProgressRatio } from './QuestCard';
 import { playHover, playTap } from '../../lib/useSoundEffects';
 import { AnimatedCounter } from '../../components/motion/AnimatedCounter';
-import { DashboardSkeleton } from '../../components/motion/SkeletonLoader';
+import { DashboardSkeleton, QuestsSkeleton } from '../../components/motion/SkeletonLoader';
 import { IntentionalEmptyState } from '../../components/motion/EmptyState';
+import { QuestSuccessModal } from '../../components/motion/QuestSuccessModal';
 import { staggerContainer, staggerItem, springConfig } from '../../components/motion/MotionVariants';
 import {
   useActiveQuests,
@@ -62,14 +63,97 @@ export function QuestsPage() {
     return (definitionsQuery.data || []).filter((item) => !activeDefinitionIds.has(item.id)).slice(0, 3);
   }, [definitionsQuery.data, quests]);
 
-  useEffect(() => setDeckIndex(0), [tab]);
+  const isQuestsLoading = activeQuery.isLoading || meQuery.isLoading;
 
-  if (activeQuery.isLoading || meQuery.isLoading) return <QuestSkeleton />;
-  if (activeQuery.isError || meQuery.isError) {
-    return <section className="ornate-panel error-state" role="alert"><h2>The quest board is veiled</h2><p>We could not reach your quest service. Check your connection and try again.</p></section>;
-  }
+  return (
+    <AnimatePresence mode="wait">
+      {isQuestsLoading ? (
+        <motion.main
+          key="quests-skeleton"
+          className="quest-reference"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0, filter: 'blur(8px)', transition: { duration: 0.22 } }}
+        >
+          <QuestsSkeleton />
+          <p className="sr-only" role="status">Loading your quest journal…</p>
+        </motion.main>
+      ) : (activeQuery.isError || meQuery.isError) ? (
+        <motion.section
+          key="quests-error"
+          className="ornate-panel error-state"
+          role="alert"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <h2>The quest board is veiled</h2>
+          <p>We could not reach your quest service. Check your connection and try again.</p>
+        </motion.section>
+      ) : (
+        <QuestsContent
+          key="quests-content"
+          me={meQuery.data}
+          quests={quests}
+          visible={visible}
+          featured={featured}
+          selected={selected}
+          setSelectedId={setSelectedId}
+          definitions={definitions}
+          definitionsQuery={definitionsQuery}
+          presentation={presentation}
+          tab={tab}
+          setTab={setTab}
+          notice={notice}
+          setNotice={setNotice}
+          deckIndex={deckIndex}
+          setDeckIndex={setDeckIndex}
+          deckMotion={deckMotion}
+          setDeckMotion={setDeckMotion}
+          deckTouchStart={deckTouchStart}
+          setDeckTouchStart={setDeckTouchStart}
+          generateDaily={generateDaily}
+          generateWeekly={generateWeekly}
+          generateMonthly={generateMonthly}
+        />
+      )}
+    </AnimatePresence>
+  );
+}
 
-  const me = meQuery.data;
+function QuestsContent({
+  me,
+  quests,
+  visible,
+  featured,
+  selected,
+  setSelectedId,
+  definitions,
+  definitionsQuery,
+  presentation,
+  tab,
+  setTab,
+  notice,
+  setNotice,
+  deckIndex,
+  setDeckIndex,
+  deckMotion,
+  setDeckMotion,
+  deckTouchStart,
+  setDeckTouchStart,
+  generateDaily,
+  generateWeekly,
+  generateMonthly,
+}) {
+  const [completedQuestModal, setCompletedQuestModal] = useState(null);
+
+  useEffect(() => {
+    const handleQuestCompleted = (event) => {
+      setCompletedQuestModal(event.detail);
+    };
+    window.addEventListener('habbit-quest-completed', handleQuestCompleted);
+    return () => window.removeEventListener('habbit-quest-completed', handleQuestCompleted);
+  }, []);
+
   const featuredRatio = featured ? questProgressRatio(featured) : 0;
   const hasCadence = (cadence) => quests.some((quest) => quest.cadence === cadence);
   const accept = (cadence) => {
@@ -103,6 +187,7 @@ export function QuestsPage() {
       variants={staggerContainer(0.05, 0.04)}
       initial="hidden"
       animate="show"
+      exit={{ opacity: 0, filter: 'blur(6px)', transition: { duration: 0.18 } }}
     >
       <motion.div variants={staggerItem}>
         <PlayerHeader me={me} page="Quests" />
@@ -269,8 +354,8 @@ export function QuestsPage() {
                 key={quest.id}
                 type="button"
                 className="reference-quest-row"
-                whileHover={{ scale: 1.015, x: 4, boxShadow: '0 4px 16px rgba(0, 0, 0, 0.25)' }}
-                whileTap={{ scale: 0.98 }}
+                whileHover={{ scale: 1.02, x: 8, boxShadow: '0 4px 16px rgba(0, 0, 0, 0.25)' }}
+                whileTap={{ scale: 0.96 }}
                 onClick={() => {
                   playTap();
                   setSelectedId(quest.id);
@@ -278,8 +363,8 @@ export function QuestsPage() {
                 onMouseEnter={playHover}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={springConfig.tactile}
+                exit={{ opacity: 0, scale: 0.95, x: 20 }}
+                transition={springConfig.snappy}
               >
                 <span className="round-emblem"><Icon name={categoryIcon(quest.category)} /></span>
                 <span className="quest-copy"><strong>{quest.title}</strong><small>{quest.description}</small><span className="gold-progress"><motion.i initial={{ width: 0 }} animate={{ width: `${questProgressRatio(quest) * 100}%` }} transition={{ type: 'spring', stiffness: 300, damping: 30 }} /></span></span>
@@ -348,6 +433,15 @@ export function QuestsPage() {
             <span>{notice}</span>
             <button type="button" onClick={() => { playTap(); setNotice(''); }} aria-label="Dismiss notification">×</button>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {completedQuestModal && (
+          <QuestSuccessModal
+            quest={completedQuestModal.quest}
+            onClose={() => setCompletedQuestModal(null)}
+          />
         )}
       </AnimatePresence>
     </motion.main>
