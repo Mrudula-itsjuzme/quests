@@ -10,6 +10,7 @@ import { JournalTransition } from './motion/JournalTransition';
 import { WaxSealCeremony } from './motion/WaxSealCeremony';
 import { Icon } from './Icon';
 import { playHover, playLevelUp, playTap } from '../lib/useSoundEffects';
+import { PullToRefresh } from './motion/PullToRefresh';
 
 const navItems = [
   { to: '/app', label: 'Home', icon: 'home', end: true },
@@ -59,185 +60,25 @@ export function AppShell() {
           Development auth active — this is a local identity, not a real account.
         </div>
       )}
-      <main className="workspace">
-        <header className="topbar">
-          <motion.div
-            className="brand-lockup"
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            onMouseEnter={playHover}
-          >
-            <span className="brand-mark" aria-hidden="true">H</span>
-            <div>
-              <strong>HABBIT QUESTS</strong>
-            </div>
-          </motion.div>
-          <nav className="top-nav" aria-label="Primary">
-            {navItems.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.end}
-                className={({ isActive }) => (isActive ? 'active' : '')}
-                onClick={playTap}
-                onMouseEnter={playHover}
-              >
-                {({ isActive }) => (
-                  <>
-                    {isActive && (
-                      <motion.div
-                        className="active-indicator"
-                        layoutId="topNavIndicator"
-                        transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-                      />
-                    )}
-                    <Icon name={item.icon} />
-                    <span>{item.label}</span>
-                  </>
-                )}
-              </NavLink>
-            ))}
-          </nav>
-          <div className="topbar-actions">
-            {isError && <span className="sync-status" role="status">Could not load your profile</span>}
-            {!isLoading && !isError && me && (
-              <>
-                <motion.div
-                  className="quick-stat shell-xp"
-                  whileHover={{ scale: 1.05, y: -1 }}
-                  onMouseEnter={playHover}
-                >
-                  <strong>{me.totalXp.toLocaleString()}</strong>
-                  <span>XP</span>
-                </motion.div>
-                <motion.div
-                  className="quick-stat"
-                  whileHover={{ scale: 1.05, y: -1 }}
-                  onMouseEnter={playHover}
-                >
-                  <strong>{me.level}</strong>
-                  <span>{me.tier}</span>
-                </motion.div>
-              </>
-            )}
-            <div className="shell-notifications">
-              <motion.button
-                type="button"
-                className="round-action"
-                aria-label={`Notifications${unreadCount ? `, ${unreadCount} unread` : ''}`}
-                aria-expanded={notificationsOpen}
-                whileHover={{ scale: 1.08 }}
-                whileTap={{ scale: 0.92 }}
-                onClick={() => {
-                  playTap();
-                  setNotificationsOpen((open) => !open);
-                }}
-                onMouseEnter={playHover}
-              >
-                <Icon name="bell" />
-                {unreadCount > 0 && (
-                  <motion.span
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ type: 'spring', stiffness: 600, damping: 20 }}
-                  >
-                    {unreadCount}
-                  </motion.span>
-                )}
-              </motion.button>
-              <AnimatePresence>
-                {notificationsOpen && (
-                  <motion.section
-                    className="notification-popover"
-                    aria-label="Notifications"
-                    initial={{ opacity: 0, y: 12, scale: 0.96 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 8, scale: 0.96 }}
-                    transition={{ type: 'spring', stiffness: 450, damping: 30 }}
-                  >
-                    <div>
-                      <strong>Notifications</strong>
-                      <motion.button
-                        type="button"
-                        onClick={() => {
-                          playTap();
-                          setNotificationsOpen(false);
-                        }}
-                        aria-label="Close notifications"
-                        whileHover={{ scale: 1.2 }}
-                        whileTap={{ scale: 0.9 }}
-                      >
-                        ×
-                      </motion.button>
-                    </div>
-                    {notifications.length === 0 ? (
-                      <p>Your path is clear.</p>
-                    ) : (
-                      notifications.slice(0, 8).map((item) => (
-                        <motion.button
-                          key={item.id}
-                          type="button"
-                          className={item.readAt ? '' : 'unread'}
-                          whileHover={{ x: 4 }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={() => {
-                            playTap();
-                            markNotificationRead.mutate(item.id);
-                          }}
-                        >
-                          <strong>{item.title}</strong>
-                          <span>{item.body}</span>
-                        </motion.button>
-                      ))
-                    )}
-                  </motion.section>
-                )}
-              </AnimatePresence>
-            </div>
-            <motion.button
-              type="button"
-              className="round-action"
-              aria-label="Settings"
-              whileHover={{ scale: 1.08 }}
-              whileTap={{ scale: 0.92 }}
-              onClick={() => {
-                playTap();
-                setSettingsOpen(true);
-              }}
-              onMouseEnter={playHover}
-            >
-              <Icon name="gear" />
-            </motion.button>
-            <motion.button
-              type="button"
-              className="ghost-action"
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => {
-                playTap();
-                setLogoutDialogOpen(true);
-              }}
-              onMouseEnter={playHover}
-            >
-              Sign out
-            </motion.button>
-          </div>
-        </header>
+      {/* Main scrolling content area */}
+      <div className="mobile-content-area" style={{ overflow: 'hidden' }}>
+        <PullToRefresh>
+          <AnimatePresence mode="wait">
+            <JournalTransition key={location.pathname} className="route-stage">
+              <Outlet />
+            </JournalTransition>
+          </AnimatePresence>
+        </PullToRefresh>
+      </div>
 
-        <AnimatePresence mode="wait">
-          <JournalTransition key={location.pathname} className="route-stage">
-            <Outlet />
-          </JournalTransition>
-        </AnimatePresence>
-      </main>
-
-      <nav className="bottom-nav" aria-label="Primary">
+      {/* Floating Glass Bottom Dock */}
+      <nav className="mobile-bottom-dock" aria-label="Primary Navigation">
         {navItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
             end={item.end}
-            className={({ isActive }) => (isActive ? 'active' : '')}
+            className={({ isActive }) => `dock-item ${isActive ? 'active' : ''}`}
             onClick={playTap}
             onMouseEnter={playHover}
           >
@@ -245,17 +86,25 @@ export function AppShell() {
               <>
                 {isActive && (
                   <motion.div
-                    className="active-indicator"
-                    layoutId="bottomNavIndicator"
+                    className="dock-active-bg"
+                    layoutId="dockIndicator"
                     transition={{ type: 'spring', stiffness: 500, damping: 35 }}
                   />
                 )}
                 <Icon name={item.icon} />
-                <span>{item.label}</span>
               </>
             )}
           </NavLink>
         ))}
+        {/* Settings / Profile Trigger on Dock */}
+        <button
+          type="button"
+          className="dock-item"
+          onClick={() => { playTap(); setSettingsOpen(true); }}
+          aria-label="Settings"
+        >
+          <Icon name="gear" />
+        </button>
       </nav>
 
       <AnimatePresence>

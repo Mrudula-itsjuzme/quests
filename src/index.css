@@ -6776,4 +6776,304 @@ body {
   margin-bottom: 32px;
 }
 
+/* ========================================================================== */
+/* Mobile-First Native Application Overrides                                  */
+/* ========================================================================== */
+
+/* Lock the viewport for a native app feel */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100dvh;
+  overflow: hidden;
+  background: #090806; /* Pitch black for mobile OLEDs */
+  touch-action: pan-y;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+
+/* Ensure the root div takes up full screen */
+#root {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Mobile App Shell constraints */
+.app-shell {
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Hide desktop top nav and sidebar completely */
+.topbar, .workspace, .reference-header {
+  display: none !important;
+}
+
+/* Mobile Content Area - scrolling view above the dock */
+.mobile-content-area {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 20px 16px calc(env(safe-area-inset-bottom) + 100px);
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Floating Glass Bottom Dock */
+.mobile-bottom-dock {
+  position: fixed;
+  bottom: env(safe-area-inset-bottom, 16px);
+  left: 16px;
+  right: 16px;
+  height: 72px;
+  background: rgba(18, 24, 28, 0.75);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 36px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0 8px;
+  z-index: 1000;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+}
+
+.dock-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  color: var(--quest-muted);
+  font-size: 1.6rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.dock-item.active {
+  color: var(--quest-gold-bright);
+}
+
+.dock-active-bg {
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  background: rgba(201, 154, 75, 0.15);
+  z-index: 0;
+}
+
+.dock-item svg {
+  position: relative;
+  z-index: 1;
+}
+
+/* Ensure 44px minimum touch targets everywhere */
+button, a {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Hide desktop grids */
+.quest-content-grid, .rewards-panel-grid, .gallery-grid, .dashboard-grid {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+}
+
+/* Reset panel padding for mobile */
+.ornate-panel {
+  padding: 20px !important;
+  border-radius: 20px !important;
+}
+
+/* Mobile Home Dashboard specific styles */
+.mobile-home-header {
+  margin-bottom: 24px;
+}
+
+.mobile-home-header h1 {
+  font-size: 2.2rem;
+  margin: 0;
+  color: var(--quest-gold-bright);
+}
+
+.mobile-home-header p {
+  color: var(--quest-muted);
+  font-size: 1.1rem;
+  margin: 4px 0 0 0;
+}
+
+/* Swipeable Quest Cards Container */
+.swipe-deck-container {
+  position: relative;
+  width: 100%;
+  height: 380px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  perspective: 1000px;
+}
+
+.swipe-card {
+  position: absolute;
+  width: 100%;
+  max-width: 340px;
+  height: 340px;
+  background: linear-gradient(145deg, #182226, #0c1214);
+  border: 1px solid var(--quest-gold-dim);
+  border-radius: 24px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+  transform-origin: bottom center;
+  will-change: transform;
+}
+
+.swipe-card-content h3 {
+  font-size: 1.8rem;
+  color: var(--quest-cream);
+  margin-bottom: 8px;
+}
+
+.swipe-card-content p {
+  font-size: 1.05rem;
+  color: var(--quest-muted);
+}
+
+.swipe-card-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.swipe-indicator {
+  position: absolute;
+  top: 20px;
+  font-weight: bold;
+  font-size: 1.2rem;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 2px solid;
+  opacity: 0;
+}
+
+.swipe-indicator.complete {
+  right: 20px;
+  color: #4CAF50;
+  border-color: #4CAF50;
+  transform: rotate(15deg);
+}
+
+.swipe-indicator.skip {
+  left: 20px;
+  color: #F44336;
+  border-color: #F44336;
+  transform: rotate(-15deg);
+}
+
+/* Mobile Auth & Floating Inputs */
+.mobile-auth-layout {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 32px 24px;
+  min-height: 100%;
+}
+
+.mobile-auth-header {
+  margin-bottom: 40px;
+  text-align: left;
+}
+
+.mobile-auth-header h1 {
+  font-size: 2.8rem;
+  line-height: 1.1;
+  color: var(--quest-gold-bright);
+  margin-bottom: 12px;
+}
+
+.mobile-auth-header p {
+  font-size: 1.2rem;
+  color: var(--quest-muted);
+}
+
+.floating-input-group {
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.floating-input-group input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 24px 16px 12px;
+  font-size: 1.2rem;
+  color: var(--quest-cream);
+  transition: border-color 0.2s;
+}
+
+.floating-input-group input:focus {
+  border-color: var(--quest-gold-bright);
+  outline: none;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.floating-input-group label {
+  position: absolute;
+  top: 20px;
+  left: 16px;
+  font-size: 1.1rem;
+  color: var(--quest-muted);
+  pointer-events: none;
+  transform-origin: left top;
+  transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.floating-input-group input:focus ~ label,
+.floating-input-group input:not(:placeholder-shown) ~ label {
+  transform: translateY(-12px) scale(0.75);
+  color: var(--quest-gold-bright);
+}
+
+.mobile-auth-submit {
+  width: 100%;
+  height: 56px;
+  border-radius: 28px;
+  background: var(--quest-gold-bright);
+  color: var(--void);
+  font-size: 1.2rem;
+  font-weight: bold;
+  border: none;
+  margin-top: 16px;
+  box-shadow: 0 10px 20px rgba(232, 208, 170, 0.2);
+}
+
+.mobile-auth-footer {
+  margin-top: 32px;
+  text-align: center;
+}
+
+.mobile-auth-footer a {
+  color: var(--quest-gold-dim);
+  text-decoration: underline;
+  font-size: 1.1rem;
+}
+
+
 

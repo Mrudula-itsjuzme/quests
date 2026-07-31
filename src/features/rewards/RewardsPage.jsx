@@ -8,6 +8,7 @@ import { playHover, playSuccess, playTap } from '../../lib/useSoundEffects';
 import { AnimatedCounter } from '../../components/motion/AnimatedCounter';
 import { DashboardSkeleton, RewardsSkeleton } from '../../components/motion/SkeletonLoader';
 import { IntentionalEmptyState } from '../../components/motion/EmptyState';
+import { HoldButton } from '../../components/motion/HoldButton';
 import { staggerContainer, staggerItem, springConfig } from '../../components/motion/MotionVariants';
 
 const badgeDefinitions = [
@@ -147,7 +148,17 @@ function RewardsContent({
             {rewards.filter((reward) => reward.status === 'claimable').slice(0, 3).map((reward) => <motion.article key={reward.level} whileHover={{ scale: 1.04 }} onMouseEnter={playHover} transition={springConfig.tactile}><Icon name={reward.rewardType === 'badge' ? 'star' : reward.rewardType === 'title' ? 'scroll' : 'chest'} /><strong>{reward.amount}</strong><span>{reward.label}</span></motion.article>)}
             {!rewards.some((reward) => reward.status === 'claimable') && <p className="reward-empty">Your next milestone reward is still ahead.</p>}
           </div>
-          <motion.button className="claim-all-button" type="button" whileHover={{ scale: 1.05, boxShadow: '0 0 20px rgba(201,154,75,0.4)' }} whileTap={{ scale: 0.98 }} transition={springConfig.cinematic} disabled={claimRewards.isPending || !rewards.some((reward) => reward.status === 'claimable')} onClick={async () => { playSuccess(); const claimed = await claimRewards.mutateAsync(); setTimeout(() => setNotice(claimed.length ? `${claimed.length} milestone reward${claimed.length === 1 ? '' : 's'} claimed.` : 'No rewards are ready yet.'), 600); }}>Claim All</motion.button>
+          <HoldButton 
+            className="claim-all-button"
+            disabled={claimRewards.isPending || !rewards.some((reward) => reward.status === 'claimable')}
+            onComplete={async () => { 
+              playSuccess(); 
+              const claimed = await claimRewards.mutateAsync(); 
+              setTimeout(() => setNotice(claimed.length ? `${claimed.length} milestone reward${claimed.length === 1 ? '' : 's'} claimed.` : 'No rewards are ready yet.'), 600); 
+            }}
+          >
+            Hold to Claim
+          </HoldButton>
         </RewardPanel>
 
         <RewardPanel title="Current Rank" className="current-rank-panel">

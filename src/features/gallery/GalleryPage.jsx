@@ -7,6 +7,7 @@ import { playHover, playTap } from '../../lib/useSoundEffects';
 import { PhysicalCard } from '../../components/motion/PhysicalCard';
 import { DashboardSkeleton, GallerySkeleton } from '../../components/motion/SkeletonLoader';
 import { IntentionalEmptyState } from '../../components/motion/EmptyState';
+import { BottomSheet } from '../../components/motion/BottomSheet';
 import { calmStaggerContainer, calmFade, staggerContainer, staggerItem, springConfig } from '../../components/motion/MotionVariants';
 
 const filters = [
@@ -134,31 +135,54 @@ function GalleryContent({
             <div className="journal-timeline">
               <AnimatePresence mode="popLayout">
                 {filtered.map((item) => (
-                  <motion.div variants={calmFade} key={item.assetId} layout>
-                    <PhysicalCard
-                      className="journal-entry-card"
-                      onClick={() => {
-                        playTap();
-                        setSelected(item);
+                  <motion.div 
+                    variants={calmFade} 
+                    key={item.assetId} 
+                    layout
+                    style={{ position: 'relative', marginBottom: '8px' }}
+                  >
+                    <div style={{ position: 'absolute', inset: 0, background: '#F44336', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: '24px', color: 'white' }}>
+                      <Icon name="archive" />
+                    </div>
+                    <motion.div
+                      drag="x"
+                      dragConstraints={{ left: 0, right: 0 }}
+                      dragElastic={{ left: 0.8, right: 0 }}
+                      onDragEnd={(e, info) => {
+                        if (info.offset.x < -100) {
+                          // Trigger archive
+                          playTap();
+                          // Simulating an archive action since no API exists yet
+                          setFilter(filter); // Force re-render just to trigger something
+                        }
                       }}
+                      whileDrag={{ scale: 1.02 }}
                     >
-                      <div className="journal-entry-content">
-                        <span className="journal-thumb" aria-hidden="true">
-                          <Icon name={categoryIcon(item.category)} />
-                        </span>
-                      <span className="journal-entry-copy">
-                        <strong>{item.title}</strong>
-                        <span className="journal-entry-meta">
-                          <span className={`pill ${categoryColors[item.category] || ''}`}>{item.category}</span>
-                          <span>{item.rarity}</span>
-                          {formatDate(item.unlockedAt) && <span>{formatDate(item.unlockedAt)}</span>}
-                        </span>
-                      </span>
-                        <span className="journal-entry-side">
-                          <Icon name="bookmark" />
-                        </span>
-                      </div>
-                    </PhysicalCard>
+                      <PhysicalCard
+                        className="journal-entry-card"
+                        onClick={() => {
+                          playTap();
+                          setSelected(item);
+                        }}
+                      >
+                        <div className="journal-entry-content">
+                          <span className="journal-thumb" aria-hidden="true">
+                            <Icon name={categoryIcon(item.category)} />
+                          </span>
+                          <span className="journal-entry-copy">
+                            <strong>{item.title}</strong>
+                            <span className="journal-entry-meta">
+                              <span className={`pill ${categoryColors[item.category] || ''}`}>{item.category}</span>
+                              <span>{item.rarity}</span>
+                              {formatDate(item.unlockedAt) && <span>{formatDate(item.unlockedAt)}</span>}
+                            </span>
+                          </span>
+                          <span className="journal-entry-side">
+                            <Icon name="bookmark" />
+                          </span>
+                        </div>
+                      </PhysicalCard>
+                    </motion.div>
                   </motion.div>
                 ))}
               </AnimatePresence>
@@ -169,7 +193,21 @@ function GalleryContent({
 
       <AnimatePresence>
         {selected && (
-          <MemoryDetail item={selected} onClose={() => { playTap(); setSelected(null); }} reduceMotion={shouldReduceMotion} />
+          <BottomSheet isOpen={!!selected} onClose={() => { playTap(); setSelected(null); }}>
+            <div style={{ padding: '24px 0', textAlign: 'center' }}>
+              <div style={{ margin: '0 auto 24px', width: '120px', height: '120px' }}>
+                <AnimatedCollectible collectible={selected} preview />
+              </div>
+              <h2 style={{ fontSize: '2rem', color: 'var(--quest-gold-bright)', marginBottom: '8px' }}>{selected.title}</h2>
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginBottom: '24px' }}>
+                <span className={`pill ${categoryColors[selected.category] || ''}`}>{selected.category}</span>
+                <span className="pill" style={{ background: 'rgba(255,255,255,0.1)' }}>{selected.rarity}</span>
+              </div>
+              {selected.caption && (
+                <p style={{ color: 'var(--quest-muted)', fontSize: '1.1rem', fontStyle: 'italic', padding: '0 24px' }}>"{selected.caption}"</p>
+              )}
+            </div>
+          </BottomSheet>
         )}
       </AnimatePresence>
     </motion.main>
