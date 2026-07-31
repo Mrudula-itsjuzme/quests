@@ -10,10 +10,10 @@ import {
 import { PlayerHeader } from '../quests/QuestsPage';
 import { useActiveQuests, useCollectibles, useMe, useQuestHistory } from '../quests/queries';
 import { playHover, playTap } from '../../lib/useSoundEffects';
-import { AnimatedCounter } from '../../components/motion/AnimatedCounter';
-import { DashboardSkeleton, ProfileSkeleton } from '../../components/motion/SkeletonLoader';
-import { IntentionalEmptyState } from '../../components/motion/EmptyState';
-import { staggerContainer, staggerItem, springConfig } from '../../components/motion/MotionVariants';
+
+import { ProfileSkeleton } from '../../components/motion/SkeletonLoader';
+
+import { staggerContainer } from '../../components/motion/MotionVariants';
 
 export function ProfilePage() {
   const meQuery = useMe();

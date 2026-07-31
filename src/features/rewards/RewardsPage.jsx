@@ -6,8 +6,7 @@ import { PlayerHeader } from '../quests/QuestsPage';
 import { useClaimRewards, useCollectibles, useLeaderboard, useMe, useRewards } from '../quests/queries';
 import { playHover, playSuccess, playTap } from '../../lib/useSoundEffects';
 import { AnimatedCounter } from '../../components/motion/AnimatedCounter';
-import { DashboardSkeleton, RewardsSkeleton } from '../../components/motion/SkeletonLoader';
-import { IntentionalEmptyState } from '../../components/motion/EmptyState';
+import { RewardsSkeleton } from '../../components/motion/SkeletonLoader';
 import { HoldButton } from '../../components/motion/HoldButton';
 import { staggerContainer, staggerItem, springConfig } from '../../components/motion/MotionVariants';
 

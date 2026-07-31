@@ -1,5 +1,5 @@
 import { motion, useAnimation, useDragControls } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 export function BottomSheet({ isOpen, onClose, children }) {
   const controls = useAnimation();

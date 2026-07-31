@@ -62,8 +62,6 @@ async function guestDelay(data, ms = 450) {
 }
 
 export function createApiClient(getToken) {
-  const withToken = async (options) => ({ ...options, token: await getToken() });
-
   return {
     getMe: async (signal) => {
       const token = await getToken();

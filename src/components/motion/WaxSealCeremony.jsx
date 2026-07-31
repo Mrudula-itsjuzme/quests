@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
 import { Icon } from '../Icon';
 import { playLevelUp, playTap } from '../../lib/useSoundEffects';
@@ -26,7 +26,7 @@ export function WaxSealCeremony({ levelUp, onComplete }) {
       clearInterval(interval);
     }
     return () => clearInterval(interval);
-  }, [progress, isSealed]);
+  }, [progress, isSealed, handleSeal]);
 
   const handlePointerDown = () => {
     if (!isSealed) {
@@ -42,7 +42,7 @@ export function WaxSealCeremony({ levelUp, onComplete }) {
     }
   };
 
-  const handleSeal = () => {
+  const handleSeal = useCallback(() => {
     setIsSealed(true);
     playLevelUp();
     // Simulate heavy screen shake and stamp impact
@@ -51,7 +51,7 @@ export function WaxSealCeremony({ levelUp, onComplete }) {
       scale: [0.95, 1.05, 1],
       transition: { duration: 0.5, ease: 'easeOut' }
     });
-  };
+  }, [controls]);
 
   return (
     <motion.div

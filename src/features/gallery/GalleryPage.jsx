@@ -1,14 +1,14 @@
 import { useMemo, useState } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { AnimatedCollectible } from '../../components/AnimatedCollectible';
 import { Icon, categoryColors, categoryIcon } from '../../components/Icon';
 import { useCollectibles } from '../quests/queries';
 import { playHover, playTap } from '../../lib/useSoundEffects';
 import { PhysicalCard } from '../../components/motion/PhysicalCard';
-import { DashboardSkeleton, GallerySkeleton } from '../../components/motion/SkeletonLoader';
+import { GallerySkeleton } from '../../components/motion/SkeletonLoader';
 import { IntentionalEmptyState } from '../../components/motion/EmptyState';
 import { BottomSheet } from '../../components/motion/BottomSheet';
-import { calmStaggerContainer, calmFade, staggerContainer, staggerItem, springConfig } from '../../components/motion/MotionVariants';
+import { calmStaggerContainer, calmFade } from '../../components/motion/MotionVariants';
 
 const filters = [
   { id: 'all', label: 'All' },
@@ -30,7 +30,7 @@ export function GalleryPage() {
   const { data: collection, isLoading, isError } = useCollectibles();
   const [filter, setFilter] = useState('all');
   const [selected, setSelected] = useState(null);
-  const shouldReduceMotion = useReducedMotion();
+
 
   const filtered = useMemo(
     () => (collection || []).filter((item) => filter === 'all' || item.category === filter),
@@ -70,7 +70,6 @@ export function GalleryPage() {
           setFilter={setFilter}
           selected={selected}
           setSelected={setSelected}
-          shouldReduceMotion={shouldReduceMotion}
         />
       )}
     </AnimatePresence>
@@ -84,7 +83,6 @@ function GalleryContent({
   setFilter,
   selected,
   setSelected,
-  shouldReduceMotion,
 }) {
 
   return (
@@ -214,58 +212,3 @@ function GalleryContent({
   );
 }
 
-function MemoryDetail({ item, onClose, reduceMotion }) {
-  const overlayTransition = reduceMotion ? { duration: 0 } : { duration: 0.25, ease: 'easeOut' };
-  const bookTransition = reduceMotion
-    ? { duration: 0 }
-    : springConfig.snappy;
-
-  return (
-    <motion.div
-      className="book-overlay"
-      role="dialog"
-      aria-modal="true"
-      aria-label={`Memory: ${item.title}`}
-      onClick={onClose}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={overlayTransition}
-    >
-      <motion.div
-        className="memory-book grain"
-        onClick={(event) => event.stopPropagation()}
-        initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.94, y: 16 }}
-        animate={reduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
-        exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.94, y: 16 }}
-        transition={bookTransition}
-      >
-        <button type="button" className="icon-button memory-close" onClick={onClose} aria-label="Close memory">
-          <Icon name="check" />
-        </button>
-
-        <div className="memory-page">
-          <div className="memory-image placeholder">
-            <AnimatedCollectible collectible={item} preview />
-          </div>
-          <h4>Category</h4>
-          <p>{item.category}</p>
-        </div>
-
-        <div className="memory-page">
-          <h1>{item.title}</h1>
-          <div className="memory-meta-grid">
-            <span>Rarity<strong>{item.rarity}</strong></span>
-            <span>Unlocked<strong>{formatDate(item.unlockedAt) || 'Unknown date'}</strong></span>
-          </div>
-          {item.caption && (
-            <div className="memory-reflection">
-              <h4>Reflection</h4>
-              <p>{item.caption}</p>
-            </div>
-          )}
-        </div>
-      </motion.div>
-    </motion.div>
-  );
-}

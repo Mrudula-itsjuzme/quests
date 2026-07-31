@@ -1,8 +1,7 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Navigate, Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Icon } from '../../components/Icon';
-import { NyxCat } from '../../components/NyxCat';
 import { supabaseConfigured } from '../../lib/supabase';
 import { useAuth } from './AuthContext';
 import { AuthParticles } from './AuthParticles';
@@ -20,10 +19,6 @@ function setRememberedEmail(email) {
 }
 function clearRememberedEmail() {
   try { localStorage.removeItem(REMEMBERED_KEY); } catch { /* ignore */ }
-}
-
-function emailIsValid(email) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
 function getPasswordStrength(pw) {
@@ -130,67 +125,6 @@ function PasswordStrengthMeter({ strength }) {
   );
 }
 
-/* ─── SubmitButton with loading morph ─────────────────────────────────────── */
-
-function SubmitButton({ state, isSignUp, onClick }) {
-  const label = isSignUp ? 'Begin journey' : 'Enter your space';
-  const loadingLabel = 'Opening...';
-
-  return (
-    <motion.button
-      type="submit"
-      className="auth-submit"
-      data-state={state}
-      disabled={state === 'loading' || state === 'success'}
-      onClick={onClick}
-      onMouseEnter={playHover}
-      layout
-      transition={{ layout: { type: 'spring', stiffness: 400, damping: 30 } }}
-    >
-      <AnimatePresence mode="wait" initial={false}>
-        {state === 'idle' && (
-          <motion.span key="idle" className="auth-submit-content"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            transition={{ duration: 0.15 }}
-          >
-            <span>{label}</span>
-            <Icon name="compass" />
-          </motion.span>
-        )}
-        {state === 'loading' && (
-          <motion.span key="loading" className="auth-submit-spinner"
-            initial={{ opacity: 0, rotate: -90 }}
-            animate={{ opacity: 1, rotate: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            aria-label={loadingLabel}
-          >
-            <svg viewBox="0 0 36 36" className="auth-ring">
-              <circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" strokeWidth="2.5" opacity="0.15" />
-              <circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" strokeWidth="2.5"
-                strokeDasharray="94.2"
-                strokeDashoffset="72"
-                strokeLinecap="round"
-                className="auth-ring-arc"
-              />
-            </svg>
-          </motion.span>
-        )}
-        {state === 'success' && (
-          <motion.span key="success" className="auth-submit-check"
-            initial={{ opacity: 0, scale: 0 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ type: 'spring', stiffness: 500, damping: 22 }}
-          >
-            <Icon name="check" />
-          </motion.span>
-        )}
-      </AnimatePresence>
-    </motion.button>
-  );
-}
 
 /* ─── Main AuthPage ───────────────────────────────────────────────────────── */
 
@@ -206,32 +140,21 @@ export function AuthPage({ mode }) {
   const [error, setError] = useState('');
   const [submitState, setSubmitState] = useState('idle'); // idle | loading | success
   const [showPassword, setShowPassword] = useState(false);
-  const [emailTouched, setEmailTouched] = useState(false);
   const [passwordTouched, setPasswordTouched] = useState(false);
   const [direction, setDirection] = useState(0); // for AnimatePresence direction
-  const [isTyping, setIsTyping] = useState(false);
-  const typingTimeout = useRef(null);
-
-  const emailValid = emailIsValid(email);
-  const passwordStrength = getPasswordStrength(password);
-
-  // Redirect if already authed
-  if (isAuthenticated && !devMode) return <Navigate to={location.state?.from || '/app'} replace />;
-
-  const handleTyping = useCallback(() => {
-    setIsTyping(true);
-    clearTimeout(typingTimeout.current);
-    typingTimeout.current = setTimeout(() => setIsTyping(false), 800);
-  }, []);
-
   const [emailSent, setEmailSent] = useState(false);
   const [resendSeconds, setResendSeconds] = useState(0);
+
+  const passwordStrength = getPasswordStrength(password);
 
   useEffect(() => {
     if (resendSeconds <= 0) return;
     const timer = setInterval(() => setResendSeconds((s) => s - 1), 1000);
     return () => clearInterval(timer);
   }, [resendSeconds]);
+
+  // Redirect if already authed
+  if (isAuthenticated && !devMode) return <Navigate to={location.state?.from || '/app'} replace />;
 
   const onSubmit = async (event) => {
     event.preventDefault();
@@ -376,14 +299,13 @@ export function AuthPage({ mode }) {
                 value={email}
                 placeholder=" "
                 autoComplete="email"
-                onChange={(e) => { setEmail(e.target.value); handleTyping(); }}
-                onBlur={() => setEmailTouched(true)}
+                onChange={(e) => { setEmail(e.target.value); }}
               />
               <label htmlFor="auth-email">Email address</label>
               {isReturning && (
                 <button
                   type="button"
-                  onClick={() => { clearRememberedEmail(); setEmail(''); setEmailTouched(false); playTap(); }}
+                  onClick={() => { clearRememberedEmail(); setEmail(''); playTap(); }}
                   style={{ position: 'absolute', right: 16, top: 22, background: 'none', border: 'none', color: 'var(--quest-gold-dim)', cursor: 'pointer', fontSize: '0.9rem' }}
                 >
                   Not you?
@@ -400,7 +322,7 @@ export function AuthPage({ mode }) {
                 value={password}
                 placeholder=" "
                 autoComplete={isSignUp ? 'new-password' : 'current-password'}
-                onChange={(e) => { setPassword(e.target.value); handleTyping(); }}
+                onChange={(e) => { setPassword(e.target.value); }}
                 onBlur={() => setPasswordTouched(true)}
               />
               <label htmlFor="auth-password">{isSignUp ? 'Create a passphrase' : 'Passphrase'}</label>

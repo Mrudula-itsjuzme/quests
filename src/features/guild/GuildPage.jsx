@@ -4,9 +4,9 @@ import { Icon } from '../../components/Icon';
 import { useFeed, useLeaderboard } from '../quests/queries';
 import { playHover, playTap } from '../../lib/useSoundEffects';
 import { AnimatedCounter } from '../../components/motion/AnimatedCounter';
-import { DashboardSkeleton, GuildSkeleton } from '../../components/motion/SkeletonLoader';
+import { GuildSkeleton } from '../../components/motion/SkeletonLoader';
 import { IntentionalEmptyState } from '../../components/motion/EmptyState';
-import { calmStaggerContainer, calmFade, staggerContainer, staggerItem, springConfig } from '../../components/motion/MotionVariants';
+import { calmStaggerContainer, calmFade, staggerItem, springConfig } from '../../components/motion/MotionVariants';
 
 export function GuildPage() {
   const feedQuery = useFeed();

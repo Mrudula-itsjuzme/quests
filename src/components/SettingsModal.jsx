@@ -6,7 +6,6 @@ import { playHover, playTap } from '../lib/useSoundEffects';
 export function SettingsModal({ onClose, user, onLogout }) {
   const [soundEnabled, setSoundEnabled] = useState(() => localStorage.getItem('habbit_sound_muted') !== 'true');
   const [motionIntensity, setMotionIntensity] = useState(() => localStorage.getItem('habbit_motion_reduced') === 'true' ? 'reduced' : 'full');
-  const [themeMode, setThemeMode] = useState(() => localStorage.getItem('habbit_theme') || 'dark-parchment');
 
   const toggleSound = () => {
     playTap();

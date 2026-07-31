@@ -1,68 +1,41 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Icon, categoryIcon } from '../../components/Icon';
-import { derivePlayerPresentation } from '../../lib/playerPresentation';
 import { QuestDetail } from './QuestDetail';
-import { questProgressRatio } from './QuestCard';
 import { playHover, playTap } from '../../lib/useSoundEffects';
 import { AnimatedCounter } from '../../components/motion/AnimatedCounter';
-import { DashboardSkeleton, QuestsSkeleton } from '../../components/motion/SkeletonLoader';
+import { QuestsSkeleton } from '../../components/motion/SkeletonLoader';
 import { IntentionalEmptyState } from '../../components/motion/EmptyState';
 import { QuestSuccessModal } from '../../components/motion/QuestSuccessModal';
 import { BottomSheet } from '../../components/motion/BottomSheet';
 import { staggerContainer, staggerItem, springConfig } from '../../components/motion/MotionVariants';
 import {
   useActiveQuests,
-  useCollectibles,
   useGenerateDaily,
   useGenerateMonthly,
   useGenerateWeekly,
   useMe,
-  useQuestDefinitions,
-  useQuestHistory,
 } from './queries';
 
-const tabs = [
-  { id: 'daily', label: 'Daily', icon: 'sun' },
-  { id: 'weekly', label: 'Weekly', icon: 'grid' },
-  { id: 'monthly', label: 'Expedition', icon: 'compass' },
-];
 
-function resetLabel() {
-  const now = new Date();
-  const tomorrow = new Date(now);
-  tomorrow.setHours(24, 0, 0, 0);
-  const minutes = Math.max(0, Math.floor((tomorrow - now) / 60000));
-  return `${Math.floor(minutes / 60)}h ${minutes % 60}m`;
-}
 
 export function QuestsPage() {
   const activeQuery = useActiveQuests();
   const meQuery = useMe();
-  const historyQuery = useQuestHistory();
-  const collectiblesQuery = useCollectibles();
-  const definitionsQuery = useQuestDefinitions();
+
   const generateDaily = useGenerateDaily();
   const generateWeekly = useGenerateWeekly();
   const generateMonthly = useGenerateMonthly();
-  const [tab, setTab] = useState('daily');
+  const [tab] = useState('daily');
   const [selectedId, setSelectedId] = useState(null);
   const [notice, setNotice] = useState('');
   const [deckIndex, setDeckIndex] = useState(0);
-  const [deckTouchStart, setDeckTouchStart] = useState(null);
-  const [deckMotion, setDeckMotion] = useState('settled');
 
   const quests = useMemo(() => activeQuery.data || [], [activeQuery.data]);
-  const history = historyQuery.data || [];
-  const collectibles = collectiblesQuery.data || [];
+
   const visible = quests.filter((quest) => quest.cadence === tab);
   const featured = visible[0] || quests[0] || null;
   const selected = quests.find((quest) => quest.id === selectedId) || null;
-  const presentation = derivePlayerPresentation(meQuery.data, quests, history, collectibles);
-  const definitions = useMemo(() => {
-    const activeDefinitionIds = new Set(quests.map((quest) => quest.definitionId));
-    return (definitionsQuery.data || []).filter((item) => !activeDefinitionIds.has(item.id)).slice(0, 3);
-  }, [definitionsQuery.data, quests]);
 
   const isQuestsLoading = activeQuery.isLoading || meQuery.isLoading;
 
@@ -99,19 +72,12 @@ export function QuestsPage() {
           featured={featured}
           selected={selected}
           setSelectedId={setSelectedId}
-          definitions={definitions}
-          definitionsQuery={definitionsQuery}
-          presentation={presentation}
           tab={tab}
-          setTab={setTab}
           notice={notice}
           setNotice={setNotice}
           deckIndex={deckIndex}
           setDeckIndex={setDeckIndex}
-          deckMotion={deckMotion}
-          setDeckMotion={setDeckMotion}
-          deckTouchStart={deckTouchStart}
-          setDeckTouchStart={setDeckTouchStart}
+
           generateDaily={generateDaily}
           generateWeekly={generateWeekly}
           generateMonthly={generateMonthly}
@@ -128,19 +94,12 @@ function QuestsContent({
   featured,
   selected,
   setSelectedId,
-  definitions,
-  definitionsQuery,
-  presentation,
   tab,
-  setTab,
   notice,
   setNotice,
   deckIndex,
   setDeckIndex,
-  deckMotion,
-  setDeckMotion,
-  deckTouchStart,
-  setDeckTouchStart,
+
   generateDaily,
   generateWeekly,
   generateMonthly,
@@ -155,7 +114,8 @@ function QuestsContent({
     return () => window.removeEventListener('habbit-quest-completed', handleQuestCompleted);
   }, []);
 
-  const featuredRatio = featured ? questProgressRatio(featured) : 0;
+
+
   const hasCadence = (cadence) => quests.some((quest) => quest.cadence === cadence);
   const accept = (cadence) => {
     playTap();
@@ -168,17 +128,6 @@ function QuestsContent({
       onSuccess: () => setNotice(`${cadence === 'monthly' ? 'Monthly expedition' : cadence === 'weekly' ? 'Weekly quest' : 'Daily quests'} accepted.`),
       onError: () => setNotice('The quest could not be accepted. Please try again.'),
     });
-  };
-  const moveDeck = (direction) => {
-    playTap();
-    setDeckMotion(direction > 0 ? 'next' : 'previous');
-    setDeckIndex((index) => Math.max(0, Math.min(visible.length - 1, index + direction)));
-  };
-  const finishDeckSwipe = (clientX) => {
-    if (deckTouchStart === null) return;
-    const distance = clientX - deckTouchStart;
-    if (Math.abs(distance) > 42) moveDeck(distance < 0 ? 1 : -1);
-    setDeckTouchStart(null);
   };
 
   return (
@@ -360,11 +309,3 @@ export function PlayerHeader({ me, page }) {
   );
 }
 
-function QuestSkeleton() {
-  return (
-    <main className="quest-reference" aria-busy="true">
-      <DashboardSkeleton />
-      <p className="sr-only" role="status">Loading your quest journal…</p>
-    </main>
-  );
-}

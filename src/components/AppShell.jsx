@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from '../features/auth/AuthContext';
-import { useMe, useMarkNotificationRead, useNotifications } from '../features/quests/queries';
+import { useMe } from '../features/quests/queries';
 import { OfflineSanctuary } from './OfflineSanctuary';
 import { SettingsModal } from './SettingsModal';
 import { LogoutDialog } from './LogoutDialog';
@@ -25,15 +25,10 @@ export function AppShell() {
   const location = useLocation();
   const { signOut, devMode } = useAuth();
   const { data: me, isLoading, isError } = useMe();
-  const notificationsQuery = useNotifications();
-  const markNotificationRead = useMarkNotificationRead();
   const [notice, setNotice] = useState('');
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const [levelUp, setLevelUp] = useState(null);
-  const notifications = notificationsQuery.data || [];
-  const unreadCount = notifications.filter((item) => !item.readAt).length;
 
   useEffect(() => {
     const onNotice = (event) => {

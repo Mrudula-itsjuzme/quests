@@ -1,8 +1,7 @@
-import { useState, useRef } from 'react';
+import { useRef } from 'react';
 import { motion, useAnimation } from 'framer-motion';
 
 export function HoldButton({ onComplete, disabled, children, className }) {
-  const [isHolding, setIsHolding] = useState(false);
   const fillControls = useAnimation();
   const holdTimeout = useRef(null);
   
@@ -10,7 +9,6 @@ export function HoldButton({ onComplete, disabled, children, className }) {
 
   const startHold = () => {
     if (disabled) return;
-    setIsHolding(true);
     
     // Start the visual fill
     fillControls.start({
@@ -21,7 +19,6 @@ export function HoldButton({ onComplete, disabled, children, className }) {
     holdTimeout.current = setTimeout(() => {
       // Completed hold
       fillControls.stop();
-      setIsHolding(false);
       fillControls.set({ width: 0 });
       onComplete();
     }, HOLD_DURATION);
@@ -30,7 +27,6 @@ export function HoldButton({ onComplete, disabled, children, className }) {
   const cancelHold = () => {
     if (disabled) return;
     clearTimeout(holdTimeout.current);
-    setIsHolding(false);
     
     // Snap visual fill back
     fillControls.start({
