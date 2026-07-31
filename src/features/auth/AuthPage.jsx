@@ -438,7 +438,6 @@ export function AuthPage({ mode }) {
                 type="submit"
                 className="mobile-auth-submit"
                 disabled={submitState === 'loading' || submitState === 'success'}
-                onClick={onClick}
                 onMouseEnter={playHover}
               >
                 {submitState === 'loading' ? 'Authenticating...' : isSignUp ? 'Begin Journey' : 'Enter'}
