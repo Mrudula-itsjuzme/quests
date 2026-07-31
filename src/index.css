@@ -5779,3 +5779,137 @@ body {
   from { opacity: 0; transform: translateY(11px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* ========================================================================== */
+/* Motion Design System Primitives                                            */
+/* ========================================================================== */
+
+.floating-xp-badge {
+  position: absolute;
+  top: -10px;
+  right: 20px;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: 1px solid var(--quest-gold-bright);
+  border-radius: 20px;
+  color: var(--quest-gold-bright);
+  background: linear-gradient(135deg, rgba(201, 154, 75, 0.95), rgba(7, 16, 21, 0.95));
+  box-shadow: 0 0 20px rgba(240, 199, 118, 0.5), 0 8px 24px rgba(0, 0, 0, 0.6);
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  pointer-events: none;
+}
+
+.xp-sparkle {
+  color: var(--quest-cream);
+  animation: sparkle-spin 1.5s infinite ease-in-out;
+}
+
+@keyframes sparkle-spin {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.3) rotate(180deg); }
+}
+
+.skeleton-loader {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  background: rgba(20, 30, 34, 0.7);
+}
+
+.skeleton-shimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(201, 154, 75, 0.15) 50%,
+    transparent 100%
+  );
+}
+
+.dashboard-skeleton-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px;
+}
+
+.skeleton-grid, .skeleton-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.intentional-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.empty-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  margin-bottom: 16px;
+  border: 1px solid var(--quest-line);
+  border-radius: 50%;
+  color: var(--quest-gold-bright);
+  background: radial-gradient(circle, rgba(201, 154, 75, 0.12), transparent);
+  font-size: 2.2rem;
+}
+
+.intentional-empty-state h3 {
+  margin-bottom: 8px;
+  color: var(--quest-cream);
+  font-size: 1.4rem;
+}
+
+.intentional-empty-state p {
+  max-width: 360px;
+  margin-bottom: 20px;
+  color: var(--quest-muted);
+  font-size: 0.95rem;
+}
+
+.animated-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  outline: none;
+  cursor: pointer;
+  user-select: none;
+}
+
+.btn-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: currentColor;
+  border-radius: 50%;
+}
+
+.btn-checkmark {
+  font-weight: bold;
+}
+
+.quest-row.is-completed {
+  border-color: rgba(145, 184, 116, 0.4);
+  background: linear-gradient(90deg, rgba(20, 40, 28, 0.95), rgba(9, 17, 21, 0.95));
+}
+
+.quest-row.is-completed .quest-glyph {
+  color: #91b874;
+}
+
