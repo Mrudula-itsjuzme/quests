@@ -37,7 +37,7 @@ export class CampaignRepository {
 
   async listActive(now = new Date()) {
     const { rows } = await this.pool.query(
-      \`SELECT * FROM campaigns WHERE status = 'active' AND (start_date IS NULL OR start_date <= $1) AND (end_date IS NULL OR end_date >= $1) ORDER BY start_date DESC\`,
+      `SELECT * FROM campaigns WHERE status = 'active' AND (start_date IS NULL OR start_date <= $1) AND (end_date IS NULL OR end_date >= $1) ORDER BY start_date DESC`,
       [now]
     );
     return rows.map(row => this.mapRow(row));

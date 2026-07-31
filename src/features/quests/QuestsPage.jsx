@@ -5,6 +5,10 @@ import { derivePlayerPresentation } from '../../lib/playerPresentation';
 import { QuestDetail } from './QuestDetail';
 import { questProgressRatio } from './QuestCard';
 import { playHover, playTap } from '../../lib/useSoundEffects';
+import { AnimatedCounter } from '../../components/motion/AnimatedCounter';
+import { DashboardSkeleton } from '../../components/motion/SkeletonLoader';
+import { IntentionalEmptyState } from '../../components/motion/EmptyState';
+import { staggerContainer, staggerItem, springConfig } from '../../components/motion/MotionVariants';
 import {
   useActiveQuests,
   useCollectibles,
@@ -93,8 +97,16 @@ export function QuestsPage() {
   };
 
   return (
-    <main className="quest-reference fantasy-page" aria-label="Quests">
-      <PlayerHeader me={me} page="Quests" />
+    <motion.main
+      className="quest-reference fantasy-page"
+      aria-label="Quests"
+      variants={staggerContainer(0.05, 0.04)}
+      initial="hidden"
+      animate="show"
+    >
+      <motion.div variants={staggerItem}>
+        <PlayerHeader me={me} page="Quests" />
+      </motion.div>
 
       <section className="mobile-quest-board" aria-label="Mobile quest deck">
         <nav className="mobile-cadence-tabs" aria-label="Mobile quest cadence">
@@ -137,7 +149,7 @@ export function QuestsPage() {
                     aria-hidden={offset !== 0}
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ type: 'spring', stiffness: 350, damping: 25 }}
+                    transition={springConfig.tactile}
                   >
                     <div className="mobile-deck-category"><span className="round-emblem"><Icon name={categoryIcon(quest.category)} /></span><strong>{quest.category}</strong></div>
                     <h2>{quest.title}</h2>
@@ -171,9 +183,13 @@ export function QuestsPage() {
           </>
         ) : (
           <section className="mobile-deck-empty ornate-panel">
-            <Icon name="scroll" /><h2>No {tab} quests yet</h2>
-            <p>Generate a new set to begin this path.</p>
-            <motion.button className="gold-button" type="button" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => accept(tab)}>Generate {tab} quests</motion.button>
+            <IntentionalEmptyState
+              icon="scroll"
+              title={`No ${tab} quests yet`}
+              description="Generate a new set to begin this path."
+              actionLabel={`Generate ${tab} quests`}
+              onAction={() => accept(tab)}
+            />
           </section>
         )}
 
@@ -181,7 +197,7 @@ export function QuestsPage() {
           <div className="section-title"><h2>Available Quests</h2><span>Swipe to explore</span></div>
           <div>
             {definitions.map((quest) => (
-              <motion.article key={quest.id} whileHover={{ y: -3 }} onMouseEnter={playHover}>
+              <motion.article key={quest.id} whileHover={{ y: -3 }} onMouseEnter={playHover} transition={springConfig.tactile}>
                 <span className="round-emblem"><Icon name={categoryIcon(quest.category)} /></span>
                 <strong>{quest.title}</strong>
                 <small>{quest.description}</small>
@@ -194,7 +210,7 @@ export function QuestsPage() {
         </section>
       </section>
 
-      <motion.section className="focus-hero ornate-panel" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', stiffness: 350, damping: 25 }}>
+      <motion.section className="focus-hero ornate-panel" variants={staggerItem}>
         <img className="focus-hero-art" src="/quest-scholar-hero.png" alt="" />
         <div className="focus-label"><span>◆</span> Today’s Focus <span>◆</span></div>
         <div className="quest-ring" style={{ '--progress': `${featuredRatio * 360}deg` }}>
@@ -212,7 +228,7 @@ export function QuestsPage() {
         <div className="character-dialogue"><Icon name="leaf" /><span>Every step forward brings you closer to legend. Keep going!</span></div>
       </motion.section>
 
-      <div className="quest-tabs" role="tablist" aria-label="Quest cadence">
+      <motion.div className="quest-tabs" role="tablist" aria-label="Quest cadence" variants={staggerItem}>
         {tabs.map((item) => (
           <motion.button
             key={item.id}
@@ -233,13 +249,19 @@ export function QuestsPage() {
             <Icon name={item.icon} /><span>{item.label}</span>
           </motion.button>
         ))}
-      </div>
+      </motion.div>
 
       <div className="quest-content-grid">
-        <section className="ornate-panel active-list">
+        <motion.section className="ornate-panel active-list" variants={staggerItem}>
           <div className="section-title"><h2>Active Quests</h2><span>{visible.length} active</span></div>
           {visible.length === 0 && (
-            <div className="empty-state"><Icon name="scroll" /><p>No {tab} quests yet.</p><motion.button className="gold-button" type="button" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => accept(tab)}>Generate {tab} quests</motion.button></div>
+            <IntentionalEmptyState
+              icon="scroll"
+              title={`No ${tab} quests yet`}
+              description="Accept or generate a new set of quests to expand your journey."
+              actionLabel={`Generate ${tab} quests`}
+              onAction={() => accept(tab)}
+            />
           )}
           <AnimatePresence mode="popLayout">
             {visible.map((quest) => (
@@ -247,7 +269,7 @@ export function QuestsPage() {
                 key={quest.id}
                 type="button"
                 className="reference-quest-row"
-                whileHover={{ scale: 1.015, x: 4 }}
+                whileHover={{ scale: 1.015, x: 4, boxShadow: '0 4px 16px rgba(0, 0, 0, 0.25)' }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => {
                   playTap();
@@ -257,7 +279,7 @@ export function QuestsPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                transition={springConfig.tactile}
               >
                 <span className="round-emblem"><Icon name={categoryIcon(quest.category)} /></span>
                 <span className="quest-copy"><strong>{quest.title}</strong><small>{quest.description}</small><span className="gold-progress"><motion.i initial={{ width: 0 }} animate={{ width: `${questProgressRatio(quest) * 100}%` }} transition={{ type: 'spring', stiffness: 300, damping: 30 }} /></span></span>
@@ -265,19 +287,19 @@ export function QuestsPage() {
               </motion.button>
             ))}
           </AnimatePresence>
-        </section>
-        <aside className="progress-side">
-          <motion.section className="ornate-panel streak-card" whileHover={{ y: -3 }} onMouseEnter={playHover}><h2>Weekly Streak</h2><Icon name="flame" /><strong>{me.streakDays || 0}</strong><span>days</span><p>Keep the flame alive!</p></motion.section>
-          <motion.section className="ornate-panel rank-card" whileHover={{ y: -3 }} onMouseEnter={playHover}><h2>Path Rank</h2><Icon name="compass" /><strong>{presentation.rank}</strong><div className="gold-progress"><motion.i initial={{ width: 0 }} animate={{ width: `${presentation.rankProgress * 100}%` }} transition={{ type: 'spring', stiffness: 300, damping: 30 }} /></div><span>{me.totalXp.toLocaleString()} / {presentation.nextRankXp.toLocaleString()} XP</span></motion.section>
-        </aside>
+        </motion.section>
+        <motion.aside className="progress-side" variants={staggerItem}>
+          <motion.section className="ornate-panel streak-card" whileHover={{ y: -3 }} onMouseEnter={playHover} transition={springConfig.tactile}><h2>Weekly Streak</h2><Icon name="flame" /><strong><AnimatedCounter value={me.streakDays || 0} /></strong><span>days</span><p>Keep the flame alive!</p></motion.section>
+          <motion.section className="ornate-panel rank-card" whileHover={{ y: -3 }} onMouseEnter={playHover} transition={springConfig.tactile}><h2>Path Rank</h2><Icon name="compass" /><strong>{presentation.rank}</strong><div className="gold-progress"><motion.i initial={{ width: 0 }} animate={{ width: `${presentation.rankProgress * 100}%` }} transition={{ type: 'spring', stiffness: 300, damping: 30 }} /></div><span><AnimatedCounter value={me.totalXp} /> / {presentation.nextRankXp.toLocaleString()} XP</span></motion.section>
+        </motion.aside>
       </div>
 
-      <section className="ornate-panel available-quests">
+      <motion.section className="ornate-panel available-quests" variants={staggerItem}>
         <div className="section-title"><h2>Available Quests</h2><span>⌛ New quests in {resetLabel()}</span></div>
         {definitionsQuery.isLoading && <p role="status">Consulting the quest archive…</p>}
         <div className="available-grid">
           {definitions.map((quest) => (
-            <motion.article key={quest.id} className="available-card" whileHover={{ y: -4, scale: 1.02 }} onMouseEnter={playHover}>
+            <motion.article key={quest.id} className="available-card" whileHover={{ y: -4, scale: 1.02 }} onMouseEnter={playHover} transition={springConfig.tactile}>
               <span className="round-emblem"><Icon name={categoryIcon(quest.category)} /></span>
               <h3>{quest.title}</h3><p>{quest.description}</p>
               <div><span>◈ {quest.xpReward} XP</span><span>{quest.cadence}</span></div>
@@ -286,7 +308,7 @@ export function QuestsPage() {
           ))}
           {!definitionsQuery.isLoading && definitions.length === 0 && <p className="empty-state">All currently available quests are already on your board.</p>}
         </div>
-      </section>
+      </motion.section>
 
       <AnimatePresence>
         {selected && (
@@ -304,7 +326,7 @@ export function QuestsPage() {
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
-              transition={{ type: 'spring', stiffness: 450, damping: 30 }}
+              transition={springConfig.snappy}
             >
               <button className="detail-close" type="button" onClick={() => { playTap(); setSelectedId(null); }} aria-label="Close quest details">×</button>
               <QuestDetail quest={selected} />
@@ -321,27 +343,27 @@ export function QuestsPage() {
             initial={{ opacity: 0, y: 20, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
-            transition={{ type: 'spring', stiffness: 450, damping: 25 }}
+            transition={springConfig.snappy}
           >
             <span>{notice}</span>
             <button type="button" onClick={() => { playTap(); setNotice(''); }} aria-label="Dismiss notification">×</button>
           </motion.div>
         )}
       </AnimatePresence>
-    </main>
+    </motion.main>
   );
 }
 
 export function PlayerHeader({ me, page }) {
   return (
     <header className="reference-header">
-      <motion.div className="avatar-medallion" whileHover={{ scale: 1.08, rotate: 3 }} onMouseEnter={playHover}>
+      <motion.div className="avatar-medallion" whileHover={{ scale: 1.08, rotate: 3 }} onMouseEnter={playHover} transition={springConfig.tactile}>
         <span>{(me.displayName || 'S')[0].toUpperCase()}</span><b>{me.level}</b>
       </motion.div>
       <div className="player-heading">
         <h1>{page}</h1>
         <p>{me.displayName || 'Mind in progress'} <i /></p>
-        <span><Icon name="shield" /> {me.totalXp.toLocaleString()} XP</span>
+        <span><Icon name="shield" /> <AnimatedCounter value={me.totalXp} /> XP</span>
       </div>
       <div className="header-orbit">
         <motion.button type="button" aria-label="Notifications" whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }} onClick={() => { playTap(); window.dispatchEvent(new CustomEvent('habbit-notice', { detail: 'No new notices. Your path is clear.' })); }}>
@@ -356,5 +378,10 @@ export function PlayerHeader({ me, page }) {
 }
 
 function QuestSkeleton() {
-  return <main className="quest-reference" aria-busy="true"><div className="skeleton player-skeleton" /><div className="skeleton hero-skeleton" /><div className="skeleton list-skeleton" /><p className="sr-only" role="status">Loading your quest journal…</p></main>;
+  return (
+    <main className="quest-reference" aria-busy="true">
+      <DashboardSkeleton />
+      <p className="sr-only" role="status">Loading your quest journal…</p>
+    </main>
+  );
 }

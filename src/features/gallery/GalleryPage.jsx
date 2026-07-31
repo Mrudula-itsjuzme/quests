@@ -4,6 +4,10 @@ import { AnimatedCollectible } from '../../components/AnimatedCollectible';
 import { Icon, categoryColors, categoryIcon } from '../../components/Icon';
 import { useCollectibles } from '../quests/queries';
 import { playHover, playTap } from '../../lib/useSoundEffects';
+import { PhysicalCard } from '../../components/motion/PhysicalCard';
+import { DashboardSkeleton } from '../../components/motion/SkeletonLoader';
+import { IntentionalEmptyState } from '../../components/motion/EmptyState';
+import { staggerContainer, staggerItem, springConfig } from '../../components/motion/MotionVariants';
 
 const filters = [
   { id: 'all', label: 'All' },
@@ -32,32 +36,49 @@ export function GalleryPage() {
     [collection, filter],
   );
 
+  if (isLoading) {
+    return (
+      <main className="gallery-shell page-stack fantasy-page">
+        <DashboardSkeleton />
+      </main>
+    );
+  }
+
+  if (isError) {
+    return (
+      <main className="gallery-shell page-stack fantasy-page">
+        <section className="panel ornate-panel" role="alert">
+          <h2>Gallery sealed</h2>
+          <p>Could not retrieve your journal entries right now.</p>
+        </section>
+      </main>
+    );
+  }
+
   return (
-    <main className="gallery-shell page-stack fantasy-page">
-      <div className="page-heading">
+    <motion.main
+      className="gallery-shell page-stack fantasy-page"
+      variants={staggerContainer(0.05, 0.04)}
+      initial="hidden"
+      animate="show"
+    >
+      <motion.div className="page-heading" variants={staggerItem}>
         <div>
           <h1>Gallery</h1>
-          <p>A chronological journal of every memory your account has actually unlocked.</p>
+          <p>A chronological journal of every milestone unlocked during your quest journey.</p>
         </div>
-      </div>
+      </motion.div>
 
-      {isLoading && <p role="status">Loading your memories...</p>}
-      {isError && (
-        <section className="panel" role="alert">
-          <p>Could not load your collection right now.</p>
-        </section>
-      )}
-
-      {!isLoading && !isError && (!collection || collection.length === 0) && (
-        <section className="panel empty-gallery">
-          <AnimatedCollectible collectible={{ category: 'Discovery' }} preview />
-          <h2>No stickers unlocked yet</h2>
-          <p>Complete a quest to add the first entry to this journal.</p>
-        </section>
-      )}
-
-      {!isLoading && !isError && collection && collection.length > 0 && (
-        <section className="panel" aria-label="Memory journal">
+      {!collection || collection.length === 0 ? (
+        <motion.div variants={staggerItem}>
+          <IntentionalEmptyState
+            icon="star"
+            title="No stickers unlocked yet"
+            description="Complete verified daily or campaign quests to earn your first collectible badge."
+          />
+        </motion.div>
+      ) : (
+        <motion.section className="panel ornate-panel" aria-label="Memory journal" variants={staggerItem}>
           <div className="segmented-control" role="group" aria-label="Filter memories by category">
             {filters.map((item) => (
               <button
@@ -76,47 +97,41 @@ export function GalleryPage() {
           </div>
 
           {filtered.length === 0 ? (
-            <p className="empty-state">No memories in this category yet.</p>
+            <p className="empty-state">No unlocked artifacts in this category yet.</p>
           ) : (
             <div className="journal-timeline">
               <AnimatePresence mode="popLayout">
                 {filtered.map((item) => (
-                  <motion.button
+                  <PhysicalCard
                     key={item.assetId}
-                    type="button"
-                    className="journal-entry"
-                    whileHover={{ scale: 1.015, x: 4 }}
-                    whileTap={{ scale: 0.98 }}
+                    className="journal-entry-card"
                     onClick={() => {
                       playTap();
                       setSelected(item);
                     }}
-                    onMouseEnter={playHover}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ type: 'spring', stiffness: 350, damping: 25 }}
                   >
-                    <span className="journal-thumb" aria-hidden="true">
-                      <Icon name={categoryIcon(item.category)} />
-                    </span>
-                    <span className="journal-entry-copy">
-                      <strong>{item.title}</strong>
-                      <span className="journal-entry-meta">
-                        <span className={`pill ${categoryColors[item.category] || ''}`}>{item.category}</span>
-                        <span>{item.rarity}</span>
-                        {formatDate(item.unlockedAt) && <span>{formatDate(item.unlockedAt)}</span>}
+                    <div className="journal-entry-content">
+                      <span className="journal-thumb" aria-hidden="true">
+                        <Icon name={categoryIcon(item.category)} />
                       </span>
-                    </span>
-                    <span className="journal-entry-side">
-                      <Icon name="bookmark" />
-                    </span>
-                  </motion.button>
+                      <span className="journal-entry-copy">
+                        <strong>{item.title}</strong>
+                        <span className="journal-entry-meta">
+                          <span className={`pill ${categoryColors[item.category] || ''}`}>{item.category}</span>
+                          <span>{item.rarity}</span>
+                          {formatDate(item.unlockedAt) && <span>{formatDate(item.unlockedAt)}</span>}
+                        </span>
+                      </span>
+                      <span className="journal-entry-side">
+                        <Icon name="bookmark" />
+                      </span>
+                    </div>
+                  </PhysicalCard>
                 ))}
               </AnimatePresence>
             </div>
           )}
-        </section>
+        </motion.section>
       )}
 
       <AnimatePresence>
@@ -124,7 +139,7 @@ export function GalleryPage() {
           <MemoryDetail item={selected} onClose={() => { playTap(); setSelected(null); }} reduceMotion={shouldReduceMotion} />
         )}
       </AnimatePresence>
-    </main>
+    </motion.main>
   );
 }
 
@@ -132,7 +147,7 @@ function MemoryDetail({ item, onClose, reduceMotion }) {
   const overlayTransition = reduceMotion ? { duration: 0 } : { duration: 0.25, ease: 'easeOut' };
   const bookTransition = reduceMotion
     ? { duration: 0 }
-    : { duration: 0.4, ease: [0.2, 0.8, 0.2, 1] };
+    : springConfig.snappy;
 
   return (
     <motion.div
@@ -149,11 +164,10 @@ function MemoryDetail({ item, onClose, reduceMotion }) {
       <motion.div
         className="memory-book grain"
         onClick={(event) => event.stopPropagation()}
-        initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.92, rotateX: 8 }}
-        animate={reduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1, rotateX: 0 }}
-        exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.94, rotateX: 6 }}
+        initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.94, y: 16 }}
+        animate={reduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
+        exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.94, y: 16 }}
         transition={bookTransition}
-        style={{ transformPerspective: 1200 }}
       >
         <button type="button" className="icon-button memory-close" onClick={onClose} aria-label="Close memory">
           <Icon name="check" />

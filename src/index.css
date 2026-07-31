@@ -53,23 +53,22 @@
 /* Reference fantasy surfaces — Quests / Profile                              */
 /* ========================================================================== */
 :root {
-  --quest-ink: #071015;
-  --quest-ink-2: #0d171c;
-  --quest-panel: rgba(12, 23, 28, .94);
-  --quest-panel-raised: rgba(20, 30, 34, .96);
-  --quest-gold: #c99a4b;
-  --quest-gold-bright: #f0c776;
-  --quest-gold-dim: #72572d;
-  --quest-cream: #ead7b1;
-  --quest-muted: #b49c76;
-  --quest-line: rgba(201, 154, 75, .42);
-  --quest-ease: cubic-bezier(.2, .8, .2, 1);
+  --quest-ink: #0e0d0b;
+  --quest-ink-2: #161412;
+  --quest-panel: rgba(22, 20, 18, 0.88);
+  --quest-panel-raised: rgba(28, 25, 22, 0.92);
+  --quest-gold: #d4b484;
+  --quest-gold-bright: #e8d0aa;
+  --quest-gold-dim: #8c7352;
+  --quest-cream: #f4efe6;
+  --quest-muted: #a69c8d;
+  --quest-line: rgba(212, 180, 132, 0.16);
+  --quest-ease: cubic-bezier(.16, 1, .3, 1);
 }
 
 body {
   background:
-    radial-gradient(circle at 50% -20%, rgba(34, 66, 76, .38), transparent 44rem),
-    repeating-linear-gradient(102deg, transparent 0 53px, rgba(255,255,255,.008) 54px 55px),
+    radial-gradient(circle at 50% 0%, rgba(45, 38, 30, 0.35), transparent 50rem),
     var(--quest-ink);
 }
 
@@ -5911,5 +5910,65 @@ body {
 
 .quest-row.is-completed .quest-glyph {
   color: #91b874;
+}
+
+/* Physical Motion Primitives */
+.magnetic-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid var(--quest-line);
+  border-radius: var(--radius-md, 8px);
+  color: var(--quest-cream);
+  background: var(--quest-surface);
+  will-change: transform;
+  transform-style: preserve-3d;
+}
+
+.magnetic-button-content {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.magnetic-button-glow {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  opacity: 0;
+  background: radial-gradient(circle at center, rgba(212, 163, 89, 0.25), transparent 70%);
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.magnetic-button:hover .magnetic-button-glow {
+  opacity: 1;
+}
+
+.physical-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--quest-line);
+  border-radius: var(--radius-lg, 12px);
+  background: var(--quest-surface);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  will-change: transform;
+}
+
+.card-light-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.card-content {
+  position: relative;
+  z-index: 1;
 }
 

@@ -35,8 +35,8 @@ export class TemplateRepository {
       conditions.push(`category = $${values.length}`);
     }
     
-    const where = conditions.length > 0 ? \`WHERE \${conditions.join(' AND ')}\` : '';
-    const { rows } = await this.pool.query(\`SELECT * FROM quest_templates \${where} ORDER BY created_at DESC\`, values);
+    const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+    const { rows } = await this.pool.query(`SELECT * FROM quest_templates ${where} ORDER BY created_at DESC`, values);
     return rows.map(row => this.mapRow(row));
   }
 
@@ -46,11 +46,11 @@ export class TemplateRepository {
     if (!entries.length) return this.getById(id);
     
     const values = entries.map(([, val]) => val);
-    const set = entries.map(([key], index) => \`\${key} = $\${index + 1}\`);
+    const set = entries.map(([key], index) => `${key} = $${index + 1}`);
     values.push(id);
     
     const { rows } = await this.pool.query(
-      \`UPDATE quest_templates SET \${set.join(', ')}, updated_at = NOW() WHERE id = $\${values.length} RETURNING *\`,
+      `UPDATE quest_templates SET ${set.join(', ')}, updated_at = NOW() WHERE id = $${values.length} RETURNING *`,
       values
     );
     return rows[0] ? this.mapRow(rows[0]) : null;

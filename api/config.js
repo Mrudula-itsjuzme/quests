@@ -37,7 +37,7 @@ const schema = z.object({
   RENDER_EXTERNAL_URL: z.string().url().optional(),
 });
 
-export function loadConfig(env = process.env) {
+export function loadConfig(env = process.env, options = {}) {
   const result = schema.safeParse(env);
   if (!result.success) {
     throw new Error(`Invalid configuration: ${result.error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`).join('; ')}`);
@@ -58,12 +58,26 @@ export function loadConfig(env = process.env) {
   config.selfOrigin = config.RENDER_EXTERNAL_URL?.replace(/\/$/, '') || null;
   config.listenHost = config.HOST || (config.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1');
 
+  if (options.isMigration) {
+    if (!config.databaseUrl) {
+      throw new Error('DATABASE_URL or POSTGRES_URL is required for database migrations.');
+    }
+    return Object.freeze(config);
+  }
+
   if (config.NODE_ENV === 'production') {
-    const missingOidc = !config.OIDC_ISSUER || !config.OIDC_AUDIENCE;
-    const insecureOidc = [config.OIDC_ISSUER, config.OIDC_JWKS_URL].filter(Boolean).some((value) => new URL(value).protocol !== 'https:');
-    const missingProviders = config.PROVIDER_MODE !== 'http' || !config.QUEST_AI_VERIFY_URL || !config.QUEST_PROVIDER_SECRET || !config.CRON_SECRET;
-    if (!config.databaseUrl || config.DEV_AUTH_ENABLED || config.DEV_ALLOW_LEGACY_MUTATIONS || missingProviders || missingOidc || insecureOidc) {
+    if (!config.databaseUrl) {
       throw new Error('Production requires PostgreSQL, HTTPS OIDC, disabled development auth, disabled legacy mutations, and configured HTTP quest providers.');
+    }
+    if (config.DEV_AUTH_ENABLED || config.DEV_ALLOW_LEGACY_MUTATIONS) {
+      throw new Error('Production requires PostgreSQL, HTTPS OIDC, disabled development auth, disabled legacy mutations, and configured HTTP quest providers.');
+    }
+    const insecureOidc = [config.OIDC_ISSUER, config.OIDC_JWKS_URL].filter(Boolean).some((value) => new URL(value).protocol !== 'https:');
+    if (insecureOidc) {
+      throw new Error('Production requires HTTPS OIDC endpoints.');
+    }
+    if (config.PROVIDER_MODE === 'http' && (!config.QUEST_AI_VERIFY_URL || !config.QUEST_PROVIDER_SECRET)) {
+      throw new Error('Production requires configured HTTP quest providers.');
     }
   }
 
