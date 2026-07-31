@@ -60,6 +60,76 @@ export function AppShell() {
           Development auth active — this is a local identity, not a real account.
         </div>
       )}
+      <header className="topbar">
+        <motion.div
+          className="brand-lockup"
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
+          onMouseEnter={playHover}
+        >
+          <span className="brand-mark" aria-hidden="true">H</span>
+          <div>
+            <strong>HABBIT QUESTS</strong>
+          </div>
+        </motion.div>
+        <nav className="top-nav" aria-label="Primary">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.end}
+              className={({ isActive }) => (isActive ? 'active' : '')}
+              onClick={playTap}
+              onMouseEnter={playHover}
+            >
+              {({ isActive }) => (
+                <>
+                  {isActive && (
+                    <motion.div
+                      className="active-indicator"
+                      layoutId="topNavIndicator"
+                      transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                    />
+                  )}
+                  <Icon name={item.icon} />
+                  <span>{item.label}</span>
+                </>
+              )}
+            </NavLink>
+          ))}
+        </nav>
+        <div className="user-profile-trigger">
+          {!isLoading && !isError && me && (
+            <div className="quick-stat shell-xp">
+              <strong>{me.totalXp.toLocaleString()}</strong>
+              <span>XP</span>
+            </div>
+          )}
+          <motion.button
+            type="button"
+            className="round-action"
+            aria-label="Settings"
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.92 }}
+            onClick={() => { playTap(); setSettingsOpen(true); }}
+            onMouseEnter={playHover}
+          >
+            <Icon name="gear" />
+          </motion.button>
+          <motion.button
+            type="button"
+            className="ghost-action"
+            aria-label="Sign out"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => { playTap(); setLogoutDialogOpen(true); }}
+            onMouseEnter={playHover}
+          >
+            Sign out
+          </motion.button>
+        </div>
+      </header>
+
       {/* Main scrolling content area */}
       <div className="mobile-content-area" style={{ overflow: 'hidden' }}>
         <PullToRefresh>

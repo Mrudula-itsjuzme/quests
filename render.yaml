@@ -3,6 +3,7 @@ services:
     name: quests-app
     env: node
     buildCommand: npm ci && npm run build
+    preDeployCommand: npm run migrate
     startCommand: npm start
     envVars:
       - key: NODE_ENV
@@ -11,6 +12,8 @@ services:
         fromDatabase:
           name: quests-db
           property: connectionString
+      - key: CRON_SECRET
+        generateValue: true
 
   - type: cron
     name: quests-scheduler
@@ -25,6 +28,11 @@ services:
         fromDatabase:
           name: quests-db
           property: connectionString
+      - key: CRON_SECRET
+        fromService:
+          type: web
+          name: quests-app
+          envVarKey: CRON_SECRET
 
 databases:
   - name: quests-db

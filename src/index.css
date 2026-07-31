@@ -7077,3 +7077,160 @@ button, a {
 
 
 
+
+/* --- HYBRID DESKTOP & MOBILE LAYOUT --- */
+@media (min-width: 768px) {
+  .app-shell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #04090c;
+    min-height: 100vh;
+  }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 16px 40px;
+    background: rgba(8, 16, 20, 0.8);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    z-index: 50;
+    position: sticky;
+    top: 0;
+  }
+
+  .brand-lockup {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--quest-gold-bright);
+    font-family: var(--font-display);
+    cursor: pointer;
+  }
+
+  .brand-mark {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(234, 181, 82, 0.1);
+    border: 1px solid rgba(234, 181, 82, 0.3);
+    border-radius: 8px;
+    font-weight: 700;
+  }
+
+  .top-nav {
+    display: flex;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 6px;
+    border-radius: 100px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .top-nav a {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    color: var(--quest-muted);
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border-radius: 100px;
+    transition: color 0.2s;
+  }
+
+  .top-nav a:hover {
+    color: var(--quest-cream);
+  }
+
+  .top-nav a.active {
+    color: var(--void);
+  }
+
+  .top-nav .active-indicator {
+    position: absolute;
+    inset: 0;
+    background: var(--quest-gold-bright);
+    border-radius: 100px;
+    z-index: -1;
+  }
+
+  .user-profile-trigger {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .shell-xp {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--quest-gold-dim);
+    font-family: var(--font-ui);
+  }
+
+  .shell-xp strong {
+    color: var(--quest-gold-bright);
+    font-size: 1.1rem;
+  }
+
+  .round-action {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    color: var(--quest-cream);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .ghost-action {
+    background: transparent;
+    border: none;
+    color: var(--quest-muted);
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+
+  .ghost-action:hover {
+    color: var(--quest-cream);
+  }
+
+  /* Desktop Container Constraint */
+  .mobile-content-area {
+    width: 100%;
+    max-width: 440px; /* Real phone width */
+    margin: 32px auto;
+    border-radius: 36px;
+    background: #090806;
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+    border: 10px solid #020405; /* Device Bezel */
+    position: relative;
+    height: calc(100vh - 160px);
+    overflow: hidden !important;
+  }
+
+  /* Keep the bottom dock but position it absolutely inside the phone simulator */
+  .mobile-bottom-dock {
+    position: absolute;
+    bottom: 24px;
+    left: 24px;
+    right: 24px;
+  }
+}
+
+@media (max-width: 767px) {
+  .topbar {
+    display: none !important;
+  }
+}

@@ -67,17 +67,20 @@ export function loadConfig(env = process.env, options = {}) {
 
   if (config.NODE_ENV === 'production') {
     if (!config.databaseUrl) {
-      throw new Error('Production requires PostgreSQL, HTTPS OIDC, disabled development auth, disabled legacy mutations, and configured HTTP quest providers.');
+      throw new Error('Production requires a valid PostgreSQL connection string (DATABASE_URL).');
     }
-    if (config.DEV_AUTH_ENABLED || config.DEV_ALLOW_LEGACY_MUTATIONS) {
-      throw new Error('Production requires PostgreSQL, HTTPS OIDC, disabled development auth, disabled legacy mutations, and configured HTTP quest providers.');
+    if (config.DEV_AUTH_ENABLED) {
+      throw new Error('Production requires DEV_AUTH_ENABLED to be disabled.');
+    }
+    if (config.DEV_ALLOW_LEGACY_MUTATIONS) {
+      throw new Error('Production requires DEV_ALLOW_LEGACY_MUTATIONS to be disabled.');
     }
     const insecureOidc = [config.OIDC_ISSUER, config.OIDC_JWKS_URL].filter(Boolean).some((value) => new URL(value).protocol !== 'https:');
     if (insecureOidc) {
       throw new Error('Production requires HTTPS OIDC endpoints.');
     }
     if (config.PROVIDER_MODE === 'http' && (!config.QUEST_AI_VERIFY_URL || !config.QUEST_PROVIDER_SECRET)) {
-      throw new Error('Production requires configured HTTP quest providers.');
+      throw new Error('Production requires configured HTTP quest providers (QUEST_AI_VERIFY_URL and QUEST_PROVIDER_SECRET).');
     }
   }
 
