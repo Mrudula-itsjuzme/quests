@@ -7210,34 +7210,16 @@ button, a {
 
   /* Desktop Container Constraint */
   .mobile-content-area {
+    padding-bottom: 40px; /* Remove padding needed for mobile dock */
+    margin: 0 auto;
     width: 100%;
-    max-width: 440px; /* Real phone width */
-    margin: 32px auto;
-    border-radius: 36px;
-    background: #090806;
-    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
-    border: 10px solid #020405; /* Device Bezel */
-    position: relative;
-    height: calc(100vh - 160px);
-    overflow: hidden !important;
-  }
-  .ptr-container::-webkit-scrollbar {
-    display: none;
-  }
-  .ptr-container {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+    max-width: 1520px;
+    overflow-y: auto !important;
   }
 
-  /* Keep the bottom dock but position it absolutely inside the phone simulator */
+  /* Hide the mobile bottom dock on desktop because topbar is visible */
   .mobile-bottom-dock {
-    position: absolute;
-    bottom: 24px;
-    left: 24px;
-    right: 24px;
-    margin: 0;
-    width: auto;
-    z-index: 1000;
+    display: none !important;
   }
 }
 
