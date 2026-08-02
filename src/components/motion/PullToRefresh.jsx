@@ -77,7 +77,7 @@ export function PullToRefresh({ children }) {
   }, [controls, isRefreshing, queryClient, y]);
 
   return (
-    <div className="ptr-container" ref={containerRef} style={{ overflowY: 'auto' }}>
+    <div className="ptr-container" ref={containerRef} style={{ overflowY: 'auto', height: '100%' }}>
       <div className="ptr-indicator">
         <motion.div
           animate={{ rotate: isRefreshing ? 360 : 0 }}

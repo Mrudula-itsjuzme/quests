@@ -74,7 +74,7 @@ body {
 
 .app-shell {
   display: block;
-  width: min(1520px, 100%);
+  width: 100%;
   padding: 18px 24px 120px;
   background: transparent;
 }
@@ -1266,6 +1266,7 @@ a { color: var(--gold); }
   line-height: 1.4;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
 }
 
 /* ---------- Pills & Badges ---------- */
@@ -2214,7 +2215,7 @@ body {
 }
 .app-shell {
   display: block;
-  width: min(1520px, 100%);
+  width: 100%;
   padding: 18px 24px 120px;
   background: transparent;
 }
@@ -4142,6 +4143,7 @@ body {
     line-height: 1.25;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
   }
 
   .mobile-available-rail article > span:not(.round-emblem) {
@@ -6812,9 +6814,9 @@ html, body {
   overflow: hidden;
 }
 
-/* Hide desktop top nav and sidebar completely */
+/* Hide desktop top nav and sidebar completely on mobile */
 .topbar, .workspace, .reference-header {
-  display: none !important;
+  display: none;
 }
 
 /* Mobile Content Area - scrolling view above the dock */
@@ -7219,6 +7221,13 @@ button, a {
     height: calc(100vh - 160px);
     overflow: hidden !important;
   }
+  .ptr-container::-webkit-scrollbar {
+    display: none;
+  }
+  .ptr-container {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 
   /* Keep the bottom dock but position it absolutely inside the phone simulator */
   .mobile-bottom-dock {
@@ -7226,6 +7235,9 @@ button, a {
     bottom: 24px;
     left: 24px;
     right: 24px;
+    margin: 0;
+    width: auto;
+    z-index: 1000;
   }
 }
 

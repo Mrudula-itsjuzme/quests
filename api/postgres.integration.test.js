@@ -95,8 +95,8 @@ suite('PostgreSQL quest repository', () => {
       engine.submit(identity, photo.id, { uploadId: 'local_concurrent1' }, 'integration-submit-001'),
       engine.submit(identity, weekly.id, { uploadId: 'local_concurrent1' }, 'integration-submit-002'),
     ]);
-    console.log(outcomes); expect(outcomes.filter((item) => item.status === 'fulfilled')).toHaveLength(1);
-    console.log(outcomes); expect(outcomes.filter((item) => item.status === 'rejected')[0].reason).toMatchObject({ code: 'duplicate_submission' });
+    expect(outcomes.filter((item) => item.status === 'fulfilled')).toHaveLength(1);
+    expect(outcomes.filter((item) => item.status === 'rejected')[0].reason).toMatchObject({ code: 'duplicate_submission' });
   });
 
   it('rolls back a generation run when any assignment insert fails', async () => {

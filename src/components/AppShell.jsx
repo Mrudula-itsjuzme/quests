@@ -126,7 +126,7 @@ export function AppShell() {
       </header>
 
       {/* Main scrolling content area */}
-      <div className="mobile-content-area" style={{ overflow: 'hidden' }}>
+      <div className="mobile-content-area">
         <PullToRefresh>
           <AnimatePresence mode="wait">
             <JournalTransition key={location.pathname} className="route-stage">
@@ -134,43 +134,43 @@ export function AppShell() {
             </JournalTransition>
           </AnimatePresence>
         </PullToRefresh>
-      </div>
 
-      {/* Floating Glass Bottom Dock */}
-      <nav className="mobile-bottom-dock" aria-label="Primary Navigation">
-        {navItems.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.end}
-            className={({ isActive }) => `dock-item ${isActive ? 'active' : ''}`}
-            onClick={playTap}
-            onMouseEnter={playHover}
+        {/* Floating Glass Bottom Dock */}
+        <nav className="mobile-bottom-dock" aria-label="Primary Navigation">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.end}
+              className={({ isActive }) => `dock-item ${isActive ? 'active' : ''}`}
+              onClick={playTap}
+              onMouseEnter={playHover}
+            >
+              {({ isActive }) => (
+                <>
+                  {isActive && (
+                    <motion.div
+                      className="dock-active-bg"
+                      layoutId="dockIndicator"
+                      transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                    />
+                  )}
+                  <Icon name={item.icon} />
+                </>
+              )}
+            </NavLink>
+          ))}
+          {/* Settings / Profile Trigger on Dock */}
+          <button
+            type="button"
+            className="dock-item"
+            onClick={() => { playTap(); setSettingsOpen(true); }}
+            aria-label="Settings"
           >
-            {({ isActive }) => (
-              <>
-                {isActive && (
-                  <motion.div
-                    className="dock-active-bg"
-                    layoutId="dockIndicator"
-                    transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-                  />
-                )}
-                <Icon name={item.icon} />
-              </>
-            )}
-          </NavLink>
-        ))}
-        {/* Settings / Profile Trigger on Dock */}
-        <button
-          type="button"
-          className="dock-item"
-          onClick={() => { playTap(); setSettingsOpen(true); }}
-          aria-label="Settings"
-        >
-          <Icon name="gear" />
-        </button>
-      </nav>
+            <Icon name="gear" />
+          </button>
+        </nav>
+      </div>
 
       <AnimatePresence>
         {notice && (

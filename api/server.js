@@ -208,7 +208,7 @@ export function createApp(options = {}) {
         : error instanceof ProviderNotConfiguredError ? 'provider_not_configured'
           : status >= 500 ? 'internal_error'
             : error.code || error.message);
-    if (status >= 500) console.error(JSON.stringify({ level: 'error', event: 'request_failed', requestId: req.id, method: req.method, path: req.path, code }));
+    if (status >= 500 && config.NODE_ENV !== 'test') console.error(JSON.stringify({ level: 'error', event: 'request_failed', requestId: req.id, method: req.method, path: req.path, code }));
     res.status(status).json({ error: { code, requestId: req.id } });
   });
   return app;
