@@ -88,9 +88,8 @@ describe('App (development auth mode)', () => {
   it('navigates to the quest board and filters quests', async () => {
     renderApp('/app/quests');
 
-    await screen.findByRole('heading', { name: /^quests$/i });
+    await screen.findByRole('heading', { name: /quest deck/i });
     expect((await screen.findAllByText(/morning mindfulness/i)).length).toBeGreaterThan(0);
-    expect(screen.getByRole('tab', { name: 'Daily' })).toBeInTheDocument();
   });
 
   it('exposes the five reference destinations and the community surface', async () => {

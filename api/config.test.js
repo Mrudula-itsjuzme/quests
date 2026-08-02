@@ -13,7 +13,7 @@ describe('configuration security', () => {
   });
 
   it('rejects development authentication, local providers, and ephemeral storage in production', () => {
-    expect(() => loadConfig({ NODE_ENV: 'production' })).toThrow(/Production requires PostgreSQL/);
+    expect(() => loadConfig({ NODE_ENV: 'production' })).toThrow(/Production requires a valid PostgreSQL/);
   });
 
   it('accepts an explicitly hardened production configuration', () => {

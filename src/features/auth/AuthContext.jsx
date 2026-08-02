@@ -43,7 +43,7 @@ export function AuthProvider({ children }) {
       loading,
       session,
       user: session?.user ?? null,
-      isAuthenticated: isGuest || Boolean(session),
+      isAuthenticated: devMode || isGuest || Boolean(session),
       getToken: async () => {
         if (isGuest) return 'guest';
         if (devMode) return null;
