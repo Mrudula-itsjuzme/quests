@@ -114,12 +114,12 @@ export function createApiClient(getToken) {
     },
     postProgress: async (assignmentId, value, idempotencyKey) => {
       const token = await getToken();
-      if (token === 'guest') return guestDelay({ success: true }, 200);
+      if (token === 'guest') throw new ApiError(401, 'guest_write_unavailable');
       return request(`/quests/${assignmentId}/progress`, { method: 'POST', body: { value }, idempotencyKey, token });
     },
     submitProof: async (assignmentId, payload, idempotencyKey) => {
       const token = await getToken();
-      if (token === 'guest') return guestDelay({ success: true }, 200);
+      if (token === 'guest') throw new ApiError(401, 'guest_write_unavailable');
       return request(`/quests/${assignmentId}/submissions`, { method: 'POST', body: payload, idempotencyKey, token });
     },
     getFeed: async (signal) => {

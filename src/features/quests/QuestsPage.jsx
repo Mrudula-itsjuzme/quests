@@ -26,7 +26,7 @@ export function QuestsPage() {
   const generateDaily = useGenerateDaily();
   const generateWeekly = useGenerateWeekly();
   const generateMonthly = useGenerateMonthly();
-  const [tab] = useState('daily');
+  const [tab, setTab] = useState('daily');
   const [selectedId, setSelectedId] = useState(null);
   const [notice, setNotice] = useState('');
   const [deckIndex, setDeckIndex] = useState(0);
@@ -73,6 +73,7 @@ export function QuestsPage() {
           selected={selected}
           setSelectedId={setSelectedId}
           tab={tab}
+          setTab={setTab}
           notice={notice}
           setNotice={setNotice}
           deckIndex={deckIndex}
@@ -95,6 +96,7 @@ function QuestsContent({
   selected,
   setSelectedId,
   tab,
+  setTab,
   notice,
   setNotice,
   deckIndex,
@@ -105,6 +107,16 @@ function QuestsContent({
   generateMonthly,
 }) {
   const [completedQuestModal, setCompletedQuestModal] = useState(null);
+  const cadences = useMemo(() => ([
+    { id: 'daily', label: 'Daily', icon: 'sun', action: generateDaily },
+    { id: 'weekly', label: 'Weekly', icon: 'star', action: generateWeekly },
+    { id: 'monthly', label: 'Monthly', icon: 'compass', action: generateMonthly },
+  ]), [generateDaily, generateWeekly, generateMonthly]);
+  const activeCount = quests.filter((quest) => quest.status === 'active').length;
+  const completedCount = quests.filter((quest) => quest.status === 'completed').length;
+  const totalXpOnBoard = quests.reduce((sum, quest) => sum + (quest.xpReward || 0), 0);
+  const deckQuests = visible.length ? visible : quests;
+  const safeDeckIndex = Math.min(deckIndex, Math.max(deckQuests.length - 1, 0));
 
   useEffect(() => {
     const handleQuestCompleted = (event) => {
@@ -115,6 +127,10 @@ function QuestsContent({
   }, []);
 
 
+
+  useEffect(() => {
+    setDeckIndex(0);
+  }, [tab, setDeckIndex]);
 
   const hasCadence = (cadence) => quests.some((quest) => quest.cadence === cadence);
   const accept = (cadence) => {
@@ -139,14 +155,22 @@ function QuestsContent({
       animate="show"
       exit={{ opacity: 0, filter: 'blur(6px)', transition: { duration: 0.18 } }}
     >
-      <motion.header className="mobile-home-header" variants={staggerItem}>
-        <h1>Good morning, Wayfarer</h1>
-        <p>Your path awaits.</p>
+      <motion.header className="quest-command-hero" variants={staggerItem}>
+        <div className="quest-hero-copy">
+          <span className="quest-hero-kicker">Habbit Quest Board</span>
+          <h1>Good morning, {me?.displayName || 'Wayfarer'}</h1>
+          <p>Pick a path, clear the deck, and turn tiny rituals into visible progress.</p>
+        </div>
+        <div className="quest-hero-stats" aria-label="Quest progress summary">
+          <span><strong>{activeCount}</strong><small>Active</small></span>
+          <span><strong>{completedCount}</strong><small>Cleared</small></span>
+          <span><strong>{totalXpOnBoard}</strong><small>Board XP</small></span>
+        </div>
       </motion.header>
 
       {me && (
-        <motion.section className="mobile-today-summary ornate-panel" style={{ marginBottom: 24 }} variants={staggerItem}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <motion.section className="quest-status-panel ornate-panel" variants={staggerItem}>
+          <div className="quest-status-level">
             <div className="xp-ring">
               <svg width="84" height="84">
                 <circle cx="42" cy="42" r="38" fill="none" stroke="rgba(255, 255, 255, 0.1)" strokeWidth="4" />
@@ -155,31 +179,40 @@ function QuestsContent({
               <span>{me.level}</span>
             </div>
             <div>
-              <h2 style={{ margin: 0, color: 'var(--quest-gold-bright)' }}>Level {me.level}</h2>
-              <p style={{ margin: 0, color: 'var(--quest-muted)' }}>{me.xpIntoLevel} / {me.xpForCurrentLevel} XP</p>
+              <h2>Level {me.level}</h2>
+              <p>{me.xpIntoLevel} / {me.xpForCurrentLevel} XP toward the next rank</p>
             </div>
           </div>
-        </motion.section>
-      )}
-
-      {featured && (
-        <motion.section className="ornate-panel" style={{ marginBottom: 24, padding: 24, borderRadius: 24 }} variants={staggerItem}>
-          <div style={{ display: 'flex', gap: 8, color: 'var(--quest-gold-bright)', textTransform: 'uppercase', fontSize: '0.9rem', marginBottom: 8 }}>
-            <Icon name="star" /> <strong>Today's Mission</strong>
+          <div className="quest-status-actions">
+            {cadences.map((cadence) => (
+              <button
+                key={cadence.id}
+                type="button"
+                className={tab === cadence.id ? 'active' : ''}
+                onClick={() => { playTap(); setTab(cadence.id); }}
+                onMouseEnter={playHover}
+              >
+                <Icon name={cadence.icon} />
+                <span>{cadence.label}</span>
+              </button>
+            ))}
           </div>
-          <h2 style={{ fontSize: '1.6rem', marginBottom: 4 }}>{featured.title}</h2>
-          <p style={{ color: 'var(--quest-muted)' }}>{featured.description}</p>
         </motion.section>
       )}
 
-      <motion.div variants={staggerItem} style={{ marginBottom: 16 }}>
-        <h2 style={{ fontSize: '1.4rem', color: 'var(--quest-cream)' }}>Quest Deck</h2>
-      </motion.div>
-
-      <motion.section className="swipe-deck-container" variants={staggerItem}>
-        {visible.length ? (
+      <motion.section className="quest-board-grid" variants={staggerItem}>
+        <div className="quest-deck-column">
+          <div className="quest-section-heading">
+            <div>
+              <h2>Quest Deck</h2>
+              <p>{cadences.find((item) => item.id === tab)?.label || 'Daily'} path</p>
+            </div>
+            <span>{safeDeckIndex + 1}/{Math.max(deckQuests.length, 1)}</span>
+          </div>
+          <section className="swipe-deck-container">
+        {deckQuests.length ? (
           <AnimatePresence mode="popLayout">
-            {visible.map((quest, index) => {
+            {deckQuests.map((quest, index) => {
               if (index < deckIndex) return null; // Already swiped
               const isFront = index === deckIndex;
               const isSecond = index === deckIndex + 1;
@@ -190,7 +223,7 @@ function QuestsContent({
               return (
                 <motion.div
                   key={quest.id}
-                  className="swipe-card"
+                  className={`swipe-card rarity-${quest.rarity?.toLowerCase() || 'common'}`}
                   style={{ zIndex }}
                   initial={{ scale: 0.8, opacity: 0, y: 100 }}
                   animate={{ scale, opacity: 1, y }}
@@ -201,9 +234,7 @@ function QuestsContent({
                   onDragEnd={(event, info) => {
                     if (info.offset.x > 100) {
                        playTap();
-                       setDeckIndex(i => i + 1);
-                       // Dispatch complete event internally to trigger success overlay/Wax Seal
-                       window.dispatchEvent(new CustomEvent('habbit-quest-completed', { detail: quest }));
+                       setSelectedId(quest.id);
                     } else if (info.offset.x < -100) {
                        playTap();
                        setDeckIndex(i => i + 1);
@@ -212,16 +243,18 @@ function QuestsContent({
                   whileDrag={{ scale: 1.05, cursor: 'grabbing' }}
                 >
                   <div className="swipe-card-content">
-                    <span className="round-emblem" style={{ marginBottom: 16 }}><Icon name={categoryIcon(quest.category)} /></span>
+                    <span className="round-emblem"><Icon name={categoryIcon(quest.category)} /></span>
+                    <small>{quest.category} · {quest.rarity}</small>
                     <h3>{quest.title}</h3>
                     <p>{quest.description}</p>
-                    <div style={{ marginTop: 24 }}>
-                      <strong style={{ color: 'var(--quest-gold-bright)' }}>+{quest.xpReward} XP</strong>
+                    <div className="swipe-card-reward">
+                      <strong>+{quest.xpReward} XP</strong>
+                      <span>{quest.verificationType?.toLowerCase()} proof</span>
                     </div>
                   </div>
                   <div className="swipe-card-actions">
-                    <span style={{ color: '#F44336' }}>‹ Skip</span>
-                    <span style={{ color: '#4CAF50' }}>Complete ›</span>
+                    <button type="button" onClick={() => { playTap(); setDeckIndex(i => i + 1); }}>Skip</button>
+                    <button type="button" onClick={() => { playTap(); setSelectedId(quest.id); }}>Open</button>
                   </div>
                 </motion.div>
               );
@@ -237,7 +270,7 @@ function QuestsContent({
             )}
           </AnimatePresence>
         ) : (
-          <div className="swipe-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+          <div className="swipe-card deck-empty-card">
             <IntentionalEmptyState
               icon="scroll"
               title={`No ${tab} quests yet`}
@@ -247,8 +280,37 @@ function QuestsContent({
             />
           </div>
         )}
+          </section>
+        </div>
+
+        <aside className="quest-side-panel">
+          {featured && (
+            <section className="quest-feature-card ornate-panel">
+              <span><Icon name="star" /> Featured Mission</span>
+              <h2>{featured.title}</h2>
+              <p>{featured.description}</p>
+              <button type="button" onClick={() => { playTap(); setSelectedId(featured.id); }}>Inspect quest</button>
+            </section>
+          )}
+          <section className="quest-path-list ornate-panel">
+            <div className="quest-section-heading compact">
+              <div>
+                <h2>Active Paths</h2>
+                <p>All current work</p>
+              </div>
+            </div>
+            {quests.map((quest) => (
+              <button key={quest.id} type="button" onClick={() => { playTap(); setSelectedId(quest.id); }}>
+                <span className="round-emblem"><Icon name={categoryIcon(quest.category)} /></span>
+                <span>
+                  <strong>{quest.title}</strong>
+                  <small>{quest.cadence} · {quest.xpReward} XP</small>
+                </span>
+              </button>
+            ))}
+          </section>
+        </aside>
       </motion.section>
-      {/* Removed desktop quest grids and tabs */}
 
       <AnimatePresence>
         {selected && (
@@ -277,7 +339,7 @@ function QuestsContent({
       <AnimatePresence>
         {completedQuestModal && (
           <QuestSuccessModal
-            quest={completedQuestModal.quest}
+            quest={completedQuestModal.quest || completedQuestModal}
             onClose={() => setCompletedQuestModal(null)}
           />
         )}
@@ -308,4 +370,3 @@ export function PlayerHeader({ me, page }) {
     </header>
   );
 }
-

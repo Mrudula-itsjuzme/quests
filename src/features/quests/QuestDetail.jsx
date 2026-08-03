@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { ApiError } from '../../lib/api';
 import { Icon, categoryColors, categoryIcon } from '../../components/Icon';
 import { ProgressBar, questProgressRatio, questStatusLabel } from './QuestCard';
 import { usePostProgress, useSubmitProof } from './queries';
 import { supabaseConfigured, uploadQuestProof } from '../../lib/supabase';
+import { FloatingXp } from '../../components/motion/FloatingXp';
 
 const MAX_PHOTO_BYTES = 8 * 1024 * 1024;
 const ACCEPTED_PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
@@ -15,6 +17,7 @@ export function QuestDetail({ quest }) {
   const [fileError, setFileError] = useState('');
   const [serviceMessage, setServiceMessage] = useState('');
   const [shareToFeed, setShareToFeed] = useState(true);
+  const [rewardBurst, setRewardBurst] = useState(null);
 
   if (!quest) {
     return (
@@ -43,10 +46,12 @@ export function QuestDetail({ quest }) {
     try {
       const uploadId = supabaseConfigured ? await uploadQuestProof(file) : `local_${crypto.randomUUID()}`;
       const result = await submitProof.mutateAsync({ assignmentId: quest.id, payload: { uploadId, feedOptIn: shareToFeed } });
-      announceCompletion(result, quest);
+      announceCompletion(result, quest, setRewardBurst);
       if (!result.completed && result.proofsRemaining) setServiceMessage(`Proof accepted. ${result.proofsRemaining} more ${result.proofsRemaining === 1 ? 'submission' : 'submissions'} required.`);
     } catch (error) {
-      if (error instanceof ApiError && (error.code === 'provider_not_configured' || error.status === 503)) {
+      if (error instanceof ApiError && error.code === 'guest_write_unavailable') {
+        setServiceMessage('Sign in to submit verified quest proof.');
+      } else if (error instanceof ApiError && (error.code === 'provider_not_configured' || error.status === 503)) {
         setServiceMessage('Photo verification is not available yet. Your quest will stay pending for manual review once it launches.');
       } else {
         setServiceMessage('Could not submit your photo. Please try again.');
@@ -59,10 +64,14 @@ export function QuestDetail({ quest }) {
     setServiceMessage('');
     try {
       const result = await submitProof.mutateAsync({ assignmentId: quest.id, payload: { text: textProof } });
-      announceCompletion(result, quest);
+      announceCompletion(result, quest, setRewardBurst);
       setTextProof('');
-    } catch {
-      setServiceMessage('Could not submit your reflection. Please check the length and try again.');
+    } catch (error) {
+      if (error instanceof ApiError && error.code === 'guest_write_unavailable') {
+        setServiceMessage('Sign in to submit verified quest proof.');
+      } else {
+        setServiceMessage('Could not submit your reflection. Please check the length and try again.');
+      }
     }
   };
 
@@ -70,9 +79,11 @@ export function QuestDetail({ quest }) {
     setServiceMessage('');
     try {
       const result = await postProgress.mutateAsync({ assignmentId: quest.id, value });
-      announceCompletion(result, quest);
+      announceCompletion(result, quest, setRewardBurst);
     } catch (error) {
-      if (error instanceof ApiError && (error.code === 'provider_not_configured' || error.status === 503)) {
+      if (error instanceof ApiError && error.code === 'guest_write_unavailable') {
+        setServiceMessage('Sign in to log verified quest progress.');
+      } else if (error instanceof ApiError && (error.code === 'provider_not_configured' || error.status === 503)) {
         setServiceMessage('Automatic progress tracking is not available yet.');
       } else {
         setServiceMessage('Could not update progress. Please try again.');
@@ -81,7 +92,14 @@ export function QuestDetail({ quest }) {
   };
 
   return (
-    <aside className="panel active-quest">
+    <motion.aside
+      className="panel active-quest"
+      initial={{ opacity: 0, y: 16, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 12, scale: 0.98 }}
+      transition={{ type: 'spring', stiffness: 360, damping: 30 }}
+    >
+      <FloatingXp xp={rewardBurst?.xp || 0} isVisible={!!rewardBurst} onComplete={() => setRewardBurst(null)} />
       <div className="panel-header">
         <div>
           <h2>Active Quest</h2>
@@ -91,9 +109,14 @@ export function QuestDetail({ quest }) {
       </div>
 
       <div className="active-title">
-        <span className={`quest-glyph ${categoryColors[quest.category] || ''}`} aria-hidden="true">
+        <motion.span
+          className={`quest-glyph ${categoryColors[quest.category] || ''}`}
+          aria-hidden="true"
+          animate={canAct ? { rotate: [0, -4, 4, 0], scale: [1, 1.04, 1] } : { scale: 1 }}
+          transition={{ duration: 3.2, repeat: canAct ? Infinity : 0, ease: 'easeInOut' }}
+        >
           <Icon name={categoryIcon(quest.category)} />
-        </span>
+        </motion.span>
         <div>
           <h3>{quest.title}</h3>
           <p>{quest.description}</p>
@@ -110,7 +133,22 @@ export function QuestDetail({ quest }) {
         ))}
       </div>
 
-      <ProgressBar value={ratio} label={`Progress ${quest.progressValue} / ${quest.targetValue} ${quest.unit}`} />
+      <div className="verified-progress-shell">
+        <ProgressBar value={ratio} label={`Progress ${quest.progressValue} / ${quest.targetValue} ${quest.unit}`} />
+        <AnimatePresence>
+          {(submitProof.isPending || postProgress.isPending) && (
+            <motion.div
+              className="verification-rune"
+              initial={{ opacity: 0, scale: 0.92 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.92 }}
+            >
+              <Icon name="compass" />
+              <span>Verifying</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
       <div className="detail-stats">
         <span>Status <strong>{questStatusLabel(quest)}</strong></span>
@@ -152,18 +190,20 @@ export function QuestDetail({ quest }) {
       )}
 
       {serviceMessage && <p role="status" className="form-error">{serviceMessage}</p>}
-    </aside>
+    </motion.aside>
   );
 }
 
-function announceCompletion(result, quest) {
+function announceCompletion(result, quest, setRewardBurst) {
   if (!result?.completed) return;
+  const xp = Number(result.xpCredited || 0) + Number(result.bonusXp || 0);
+  setRewardBurst({ xp });
   window.dispatchEvent(new CustomEvent('habbit-quest-completed', {
-    detail: { quest, xp: result.xpCredited + result.bonusXp }
+    detail: { quest, xp, bonusXp: Number(result.bonusXp || 0), assignment: result.assignment }
   }));
   window.dispatchEvent(new CustomEvent(result.levelUp ? 'habbit-level-up' : 'habbit-notice', {
     detail: result.levelUp
-      ? { level: result.newLevel, tier: result.user?.tier, xp: result.xpCredited + result.bonusXp }
-      : `${quest.title} complete — ${result.xpCredited + result.bonusXp} XP earned.`,
+      ? { level: result.newLevel, tier: result.user?.tier, xp }
+      : `${quest.title} complete — ${xp} XP earned.`,
   }));
 }

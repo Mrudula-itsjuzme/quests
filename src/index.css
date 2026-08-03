@@ -49,6 +49,481 @@
   -webkit-font-smoothing: antialiased;
 }
 
+/* Quest board premium refresh */
+.quest-reference {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+}
+
+.quest-command-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 22px;
+  align-items: end;
+  min-height: 220px;
+  margin: 4px 0 18px;
+  padding: clamp(24px, 4vw, 46px);
+  overflow: hidden;
+  border: 1px solid rgba(232, 208, 170, 0.18);
+  border-radius: 8px;
+  background:
+    linear-gradient(120deg, rgba(7, 16, 21, 0.96) 0 40%, rgba(12, 30, 34, 0.7) 72%),
+    url('/dashboard-castle-panorama.png') center / cover;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.42);
+}
+
+.quest-command-hero::after {
+  content: "";
+  position: absolute;
+  inset: auto 28px 20px auto;
+  width: 210px;
+  height: 210px;
+  border: 1px solid rgba(232, 208, 170, 0.18);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(232, 208, 170, 0.1), transparent 66%);
+  pointer-events: none;
+}
+
+.quest-hero-copy,
+.quest-hero-stats {
+  position: relative;
+  z-index: 1;
+}
+
+.quest-hero-kicker {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--quest-gold-bright);
+  font-size: 0.74rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.quest-hero-copy h1 {
+  max-width: 780px;
+  margin: 0;
+  color: var(--quest-cream);
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 7vw, 6.7rem);
+  font-weight: 700;
+  line-height: 0.86;
+}
+
+.quest-hero-copy p {
+  max-width: 560px;
+  margin: 18px 0 0;
+  color: rgba(244, 239, 230, 0.82);
+  font-size: clamp(1rem, 1.6vw, 1.18rem);
+  line-height: 1.55;
+}
+
+.quest-hero-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(78px, 1fr));
+  gap: 8px;
+  min-width: min(360px, 100%);
+}
+
+.quest-hero-stats span {
+  display: grid;
+  gap: 2px;
+  padding: 14px 16px;
+  border: 1px solid rgba(232, 208, 170, 0.18);
+  border-radius: 8px;
+  background: rgba(5, 10, 12, 0.72);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.quest-hero-stats strong {
+  color: var(--quest-gold-bright);
+  font-family: var(--font-display);
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.quest-hero-stats small {
+  color: var(--quest-muted);
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.quest-status-panel {
+  display: flex;
+  gap: 22px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  padding: 18px;
+  border-radius: 8px;
+}
+
+.quest-status-level {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 15px;
+}
+
+.quest-status-level .xp-ring {
+  flex: 0 0 auto;
+  width: 84px;
+  height: 84px;
+  margin: 0;
+}
+
+.quest-status-level .xp-ring span {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--quest-gold-bright);
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  font-weight: 800;
+}
+
+.quest-status-level h2 {
+  margin: 0 0 3px;
+  color: var(--quest-gold-bright);
+  font-size: 1.22rem;
+}
+
+.quest-status-level p {
+  margin: 0;
+  color: var(--quest-muted);
+}
+
+.quest-status-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.quest-status-actions button,
+.quest-feature-card button,
+.swipe-card-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  border: 1px solid rgba(232, 208, 170, 0.22);
+  border-radius: 8px;
+  color: var(--quest-cream);
+  background: rgba(11, 22, 26, 0.82);
+  font: 800 0.9rem/1 var(--font-body);
+  cursor: pointer;
+}
+
+.quest-status-actions button {
+  gap: 8px;
+  padding: 0 14px;
+}
+
+.quest-status-actions button svg {
+  width: 17px;
+  height: 17px;
+  fill: currentColor;
+}
+
+.quest-status-actions button.active {
+  color: #17100a;
+  background: linear-gradient(180deg, #f0d6a9, #c9973d);
+}
+
+.quest-board-grid {
+  display: grid;
+  grid-template-columns: minmax(320px, 0.95fr) minmax(320px, 1.05fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.quest-section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.quest-section-heading h2 {
+  margin: 0;
+  color: var(--quest-cream);
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3vw, 2.35rem);
+  line-height: 1;
+}
+
+.quest-section-heading p,
+.quest-section-heading span {
+  margin: 4px 0 0;
+  color: var(--quest-muted);
+  font-size: 0.86rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.swipe-deck-container {
+  min-height: 520px;
+  perspective: 1400px;
+}
+
+.swipe-card {
+  border-radius: 8px;
+  border-color: rgba(232, 208, 170, 0.24);
+  background:
+    radial-gradient(circle at top right, rgba(232, 208, 170, 0.18), transparent 40%),
+    linear-gradient(180deg, rgba(31, 29, 25, 0.96), rgba(12, 20, 22, 0.98));
+}
+
+.swipe-card::before {
+  content: "";
+  position: absolute;
+  inset: 12px;
+  border: 1px solid rgba(232, 208, 170, 0.16);
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+.swipe-card-content {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 12px;
+  align-content: center;
+  min-height: 310px;
+  padding: clamp(28px, 5vw, 46px);
+  text-align: left;
+}
+
+.swipe-card-content .round-emblem {
+  margin-bottom: 4px;
+}
+
+.swipe-card-content small {
+  color: var(--quest-gold-bright);
+  font-size: 0.76rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.swipe-card-content h3 {
+  max-width: 12ch;
+  margin: 0;
+  color: var(--quest-cream);
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 5vw, 4.2rem);
+  line-height: 0.92;
+}
+
+.swipe-card-content p {
+  max-width: 36rem;
+  margin: 0;
+  color: rgba(244, 239, 230, 0.74);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.swipe-card-reward {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.swipe-card-reward strong {
+  color: var(--quest-gold-bright);
+  font-size: 1.15rem;
+}
+
+.swipe-card-reward span {
+  color: var(--quest-muted);
+  font-size: 0.84rem;
+  text-transform: uppercase;
+}
+
+.swipe-card-actions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  padding: 0 clamp(22px, 4vw, 38px) clamp(22px, 4vw, 34px);
+}
+
+.swipe-card-actions button {
+  flex: 1;
+}
+
+.swipe-card-actions button:last-child,
+.quest-feature-card button {
+  color: #17100a;
+  background: linear-gradient(180deg, #f0d6a9, #c9973d);
+}
+
+.deck-empty-card {
+  display: grid;
+  place-items: center;
+  padding: 28px;
+  text-align: center;
+}
+
+.quest-side-panel {
+  display: grid;
+  gap: 14px;
+}
+
+.quest-feature-card,
+.quest-path-list {
+  border-radius: 8px;
+  padding: 22px;
+}
+
+.quest-feature-card > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--quest-gold-bright);
+  font-size: 0.82rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.quest-feature-card > span svg {
+  width: 17px;
+  height: 17px;
+  fill: currentColor;
+}
+
+.quest-feature-card h2 {
+  margin: 14px 0 8px;
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3vw, 3rem);
+  line-height: 0.96;
+}
+
+.quest-feature-card p {
+  margin-bottom: 18px;
+  line-height: 1.55;
+}
+
+.quest-feature-card button {
+  width: 100%;
+}
+
+.quest-path-list {
+  display: grid;
+  gap: 8px;
+}
+
+.quest-path-list button {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid rgba(232, 208, 170, 0.13);
+  border-radius: 8px;
+  color: var(--quest-cream);
+  background: rgba(255, 255, 255, 0.035);
+  text-align: left;
+  cursor: pointer;
+}
+
+.quest-path-list button strong,
+.quest-path-list button small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.quest-path-list button small {
+  margin-top: 4px;
+  color: var(--quest-muted);
+  text-transform: capitalize;
+}
+
+@media (max-width: 860px) {
+  .quest-reference {
+    padding: 0 0 92px;
+  }
+
+  .quest-command-hero {
+    grid-template-columns: 1fr;
+    min-height: 270px;
+    margin: 0 -4px 14px;
+    padding: 30px 22px 22px;
+  }
+
+  .quest-hero-copy h1 {
+    font-size: clamp(3.1rem, 16vw, 5.2rem);
+  }
+
+  .quest-hero-stats {
+    grid-template-columns: repeat(3, 1fr);
+    min-width: 0;
+  }
+
+  .quest-hero-stats span {
+    padding: 11px 10px;
+  }
+
+  .quest-status-panel {
+    display: grid;
+    gap: 16px;
+    padding: 15px;
+  }
+
+  .quest-status-actions {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    justify-content: stretch;
+  }
+
+  .quest-status-actions button {
+    min-width: 0;
+    padding: 0 8px;
+  }
+
+  .quest-board-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .swipe-deck-container {
+    min-height: 500px;
+  }
+
+  .swipe-card-content {
+    min-height: 330px;
+    padding: 34px 28px;
+  }
+
+  .swipe-card-content h3 {
+    max-width: 10ch;
+  }
+
+  .quest-side-panel {
+    margin-top: 4px;
+  }
+}
+
+@media (min-width: 861px) {
+  .quest-reference {
+    padding-top: 10px;
+  }
+
+  .quest-deck-column {
+    position: sticky;
+    top: 18px;
+  }
+}
+
 /* ========================================================================== */
 /* Reference fantasy surfaces — Quests / Profile                              */
 /* ========================================================================== */
@@ -7937,5 +8412,77 @@ button, a {
   .footer-stats {
     flex-wrap: wrap;
     gap: 16px;
+  }
+}
+
+/* Final Quest board cascade guard */
+.app-shell:has(.quest-reference) {
+  padding-bottom: 110px;
+}
+
+.quest-reference .quest-command-hero,
+.quest-reference .quest-status-panel,
+.quest-reference .quest-feature-card,
+.quest-reference .quest-path-list,
+.quest-reference .swipe-card {
+  border-radius: 8px;
+}
+
+.quest-reference .quest-board-grid {
+  display: grid;
+  grid-template-columns: minmax(320px, 0.95fr) minmax(320px, 1.05fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.quest-reference .quest-command-hero {
+  margin-bottom: 18px;
+}
+
+.quest-reference .swipe-deck-container {
+  min-height: 520px;
+}
+
+.quest-reference .swipe-card-content {
+  padding: clamp(28px, 5vw, 46px);
+  text-align: left;
+}
+
+.quest-reference .swipe-card-content h3 {
+  max-width: 12ch;
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 5vw, 4.2rem);
+  line-height: 0.92;
+}
+
+.quest-reference .swipe-card-actions {
+  display: flex;
+  gap: 10px;
+  padding: 0 clamp(22px, 4vw, 38px) clamp(22px, 4vw, 34px);
+}
+
+.quest-reference .quest-path-list button {
+  min-height: 70px;
+}
+
+@media (max-width: 860px) {
+  .quest-reference .quest-board-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .quest-reference .quest-command-hero {
+    grid-template-columns: 1fr;
+    min-height: 270px;
+    margin: 0 -4px 14px;
+    padding: 30px 22px 22px;
+  }
+
+  .quest-reference .quest-status-panel {
+    display: grid;
+  }
+
+  .quest-reference .quest-status-actions {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
   }
 }

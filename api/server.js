@@ -72,6 +72,7 @@ export function createApp(options = {}) {
     const startTime = process.hrtime.bigint();
     req.id = safeRequestId(req.get('x-request-id'));
     res.setHeader('x-request-id', req.id);
+    res.setHeader('Cache-Control', 'no-store');
     const originalJson = res.json;
     res.json = function (body) {
       const durationMs = Number(process.hrtime.bigint() - startTime) / 1e6;
@@ -119,11 +120,11 @@ export function createApp(options = {}) {
   const writeLimiter = rateLimit({ windowMs: config.RATE_LIMIT_WINDOW_MS, limit: config.RATE_LIMIT_WRITES, standardHeaders: 'draft-7', legacyHeaders: false, keyGenerator: rateKey });
   const authenticate = createAuthMiddleware(config, { jwks: options.authJwks });
 
-  app.get('/health', (_req, res) => res.json({ status: 'ok', database: options.pool ? 'configured' : 'memory-fallback' }));
+  app.get('/health', (req, res) => res.json({ status: 'ok', database: options.pool ? 'configured' : 'memory-fallback', requestId: req.id }));
   app.get('/ready', async (_req, res) => {
     try {
       if (options.pool) await options.pool.query('SELECT 1');
-      return res.json({ status: 'ready', database: options.pool ? 'postgres' : 'memory' });
+      return res.json({ status: 'ready', database: options.pool ? 'postgres' : 'memory', providerMode: config.PROVIDER_MODE });
     } catch {
       return res.status(503).json({ status: 'not_ready' });
     }

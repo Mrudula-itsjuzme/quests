@@ -18,9 +18,10 @@ describe('Quest API', () => {
     const health = await request(app).get('/health');
     const ready = await request(app).get('/ready');
     expect(health.status).toBe(200);
-    expect(health.body).toEqual({ status: 'ok', database: 'memory-fallback' });
+    expect(health.body).toEqual({ status: 'ok', database: 'memory-fallback', requestId: expect.any(String) });
     expect(health.headers['x-content-type-options']).toBe('nosniff');
-    expect(ready.body).toEqual({ status: 'ready', database: 'memory' });
+    expect(ready.body).toEqual({ status: 'ready', database: 'memory', providerMode: 'local' });
+    expect(ready.headers['cache-control']).toBe('no-store');
   });
 
   it('allows browser fetches to Supabase via CSP connect-src', async () => {

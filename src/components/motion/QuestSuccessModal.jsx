@@ -9,6 +9,15 @@ export function QuestSuccessModal({ quest, onClose }) {
     playSuccess();
   }, []);
 
+  const xp = Number(quest?.xp ?? quest?.xpReward ?? 0);
+  const bonusXp = Number(quest?.bonusXp ?? 0);
+  const particles = Array.from({ length: 12 }, (_, index) => ({
+    id: index,
+    x: ((index % 6) - 2.5) * 58,
+    y: -70 - Math.floor(index / 6) * 52 - (index % 2) * 24,
+    scale: 0.5 + (index % 4) * 0.16,
+  }));
+
   return (
     <motion.div
       className="modal-overlay celebration-overlay"
@@ -21,18 +30,18 @@ export function QuestSuccessModal({ quest, onClose }) {
       onMouseDown={(e) => e.target === e.currentTarget && onClose()}
     >
       <div className="celebration-particles">
-        {[...Array(12)].map((_, i) => (
+        {particles.map((particle) => (
           <motion.span
-            key={i}
+            key={particle.id}
             className="sparkle-particle"
-            initial={{ opacity: 1, x: 0, y: 0, scale: Math.random() * 0.8 + 0.4 }}
+            initial={{ opacity: 1, x: 0, y: 0, scale: particle.scale }}
             animate={{
               opacity: 0,
-              x: (Math.random() - 0.5) * 360,
-              y: (Math.random() - 0.5) * 360 - 80,
+              x: particle.x,
+              y: particle.y,
               scale: 0,
             }}
-            transition={{ duration: 1.4, ease: 'easeOut', delay: i * 0.04 }}
+            transition={{ duration: 1.4, ease: 'easeOut', delay: particle.id * 0.04 }}
           />
         ))}
       </div>
@@ -48,18 +57,20 @@ export function QuestSuccessModal({ quest, onClose }) {
           <Icon name="sun" />
         </div>
         <p className="eyebrow">QUEST ACCOMPLISHED</p>
-        <h2>{quest?.title || 'Milestone Reached'}</h2>
-        <p className="celebration-desc">{quest?.description || 'Your dedication leaves a mark on your adventure journal.'}</p>
+        <h2>{quest?.title || 'Quest complete'}</h2>
+        {quest?.description && <p className="celebration-desc">{quest.description}</p>}
 
         <div className="reward-badge-container">
           <div className="reward-badge">
             <Icon name="shield" />
-            <span>+<AnimatedCounter value={quest?.xpReward || 150} /> XP</span>
+            <span>+<AnimatedCounter value={xp} /> XP</span>
           </div>
-          <div className="reward-badge gold-badge">
-            <Icon name="star" />
-            <span>+<AnimatedCounter value={quest?.goldReward || 10} /> Gold</span>
-          </div>
+          {bonusXp > 0 && (
+            <div className="reward-badge gold-badge">
+              <Icon name="star" />
+              <span>+<AnimatedCounter value={bonusXp} /> Bonus XP</span>
+            </div>
+          )}
         </div>
 
         <button
