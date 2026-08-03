@@ -11,6 +11,9 @@ import { WaxSealCeremony } from './motion/WaxSealCeremony';
 import { Icon } from './Icon';
 import { playHover, playLevelUp, playTap } from '../lib/useSoundEffects';
 import { PullToRefresh } from './motion/PullToRefresh';
+import { MagneticButton } from './motion/MagneticButton';
+import { WorldAmbience } from './WorldAmbience';
+import { DawnMoment, useDawnMoment } from './DawnMoment';
 
 const navItems = [
   { to: '/app', label: 'Home', icon: 'home', end: true },
@@ -29,6 +32,7 @@ export function AppShell() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const [levelUp, setLevelUp] = useState(null);
+  const { visible: dawnVisible, dismiss: dismissDawn } = useDawnMoment();
 
   useEffect(() => {
     const onNotice = (event) => {
@@ -49,6 +53,7 @@ export function AppShell() {
 
   return (
     <div className="app-shell">
+      <WorldAmbience />
       <OfflineSanctuary />
       {devMode && (
         <div className="dev-auth-banner" role="status">
@@ -100,28 +105,24 @@ export function AppShell() {
               <span>XP</span>
             </div>
           )}
-          <motion.button
+          <MagneticButton
             type="button"
             className="round-action"
             aria-label="Settings"
-            whileHover={{ scale: 1.08 }}
-            whileTap={{ scale: 0.92 }}
-            onClick={() => { playTap(); setSettingsOpen(true); }}
-            onMouseEnter={playHover}
+            strength={0.3}
+            onClick={() => setSettingsOpen(true)}
           >
             <Icon name="gear" />
-          </motion.button>
-          <motion.button
+          </MagneticButton>
+          <MagneticButton
             type="button"
             className="ghost-action"
             aria-label="Sign out"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => { playTap(); setLogoutDialogOpen(true); }}
-            onMouseEnter={playHover}
+            strength={0.2}
+            onClick={() => setLogoutDialogOpen(true)}
           >
             Sign out
-          </motion.button>
+          </MagneticButton>
         </div>
       </header>
 
@@ -201,6 +202,10 @@ export function AppShell() {
         {levelUp && (
           <WaxSealCeremony levelUp={levelUp} onComplete={() => setLevelUp(null)} />
         )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {dawnVisible && <DawnMoment onDismiss={dismissDawn} />}
       </AnimatePresence>
 
       <AnimatePresence>
