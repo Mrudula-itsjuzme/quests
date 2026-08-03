@@ -1,29 +1,20 @@
 import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Icon, categoryIcon } from '../../components/Icon';
 import { QuestDetail } from '../quests/QuestDetail';
-import { PlayerHeader } from '../quests/QuestsPage';
 import { questProgressRatio } from '../quests/QuestCard';
 import { useActiveQuests, useMe } from '../quests/queries';
-import { playHover, playTap } from '../../lib/useSoundEffects';
-import { AnimatedCounter } from '../../components/motion/AnimatedCounter';
+import { playTap } from '../../lib/useSoundEffects';
 import { DashboardSkeleton } from '../../components/motion/SkeletonLoader';
-import { IntentionalEmptyState } from '../../components/motion/EmptyState';
 import { staggerContainer, staggerItem, springConfig } from '../../components/motion/MotionVariants';
 
 export function DashboardPage() {
   const { data: me, isLoading: meLoading, isError: meError } = useMe();
-  const { data: quests, isLoading: questsLoading, isError: questsError } = useActiveQuests();
+  const { data: quests, isLoading: questsLoading } = useActiveQuests();
   const [selectedId, setSelectedId] = useState(null);
 
   const activeQuests = useMemo(() => quests || [], [quests]);
-  const featured = activeQuests[0] || null;
   const selected = activeQuests.find((quest) => quest.id === selectedId) || null;
-  const completedCount = activeQuests.filter((quest) => quest.status === 'completed').length;
-  const activeProgress = activeQuests.length
-    ? Math.round(activeQuests.reduce((sum, quest) => sum + questProgressRatio(quest), 0) / activeQuests.length * 100)
-    : 0;
 
   const isDashboardLoading = meLoading || questsLoading;
 
@@ -56,12 +47,8 @@ export function DashboardPage() {
           key="dashboard-content"
           me={me}
           activeQuests={activeQuests}
-          questsError={questsError}
-          featured={featured}
           selected={selected}
           setSelectedId={setSelectedId}
-          completedCount={completedCount}
-          activeProgress={activeProgress}
         />
       )}
     </AnimatePresence>
@@ -71,19 +58,13 @@ export function DashboardPage() {
 function DashboardContent({
   me,
   activeQuests,
-  questsError,
-  featured,
   selected,
   setSelectedId,
-  completedCount,
-  activeProgress,
 }) {
-  const featuredRatio = featured ? questProgressRatio(featured) : 0;
   const rankIndex = Math.max(0, Math.floor(((me?.totalXp) || 0) / 500));
   const rankNames = ['Novice I', 'Novice II', 'Novice III', 'Bronze I', 'Silver I', 'Gold I'];
   const rank = rankNames[Math.min(rankIndex, rankNames.length - 1)];
   const nextRankXp = (rankIndex + 1) * 500;
-  const rankProgress = Math.min(1, ((me?.totalXp) || 0) / nextRankXp);
 
   return (
     <motion.main
@@ -140,7 +121,7 @@ function DashboardContent({
             </div>
             
             <div className="quest-scroll-container">
-              {activeQuests.slice(0, 4).map((quest, index) => (
+              {activeQuests.slice(0, 4).map((quest) => (
                 <div key={quest.id} className="parchment-card quest-card">
                   <div className="paperclip"></div>
                   <div className="quest-header">
@@ -301,11 +282,4 @@ function DashboardContent({
   );
 }
 
-function OverviewStat({ icon, label, value }) {
-  return (
-    <motion.article whileHover={{ y: -3, scale: 1.02 }} onMouseEnter={playHover} transition={springConfig.tactile}>
-      <span className="round-emblem"><Icon name={icon} /></span>
-      <div><small>{label}</small><strong>{typeof value === 'number' ? <AnimatedCounter value={value} /> : value}</strong></div>
-    </motion.article>
-  );
-}
+
