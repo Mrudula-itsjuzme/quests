@@ -6822,6 +6822,10 @@ html, body {
 /* Mobile Content Area - scrolling view above the dock */
 .mobile-content-area {
   flex: 1;
+  overflow: hidden;
+}
+
+.ptr-container {
   overflow-y: auto;
   overflow-x: hidden;
   padding: 20px 16px calc(env(safe-area-inset-bottom) + 100px);
@@ -7210,11 +7214,13 @@ button, a {
 
   /* Desktop Container Constraint */
   .mobile-content-area {
-    padding-bottom: 40px; /* Remove padding needed for mobile dock */
     margin: 0 auto;
     width: 100%;
     max-width: 1520px;
-    overflow-y: auto !important;
+    overflow: hidden !important;
+  }
+  .ptr-container {
+    padding-bottom: 40px;
   }
 
   /* Hide the mobile bottom dock on desktop because topbar is visible */
