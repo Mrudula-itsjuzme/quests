@@ -137,7 +137,7 @@ export function AppShell() {
 
         {/* Floating Glass Bottom Dock */}
         <nav className="mobile-bottom-dock" aria-label="Primary Navigation">
-          {navItems.map((item) => (
+          {navItems.slice(0, 4).map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
