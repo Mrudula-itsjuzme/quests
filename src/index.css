@@ -7905,7 +7905,20 @@ button, a {
 }
 
 @media (max-width: 768px) {
-  .hero-panorama { min-height: 500px; }
+  .app-shell {
+    padding: 0 !important;
+  }
+  .dark-fantasy-dashboard {
+    padding: 0 0 24px 0;
+  }
+  .hero-panorama { 
+    min-height: 500px;
+    margin-left: -16px;
+    margin-right: -16px;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
   .hero-stats-overlay {
     flex-direction: column;
   }
