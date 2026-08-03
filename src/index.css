@@ -7257,7 +7257,7 @@ button, a {
 
 .hero-panorama {
   position: relative;
-  height: 400px;
+  min-height: 400px;
   border-radius: 16px;
   border: 1px solid rgba(234, 181, 82, 0.3);
   background-image: url('/dashboard-castle-panorama.png'), linear-gradient(135deg, #1A1210, #0D0907);
@@ -7905,7 +7905,7 @@ button, a {
 }
 
 @media (max-width: 768px) {
-  .hero-panorama { height: 500px; }
+  .hero-panorama { min-height: 500px; }
   .hero-stats-overlay {
     flex-direction: column;
   }
