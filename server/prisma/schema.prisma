@@ -1,0 +1,383 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// Core — shared kernel
+// ============================================================
+
+// Unified, versioned content store. Quest definitions, achievement rules,
+// battle pass tiers, seasons, NPC scripts, store items are all rows here,
+// differentiated by `type`, not separate tables. Each engine owns a typed
+// ContentAdapter that validates `payload` against a Zod schema for its own
+// (type, schemaVersion) — the registry itself stays generic. This is what
+// turns "ship a new season" or "add a raid" into a content write instead of
+// a schema migration.
+model ContentDefinition {
+  id            String    @id @default(uuid())
+  type          String // 'quest_definition' | 'achievement_definition' | 'battle_pass_tier' | 'season' | 'npc_script' | 'store_item' | ...
+  schemaVersion Int       @default(1) @map("schema_version")
+  key           String // stable human-readable id, e.g. "orange-cat-photo"
+  payload       Json
+  activeFrom    DateTime? @map("active_from")
+  activeUntil   DateTime? @map("active_until")
+  status        String    @default("active") // draft | active | archived
+  createdBy     String?   @map("created_by")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  assignments        QuestAssignment[]
+  achievementUnlocks AchievementUnlock[]
+
+  @@unique([type, key])
+  @@index([type, status])
+  @@index([type, activeFrom, activeUntil])
+  @@map("content_definitions")
+}
+
+// Durable outbox for the GameEventBus. Every cross-engine reaction that must
+// survive a process crash (or fan out to a BullMQ worker instead of just an
+// in-process listener) is relayed from here.
+model GameEventLog {
+  id          String    @id @default(uuid())
+  type        String
+  payload     Json
+  createdAt   DateTime  @default(now()) @map("created_at")
+  publishedAt DateTime? @map("published_at")
+
+  @@index([publishedAt])
+  @@map("game_event_log")
+}
+
+// ============================================================
+// Identity / Progression Engine — player state
+// ============================================================
+
+model User {
+  id        String   @id // mirrors Supabase auth user id
+  email     String?  @unique
+  timezone  String   @default("UTC")
+  locale    String   @default("en")
+  isAdmin   Boolean  @default(false) @map("is_admin")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  profile                 PlayerProfile?
+  xpLedger                XpLedgerEntry[]
+  currencyLedger          CurrencyLedgerEntry[]
+  purchases               PurchaseRecord[]
+  streak                  StreakState?
+  assignments             QuestAssignment[]
+  submissions             QuestSubmission[]
+  questChainStates        QuestChainState[]
+  achievements            AchievementUnlock[]
+  feedPosts               FeedPost[]
+  notifications           Notification[]
+  moderationFlagsReceived ModerationFlag[]
+  battlePassProgress      BattlePassProgress[]
+
+  @@map("users")
+}
+
+model PlayerProfile {
+  userId                String    @id @map("user_id")
+  displayName           String    @map("display_name")
+  avatarUrl             String?   @map("avatar_url")
+  primaryPath           String?   @map("primary_path") // Mind | Body | Discovery
+  onboardingCompletedAt DateTime? @map("onboarding_completed_at")
+  motionPreference      String    @default("system") @map("motion_preference")
+  reminderTime          String?   @map("reminder_time")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("player_profiles")
+}
+
+// Append-only XP ledger — total_xp is a derived projection, never a mutable counter.
+model XpLedgerEntry {
+  id             String   @id @default(uuid())
+  userId         String   @map("user_id")
+  amount         Int
+  source         String // "quest_completion" | "streak_bonus" | "achievement" | "admin_grant"
+  sourceRefId    String?  @map("source_ref_id") // assignmentId / achievementId / etc
+  idempotencyKey String   @unique @map("idempotency_key")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("xp_ledger_entries")
+}
+
+// Data-driven XP curve — level N costs xpCost XP to clear, tier is a banding over level.
+model ProgressionCurveStep {
+  level  Int    @id
+  xpCost Int    @map("xp_cost")
+  tier   String
+
+  @@map("progression_curve_steps")
+}
+
+model StreakState {
+  userId                 String   @id @map("user_id")
+  currentStreak          Int      @default(0) @map("current_streak")
+  longestStreak          Int      @default(0) @map("longest_streak")
+  lastCompletedPeriodKey String?  @map("last_completed_period_key")
+  updatedAt              DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("streak_states")
+}
+
+// ============================================================
+// Quest Engine
+// ============================================================
+// Quest definitions themselves are NOT a model here — they are
+// ContentDefinition rows with type = 'quest_definition', read through
+// QuestContentAdapter. QuestAssignment references ContentDefinition.id.
+
+model QuestAssignment {
+  id            String    @id @default(uuid())
+  userId        String    @map("user_id")
+  definitionId  String    @map("definition_id") // ContentDefinition.id
+  status        String    @default("active") // assigned|active|pending_verification|completed|rejected|expired|abandoned
+  periodKey     String    @map("period_key")
+  progressValue Int       @default(0) @map("progress_value")
+  targetValue   Int       @map("target_value")
+  assignedAt    DateTime  @default(now()) @map("assigned_at")
+  startsAt      DateTime  @map("starts_at")
+  expiresAt     DateTime  @map("expires_at")
+  completedAt   DateTime? @map("completed_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  definition  ContentDefinition @relation(fields: [definitionId], references: [id])
+  submissions QuestSubmission[]
+
+  @@index([userId, status])
+  @@index([userId, definitionId, assignedAt])
+  @@index([userId, periodKey])
+  @@map("quest_assignments")
+}
+
+model QuestSubmission {
+  id               String    @id @default(uuid())
+  assignmentId     String    @map("assignment_id")
+  userId           String    @map("user_id")
+  verificationType String    @map("verification_type")
+  status           String    @default("pending") // pending|approved|manual_review|rejected
+  imageHash        String?   @map("image_hash")
+  confidence       Float?
+  metadata         Json      @default("{}")
+  uploadId         String?   @map("upload_id")
+  reviewedBy       String?   @map("reviewed_by")
+  reviewedAt       DateTime? @map("reviewed_at")
+  reviewReason     String?   @map("review_reason")
+  createdAt        DateTime  @default(now()) @map("created_at")
+
+  assignment      QuestAssignment  @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  verificationJob VerificationJob?
+
+  @@index([assignmentId])
+  @@index([status])
+  @@index([imageHash])
+  @@map("quest_submissions")
+}
+
+// Narrative campaign / quest chain progress. Scaffolded now so chains are
+// additive later, not a retrofit: a quest whose content payload carries a
+// chainId advances this on QuestCompleted.
+model QuestChainState {
+  id               String   @id @default(uuid())
+  userId           String   @map("user_id")
+  chainContentId   String   @map("chain_content_id") // ContentDefinition.id of type 'quest_chain'
+  currentChapter   Int      @default(0) @map("current_chapter")
+  unlockedQuestIds String[] @map("unlocked_quest_ids")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, chainContentId])
+  @@map("quest_chain_states")
+}
+
+// ============================================================
+// Verification Engine
+// ============================================================
+
+model VerificationJob {
+  id           String   @id @default(uuid())
+  submissionId String   @unique @map("submission_id")
+  provider     String // "openai-vision" | "gemini-vision" | "health-connect" | "manual"
+  rawResponse  Json?    @map("raw_response")
+  confidence   Float?
+  decision     String // approved | manual_review | rejected
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  submission QuestSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@map("verification_jobs")
+}
+
+model ModerationFlag {
+  id           String    @id @default(uuid())
+  userId       String    @map("user_id")
+  submissionId String?   @map("submission_id")
+  reason       String // "duplicate_image" | "confidence_low" | "velocity_anomaly" | "location_mismatch"
+  status       String    @default("open") // open|resolved|dismissed
+  resolvedBy   String?   @map("resolved_by")
+  resolvedAt   DateTime? @map("resolved_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@map("moderation_flags")
+}
+
+// ============================================================
+// Economy Engine
+// ============================================================
+
+// Append-only, same rationale as XpLedgerEntry — never a mutable balance
+// column. currencyCode discriminates gold / gems / event tokens / battle
+// pass XP; adding a new currency is a new code, not new infrastructure.
+model CurrencyLedgerEntry {
+  id             String   @id @default(uuid())
+  userId         String   @map("user_id")
+  currencyCode   String   @map("currency_code") // "gold" | "gems" | "event_token" | "battlepass_xp" | ...
+  amount         Int // negative for spends
+  source         String // "quest_completion" | "purchase" | "admin_grant" | "battlepass_claim"
+  sourceRefId    String?  @map("source_ref_id")
+  idempotencyKey String   @unique @map("idempotency_key")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, currencyCode, createdAt])
+  @@map("currency_ledger_entries")
+}
+
+model PurchaseRecord {
+  id             String   @id @default(uuid())
+  userId         String   @map("user_id")
+  storeItemId    String   @map("store_item_id") // ContentDefinition.id of type 'store_item'
+  currencyCode   String   @map("currency_code")
+  amount         Int
+  idempotencyKey String   @unique @map("idempotency_key")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("purchase_records")
+}
+
+// ============================================================
+// Achievement Engine
+// ============================================================
+// Achievement definitions are ContentDefinition rows (type =
+// 'achievement_definition'), not a local table — same registry pattern as quests.
+
+model AchievementUnlock {
+  id            String   @id @default(uuid())
+  userId        String   @map("user_id")
+  achievementId String   @map("achievement_id") // ContentDefinition.id
+  unlockedAt    DateTime @default(now()) @map("unlocked_at")
+
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement ContentDefinition @relation(fields: [achievementId], references: [id])
+
+  @@unique([userId, achievementId])
+  @@map("achievement_unlocks")
+}
+
+// ============================================================
+// LiveOps Engine
+// ============================================================
+// Seasons themselves are ContentDefinition rows (type = 'season'). These
+// tables track per-player / per-event runtime progress against that content.
+
+model SeasonState {
+  id              String    @id @default(uuid())
+  seasonContentId String    @unique @map("season_content_id") // ContentDefinition.id of type 'season'
+  status          String    @default("scheduled") // scheduled | active | ended
+  startedAt       DateTime? @map("started_at")
+  endedAt         DateTime? @map("ended_at")
+
+  @@map("season_states")
+}
+
+model WorldEventProgress {
+  id               String   @id @default(uuid())
+  eventContentId   String   @unique @map("event_content_id") // ContentDefinition.id of type 'world_event'
+  currentValue     Int      @default(0) @map("current_value")
+  targetValue      Int      @map("target_value")
+  participantCount Int      @default(0) @map("participant_count")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  @@map("world_event_progress")
+}
+
+model BattlePassProgress {
+  userId          String   @map("user_id")
+  seasonContentId String   @map("season_content_id") // ContentDefinition.id of type 'season'
+  tokensEarned    Int      @default(0) @map("tokens_earned")
+  claimedTierIds  String[] @map("claimed_tier_ids")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, seasonContentId])
+  @@map("battle_pass_progress")
+}
+
+// ============================================================
+// Community Engine
+// ============================================================
+
+model FeedPost {
+  id                  String   @id @default(uuid())
+  userId              String   @map("user_id")
+  displayNameSnapshot String   @map("display_name_snapshot")
+  avatarUrlSnapshot   String?  @map("avatar_url_snapshot")
+  assignmentId        String   @map("assignment_id")
+  questTitleSnapshot  String   @map("quest_title_snapshot")
+  xpEarned            Int      @map("xp_earned")
+  imageRef            String?  @map("image_ref")
+  likeCount           Int      @default(0) @map("like_count")
+  createdAt           DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([createdAt])
+  @@map("feed_posts")
+}
+
+// ============================================================
+// Notifications (LiveOps-adjacent, cross-cutting)
+// ============================================================
+
+model Notification {
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  kind      String
+  title     String
+  body      String
+  dedupeKey String?   @map("dedupe_key")
+  readAt    DateTime? @map("read_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, dedupeKey])
+  @@index([userId, readAt])
+  @@map("notifications")
+}

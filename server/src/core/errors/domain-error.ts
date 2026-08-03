@@ -1,0 +1,14 @@
+export class DomainError extends Error {
+  readonly code: string;
+  readonly status: number;
+
+  constructor(code: string, status = 400, message?: string) {
+    super(message ?? code);
+    this.code = code;
+    this.status = status;
+    this.name = 'DomainError';
+  }
+}
+
+export const domainError = (code: string, status = 400, message?: string) =>
+  new DomainError(code, status, message);

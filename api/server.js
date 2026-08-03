@@ -17,21 +17,6 @@ import { createProviders, ProviderNotConfiguredError } from './lib/providers.js'
 import { MemoryQuestRepository } from './lib/memory-repository.js';
 import { PostgresQuestRepository } from './lib/postgres-repository.js';
 
-// Live Services
-import { createAdminRoutes } from './routes/admin.routes.js';
-import { createUserRoutes } from './routes/user.routes.js';
-import { TemplateRepository } from './repositories/TemplateRepository.js';
-import { CampaignRepository } from './repositories/CampaignRepository.js';
-import { AssignmentRepository } from './repositories/AssignmentRepository.js';
-import { UserRepository } from './repositories/UserRepository.js';
-import { QuestService } from './services/QuestService.js';
-import { CampaignService } from './services/CampaignService.js';
-import { AssignmentService } from './services/AssignmentService.js';
-import { EligibilityService } from './services/EligibilityService.js';
-import { VerificationService } from './services/VerificationService.js';
-import { ProgressionService } from './services/ProgressionService.js';
-import { DomainEventBus } from './lib/domain-events.js';
-
 const idempotencySchema = z.string().min(8).max(160).regex(/^[A-Za-z0-9._:-]+$/);
 const assignmentIdSchema = z.string().uuid();
 const notificationIdSchema = z.string().uuid();
@@ -63,7 +48,6 @@ export function createApp(options = {}) {
   const repository = options.repository || new MemoryQuestRepository({ definitions: questDefinitions });
   const providers = options.providers || createProviders({ mode: config.PROVIDER_MODE, aiVerifyUrl: config.QUEST_AI_VERIFY_URL, providerSecret: config.QUEST_PROVIDER_SECRET, notificationUrl: config.QUEST_NOTIFICATION_URL });
   const engine = options.engine || new QuestEngine({ repository, providers });
-  const liveServices = options.liveServices || {};
   const app = express();
 
   app.disable('x-powered-by');
@@ -149,11 +133,6 @@ export function createApp(options = {}) {
     category: optionalEnum(req.query.category, ['Mind', 'Body', 'Discovery', 'Weekly', 'Monthly']),
   }))));
 
-  if (liveServices.questService) {
-    app.use('/api/v1/admin', createAdminRoutes(liveServices));
-    app.use('/api/v1', createUserRoutes(liveServices));
-  }
-
   app.get('/api/v1/quests/active', asyncRoute(async (req, res) => res.json(await engine.active(req.identity))));
   app.get('/api/v1/quests/history', asyncRoute(async (req, res) => res.json(await engine.history(req.identity))));
   app.post('/api/v1/quests/generate-daily', writeLimiter, asyncRoute(async (req, res) => res.status(201).json(await engine.generateDaily(req.identity, requireIdempotency(req)))));
@@ -226,26 +205,8 @@ export async function createRuntime(env = process.env) {
     repository = new MemoryQuestRepository({ definitions: questDefinitions });
   }
   const providers = createProviders({ mode: config.PROVIDER_MODE, aiVerifyUrl: config.QUEST_AI_VERIFY_URL, providerSecret: config.QUEST_PROVIDER_SECRET, notificationUrl: config.QUEST_NOTIFICATION_URL });
-  
-  let liveServices = {};
-  if (pool) {
-    const eventBus = new DomainEventBus();
-    const templateRepo = new TemplateRepository(pool);
-    const campaignRepo = new CampaignRepository(pool);
-    const assignmentRepo = new AssignmentRepository(pool);
-    const userRepo = new UserRepository(pool);
 
-    liveServices = {
-      questService: new QuestService(templateRepo),
-      campaignService: new CampaignService(campaignRepo, eventBus),
-      assignmentService: new AssignmentService(assignmentRepo, templateRepo, eventBus),
-      eligibilityService: new EligibilityService(userRepo),
-      verificationService: new VerificationService(),
-      progressionService: new ProgressionService(userRepo, eventBus)
-    };
-  }
-
-  return { config, pool, repository, providers, engine: new QuestEngine({ repository, providers }), liveServices };
+  return { config, pool, repository, providers, engine: new QuestEngine({ repository, providers }) };
 }
 
 export async function startServer(env = process.env) {

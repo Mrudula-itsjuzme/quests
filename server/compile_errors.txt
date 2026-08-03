@@ -1,0 +1,9 @@
+src/app.module.ts(8,30): error TS2307: Cannot find module './core/event-bus/events.module' or its corresponding type declarations.
+src/engines/quest/application/quest-submission.service.ts(32,27): error TS18047: 'assignment.definition' is possibly 'null'.
+src/engines/quest/application/quest-submission.service.ts(43,25): error TS18047: 'assignment.definition' is possibly 'null'.
+src/engines/quest/application/quest-submission.service.ts(44,19): error TS18047: 'assignment.definition' is possibly 'null'.
+src/engines/quest/infrastructure/quest-content.adapter.ts(36,22): error TS2416: Property 'schema' in type 'QuestContentAdapter' is not assignable to the same property in base type 'ContentAdapter<Omit<QuestDefinitionData, "id">>'.
+  Type 'ZodObject<{ title: ZodString; description: ZodString; category: ZodString; cadence: ZodString; rarity: ZodString; verificationType: ZodString; ... 8 more ...; chainId: ZodOptional<...>; }, "strip", ZodTypeAny, { ...; }, { ...; }>' is not assignable to type 'ZodType<Omit<QuestDefinitionData, "id">, ZodTypeDef, Omit<QuestDefinitionData, "id">>'.
+    The types of '_input.instructions' are incompatible between these types.
+      Type 'string[] | undefined' is not assignable to type 'string[]'.
+        Type 'undefined' is not assignable to type 'string[]'.
