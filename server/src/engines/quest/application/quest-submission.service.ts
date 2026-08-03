@@ -32,7 +32,7 @@ export class QuestSubmissionService {
         verificationType: assignment.definition.verificationType,
         status: 'pending',
         uploadId: payload.uploadId,
-        metadata: payload.text ? { text: payload.text } : {},
+        metadata: { text: payload.text, feedOptIn: payload.feedOptIn !== false },
       },
     });
 

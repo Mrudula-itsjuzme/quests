@@ -381,3 +381,22 @@ model Notification {
   @@index([userId, readAt])
   @@map("notifications")
 }
+
+// ============================================================
+// Analytics Engine — read-only consumer of the event stream
+// ============================================================
+
+// Per-content approval/rejection counters, fed by Verification Engine's
+// SubmissionVerified events. Read by Analytics to publish
+// ContentDifficultySignal, which LiveOps/AI Services can use to
+// deprioritize a quest with a persistently high rejection rate — without
+// Quest Engine needing to know verification even happened.
+model ContentDifficultyStats {
+  definitionId      String   @id @map("definition_id")
+  approvedCount     Int      @default(0) @map("approved_count")
+  rejectedCount     Int      @default(0) @map("rejected_count")
+  manualReviewCount Int      @default(0) @map("manual_review_count")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@map("content_difficulty_stats")
+}

@@ -28,12 +28,13 @@ describe('Quest <-> Verification event round trip', () => {
     const emitter = new EventEmitter2();
 
     const questSubmissionUpdate = jest.fn().mockResolvedValue({});
+    const questSubmissionFindUnique = jest.fn().mockResolvedValue({ metadata: {} });
     const questAssignmentUpdate = jest.fn().mockResolvedValue({});
     const questAssignmentFindUnique = jest.fn().mockResolvedValue(makeAssignment());
     const questSubmissionCount = jest.fn().mockResolvedValue(0);
 
     const verificationPrisma = {
-      questSubmission: { update: questSubmissionUpdate },
+      questSubmission: { update: questSubmissionUpdate, findUnique: questSubmissionFindUnique },
     } as any;
     const questPrisma = {
       questAssignment: { findUnique: questAssignmentFindUnique, update: questAssignmentUpdate },

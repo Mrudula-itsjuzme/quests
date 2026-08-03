@@ -2,12 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createHash } from 'node:crypto';
 import { PrismaService } from '../../../../core/prisma/prisma.service';
-import { AiVisionProviderFactory } from '../../infrastructure/providers/ai-vision-provider.factory';
+import { AiVisionService } from '../../../ai-services/application/ai-vision.service';
 import { VerificationResult, VerificationStrategy, VerificationSubmissionInput } from '../verification-strategy';
 
 /**
  * Upload -> dedup pre-check -> AI classification -> confidence-threshold decision.
  * Dedup runs before the (costly) AI call so replay abuse is rejected cheaply.
+ * AI classification itself is delegated to AI Services Engine — Verification
+ * owns the decision thresholds, not the provider plumbing.
  */
 @Injectable()
 export class PhotoVerificationStrategy implements VerificationStrategy {
@@ -16,7 +18,7 @@ export class PhotoVerificationStrategy implements VerificationStrategy {
   constructor(
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
-    private readonly visionFactory: AiVisionProviderFactory,
+    private readonly vision: AiVisionService,
   ) {}
 
   async verify(input: VerificationSubmissionInput): Promise<VerificationResult> {
@@ -36,8 +38,7 @@ export class PhotoVerificationStrategy implements VerificationStrategy {
       return { decision: 'rejected', imageHash, metadata: { reason: 'duplicate_image' } };
     }
 
-    const provider = this.visionFactory.resolve();
-    const classification = await provider.classify(input.uploadId, input.subjectTag);
+    const classification = await this.vision.classify(input.uploadId, input.subjectTag);
 
     const approveThreshold = this.config.get<number>('ai.approveThreshold') ?? 0.85;
     const manualReviewThreshold = this.config.get<number>('ai.manualReviewThreshold') ?? 0.5;

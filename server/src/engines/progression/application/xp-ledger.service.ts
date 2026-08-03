@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../core/prisma/prisma.service';
 import { GameEventBus } from '../../../core/event-bus/game-event-bus.service';
-import { GameEventType, LevelUpPayload, TierPromotedPayload } from '../../../core/event-bus/game-events';
+import { GameEventType, LevelUpPayload, TierPromotedPayload, XpGrantedPayload } from '../../../core/event-bus/game-events';
 import { withIdempotency } from '../../../core/idempotency/idempotency-guard';
 import { ProgressionEngine } from '../../../core/progression-curve/progression-engine';
 import { ProgressionCurveRepository } from '../../../core/progression-curve/progression-curve.repository';
@@ -38,6 +38,9 @@ export class XpLedgerService {
 
     const before = (await this.totalXp(userId)) - amount;
     const after = before + amount;
+
+    const grantedPayload: XpGrantedPayload = { userId, amount, source, sourceRefId };
+    this.eventBus.emit(GameEventType.XpGranted, grantedPayload as unknown as Record<string, unknown>);
 
     const curve = await this.curveRepo.load();
     const engine = new ProgressionEngine(curve);

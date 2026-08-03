@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../core/prisma/prisma.service';
 import { GameEventBus } from '../../../core/event-bus/game-event-bus.service';
 import { GameEventType, QuestSubmissionReceivedPayload, SubmissionVerifiedPayload } from '../../../core/event-bus/game-events';
@@ -24,6 +25,12 @@ export class VerificationEventListener {
 
   @OnEvent(GameEventType.QuestSubmissionReceived)
   async onQuestSubmissionReceived(payload: QuestSubmissionReceivedPayload) {
+    const existing = await this.prisma.questSubmission.findUnique({
+      where: { id: payload.submissionId },
+      select: { metadata: true },
+    });
+    const priorMetadata = (existing?.metadata as object) ?? {};
+
     try {
       const result = await this.pipeline.verify(payload.verificationType, {
         assignmentId: payload.assignmentId,
@@ -39,7 +46,7 @@ export class VerificationEventListener {
           status: result.decision,
           imageHash: result.imageHash,
           confidence: result.confidence,
-          metadata: (result.metadata ?? {}) as object,
+          metadata: { ...priorMetadata, ...(result.metadata ?? {}) } as Prisma.InputJsonValue,
         },
       });
 
@@ -56,7 +63,7 @@ export class VerificationEventListener {
       this.logger.error(`verification failed for submission ${payload.submissionId}`, error as Error);
       await this.prisma.questSubmission.update({
         where: { id: payload.submissionId },
-        data: { status: 'rejected', metadata: { reason: 'verification_error' } },
+        data: { status: 'rejected', metadata: { ...priorMetadata, reason: 'verification_error' } as Prisma.InputJsonValue },
       });
       this.eventBus.emit(GameEventType.SubmissionVerified, {
         userId: payload.userId,
