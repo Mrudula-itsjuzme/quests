@@ -8622,3 +8622,22 @@ button, a {
     grid-template-columns: repeat(3, 1fr);
   }
 }
+
+/* Force Correct Nav Visibility */
+@media (min-width: 768px) {
+  .app-shell > .topbar {
+    display: flex !important;
+  }
+  .app-shell .mobile-bottom-dock {
+    display: none !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .app-shell > .topbar {
+    display: none !important;
+  }
+  .app-shell .mobile-bottom-dock {
+    display: flex !important;
+  }
+}

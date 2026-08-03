@@ -8,6 +8,6 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './src/setupTests.js',
     globals: true,
-    exclude: [...configDefaults.exclude, '.kilo/**'],
+    exclude: [...configDefaults.exclude, '.kilo/**', 'server/**'],
   },
 });
