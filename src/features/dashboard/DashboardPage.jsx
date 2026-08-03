@@ -75,6 +75,7 @@ function DashboardContent({
       animate="show"
       exit={{ opacity: 0, filter: 'blur(6px)', transition: { duration: 0.18 } }}
     >
+      <h1 className="sr-only">Dashboard</h1>
       <div className="dashboard-grid">
         {/* Left Column (Hero) */}
         <div className="dashboard-col-left">
