@@ -16,8 +16,11 @@ import { questDefinitions } from './lib/quest-definitions.js';
 import { createProviders, ProviderNotConfiguredError } from './lib/providers.js';
 import { MemoryQuestRepository } from './lib/memory-repository.js';
 import { PostgresQuestRepository } from './lib/postgres-repository.js';
-import { resolveVisionProvider, rarityTierFromScore, VisionClassificationError } from './lib/vision-providers.js';
+import { resolveVisionProvider, resolveCandidateSpecies, VisionClassificationError } from './lib/vision-providers.js';
 import { antiCheatVerdict, GateVerdict } from './lib/anti-cheat.js';
+import { scoreDiscovery, DEFAULT_WEIGHTS, DEFAULT_GRADE_BANDS } from './lib/rarity-engine.js';
+
+const CONFIDENCE_THRESHOLD = 0.70;
 
 const idempotencySchema = z.string().min(8).max(160).regex(/^[A-Za-z0-9._:-]+$/);
 const assignmentIdSchema = z.string().uuid();
@@ -55,6 +58,7 @@ const captureCreateSchema = z.object({
   gps: gpsSchema,
   heading: z.number().min(0).max(360).nullable().optional(),
   liveness: livenessSchema,
+  chosenCandidateIndex: z.number().int().min(0).max(2).optional(),
 }).strict();
 const captureRenameSchema = z.object({ cardTitle: z.string().trim().min(1).max(80) }).strict();
 const legacyQuestSchema = z.object({
@@ -182,19 +186,48 @@ export function createApp(options = {}) {
       return res.status(422).json({ error: { code: 'anti_cheat_rejected', reason: gate.reason, requestId: req.id } });
     }
 
-    const card = await repository.runIdempotent(req.identity.id, 'create-capture', idempotencyKey, async () => {
-      const classification = await visionProvider.classify(body.imageBase64);
-      return repository.createCapturedCard({
+    const result = await repository.runIdempotent(req.identity.id, 'create-capture', idempotencyKey, async () => {
+      const identification = await visionProvider.identify(body.imageBase64);
+      const top = identification.candidates[body.chosenCandidateIndex ?? 0] || identification.candidates[0];
+
+      if (body.chosenCandidateIndex == null && top.confidence < CONFIDENCE_THRESHOLD) {
+        return { needsConfirmation: true, candidates: identification.candidates };
+      }
+
+      const speciesMatch = resolveCandidateSpecies(top);
+      const lastCapture = await repository.getLastCaptureLocation?.(req.identity.id);
+      const isFirstForPlayer = speciesMatch.id
+        ? !(await repository.hasCapturedSpecies?.(req.identity.id, speciesMatch.id))
+        : false;
+      const isFirstGlobal = speciesMatch.id
+        ? !(await repository.hasAnyCaptureOfSpecies?.(speciesMatch.id))
+        : false;
+
+      const rarity = scoreDiscovery(
+        {
+          species: speciesMatch,
+          confidence: top.confidence,
+          capturedAt,
+          gps: body.gps || null,
+          lastCaptureGps: lastCapture?.gps || null,
+          isFirstForPlayer,
+          isFirstGlobal,
+        },
+        { version: 1, weights: DEFAULT_WEIGHTS, gradeBands: DEFAULT_GRADE_BANDS },
+      );
+
+      const card = await repository.createCapturedCard({
         userId: req.identity.id,
         captureId: body.captureId || null,
-        itemName: classification.itemName,
-        category: classification.category,
-        cardTitle: classification.cardTitle,
-        rarityTier: rarityTierFromScore(classification.rarityScore),
-        rarityScore: classification.rarityScore,
-        description: classification.description,
+        speciesId: speciesMatch.id,
+        itemName: speciesMatch.commonName,
+        category: speciesMatch.category,
+        cardTitle: speciesMatch.commonName,
+        rarityTier: rarity.grade,
+        rarityScore: rarity.score / 100,
+        description: speciesMatch.encyclopedia || top.ecosystem || '',
         imageHash,
-        status: gate.verdict === GateVerdict.PASS_WITH_REVIEW ? 'provisional' : 'final',
+        status: gate.verdict === GateVerdict.PASS_WITH_REVIEW || rarity.humanReview ? 'provisional' : 'final',
         gps: body.gps || null,
         heading: body.heading ?? null,
         capturedAt,
@@ -202,9 +235,19 @@ export function createApp(options = {}) {
         antiCheatVerdict: gate.verdict,
         antiCheatReason: gate.reason,
         antiCheatDetail: gate.results,
+        confidence: top.confidence,
+        rarityGrade: rarity.grade,
+        rarityStars: rarity.stars,
+        rarityWeightSetVersion: rarity.weightSetVersion,
+        rarityFactorBreakdown: rarity.factorBreakdown,
+        xpAwarded: rarity.xp,
+        coinsAwarded: rarity.coins,
       });
+      return { card };
     });
-    res.status(201).json(card);
+
+    if (result.needsConfirmation) return res.status(200).json(result);
+    res.status(201).json(result.card);
   }));
   app.get('/api/v1/captures', asyncRoute(async (req, res) => res.json(await repository.getCapturedCards(req.identity.id))));
   app.get('/api/v1/captures/:captureId', asyncRoute(async (req, res) => {

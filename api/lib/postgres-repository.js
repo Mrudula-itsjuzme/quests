@@ -286,8 +286,9 @@ export class PostgresQuestRepository {
       `INSERT INTO captured_cards
         (id, user_id, capture_id, item_name, category, card_title, rarity_tier, rarity_score, description, image_ref, image_hash,
          status, gps_lat, gps_lng, gps_accuracy_m, gps_altitude, heading, captured_at, server_received_at,
-         anti_cheat_verdict, anti_cheat_reason, anti_cheat_detail, reject_reason)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23)
+         anti_cheat_verdict, anti_cheat_reason, anti_cheat_detail, reject_reason,
+         species_id, confidence, rarity_grade, rarity_stars, rarity_weight_set_version, rarity_factor_breakdown, xp_awarded, coins_awarded)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31)
        RETURNING *`,
       [
         randomUUID(), card.userId, card.captureId || null, card.itemName, card.category, card.cardTitle, card.rarityTier, card.rarityScore,
@@ -295,6 +296,8 @@ export class PostgresQuestRepository {
         card.status || 'final', card.gps?.lat ?? null, card.gps?.lng ?? null, card.gps?.accuracyM ?? null, card.gps?.altitude ?? null,
         card.heading ?? null, card.capturedAt || new Date(), card.serverReceivedAt || new Date(),
         card.antiCheatVerdict || null, card.antiCheatReason || null, JSON.stringify(card.antiCheatDetail || []), card.rejectReason || null,
+        card.speciesId || null, card.confidence ?? null, card.rarityGrade || null, card.rarityStars ?? null,
+        card.rarityWeightSetVersion ?? null, JSON.stringify(card.rarityFactorBreakdown || {}), card.xpAwarded || 0, card.coinsAwarded || 0,
       ],
     );
     return mapCapturedCard(rows[0]);
@@ -321,6 +324,14 @@ export class PostgresQuestRepository {
     );
     if (!rows[0]) return null;
     return { gps: { lat: Number(rows[0].gps_lat), lng: Number(rows[0].gps_lng) }, capturedAt: rows[0].captured_at };
+  }
+  async hasCapturedSpecies(userId, speciesId) {
+    const { rowCount } = await this.pool.query('SELECT 1 FROM captured_cards WHERE user_id = $1 AND species_id = $2 AND status <> $3 LIMIT 1', [userId, speciesId, 'rejected']);
+    return rowCount > 0;
+  }
+  async hasAnyCaptureOfSpecies(speciesId) {
+    const { rowCount } = await this.pool.query('SELECT 1 FROM captured_cards WHERE species_id = $1 AND status <> $2 LIMIT 1', [speciesId, 'rejected']);
+    return rowCount > 0;
   }
   async hasSimilarCaptureImageHash(userId, hash, threshold = 0.95) {
     const { rows } = await this.pool.query(
@@ -450,6 +461,13 @@ function mapCapturedCard(row) {
     antiCheatVerdict: row.anti_cheat_verdict,
     antiCheatReason: row.anti_cheat_reason,
     rejectReason: row.reject_reason,
+    speciesId: row.species_id,
+    confidence: row.confidence != null ? Number(row.confidence) : null,
+    rarityGrade: row.rarity_grade,
+    rarityStars: row.rarity_stars,
+    rarityWeightSetVersion: row.rarity_weight_set_version,
+    xpAwarded: row.xp_awarded != null ? Number(row.xp_awarded) : 0,
+    coinsAwarded: row.coins_awarded != null ? Number(row.coins_awarded) : 0,
   };
 }
 function conflict(code) { const error = new Error(code); error.code = code; error.status = 409; return error; }

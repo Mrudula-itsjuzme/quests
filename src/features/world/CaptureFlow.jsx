@@ -26,28 +26,24 @@ function messageForRejection(reason) {
 
 export function CaptureFlow({ onClose }) {
   const inputRef = useRef(null);
-  const [stage, setStage] = useState('prompt'); // prompt | scanning | reveal | error
+  const [stage, setStage] = useState('prompt'); // prompt | scanning | candidates | reveal | error
   const [card, setCard] = useState(null);
   const [name, setName] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [pendingBundle, setPendingBundle] = useState(null);
+  const [candidates, setCandidates] = useState([]);
   const captureItem = useCaptureItem();
   const renameCapture = useRenameCapture();
 
-  const handleFile = async (event) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    setStage('scanning');
-    setErrorMessage('');
+  const submitCapture = async (bundle) => {
     try {
-      const [dataUrl, telemetry] = await Promise.all([fileToDataUrl(file), collectCaptureTelemetry(file)]);
-      const result = await captureItem.mutateAsync({
-        captureId: crypto.randomUUID(),
-        imageBase64: dataUrl,
-        capturedAt: telemetry.capturedAt,
-        gps: telemetry.gps,
-        heading: telemetry.heading,
-        liveness: telemetry.liveness,
-      });
+      const result = await captureItem.mutateAsync(bundle);
+      if (result.needsConfirmation) {
+        setPendingBundle(bundle);
+        setCandidates(result.candidates);
+        setStage('candidates');
+        return;
+      }
       setCard(result);
       setName(result.cardTitle);
       setStage('reveal');
@@ -55,6 +51,28 @@ export function CaptureFlow({ onClose }) {
       setErrorMessage(error?.code === 'anti_cheat_rejected' ? messageForRejection(error.reason) : 'The rarity engine could not read that photo. Try again.');
       setStage('error');
     }
+  };
+
+  const handleFile = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setStage('scanning');
+    setErrorMessage('');
+    const [dataUrl, telemetry] = await Promise.all([fileToDataUrl(file), collectCaptureTelemetry(file)]);
+    await submitCapture({
+      captureId: crypto.randomUUID(),
+      imageBase64: dataUrl,
+      capturedAt: telemetry.capturedAt,
+      gps: telemetry.gps,
+      heading: telemetry.heading,
+      liveness: telemetry.liveness,
+    });
+  };
+
+  const handlePickCandidate = async (index) => {
+    playTap();
+    setStage('scanning');
+    await submitCapture({ ...pendingBundle, chosenCandidateIndex: index });
   };
 
   const handleConfirm = async () => {
@@ -129,6 +147,32 @@ export function CaptureFlow({ onClose }) {
               />
             </div>
             <p>Identifying and scoring rarity…</p>
+          </motion.div>
+        )}
+
+        {stage === 'candidates' && (
+          <motion.div
+            key="candidates"
+            className="capture-flow-panel"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+          >
+            <h2>Which one is it?</h2>
+            <p>We’re not fully sure — pick the closest match, or retake the photo.</p>
+            <ul className="capture-candidate-list">
+              {candidates.map((candidate, index) => (
+                <li key={candidate.commonName}>
+                  <button type="button" className="capture-candidate-option" onClick={() => handlePickCandidate(index)}>
+                    <span className="capture-candidate-name">{candidate.commonName}</span>
+                    <span className="capture-candidate-confidence">{Math.round(candidate.confidence * 100)}%</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <button type="button" className="continue-journey-btn" onClick={() => setStage('prompt')}>
+              Retake Photo
+            </button>
           </motion.div>
         )}
 

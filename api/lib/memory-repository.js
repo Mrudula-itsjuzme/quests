@@ -216,6 +216,12 @@ export class MemoryQuestRepository {
     const item = this.capturedCards.find((entry) => entry.userId === userId && entry.gps);
     return item ? { gps: item.gps, capturedAt: item.capturedAt } : null;
   }
+  async hasCapturedSpecies(userId, speciesId) {
+    return this.capturedCards.some((item) => item.userId === userId && item.speciesId === speciesId && item.status !== 'rejected');
+  }
+  async hasAnyCaptureOfSpecies(speciesId) {
+    return this.capturedCards.some((item) => item.speciesId === speciesId && item.status !== 'rejected');
+  }
   async hasSimilarCaptureImageHash(userId, hash, threshold = 0.95) {
     const tenMinutesAgo = Date.now() - 10 * 60 * 1000;
     return this.capturedCards.some((item) => item.userId === userId && item.imageHash && new Date(item.capturedAt).getTime() >= tenMinutesAgo && hashSimilarity(item.imageHash, hash) >= threshold);

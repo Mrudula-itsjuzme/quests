@@ -253,7 +253,7 @@ describe('Quest API', () => {
   });
 
   it('runs a capture through the anti-cheat gate and mints a final card when telemetry is clean', async () => {
-    const app = createApp({ config: testConfig() });
+    const app = createApp({ config: testConfig(), visionProvider: highConfidenceVisionProvider() });
     const response = await request(app)
       .post('/api/v1/captures')
       .set('Idempotency-Key', 'capture-001')
@@ -268,10 +268,11 @@ describe('Quest API', () => {
     expect(response.status).toBe(201);
     expect(response.body.status).toBe('final');
     expect(response.body.antiCheatVerdict).toBe('PASS');
+    expect(response.body.itemName).toBe('House Sparrow');
   });
 
   it('marks a capture provisional when a single anti-cheat flag is raised', async () => {
-    const app = createApp({ config: testConfig() });
+    const app = createApp({ config: testConfig(), visionProvider: highConfidenceVisionProvider() });
     const response = await request(app)
       .post('/api/v1/captures')
       .set('Idempotency-Key', 'capture-002')
@@ -297,13 +298,46 @@ describe('Quest API', () => {
   });
 
   it('polls a minted capture back by its id', async () => {
-    const app = createApp({ config: testConfig() });
+    const app = createApp({ config: testConfig(), visionProvider: highConfidenceVisionProvider() });
     const created = await request(app).post('/api/v1/captures').set('Idempotency-Key', 'capture-004').send({ imageBase64: PIXEL_PNG });
     const fetched = await request(app).get(`/api/v1/captures/${created.body.id}`);
     expect(fetched.status).toBe(200);
     expect(fetched.body.id).toBe(created.body.id);
   });
+
+  it('asks for confirmation instead of minting when identification confidence is below threshold', async () => {
+    const app = createApp({ config: testConfig() });
+    const response = await request(app)
+      .post('/api/v1/captures')
+      .set('Idempotency-Key', 'capture-005')
+      .send({ imageBase64: PIXEL_PNG });
+    expect(response.status).toBe(200);
+    expect(response.body.needsConfirmation).toBe(true);
+    expect(response.body.candidates.length).toBeGreaterThan(0);
+  });
+
+  it('mints a card once a candidate is chosen after a low-confidence identification', async () => {
+    const app = createApp({ config: testConfig() });
+    const first = await request(app).post('/api/v1/captures').set('Idempotency-Key', 'capture-006').send({ imageBase64: PIXEL_PNG });
+    expect(first.body.needsConfirmation).toBe(true);
+    const second = await request(app)
+      .post('/api/v1/captures')
+      .set('Idempotency-Key', 'capture-007')
+      .send({ imageBase64: PIXEL_PNG, chosenCandidateIndex: 0 });
+    expect(second.status).toBe(201);
+    expect(second.body.itemName).toBe(first.body.candidates[0].commonName);
+  });
 });
+
+function highConfidenceVisionProvider() {
+  return {
+    identify: async () => ({
+      candidates: [
+        { commonName: 'House Sparrow', scientificName: 'Passer domesticus', category: 'Fauna', element: 'Sky', ecosystem: 'Urban', confidence: 0.92 },
+      ],
+    }),
+  };
+}
 
 const PIXEL_PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
 
