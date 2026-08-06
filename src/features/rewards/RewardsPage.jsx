@@ -188,13 +188,16 @@ function RewardsContent({
         document.body,
       )}
 
-      <AnimatePresence>
-        {notice && (
-          <motion.div className="toast-notice" role="status" initial={{ opacity: 0, y: 20, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 20, scale: 0.9 }} transition={springConfig.snappy}>
-            <span>{notice}</span><button type="button" onClick={() => { playTap(); setNotice(''); }} aria-label="Dismiss notification">×</button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {createPortal(
+        <AnimatePresence>
+          {notice && (
+            <motion.div className="toast-notice" role="status" initial={{ opacity: 0, y: 20, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 20, scale: 0.9 }} transition={springConfig.snappy}>
+              <span>{notice}</span><button type="button" onClick={() => { playTap(); setNotice(''); }} aria-label="Dismiss notification">×</button>
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body,
+      )}
     </motion.main>
   );
 }

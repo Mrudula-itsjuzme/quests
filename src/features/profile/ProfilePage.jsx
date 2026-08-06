@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Icon } from '../../components/Icon';
 import {
@@ -206,13 +207,16 @@ function ProfileContent({
         {picker && <SelectionSheet title={`Choose ${picker}`} options={cosmeticOptions[picker]} selected={cosmetics[picker]} onChoose={(value) => choose(picker, value)} onClose={() => setPicker(null)} />}
       </AnimatePresence>
 
-      <AnimatePresence>
-        {saved && (
-          <motion.div className="toast-notice" role="status" initial={{ opacity: 0, y: 20, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 20, scale: 0.9 }} transition={{ type: 'spring', stiffness: 450, damping: 25 }}>
-            <span>{saved}</span><button type="button" onClick={() => { playTap(); setSaved(''); }} aria-label="Dismiss notification">×</button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {createPortal(
+        <AnimatePresence>
+          {saved && (
+            <motion.div className="toast-notice" role="status" initial={{ opacity: 0, y: 20, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 20, scale: 0.9 }} transition={{ type: 'spring', stiffness: 450, damping: 25 }}>
+              <span>{saved}</span><button type="button" onClick={() => { playTap(); setSaved(''); }} aria-label="Dismiss notification">×</button>
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body,
+      )}
     </motion.main>
   );
 }
@@ -230,7 +234,7 @@ function StatRow({ label, value }) {
 }
 
 function SelectionSheet({ title, options, selected, onChoose, onClose }) {
-  return (
+  return createPortal(
     <motion.div className="selection-overlay" role="dialog" aria-modal="true" aria-label={title} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
       <motion.section className="selection-sheet ornate-panel" initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} transition={{ type: 'spring', stiffness: 450, damping: 30 }}>
         <div className="section-title"><h2>{title}</h2><button type="button" onClick={() => { playTap(); onClose(); }} aria-label="Close">×</button></div>
@@ -240,6 +244,7 @@ function SelectionSheet({ title, options, selected, onChoose, onClose }) {
           </motion.button>
         ))}
       </motion.section>
-    </motion.div>
+    </motion.div>,
+    document.body,
   );
 }

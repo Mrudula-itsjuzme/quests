@@ -133,13 +133,13 @@ function GalleryContent({
             <div className="journal-timeline">
               <AnimatePresence mode="popLayout">
                 {filtered.map((item) => (
-                  <motion.div 
-                    variants={calmFade} 
-                    key={item.assetId} 
+                  <motion.div
+                    variants={calmFade}
+                    key={item.assetId}
                     layout
-                    style={{ position: 'relative', marginBottom: '8px' }}
+                    className="journal-entry-swipe-row"
                   >
-                    <div style={{ position: 'absolute', inset: 0, background: '#F44336', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: '24px', color: 'white' }}>
+                    <div className="journal-entry-archive-hint">
                       <Icon name="archive" />
                     </div>
                     <motion.div
@@ -192,17 +192,17 @@ function GalleryContent({
       <AnimatePresence>
         {selected && (
           <BottomSheet isOpen={!!selected} onClose={() => { playTap(); setSelected(null); }}>
-            <div style={{ padding: '24px 0', textAlign: 'center' }}>
-              <div style={{ margin: '0 auto 24px', width: '120px', height: '120px' }}>
+            <div className="journal-detail-sheet">
+              <div className="journal-detail-preview">
                 <AnimatedCollectible collectible={selected} preview />
               </div>
-              <h2 style={{ fontSize: '2rem', color: 'var(--quest-gold-bright)', marginBottom: '8px' }}>{selected.title}</h2>
-              <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginBottom: '24px' }}>
+              <h2 className="journal-detail-title">{selected.title}</h2>
+              <div className="journal-detail-tags">
                 <span className={`pill ${categoryColors[selected.category] || ''}`}>{selected.category}</span>
-                <span className="pill" style={{ background: 'rgba(255,255,255,0.1)' }}>{selected.rarity}</span>
+                <span className="pill journal-detail-rarity-pill">{selected.rarity}</span>
               </div>
               {selected.caption && (
-                <p style={{ color: 'var(--quest-muted)', fontSize: '1.1rem', fontStyle: 'italic', padding: '0 24px' }}>"{selected.caption}"</p>
+                <p className="journal-detail-caption">"{selected.caption}"</p>
               )}
             </div>
           </BottomSheet>
