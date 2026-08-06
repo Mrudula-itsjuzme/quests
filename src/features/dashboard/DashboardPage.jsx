@@ -9,6 +9,25 @@ import { playTap } from '../../lib/useSoundEffects';
 import { DashboardSkeleton } from '../../components/motion/SkeletonLoader';
 import { staggerContainer, staggerItem, springConfig } from '../../components/motion/MotionVariants';
 import { deriveGold, deriveGems, getEnergy } from '../../lib/playerEconomy';
+import { PhysicalCard } from '../../components/motion/PhysicalCard';
+import { ParallaxLayer } from '../../components/motion/ParallaxLayer';
+import { AmbientIdle } from '../../components/motion/AmbientIdle';
+
+const REALMS = [
+  { key: 'Mind', label: 'Mind', tiers: ['Novice', 'Apprentice', 'Scholar', 'Sage'], icon: 'leaf' },
+  { key: 'Body', label: 'Body', tiers: ['Novice', 'Wayfarer', 'Vanguard', 'Warden'], icon: 'bolt' },
+  { key: 'Discovery', label: 'Discovery', tiers: ['Novice', 'Seeker', 'Ranger', 'Pathfinder'], icon: 'compass' },
+];
+
+function realmMastery(activeQuests, realmKey) {
+  const realmQuests = activeQuests.filter((quest) => quest.category === realmKey);
+  const completed = realmQuests.filter((quest) => quest.status === 'completed');
+  const earnedXp = completed.reduce((sum, quest) => sum + (quest.xpReward || 0), 0);
+  const tierIndex = Math.min(3, Math.floor(earnedXp / 150));
+  const tierFloor = tierIndex * 150;
+  const progress = tierIndex === 3 ? 1 : (earnedXp - tierFloor) / 150;
+  return { earnedXp, tierIndex, progress: Math.max(0, Math.min(1, progress)) };
+}
 
 export function DashboardPage() {
   const { data: me, isLoading: meLoading, isError: meError } = useMe();
@@ -230,15 +249,17 @@ function DashboardContent({
         {/* Left Column (Hero) */}
         <div className="dashboard-col-left">
           <motion.section className="hero-panorama" variants={staggerItem}>
-            <div className="hero-content">
-              <span className="hero-greeting">Good evening,</span>
-              <h1>Adventurer.</h1>
-              <p>"Small steps today, legend tomorrow."</p>
-              <button className="continue-journey-btn" onClick={playTap}>
-                Continue Journey <span>→</span>
-              </button>
-            </div>
-            
+            <ParallaxLayer depth={10} className="hero-panorama-parallax">
+              <div className="hero-content">
+                <span className="hero-greeting">{greeting},</span>
+                <h1>Adventurer.</h1>
+                <p>"Small steps today, legend tomorrow."</p>
+                <button className="continue-journey-btn" onClick={() => { playTap(); navigate('/app/quests'); }}>
+                  Continue Journey <span>→</span>
+                </button>
+              </div>
+            </ParallaxLayer>
+
             <div className="hero-stats-overlay">
               <div className="hero-stat-card">
                 <Icon name="flame" className="text-gold" />
@@ -270,50 +291,55 @@ function DashboardContent({
               <h2><span className="diamond-bullet">✦</span> TODAY'S QUESTS</h2>
               <span className="reset-time">Reset at midnight <Icon name="moon" /></span>
             </div>
-            
-            <div className="quest-scroll-container">
-              {activeQuests.slice(0, 4).map((quest) => (
-                <div key={quest.id} className="parchment-card quest-card">
-                  <div className="paperclip"></div>
-                  <div className="quest-header">
-                    <Icon name={categoryIcon(quest.category)} />
-                    <h3>{quest.title}</h3>
-                  </div>
-                  <p className="quest-desc">{quest.description}</p>
-                  
-                  {quest.status === 'completed' ? (
-                    <div className="quest-completed-stamp">
-                      <div className="wax-seal">
-                        <Icon name="check" />
-                      </div>
-                      <span>Completed</span>
-                    </div>
-                  ) : (
-                    <div className="quest-progress-info">
-                      <small>{quest.progressValue} / {quest.targetValue}</small>
-                      <div className="parchment-progress">
-                        <motion.div 
-                          className="parchment-progress-fill" 
-                          initial={{ width: 0 }} 
-                          animate={{ width: `${questProgressRatio(quest) * 100}%` }} 
-                        />
-                      </div>
-                    </div>
-                  )}
-                  
-                  <div className="quest-footer">
-                    <span className="xp-reward">+{quest.xpReward} XP</span>
-                    <div className={`checkbox ${quest.status === 'completed' ? 'checked' : ''}`}>
-                      {quest.status === 'completed' && <Icon name="check" />}
-                    </div>
-                  </div>
-                </div>
-              ))}
 
-              <button className="parchment-card add-quest-card" onClick={playTap}>
+            <div className="quest-scroll-container">
+              {activeQuests.slice(0, 4).map((quest) => {
+                const isCompleted = quest.status === 'completed';
+                const realmClass = quest.category ? quest.category.toLowerCase() : '';
+                return (
+                  <PhysicalCard
+                    key={quest.id}
+                    className={`quest-realm-card ${realmClass} ${isCompleted ? 'is-completed' : ''}`}
+                    onClick={() => { playTap(); setSelectedId(quest.id); }}
+                    maxTilt={6}
+                  >
+                    <div className="quest-realm-header">
+                      <span className="quest-realm-icon"><Icon name={categoryIcon(quest.category)} /></span>
+                      <h3>{quest.title}</h3>
+                    </div>
+                    <p className="quest-realm-desc">{quest.description}</p>
+
+                    {isCompleted ? (
+                      <div className="quest-realm-completed">
+                        <span className="quest-realm-check"><Icon name="check" /></span>
+                        <span>Completed</span>
+                      </div>
+                    ) : (
+                      <div className="quest-realm-progress-info">
+                        <small>{quest.progressValue} / {quest.targetValue}</small>
+                        <div className="quest-realm-progress">
+                          <motion.div
+                            className="quest-realm-progress-fill"
+                            initial={{ width: 0 }}
+                            animate={{ width: `${questProgressRatio(quest) * 100}%` }}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="quest-realm-footer">
+                      <span className="xp-reward">+{quest.xpReward} XP</span>
+                      <div className={`checkbox ${isCompleted ? 'checked' : ''}`}>
+                        {isCompleted && <Icon name="check" />}
+                      </div>
+                    </div>
+                  </PhysicalCard>
+                );
+              })}
+
+              <button className="quest-realm-card add-quest-card" onClick={() => { playTap(); navigate('/app/quests'); }}>
                 <Icon name="plus" />
                 <span>Add Quest</span>
-                <div className="feather-pen"></div>
               </button>
             </div>
           </motion.section>
@@ -321,27 +347,35 @@ function DashboardContent({
 
         {/* Right Column (Side Panels) */}
         <div className="dashboard-col-right">
-          <motion.section className="dark-glass-card path-card" variants={staggerItem}>
+          <motion.section className="dark-glass-card realm-mastery-card" variants={staggerItem}>
             <div className="section-header centered">
-              <h2><span className="diamond-bullet">✦</span> YOUR PATH <span className="diamond-bullet">✦</span></h2>
+              <h2><span className="diamond-bullet">✦</span> REALM MASTERY <span className="diamond-bullet">✦</span></h2>
             </div>
-            <div className="path-rank-info">
-              <Icon name="shield" className="large-shield" />
-              <div>
-                <h3>{rank}</h3>
-                <small>{me.totalXp} / {nextRankXp} XP</small>
-              </div>
-            </div>
-            
-            <div className="path-map-container">
-              <div className="path-nodes">
-                <div className="path-node active"><div className="dot"></div><span>Village</span></div>
-                <div className="path-node"><div className="dot"></div><span>Forest</span></div>
-                <div className="path-node"><div className="dot"></div><span>Ruins</span></div>
-                <div className="path-node"><div className="dot"></div><span>Capital</span></div>
-                <div className="path-node"><div className="dot"></div><span>Dragon Peak</span></div>
-                <div className="path-node locked"><Icon name="lock" /><span>Celestial Kingdom</span></div>
-              </div>
+
+            <div className="realm-mastery-list">
+              {REALMS.map((realm) => {
+                const mastery = realmMastery(activeQuests, realm.key);
+                const tierName = realm.tiers[mastery.tierIndex];
+                return (
+                  <div key={realm.key} className={`realm-mastery-row ${realm.key.toLowerCase()}`}>
+                    <span className="realm-mastery-icon"><Icon name={realm.icon} /></span>
+                    <div className="realm-mastery-copy">
+                      <div className="realm-mastery-label">
+                        <strong>{realm.label}</strong>
+                        <span>{tierName}</span>
+                      </div>
+                      <div className="realm-mastery-bar">
+                        <motion.div
+                          className="realm-mastery-bar-fill"
+                          initial={{ width: 0 }}
+                          animate={{ width: `${mastery.progress * 100}%` }}
+                          transition={springConfig.soft}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </motion.section>
 
@@ -353,9 +387,9 @@ function DashboardContent({
               <p>Complete all active quests to unlock.</p>
               <strong className="xp-bonus">+150 XP</strong>
             </div>
-            <div className="chest-image-container">
+            <AmbientIdle amplitude={6} duration={4} className="chest-image-container">
               <div className="magical-chest"></div>
-            </div>
+            </AmbientIdle>
           </motion.section>
 
           <motion.section className="dark-glass-card encounter-card" variants={staggerItem}>

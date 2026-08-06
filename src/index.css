@@ -38,6 +38,14 @@
   --rarity-epic: #b47fe0;
   --rarity-legendary: #f0c46b;
 
+  /* ---- Realm accents (Mind / Body / Discovery) ---- */
+  --realm-mind: #8f8fe0;
+  --realm-mind-soft: rgba(143, 143, 224, 0.14);
+  --realm-body: #6fbf7a;
+  --realm-body-soft: rgba(111, 191, 122, 0.14);
+  --realm-discovery: #d9a441;
+  --realm-discovery-soft: rgba(217, 164, 65, 0.14);
+
   /* ---- Type scale (paired with --font-display / --font-body) ---- */
   --text-xs: clamp(0.72rem, 0.7rem + 0.1vw, 0.78rem);
   --text-sm: clamp(0.82rem, 0.8rem + 0.1vw, 0.88rem);
@@ -8275,108 +8283,112 @@ button, a {
 .hero-panorama {
   position: relative;
   min-height: 400px;
-  border-radius: 16px;
-  border: 1px solid rgba(234, 181, 82, 0.3);
-  background-image: url('/dashboard-castle-panorama.png'), linear-gradient(135deg, #1A1210, #0D0907);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--quest-line);
+  background-image: url('/dashboard-castle-panorama.png'), linear-gradient(135deg, var(--quest-ink-2), var(--quest-ink));
   background-size: cover;
   background-position: center;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.1);
+  box-shadow: var(--shadow-3), inset 0 0 0 1px rgba(255,255,255,0.06);
 }
 
 .hero-panorama::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(to right, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) 50%, transparent 100%),
-              linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 50%);
+  background: linear-gradient(to right, rgba(10,20,16,0.85) 0%, rgba(10,20,16,0.25) 50%, transparent 100%),
+              linear-gradient(to top, rgba(10,20,16,0.92) 0%, transparent 50%);
   z-index: 1;
+  pointer-events: none;
+}
+
+.hero-panorama-parallax {
+  position: relative;
+  z-index: 2;
 }
 
 .hero-content {
-  position: relative;
-  z-index: 2;
-  padding: 40px;
+  padding: var(--space-8);
   max-width: 400px;
 }
 
 .hero-greeting {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-style: italic;
-  font-size: 1.5rem;
-  color: #D3A76C;
-  margin-bottom: 4px;
+  font-size: var(--text-lg);
+  color: var(--quest-gold-bright);
+  margin-bottom: var(--space-1);
   display: block;
 }
 
 .hero-content h1 {
-  font-family: 'Playfair Display', serif;
-  font-size: 4rem;
+  font-family: var(--font-display);
+  font-size: var(--text-display);
   font-weight: 400;
-  margin: 0 0 16px 0;
-  color: #FFF;
+  margin: 0 0 var(--space-4) 0;
+  color: var(--quest-cream);
   letter-spacing: -0.02em;
 }
 
 .hero-content p {
-  font-size: 1.1rem;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.8);
-  margin-bottom: 24px;
+  font-size: var(--text-lg);
+  line-height: var(--leading-normal);
+  color: rgba(238, 242, 234, 0.8);
+  margin-bottom: var(--space-6);
 }
 
 .continue-journey-btn {
-  background: linear-gradient(180deg, #F9E5C9 0%, #D4A972 100%);
-  border: 1px solid #735128;
-  border-radius: 30px;
-  padding: 12px 28px;
-  color: #1A1210;
+  background: linear-gradient(180deg, var(--quest-gold-bright) 0%, var(--quest-gold-dim) 100%);
+  border: 1px solid var(--quest-gold-dim);
+  border-radius: var(--radius-pill);
+  padding: var(--space-3) var(--space-7);
+  color: var(--quest-ink);
   font-weight: 700;
-  font-size: 1.05rem;
+  font-size: var(--text-base);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 12px;
-  box-shadow: 0 4px 15px rgba(212, 169, 114, 0.3);
-  transition: all 0.2s ease;
+  gap: var(--space-3);
+  box-shadow: 0 4px 15px rgba(217, 164, 65, 0.3);
+  transition: transform var(--duration-quick) var(--quest-ease), box-shadow var(--duration-quick) var(--quest-ease);
 }
 
 .continue-journey-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(212, 169, 114, 0.4);
+  box-shadow: 0 6px 20px rgba(217, 164, 65, 0.4);
 }
 
 .hero-stats-overlay {
   position: relative;
   z-index: 2;
   display: flex;
-  gap: 16px;
-  padding: 0 40px 24px;
+  gap: var(--space-4);
+  padding: 0 var(--space-8) var(--space-6);
 }
 
 .hero-stat-card {
-  background: rgba(16, 12, 10, 0.85);
+  background: rgba(10, 20, 16, 0.85);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(212, 169, 114, 0.2);
-  border-radius: 8px;
-  padding: 16px 20px;
+  border: 1px solid var(--quest-line);
+  border-radius: var(--radius-md);
+  padding: var(--space-4) var(--space-5);
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: var(--space-4);
   min-width: 180px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  box-shadow: var(--shadow-1);
 }
 
 .hero-stat-card svg {
   width: 32px;
   height: 32px;
 }
-.text-gold { color: #F0B155; }
-.text-silver { color: #B0BEC5; }
-.text-bronze { color: #CD7F32; }
+.text-gold { color: var(--quest-gold-bright); }
+.text-silver { color: var(--quest-muted); }
+.text-bronze { color: var(--realm-discovery); }
 
 .hero-stat-card div {
   display: flex;
@@ -8384,43 +8396,34 @@ button, a {
 }
 
 .hero-stat-card strong {
-  font-size: 1.3rem;
-  color: #FFF;
+  font-size: var(--text-lg);
+  color: var(--quest-cream);
   line-height: 1.1;
 }
 
 .hero-stat-card small {
-  font-size: 0.8rem;
-  color: #A39686;
+  font-size: var(--text-xs);
+  color: var(--quest-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-top: 4px;
+  margin-top: var(--space-1);
 }
 
-/* ----------------- TODAY'S QUESTS (PARCHMENT) ----------------- */
+/* ----------------- TODAY'S QUESTS ----------------- */
 .todays-quests-section {
-  background: linear-gradient(180deg, #EAD7BA 0%, #D8C3A0 100%);
-  border-radius: 16px;
-  padding: 24px;
-  border: 1px solid #BCA27A;
-  box-shadow: inset 0 0 40px rgba(139, 107, 72, 0.2), 0 10px 20px rgba(0,0,0,0.3);
+  background: var(--quest-panel);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  border: 1px solid var(--quest-line);
+  box-shadow: var(--shadow-2);
   position: relative;
-}
-
-.todays-quests-section::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  opacity: 0.1;
-  background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDEiLz4KPHBhdGggZD0iTTAgMEwyIDJNMCAyTDIgMCIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjAuNSIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIvPgo8L3N2Zz4=');
-  pointer-events: none;
 }
 
 .section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: var(--space-5);
   position: relative;
   z-index: 2;
 }
@@ -8430,34 +8433,34 @@ button, a {
 }
 
 .section-header h2 {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.1rem;
-  color: #4A3525;
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  color: var(--quest-gold-bright);
   letter-spacing: 0.1em;
   margin: 0;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .diamond-bullet {
-  color: #A47B50;
-  font-size: 0.9rem;
+  color: var(--quest-gold-dim);
+  font-size: var(--text-sm);
 }
 
 .reset-time {
-  font-size: 0.85rem;
-  color: #735F4C;
+  font-size: var(--text-sm);
+  color: var(--quest-muted);
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-2);
 }
 
 .quest-scroll-container {
   display: flex;
-  gap: 16px;
+  gap: var(--space-4);
   overflow-x: auto;
-  padding-bottom: 12px;
+  padding-bottom: var(--space-3);
   position: relative;
   z-index: 2;
 }
@@ -8474,180 +8477,159 @@ button, a {
   border-radius: 10px;
 }
 
-.parchment-card {
-  background: #F7EAD0;
-  border: 1px solid #D1B894;
-  border-radius: 8px;
+.quest-realm-card {
+  background: var(--quest-surface);
+  border: 1px solid var(--quest-line);
+  border-radius: var(--radius-md);
   min-width: 220px;
   max-width: 220px;
-  padding: 20px;
+  padding: var(--space-5);
   position: relative;
-  box-shadow: 2px 4px 10px rgba(90, 60, 30, 0.1), inset 0 0 15px rgba(255, 255, 255, 0.5);
+  box-shadow: var(--shadow-1);
   display: flex;
   flex-direction: column;
+  border-top: 2px solid var(--quest-line);
 }
 
-.parchment-card::after {
-  content: "";
-  position: absolute;
-  inset: 2px;
-  border: 1px dashed rgba(188, 162, 122, 0.4);
-  pointer-events: none;
-  border-radius: 6px;
-}
+.quest-realm-card.mind { border-top-color: var(--realm-mind); }
+.quest-realm-card.body { border-top-color: var(--realm-body); }
+.quest-realm-card.discovery { border-top-color: var(--realm-discovery); }
 
-.paperclip {
-  position: absolute;
-  top: -8px;
-  left: 20px;
-  width: 12px;
-  height: 30px;
-  border: 2px solid #8C7B6B;
-  border-radius: 10px;
-  z-index: 5;
-  box-shadow: 1px 1px 2px rgba(0,0,0,0.2);
-  background: transparent;
-}
-.paperclip::before {
-  content: "";
-  position: absolute;
-  top: 4px;
-  left: 2px;
-  width: 4px;
-  height: 20px;
-  border: 2px solid #8C7B6B;
-  border-radius: 10px;
-  border-top: none;
-  border-bottom-left-radius: 0;
-}
-
-.quest-header {
+.quest-realm-header {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
-  color: #2D2013;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+  color: var(--quest-cream);
 }
 
-.quest-header svg {
+.quest-realm-icon {
+  display: inline-flex;
   width: 20px;
   height: 20px;
 }
+.quest-realm-icon svg { width: 20px; height: 20px; }
+.quest-realm-card.mind .quest-realm-icon { color: var(--realm-mind); }
+.quest-realm-card.body .quest-realm-icon { color: var(--realm-body); }
+.quest-realm-card.discovery .quest-realm-icon { color: var(--realm-discovery); }
 
-.quest-header h3 {
-  font-size: 1rem;
+.quest-realm-header h3 {
+  font-size: var(--text-base);
   margin: 0;
   font-weight: 700;
+  color: var(--quest-cream);
 }
 
-.quest-desc {
-  font-size: 0.85rem;
-  color: #6B5744;
-  margin-bottom: 24px;
-  line-height: 1.4;
+.quest-realm-desc {
+  font-size: var(--text-sm);
+  color: var(--quest-muted);
+  margin-bottom: var(--space-6);
+  line-height: var(--leading-snug);
   flex: 1;
 }
 
-.quest-progress-info {
-  margin-bottom: 16px;
+.quest-realm-progress-info {
+  margin-bottom: var(--space-4);
 }
 
-.quest-progress-info small {
-  font-size: 0.8rem;
-  color: #4A3525;
+.quest-realm-progress-info small {
+  font-size: var(--text-xs);
+  color: var(--quest-muted);
   font-weight: 600;
-  margin-bottom: 6px;
+  margin-bottom: var(--space-2);
   display: block;
 }
 
-.parchment-progress {
+.quest-realm-progress {
   height: 4px;
-  background: rgba(139, 107, 72, 0.2);
+  background: rgba(217, 164, 65, 0.14);
   border-radius: 2px;
   overflow: hidden;
 }
 
-.parchment-progress-fill {
+.quest-realm-progress-fill {
   height: 100%;
-  background: #8B6B48;
+  background: var(--quest-gold);
 }
 
-.quest-footer {
+.quest-realm-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-top: 1px solid rgba(139, 107, 72, 0.2);
-  padding-top: 12px;
+  border-top: 1px solid var(--quest-line);
+  padding-top: var(--space-3);
 }
 
 .xp-reward {
   font-weight: 700;
-  color: #2D2013;
-  font-size: 0.95rem;
+  color: var(--quest-gold-bright);
+  font-size: var(--text-sm);
 }
 
 .checkbox {
   width: 20px;
   height: 20px;
-  border: 2px solid #8B6B48;
-  border-radius: 4px;
+  border: 2px solid var(--quest-gold-dim);
+  border-radius: var(--radius-sm);
   display: grid;
   place-items: center;
-  color: #F7EAD0;
+  color: var(--quest-ink);
 }
 .checkbox.checked {
-  background: #8B6B48;
+  background: var(--quest-gold);
+  border-color: var(--quest-gold);
 }
 .checkbox svg { width: 14px; height: 14px; }
 
-.quest-completed-stamp {
+.quest-realm-completed {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  margin-bottom: 16px;
-  color: #8B2C21;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  color: var(--realm-body);
 }
 
-.wax-seal {
+.quest-realm-check {
   width: 40px;
   height: 40px;
-  background: #9B2D22;
+  background: var(--realm-body-soft);
   border-radius: 50%;
   display: grid;
   place-items: center;
-  box-shadow: inset 0 0 10px rgba(0,0,0,0.3), 0 4px 6px rgba(0,0,0,0.2);
-  color: #E2A69A;
-  border: 2px solid #7A1C12;
+  box-shadow: var(--shadow-1);
+  color: var(--realm-body);
+  border: 2px solid var(--realm-body);
 }
 
-.wax-seal svg { width: 20px; height: 20px; }
+.quest-realm-check svg { width: 20px; height: 20px; }
 
-.quest-completed-stamp span {
-  font-family: 'Playfair Display', serif;
+.quest-realm-completed span {
+  font-family: var(--font-display);
   font-style: italic;
-  font-size: 1.1rem;
+  font-size: var(--text-lg);
 }
 
 .add-quest-card {
   justify-content: center;
   align-items: center;
-  background: rgba(247, 234, 208, 0.5);
-  border: 1px dashed #BCA27A;
-  color: #8B6B48;
+  background: transparent;
+  border: 1px dashed var(--quest-line);
+  color: var(--quest-muted);
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background var(--duration-quick) var(--quest-ease), color var(--duration-quick) var(--quest-ease);
 }
 
 .add-quest-card:hover {
-  background: rgba(247, 234, 208, 0.8);
+  background: var(--quest-panel-raised);
+  color: var(--quest-gold-bright);
 }
 
 .add-quest-card svg {
   width: 32px;
   height: 32px;
-  margin-bottom: 8px;
+  margin-bottom: var(--space-2);
 }
 .add-quest-card span { font-weight: 600; }
 
@@ -8659,107 +8641,94 @@ button, a {
 }
 
 .dark-glass-card {
-  background: rgba(20, 16, 18, 0.8);
-  border: 1px solid rgba(212, 169, 114, 0.15);
-  border-radius: 12px;
-  padding: 24px;
+  background: var(--quest-panel);
+  border: 1px solid var(--quest-line);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
   position: relative;
   overflow: hidden;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+  box-shadow: var(--shadow-2);
 }
 
 .dark-glass-card .section-header h2 {
-  color: #D3A76C;
+  color: var(--quest-gold-bright);
 }
 
-.path-card {
+.realm-mastery-card {
   display: flex;
   flex-direction: column;
-  background: linear-gradient(180deg, rgba(20, 16, 18, 0.9) 0%, rgba(30, 24, 26, 0.9) 100%);
+  background: linear-gradient(180deg, var(--quest-panel) 0%, var(--quest-panel-raised) 100%);
 }
 
-.path-rank-info {
+.realm-mastery-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.realm-mastery-row {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 20px;
+  gap: var(--space-4);
 }
-.large-shield {
+
+.realm-mastery-icon {
+  display: grid;
+  place-items: center;
   width: 40px;
   height: 40px;
-  color: #F0B155;
-  filter: drop-shadow(0 0 8px rgba(240, 177, 85, 0.3));
+  flex: 0 0 auto;
+  border-radius: var(--radius-md);
+  background: var(--quest-panel-raised);
+  border: 1px solid var(--quest-line);
 }
-.path-rank-info h3 {
-  font-size: 1.4rem;
-  margin: 0;
-  color: #FFF;
-}
-.path-rank-info small {
-  color: #A39686;
-  font-size: 0.85rem;
+.realm-mastery-icon svg { width: 20px; height: 20px; }
+.realm-mastery-row.mind .realm-mastery-icon { color: var(--realm-mind); border-color: var(--realm-mind); background: var(--realm-mind-soft); }
+.realm-mastery-row.body .realm-mastery-icon { color: var(--realm-body); border-color: var(--realm-body); background: var(--realm-body-soft); }
+.realm-mastery-row.discovery .realm-mastery-icon { color: var(--realm-discovery); border-color: var(--realm-discovery); background: var(--realm-discovery-soft); }
+
+.realm-mastery-copy {
+  flex: 1;
+  min-width: 0;
 }
 
-.path-map-container {
-  position: relative;
-  min-height: 200px;
-  background: url('/quest-scholar-hero.png') center/cover;
-  border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.1);
-  padding: 16px;
+.realm-mastery-label {
   display: flex;
-  align-items: center;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: var(--space-2);
 }
-.path-map-container::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.6);
-  border-radius: 8px;
+.realm-mastery-label strong {
+  font-size: var(--text-base);
+  color: var(--quest-cream);
+}
+.realm-mastery-label span {
+  font-size: var(--text-xs);
+  color: var(--quest-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-.path-nodes {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+.realm-mastery-bar {
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: rgba(217, 164, 65, 0.12);
+  overflow: hidden;
 }
-.path-node {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: rgba(255,255,255,0.6);
-  font-size: 0.9rem;
+.realm-mastery-bar-fill {
+  height: 100%;
+  border-radius: var(--radius-pill);
 }
-.path-node.active {
-  color: #F0B155;
-  font-weight: 700;
-}
-.path-node .dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  border: 2px solid currentColor;
-  background: transparent;
-}
-.path-node.active .dot {
-  background: #F0B155;
-  box-shadow: 0 0 10px #F0B155;
-}
-.path-node.locked {
-  color: rgba(255,255,255,0.3);
-}
-.path-node.locked svg {
-  width: 12px; height: 12px;
-}
+.realm-mastery-row.mind .realm-mastery-bar-fill { background: var(--realm-mind); }
+.realm-mastery-row.body .realm-mastery-bar-fill { background: var(--realm-body); }
+.realm-mastery-row.discovery .realm-mastery-bar-fill { background: var(--realm-discovery); }
 
 .bonus-chest-card {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(135deg, #221430 0%, #150A1C 100%);
-  border-color: rgba(147, 85, 204, 0.3);
+  background: linear-gradient(135deg, var(--quest-panel-raised) 0%, var(--quest-ink-2) 100%);
+  border-color: var(--quest-line);
 }
 
 .chest-info {
@@ -8767,15 +8736,15 @@ button, a {
 }
 
 .chest-info p {
-  color: #B59ED6;
-  font-size: 0.9rem;
-  margin-bottom: 12px;
+  color: var(--quest-muted);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-3);
 }
 
 .xp-bonus {
-  font-size: 1.5rem;
-  color: #E2C9F8;
-  text-shadow: 0 0 10px rgba(226, 201, 248, 0.5);
+  font-size: var(--text-xl);
+  color: var(--quest-gold-bright);
+  text-shadow: 0 0 10px rgba(217, 164, 65, 0.35);
 }
 
 .chest-image-container {
@@ -8786,7 +8755,7 @@ button, a {
 }
 
 .encounter-card {
-  background: linear-gradient(135deg, #1A1614 0%, #0A0807 100%);
+  background: linear-gradient(135deg, var(--quest-panel-raised) 0%, var(--quest-ink) 100%);
 }
 .encounter-content {
   display: flex;
@@ -8796,40 +8765,40 @@ button, a {
 }
 .encounter-info { flex: 1; }
 .encounter-info h3 {
-  font-size: 1.4rem;
-  color: #FFF;
-  margin: 0 0 8px 0;
+  font-size: var(--text-xl);
+  color: var(--quest-cream);
+  margin: 0 0 var(--space-2) 0;
 }
 .encounter-info p {
-  color: #A39686;
-  font-size: 0.9rem;
-  margin-bottom: 16px;
-  line-height: 1.4;
+  color: var(--quest-muted);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-4);
+  line-height: var(--leading-snug);
 }
 
 .encounter-btn {
-  background: rgba(212, 169, 114, 0.15);
-  border: 1px solid rgba(212, 169, 114, 0.4);
-  color: #D3A76C;
-  padding: 8px 20px;
-  border-radius: 20px;
+  background: var(--realm-discovery-soft);
+  border: 1px solid var(--quest-gold-dim);
+  color: var(--quest-gold-bright);
+  padding: var(--space-2) var(--space-5);
+  border-radius: var(--radius-pill);
   font-weight: 600;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background var(--duration-quick) var(--quest-ease);
 }
-.encounter-btn:hover { background: rgba(212, 169, 114, 0.25); }
+.encounter-btn:hover { background: rgba(217, 164, 65, 0.25); }
 
 .encounter-photo-frame {
   position: relative;
   width: 120px;
   height: 90px;
   transform: rotate(5deg);
-  background: #EAE0C8;
-  padding: 6px;
-  box-shadow: 2px 4px 10px rgba(0,0,0,0.4);
+  background: var(--quest-cream);
+  padding: var(--space-2);
+  box-shadow: var(--shadow-1);
 }
 .vintage-photo {
   width: 100%;
@@ -8843,34 +8812,34 @@ button, a {
   right: 10px;
   width: 8px;
   height: 24px;
-  border: 2px solid #D3A76C;
-  border-radius: 8px;
+  border: 2px solid var(--quest-gold-bright);
+  border-radius: var(--radius-md);
   background: transparent;
   transform: rotate(-15deg);
 }
 
 /* ----------------- FOOTER ----------------- */
 .dashboard-footer {
-  background: #14100E;
-  border: 1px solid rgba(212, 169, 114, 0.15);
-  border-radius: 12px;
-  padding: 16px 32px;
+  background: var(--quest-panel);
+  border: 1px solid var(--quest-line);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-7);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+  box-shadow: var(--shadow-2);
 }
 
 .footer-quote {
   display: flex;
   align-items: center;
-  gap: 12px;
-  color: #A39686;
-  font-size: 0.95rem;
+  gap: var(--space-3);
+  color: var(--quest-muted);
+  font-size: var(--text-base);
   font-style: italic;
 }
 .footer-quote svg {
-  color: #D3A76C;
+  color: var(--quest-gold-bright);
   width: 20px;
   height: 20px;
 }
@@ -8880,20 +8849,20 @@ button, a {
 
 .footer-stats {
   display: flex;
-  gap: 32px;
+  gap: var(--space-7);
 }
 
 .footer-stat {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
 }
 .footer-stat svg {
-  color: #D3A76C;
+  color: var(--quest-gold-bright);
   width: 24px;
   height: 24px;
-  background: rgba(212, 169, 114, 0.1);
-  padding: 6px;
+  background: var(--realm-discovery-soft);
+  padding: var(--space-2);
   border-radius: 50%;
   box-sizing: content-box;
 }
@@ -8902,14 +8871,14 @@ button, a {
   flex-direction: column;
 }
 .footer-stat small {
-  color: #8C7B6B;
-  font-size: 0.75rem;
+  color: var(--quest-muted);
+  font-size: var(--text-xs);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 .footer-stat strong {
-  color: #FFF;
-  font-size: 1.05rem;
+  color: var(--quest-cream);
+  font-size: var(--text-lg);
 }
 
 @media (max-width: 1200px) {
