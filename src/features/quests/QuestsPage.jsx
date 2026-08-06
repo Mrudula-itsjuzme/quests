@@ -34,7 +34,6 @@ export function QuestsPage() {
   const quests = useMemo(() => activeQuery.data || [], [activeQuery.data]);
 
   const visible = quests.filter((quest) => quest.cadence === tab);
-  const featured = visible[0] || quests[0] || null;
   const selected = quests.find((quest) => quest.id === selectedId) || null;
 
   const isQuestsLoading = activeQuery.isLoading || meQuery.isLoading;
@@ -69,7 +68,6 @@ export function QuestsPage() {
           me={meQuery.data}
           quests={quests}
           visible={visible}
-          featured={featured}
           selected={selected}
           setSelectedId={setSelectedId}
           tab={tab}
@@ -92,7 +90,6 @@ function QuestsContent({
   me,
   quests,
   visible,
-  featured,
   selected,
   setSelectedId,
   tab,
@@ -200,16 +197,14 @@ function QuestsContent({
         </motion.section>
       )}
 
-      <motion.section className="quest-board-grid" variants={staggerItem}>
-        <div className="quest-deck-column">
-          <div className="quest-section-heading">
-            <div>
-              <h2>Quest Deck</h2>
-              <p>{cadences.find((item) => item.id === tab)?.label || 'Daily'} path</p>
-            </div>
-            <span>{safeDeckIndex + 1}/{Math.max(deckQuests.length, 1)}</span>
-          </div>
-          <section className="swipe-deck-container">
+      <motion.div variants={staggerItem} style={{ marginBottom: 16 }}>
+        <h2 style={{ fontSize: '1.4rem', color: 'var(--quest-cream)' }}>Quest Deck</h2>
+        <p style={{ color: 'var(--quest-gold-dim)', margin: 0, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600, marginTop: 4 }}>
+          {cadences.find((item) => item.id === tab)?.label || 'Daily'} path <span style={{ opacity: 0.5 }}>·</span> {safeDeckIndex + 1}/{Math.max(deckQuests.length, 1)}
+        </p>
+      </motion.div>
+
+      <motion.section className="swipe-deck-container" variants={staggerItem}>
         {deckQuests.length ? (
           <AnimatePresence mode="popLayout">
             {deckQuests.map((quest, index) => {
@@ -280,36 +275,6 @@ function QuestsContent({
             />
           </div>
         )}
-          </section>
-        </div>
-
-        <aside className="quest-side-panel">
-          {featured && (
-            <section className="quest-feature-card ornate-panel">
-              <span><Icon name="star" /> Featured Mission</span>
-              <h2>{featured.title}</h2>
-              <p>{featured.description}</p>
-              <button type="button" onClick={() => { playTap(); setSelectedId(featured.id); }}>Inspect quest</button>
-            </section>
-          )}
-          <section className="quest-path-list ornate-panel">
-            <div className="quest-section-heading compact">
-              <div>
-                <h2>Active Paths</h2>
-                <p>All current work</p>
-              </div>
-            </div>
-            {quests.map((quest) => (
-              <button key={quest.id} type="button" onClick={() => { playTap(); setSelectedId(quest.id); }}>
-                <span className="round-emblem"><Icon name={categoryIcon(quest.category)} /></span>
-                <span>
-                  <strong>{quest.title}</strong>
-                  <small>{quest.cadence} · {quest.xpReward} XP</small>
-                </span>
-              </button>
-            ))}
-          </section>
-        </aside>
       </motion.section>
 
       <AnimatePresence>

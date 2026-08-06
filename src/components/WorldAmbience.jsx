@@ -1,12 +1,6 @@
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
-
-function timeOfDayPhase(hour) {
-  if (hour >= 5 && hour < 8) return 'dawn';
-  if (hour >= 8 && hour < 17) return 'day';
-  if (hour >= 17 && hour < 20) return 'dusk';
-  return 'night';
-}
+import { timeOfDayPhase } from '../lib/worldTime';
 
 const PHASE_GLOW = {
   dawn: 'radial-gradient(circle at 50% -10%, rgba(212, 163, 106, 0.16), transparent 60%)',

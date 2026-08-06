@@ -8,6 +8,7 @@ export class MemoryQuestRepository {
     this.submissions = new Map();
     this.ledger = [];
     this.collectibles = [];
+    this.capturedCards = [];
     this.idempotency = new Map();
     this.imageHashes = new Set();
     this.bonusPeriods = new Set();
@@ -191,6 +192,18 @@ export class MemoryQuestRepository {
     return { assignment: clone(assignment), user: await this.getUser(userId), xpCredited, bonusXp };
   }
   async getCollectibles(userId) { return this.collectibles.filter((item) => item.userId === userId).map(clone); }
+  async createCapturedCard(card) {
+    const value = { id: randomUUID(), capturedAt: new Date().toISOString(), ...card };
+    this.capturedCards.unshift(value);
+    return clone(value);
+  }
+  async getCapturedCards(userId) { return this.capturedCards.filter((item) => item.userId === userId).map(clone); }
+  async updateCapturedCard(userId, cardId, patch) {
+    const item = this.capturedCards.find((entry) => entry.userId === userId && entry.id === cardId);
+    if (!item) return null;
+    Object.assign(item, patch);
+    return clone(item);
+  }
   async createFeedEntry(entry) {
     if (this.feedEntries.some((item) => item.submissionId === entry.submissionId)) return clone(this.feedEntries.find((item) => item.submissionId === entry.submissionId));
     const value = { id: randomUUID(), createdAt: new Date().toISOString(), ...entry };

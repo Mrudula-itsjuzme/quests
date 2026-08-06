@@ -1,0 +1,10 @@
+{
+  "name": "Wild Realm",
+  "short_name": "Wild Realm",
+  "description": "Explore the real world, capture what you find, and discover its rarity.",
+  "start_url": "/app",
+  "display": "standalone",
+  "background_color": "#0a1410",
+  "theme_color": "#0a1410",
+  "orientation": "portrait-primary"
+}

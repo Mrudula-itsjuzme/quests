@@ -1,10 +1,10 @@
 /* ==========================================================================
    Design tokens
    Canonical palette: `--quest-*`. This is the single source of truth for
-   new work — a dark, living-world fantasy-journal system.
+   new work — a dark, living-world nature-exploration system (Wild Realm).
    `--void`/`--parchment`/`--gold`/etc. below are the legacy parchment/leather
-   palette from an earlier pass. They stay defined (existing selectors like
-   `.parchment-card` still read them) but are not to be used in new CSS —
+   palette from the pre-Wild-Realm "Habbit" pass. They stay defined (a few
+   existing selectors still read them) but are not to be used in new CSS —
    author new rules against `--quest-*` and the scales below instead.
    Scales: type (--text-*), spacing (--space-*), elevation (--shadow-*),
    motion duration (--duration-*). Curves live alongside springConfig in
@@ -14,22 +14,29 @@
   color-scheme: dark;
   font-family: 'Manrope', ui-sans-serif, system-ui, -apple-system, sans-serif;
 
-  /* ---- Canonical palette: quest-* (living world, dark fantasy-journal) ---- */
-  --quest-ink: #0e0d0b;
-  --quest-ink-2: #161412;
-  --quest-panel: rgba(22, 20, 18, 0.88);
-  --quest-panel-raised: rgba(28, 25, 22, 0.92);
-  --quest-surface: rgba(28, 25, 22, 0.92);
-  --quest-gold: #d4b484;
-  --quest-gold-bright: #e8d0aa;
-  --quest-gold-dim: #8c7352;
-  --quest-cream: #f4efe6;
-  --quest-fg: #f4efe6;
-  --quest-muted: #a69c8d;
-  --quest-line: rgba(212, 180, 132, 0.16);
+  /* ---- Canonical palette: quest-* (Wild Realm — deep forest / amber) ---- */
+  --quest-ink: #0a1410;
+  --quest-ink-2: #101d17;
+  --quest-panel: rgba(14, 24, 19, 0.88);
+  --quest-panel-raised: rgba(19, 31, 25, 0.92);
+  --quest-surface: rgba(19, 31, 25, 0.92);
+  --quest-gold: #d9a441;
+  --quest-gold-bright: #f0c46b;
+  --quest-gold-dim: #8f6b2c;
+  --quest-cream: #eef2ea;
+  --quest-fg: #eef2ea;
+  --quest-muted: #93a396;
+  --quest-line: rgba(217, 164, 65, 0.16);
   --quest-danger: #c25b46;
   --quest-danger-soft: rgba(194, 91, 70, 0.14);
   --quest-ease: cubic-bezier(.16, 1, .3, 1);
+
+  /* ---- Rarity accents (grade D–S, blueprint §16.2) ---- */
+  --rarity-common: #9aa79c;
+  --rarity-uncommon: #6fbf7a;
+  --rarity-rare: #4f9fd6;
+  --rarity-epic: #b47fe0;
+  --rarity-legendary: #f0c46b;
 
   /* ---- Type scale (paired with --font-display / --font-body) ---- */
   --text-xs: clamp(0.72rem, 0.7rem + 0.1vw, 0.78rem);
@@ -112,7 +119,7 @@
   --shadow-lift: 0 2px 10px rgba(0, 0, 0, 0.3);
   --shadow-inset-page: inset 0 1px 0 rgba(255, 255, 255, 0.5), inset 0 -1px 0 rgba(0, 0, 0, 0.06);
 
-  --font-display: 'Cormorant Garamond', 'Georgia', serif;
+  --font-display: 'Manrope', ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-body: 'Manrope', ui-sans-serif, system-ui, sans-serif;
 
   background: var(--quest-ink);
@@ -615,7 +622,6 @@ body {
   background: transparent;
 }
 
-.workspace { display: block; }
 .topbar {
   position: relative;
   top: auto;
@@ -625,7 +631,7 @@ body {
   background: linear-gradient(180deg, rgba(18,31,36,.98), rgba(7,16,21,.98));
 }
 .top-nav a,
-.bottom-nav a {
+.mobile-bottom-dock a {
   color: var(--quest-muted);
   text-decoration: none;
 }
@@ -639,12 +645,12 @@ body {
 }
 .top-nav a > svg,
 .top-nav a > span,
-.bottom-nav a > svg,
-.bottom-nav a > span {
+.mobile-bottom-dock a > svg,
+.mobile-bottom-dock a > span {
   position: relative;
   z-index: 1;
 }
-.bottom-nav a {
+.mobile-bottom-dock a {
   position: relative;
 }
 .active-indicator {
@@ -670,7 +676,7 @@ body {
   background: #0c161a;
   cursor: pointer;
 }
-.bottom-nav { display: none; }
+.mobile-bottom-dock { display: none; }
 
 .fantasy-page {
   color: var(--quest-cream);
@@ -1145,7 +1151,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   .available-card { min-height: 190px; padding: 14px; }
   .profile-detail-grid { grid-template-columns: 1fr 1fr; }
   .statistics-panel { grid-column: 1 / -1; }
-  .bottom-nav {
+  .mobile-bottom-dock {
     position: fixed;
     z-index: 80;
     right: 12px;
@@ -1162,9 +1168,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     box-shadow: 0 12px 38px #000;
     backdrop-filter: blur(18px);
   }
-  .bottom-nav a { display: grid; gap: 4px; place-items: center; border-radius: 18px; font-family: var(--font-display); font-size: .78rem; }
-  .bottom-nav a svg { font-size: 1.5rem; }
-  .bottom-nav a.active { color: var(--quest-gold-bright); border: 1px solid var(--quest-gold-dim); background: radial-gradient(circle at 50% 100%, rgba(201,154,75,.25), transparent 75%); box-shadow: inset 0 -2px var(--quest-gold); }
+  .mobile-bottom-dock a { display: grid; gap: 4px; place-items: center; border-radius: 18px; font-family: var(--font-display); font-size: .78rem; }
+  .mobile-bottom-dock a svg { font-size: 1.5rem; }
+  .mobile-bottom-dock a.active { color: var(--quest-gold-bright); border: 1px solid var(--quest-gold-dim); background: radial-gradient(circle at 50% 100%, rgba(201,154,75,.25), transparent 75%); box-shadow: inset 0 -2px var(--quest-gold); }
 }
 
 @media (max-width: 780px) {
@@ -1242,8 +1248,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   .quest-ring { width: 102px; }
   .focus-copy h2 { font-size: 1.7rem; }
   .character-dialogue { width: 72%; }
-  .bottom-nav { right: 5px; left: 5px; }
-  .bottom-nav a { font-size: .67rem; }
+  .mobile-bottom-dock { right: 5px; left: 5px; }
+  .mobile-bottom-dock a { font-size: .67rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -2426,11 +2432,11 @@ a { color: var(--gold); }
 }
 
 /* Mobile bottom bookmark nav */
-.bottom-nav {
+.mobile-bottom-dock {
   display: none;
 }
 @media (max-width: 900px) {
-  .bottom-nav {
+  .mobile-bottom-dock {
     display: flex;
     position: fixed;
     left: 0; right: 0; bottom: 0;
@@ -2441,7 +2447,7 @@ a { color: var(--gold); }
     border-top: 1px solid var(--border-hairline);
     box-shadow: 0 -8px 24px rgba(0,0,0,0.4);
   }
-  .bottom-nav a {
+  .mobile-bottom-dock a {
     display: grid;
     justify-items: center;
     gap: 3px;
@@ -2456,8 +2462,8 @@ a { color: var(--gold); }
     text-transform: uppercase;
     letter-spacing: 0.03em;
   }
-  .bottom-nav a svg { width: 20px; height: 20px; }
-  .bottom-nav a.active {
+  .mobile-bottom-dock a svg { width: 20px; height: 20px; }
+  .mobile-bottom-dock a.active {
     color: var(--gold);
     background: rgba(201, 151, 61, 0.12);
   }
@@ -2739,7 +2745,7 @@ body {
 .app-shell:has(.quest-reference) > .dev-auth-banner {
   display: none;
 }
-.workspace:has(.quest-reference) > .topbar {
+.app-shell:has(.quest-reference) > .topbar {
   display: none;
 }
 .app-shell:has(.quest-reference) {
@@ -2755,7 +2761,6 @@ body {
   padding: 18px 24px 120px;
   background: transparent;
 }
-.workspace { display: block; }
 .topbar {
   position: relative;
   top: auto;
@@ -2778,13 +2783,13 @@ body {
 }
 
 @media (min-width: 1101px) {
-  .bottom-nav { display: none; }
+  .mobile-bottom-dock { display: none; }
 }
 
 @media (max-width: 1100px) {
   .topbar { display: none; }
   .app-shell { padding: 16px 16px 110px; }
-  .bottom-nav {
+  .mobile-bottom-dock {
     position: fixed;
     z-index: 80;
     right: 12px;
@@ -2801,7 +2806,7 @@ body {
     box-shadow: 0 12px 38px #000;
     backdrop-filter: blur(18px);
   }
-  .bottom-nav a {
+  .mobile-bottom-dock a {
     display: grid;
     min-width: 0;
     min-height: 58px;
@@ -2815,7 +2820,7 @@ body {
     font-weight: 600;
     text-transform: none;
   }
-  .bottom-nav a.active {
+  .mobile-bottom-dock a.active {
     color: var(--quest-gold-bright);
     border: 1px solid var(--quest-gold-dim);
     background: radial-gradient(circle at 50% 100%, rgba(201,154,75,.25), transparent 75%);
@@ -3210,10 +3215,10 @@ body {
 
 /* Preserve the supplied 944px dashboard composition on narrow render canvases. */
 .app-shell:has(.dashboard-reference) > .dev-auth-banner { display: none; }
-.app-shell:has(.dashboard-reference) .bottom-nav {
+.app-shell:has(.dashboard-reference) .mobile-bottom-dock {
   grid-template-columns: repeat(5, minmax(0, 1fr));
 }
-.app-shell:has(.dashboard-reference) .bottom-nav a[href="/app/gallery"] { display: none; }
+.app-shell:has(.dashboard-reference) .mobile-bottom-dock a[href="/app/gallery"] { display: none; }
 
 @media (max-width: 780px) {
   .app-shell:has(.dashboard-reference) {
@@ -3293,18 +3298,18 @@ body {
   .dashboard-reference .dashboard-overview article { padding: 14px; }
   .dashboard-reference .dashboard-overview .round-emblem { width: 54px; height: 54px; }
 
-  .app-shell:has(.dashboard-reference) .bottom-nav {
+  .app-shell:has(.dashboard-reference) .mobile-bottom-dock {
     right: 0;
     left: 0;
     bottom: 0;
     min-height: 100px;
     border-radius: 30px 30px 0 0;
   }
-  .app-shell:has(.dashboard-reference) .bottom-nav a {
+  .app-shell:has(.dashboard-reference) .mobile-bottom-dock a {
     min-height: 84px;
     font-size: 1rem;
   }
-  .app-shell:has(.dashboard-reference) .bottom-nav a svg { width: 30px; height: 30px; }
+  .app-shell:has(.dashboard-reference) .mobile-bottom-dock a svg { width: 30px; height: 30px; }
 }
 
 /* Rewards reference composition */
@@ -3515,10 +3520,10 @@ body {
 .current-rank-panel > div > strong { display: block; margin: 5px 0; color: var(--quest-cream); font-family: var(--font-display); font-size: 2.4rem; }
 
 .app-shell:has(.rewards-reference) > .dev-auth-banner { display: none; }
-.app-shell:has(.rewards-reference) .bottom-nav {
+.app-shell:has(.rewards-reference) .mobile-bottom-dock {
   grid-template-columns: repeat(5, minmax(0, 1fr));
 }
-.app-shell:has(.rewards-reference) .bottom-nav a[href="/app/gallery"] { display: none; }
+.app-shell:has(.rewards-reference) .mobile-bottom-dock a[href="/app/gallery"] { display: none; }
 
 @media (max-width: 780px) {
   .app-shell:has(.rewards-reference) {
@@ -3568,15 +3573,15 @@ body {
   .rewards-reference .current-rank-panel > div > span,
   .rewards-reference .current-rank-panel p { font-size: 1.1rem; }
   .rewards-reference .claim-all-button { font-size: 1.5rem; }
-  .app-shell:has(.rewards-reference) .bottom-nav {
+  .app-shell:has(.rewards-reference) .mobile-bottom-dock {
     right: 0;
     left: 0;
     bottom: 0;
     min-height: 100px;
     border-radius: 30px 30px 0 0;
   }
-  .app-shell:has(.rewards-reference) .bottom-nav a { min-height: 84px; font-size: 1.25rem; }
-  .app-shell:has(.rewards-reference) .bottom-nav a svg { width: 30px; height: 30px; }
+  .app-shell:has(.rewards-reference) .mobile-bottom-dock a { min-height: 84px; font-size: 1.25rem; }
+  .app-shell:has(.rewards-reference) .mobile-bottom-dock a svg { width: 30px; height: 30px; }
 }
 
 /* ==========================================================================
@@ -3932,10 +3937,10 @@ body {
   .rewards-reference .current-rank-panel > div > span,
   .rewards-reference .current-rank-panel p { font-size: .92rem; }
 
-  .app-shell:has(.dashboard-reference) .bottom-nav,
-  .app-shell:has(.rewards-reference) .bottom-nav,
-  .app-shell:has(.quest-reference) .bottom-nav,
-  .app-shell:has(.profile-reference) .bottom-nav {
+  .app-shell:has(.dashboard-reference) .mobile-bottom-dock,
+  .app-shell:has(.rewards-reference) .mobile-bottom-dock,
+  .app-shell:has(.quest-reference) .mobile-bottom-dock,
+  .app-shell:has(.profile-reference) .mobile-bottom-dock {
     right: 8px;
     bottom: max(6px, env(safe-area-inset-bottom));
     left: 8px;
@@ -3944,25 +3949,25 @@ body {
     border-radius: 22px;
   }
 
-  .app-shell:has(.dashboard-reference) .bottom-nav a[href="/app/gallery"],
-  .app-shell:has(.rewards-reference) .bottom-nav a[href="/app/gallery"],
-  .app-shell:has(.quest-reference) .bottom-nav a[href="/app/gallery"],
-  .app-shell:has(.profile-reference) .bottom-nav a[href="/app/gallery"] {
+  .app-shell:has(.dashboard-reference) .mobile-bottom-dock a[href="/app/gallery"],
+  .app-shell:has(.rewards-reference) .mobile-bottom-dock a[href="/app/gallery"],
+  .app-shell:has(.quest-reference) .mobile-bottom-dock a[href="/app/gallery"],
+  .app-shell:has(.profile-reference) .mobile-bottom-dock a[href="/app/gallery"] {
     display: none;
   }
 
-  .app-shell:has(.dashboard-reference) .bottom-nav a,
-  .app-shell:has(.rewards-reference) .bottom-nav a,
-  .app-shell:has(.quest-reference) .bottom-nav a,
-  .app-shell:has(.profile-reference) .bottom-nav a {
+  .app-shell:has(.dashboard-reference) .mobile-bottom-dock a,
+  .app-shell:has(.rewards-reference) .mobile-bottom-dock a,
+  .app-shell:has(.quest-reference) .mobile-bottom-dock a,
+  .app-shell:has(.profile-reference) .mobile-bottom-dock a {
     min-height: 66px;
     font-size: .78rem;
   }
 
-  .app-shell:has(.dashboard-reference) .bottom-nav a svg,
-  .app-shell:has(.rewards-reference) .bottom-nav a svg,
-  .app-shell:has(.quest-reference) .bottom-nav a svg,
-  .app-shell:has(.profile-reference) .bottom-nav a svg {
+  .app-shell:has(.dashboard-reference) .mobile-bottom-dock a svg,
+  .app-shell:has(.rewards-reference) .mobile-bottom-dock a svg,
+  .app-shell:has(.quest-reference) .mobile-bottom-dock a svg,
+  .app-shell:has(.profile-reference) .mobile-bottom-dock a svg {
     width: 24px;
     height: 24px;
   }
@@ -4737,30 +4742,30 @@ body {
     padding: 12px 22px 24px;
   }
 
-  .workspace:has(.dashboard-reference) {
+  .app-shell:has(.dashboard-reference) {
     width: 100%;
     max-width: 1680px;
     margin: 0 auto;
   }
 
-  .workspace:has(.dashboard-reference) > .topbar {
+  .app-shell:has(.dashboard-reference) > .topbar {
     min-height: 84px;
     margin-bottom: 16px;
     border-radius: 0;
   }
 
-  .workspace:has(.dashboard-reference) .brand-lockup strong {
+  .app-shell:has(.dashboard-reference) .brand-lockup strong {
     color: var(--quest-gold-bright);
     font-family: var(--font-display);
     font-size: 1.45rem;
     letter-spacing: .12em;
   }
 
-  .workspace:has(.dashboard-reference) .top-nav {
+  .app-shell:has(.dashboard-reference) .top-nav {
     align-self: stretch;
   }
 
-  .workspace:has(.dashboard-reference) .top-nav a {
+  .app-shell:has(.dashboard-reference) .top-nav a {
     min-width: 100px;
     justify-content: center;
     border-radius: 0;
@@ -5108,7 +5113,7 @@ body {
 
 /* Shared wide-screen treatment for every app destination. */
 @media (min-width: 1101px) {
-  .workspace:has(.quest-reference) > .topbar {
+  .app-shell:has(.quest-reference) > .topbar {
     display: flex;
   }
 
@@ -5122,21 +5127,21 @@ body {
     padding: 12px 22px 30px;
   }
 
-  .workspace:has(.quest-reference),
-  .workspace:has(.rewards-reference),
-  .workspace:has(.profile-reference),
-  .workspace:has(.guild-page),
-  .workspace:has(.gallery-shell) {
+  .app-shell:has(.quest-reference),
+  .app-shell:has(.rewards-reference),
+  .app-shell:has(.profile-reference),
+  .app-shell:has(.guild-page),
+  .app-shell:has(.gallery-shell) {
     width: 100%;
     max-width: 1680px;
     margin: 0 auto;
   }
 
-  .workspace:has(.quest-reference) > .topbar,
-  .workspace:has(.rewards-reference) > .topbar,
-  .workspace:has(.profile-reference) > .topbar,
-  .workspace:has(.guild-page) > .topbar,
-  .workspace:has(.gallery-shell) > .topbar {
+  .app-shell:has(.quest-reference) > .topbar,
+  .app-shell:has(.rewards-reference) > .topbar,
+  .app-shell:has(.profile-reference) > .topbar,
+  .app-shell:has(.guild-page) > .topbar,
+  .app-shell:has(.gallery-shell) > .topbar {
     min-height: 84px;
     margin-bottom: 16px;
     border-radius: 0;
@@ -5344,22 +5349,22 @@ body {
 
 /* Shared navigation: the selected destination settles into its socket. */
 .top-nav a,
-.bottom-nav a {
+.mobile-bottom-dock a {
   transition: color .22s ease, background-color .22s ease, border-color .22s ease, box-shadow .3s ease, transform .22s ease;
 }
 .top-nav a svg,
-.bottom-nav a svg {
+.mobile-bottom-dock a svg {
   transition: transform .32s cubic-bezier(.2, .9, .25, 1), filter .28s ease;
 }
 .top-nav a:hover svg,
-.bottom-nav a:hover svg {
+.mobile-bottom-dock a:hover svg {
   transform: translateY(-3px) scale(1.08);
   filter: drop-shadow(0 4px 7px rgba(238, 183, 79, .42));
 }
 .top-nav a:active,
-.bottom-nav a:active { transform: translateY(2px) scale(.98); }
+.mobile-bottom-dock a:active { transform: translateY(2px) scale(.98); }
 .top-nav a.active svg,
-.bottom-nav a.active svg { animation: nav-emblem-settle .52s cubic-bezier(.18, .9, .24, 1); }
+.mobile-bottom-dock a.active svg { animation: nav-emblem-settle .52s cubic-bezier(.18, .9, .24, 1); }
 
 /* Dashboard: cards rise out of the tactical table and fan toward the cursor. */
 .desktop-progression-hero {
@@ -6179,11 +6184,11 @@ body {
 }
 .route-stage > * { animation: route-content-resolve .65s cubic-bezier(.2, .78, .2, 1) both; }
 .top-nav a,
-.bottom-nav a { transition: color .2s ease, background-color .2s ease, transform .24s cubic-bezier(.2, .8, .2, 1), box-shadow .24s ease; }
+.mobile-bottom-dock a { transition: color .2s ease, background-color .2s ease, transform .24s cubic-bezier(.2, .8, .2, 1), box-shadow .24s ease; }
 .top-nav a:active,
-.bottom-nav a:active { transform: scale(.96); }
+.mobile-bottom-dock a:active { transform: scale(.96); }
 .top-nav a.active svg,
-.bottom-nav a.active svg { animation: nav-emblem-arrive .5s cubic-bezier(.2, .9, .25, 1.25) both; }
+.mobile-bottom-dock a.active svg { animation: nav-emblem-arrive .5s cubic-bezier(.2, .9, .25, 1.25) both; }
 
 @keyframes route-stage-enter {
   from { opacity: 0; transform: translateY(12px); }
@@ -7426,7 +7431,7 @@ html, body {
 }
 
 /* Hide desktop top nav and sidebar completely on mobile */
-.topbar, .workspace, .reference-header {
+.topbar, .reference-header {
   display: none;
 }
 
@@ -7856,6 +7861,401 @@ button, a {
   margin: 0 auto;
   color: var(--quest-cream, #E8E3D9);
   font-family: var(--font-ui, 'Inter', sans-serif);
+}
+
+/* ==========================================================================
+   MOBILE HOME SCREEN (RPG status bar + banner + quest list + nav grid)
+   ========================================================================== */
+
+.mobile-home-screen {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .dark-fantasy-dashboard {
+    padding: 0 0 24px;
+  }
+
+  .mobile-home-screen {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: calc(env(safe-area-inset-top) + 12px) 14px 0;
+  }
+
+  .dashboard-grid-desktop,
+  .dashboard-footer-desktop {
+    display: none;
+  }
+}
+
+.mobile-home-topbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mobile-home-identity {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.mobile-home-avatar {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 30% 30%, #3a2c22, #14100c);
+  border: 2px solid #D4A972;
+  box-shadow: 0 0 0 3px rgba(212, 169, 114, 0.18);
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem;
+  color: #F0DFC0;
+}
+
+.mobile-home-avatar b {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 4px;
+  border-radius: 50%;
+  background: #1A1210;
+  border: 1px solid #D4A972;
+  color: #F0B155;
+  font-size: 0.7rem;
+  display: grid;
+  place-items: center;
+}
+
+.mobile-home-identity > div {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.mobile-home-identity strong {
+  color: #FFF;
+  font-size: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mobile-home-identity small {
+  color: #D4A972;
+  font-size: 0.75rem;
+}
+
+.mobile-home-stats {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.mobile-home-pill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(20, 16, 12, 0.7);
+  border: 1px solid rgba(212, 169, 114, 0.25);
+  border-radius: 999px;
+  padding: 5px 9px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #F0DFC0;
+  white-space: nowrap;
+}
+
+.mobile-home-pill svg {
+  width: 14px;
+  height: 14px;
+  color: #D4A972;
+}
+
+.mobile-home-bell {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid rgba(212, 169, 114, 0.25);
+  background: rgba(20, 16, 12, 0.7);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.mobile-home-bell svg {
+  width: 18px;
+  height: 18px;
+  color: #F0DFC0;
+}
+
+.mobile-home-bell-dot {
+  position: absolute;
+  top: 8px;
+  right: 9px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #E05C5C;
+  border: 1px solid #1A1210;
+}
+
+.mobile-home-banner {
+  position: relative;
+  min-height: 300px;
+  border-radius: 16px;
+  border: 1px solid rgba(234, 181, 82, 0.3);
+  background-image: url('/dashboard-castle-panorama.png'), linear-gradient(135deg, #1A1210, #0D0907);
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+}
+
+.mobile-home-banner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.35) 55%, transparent 100%);
+}
+
+.mobile-home-banner-copy {
+  position: relative;
+  z-index: 1;
+  padding: 20px;
+}
+
+.mobile-home-greeting {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 1.15rem;
+  color: #D3A76C;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.mobile-home-banner-copy h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.4rem;
+  font-weight: 400;
+  margin: 0 0 8px;
+  color: #FFF;
+}
+
+.mobile-home-banner-copy p {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 16px;
+}
+
+.mobile-home-statrow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.mobile-home-stat {
+  background: rgba(16, 12, 10, 0.85);
+  border: 1px solid rgba(212, 169, 114, 0.2);
+  border-radius: 12px;
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.mobile-home-stat svg {
+  width: 22px;
+  height: 22px;
+}
+
+.mobile-home-stat strong {
+  color: #FFF;
+  font-size: 0.95rem;
+  line-height: 1.15;
+}
+
+.mobile-home-stat small {
+  color: #A39686;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.mobile-home-section {
+  background: rgba(16, 12, 10, 0.55);
+  border: 1px solid rgba(212, 169, 114, 0.2);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.mobile-home-section .section-header {
+  margin-bottom: 12px;
+}
+
+.mobile-home-quest-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mobile-home-quest-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(212, 169, 114, 0.15);
+  border-radius: 12px;
+  padding: 10px 12px;
+  text-align: left;
+  color: inherit;
+  font-family: inherit;
+}
+
+.mobile-home-quest-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(212, 169, 114, 0.12);
+}
+
+.mobile-home-quest-icon svg {
+  width: 18px;
+  height: 18px;
+  color: #D4A972;
+}
+
+.mobile-home-quest-copy {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mobile-home-quest-copy strong {
+  color: #FFF;
+  font-size: 0.9rem;
+}
+
+.mobile-home-quest-copy small {
+  color: #A39686;
+  font-size: 0.75rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mobile-home-quest-progress {
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  margin-top: 4px;
+  overflow: hidden;
+}
+
+.mobile-home-quest-progress > div {
+  height: 100%;
+  background: linear-gradient(90deg, #D4A972, #F0B155);
+}
+
+.mobile-home-quest-reward {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.mobile-home-quest-reward .xp-pill,
+.mobile-home-quest-reward .gold-pill {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #F0B155;
+}
+
+.mobile-home-quest-reward .gold-pill {
+  color: #D4A972;
+}
+
+.mobile-home-quest-reward svg {
+  width: 12px;
+  height: 12px;
+}
+
+.mobile-home-quest-reward > svg.chevron {
+  width: 16px;
+  height: 16px;
+  color: #6B5F52;
+}
+
+.mobile-home-empty {
+  color: #A39686;
+  font-size: 0.85rem;
+  padding: 12px 0;
+  text-align: center;
+}
+
+.mobile-home-view-all {
+  width: 100%;
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: #D4A972;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 8px;
+}
+
+.mobile-home-view-all svg {
+  width: 14px;
+  height: 14px;
+}
+
+.mobile-home-navgrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.mobile-home-navgrid button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: rgba(16, 12, 10, 0.55);
+  border: 1px solid rgba(212, 169, 114, 0.2);
+  border-radius: 12px;
+  padding: 12px 6px;
+  color: #E8E3D9;
+  font-size: 0.72rem;
+}
+
+.mobile-home-navgrid button svg {
+  width: 20px;
+  height: 20px;
+  color: #D4A972;
 }
 
 .dashboard-grid {
@@ -8623,21 +9023,3 @@ button, a {
   }
 }
 
-/* Force Correct Nav Visibility */
-@media (min-width: 768px) {
-  .app-shell > .topbar {
-    display: flex !important;
-  }
-  .app-shell .mobile-bottom-dock {
-    display: none !important;
-  }
-}
-
-@media (max-width: 767px) {
-  .app-shell > .topbar {
-    display: none !important;
-  }
-  .app-shell .mobile-bottom-dock {
-    display: flex !important;
-  }
-}

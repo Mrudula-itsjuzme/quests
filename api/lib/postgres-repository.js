@@ -281,6 +281,20 @@ export class PostgresQuestRepository {
     } catch (error) { await client.query('ROLLBACK'); throw error; } finally { client.release(); }
   }
   async getCollectibles(userId) { const { rows } = await this.pool.query('SELECT * FROM collectible_unlocks WHERE user_id = $1 ORDER BY unlocked_at DESC', [userId]); return rows.map((row) => ({ assetId: row.asset_id, questId: row.quest_id, title: row.title, category: row.category, rarity: row.rarity, caption: row.caption, unlockedAt: row.unlocked_at })); }
+  // Requires a `captured_cards` table (see api/migrate.js note) — not yet part of the applied schema.
+  async createCapturedCard(card) {
+    const { rows } = await this.pool.query(
+      `INSERT INTO captured_cards (id, user_id, item_name, category, card_title, rarity_tier, rarity_score, description, image_ref, captured_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,NOW()) RETURNING *`,
+      [randomUUID(), card.userId, card.itemName, card.category, card.cardTitle, card.rarityTier, card.rarityScore, card.description, card.imageRef || null],
+    );
+    return mapCapturedCard(rows[0]);
+  }
+  async getCapturedCards(userId) { const { rows } = await this.pool.query('SELECT * FROM captured_cards WHERE user_id = $1 ORDER BY captured_at DESC', [userId]); return rows.map(mapCapturedCard); }
+  async updateCapturedCard(userId, cardId, patch) {
+    const { rows } = await this.pool.query('UPDATE captured_cards SET card_title = COALESCE($3, card_title) WHERE user_id = $1 AND id = $2 RETURNING *', [userId, cardId, patch.cardTitle ?? null]);
+    return rows[0] ? mapCapturedCard(rows[0]) : null;
+  }
   async createFeedEntry(entry) {
     const { rows } = await this.pool.query(`INSERT INTO quest_feed_entries
       (id,user_id,assignment_id,submission_id,quest_name,display_name,xp_earned,rank_title,image_ref,created_at)
@@ -379,6 +393,7 @@ function mapSubmission(row) { return { id: row.id, userId: row.user_id, assignme
 function mapFeedEntry(row) { return { id: row.id, userId: row.user_id, assignmentId: row.assignment_id, submissionId: row.submission_id, questName: row.quest_name, displayName: row.display_name, xpEarned: Number(row.xp_earned), rankTitle: row.rank_title, imageRef: row.image_ref, createdAt: row.created_at }; }
 function mapReward(row) { return { level: Number(row.level), rewardType: row.reward_type, rewardKey: row.reward_key, amount: Number(row.amount), label: row.label, status: row.status, unlockedAt: row.unlocked_at, claimedAt: row.claimed_at }; }
 function mapNotification(row) { return { id: row.id, userId: row.user_id, kind: row.kind, title: row.title, body: row.body, readAt: row.read_at, createdAt: row.created_at }; }
+function mapCapturedCard(row) { return { id: row.id, userId: row.user_id, itemName: row.item_name, category: row.category, cardTitle: row.card_title, rarityTier: row.rarity_tier, rarityScore: Number(row.rarity_score), description: row.description, imageRef: row.image_ref, capturedAt: row.captured_at }; }
 function conflict(code) { const error = new Error(code); error.code = code; error.status = 409; return error; }
 function levelFromXp(totalXp) {
   let remaining = totalXp;

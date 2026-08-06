@@ -5,7 +5,7 @@ import { AuthPage } from './features/auth/AuthPage';
 import { LandingPage } from './features/auth/LandingPage';
 import { ProtectedRoute } from './features/auth/ProtectedRoute';
 import { RequireOnboarding } from './features/auth/RequireOnboarding';
-import { DashboardPage } from './features/dashboard/DashboardPage';
+import { WorldScreen } from './features/world/WorldScreen';
 import { GalleryPage } from './features/gallery/GalleryPage';
 import { GuildPage } from './features/guild/GuildPage';
 import { OnboardingPage } from './features/onboarding/OnboardingPage';
@@ -24,11 +24,11 @@ function App() {
           <Route path="/onboarding" element={<OnboardingPage />} />
           <Route element={<RequireOnboarding />}>
             <Route path="/app" element={<AppShell />}>
-              <Route index element={<DashboardPage />} />
+              <Route index element={<WorldScreen />} />
               <Route path="quests" element={<QuestsPage />} />
-              <Route path="guild" element={<GuildPage />} />
+              <Route path="community" element={<GuildPage />} />
               <Route path="rewards" element={<RewardsPage />} />
-              <Route path="gallery" element={<GalleryPage />} />
+              <Route path="collection" element={<GalleryPage />} />
               <Route path="profile" element={<ProfilePage />} />
             </Route>
           </Route>

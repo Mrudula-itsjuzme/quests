@@ -31,6 +31,29 @@ export function useCollectibles() {
   return useQuery({ queryKey: ['collectibles'], queryFn: ({ signal }) => api.getCollectibles(signal) });
 }
 
+export function useCaptures() {
+  const api = useApiClient();
+  return useQuery({ queryKey: ['captures'], queryFn: ({ signal }) => api.getCaptures(signal) });
+}
+
+export function useCaptureItem() {
+  const api = useApiClient();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (imageBase64) => api.createCapture(imageBase64, newIdempotencyKey()),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['captures'] }),
+  });
+}
+
+export function useRenameCapture() {
+  const api = useApiClient();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ captureId, cardTitle }) => api.renameCapture(captureId, cardTitle),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['captures'] }),
+  });
+}
+
 export function useFeed() {
   const api = useApiClient();
   return useQuery({ queryKey: ['feed'], queryFn: ({ signal }) => api.getFeed(signal) });

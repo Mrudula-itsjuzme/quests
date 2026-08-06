@@ -70,21 +70,19 @@ describe('App (development auth mode)', () => {
     vi.restoreAllMocks();
   });
 
-  it('renders the dashboard with real profile data instead of hardcoded fallbacks', async () => {
+  it('renders the world/capture screen with real profile data instead of hardcoded fallbacks', async () => {
     renderApp('/app');
 
-    expect(await screen.findByRole('heading', { name: /dashboard/i })).toBeInTheDocument();
-    expect((await screen.findAllByText(/morning mindfulness/i)).length).toBeGreaterThan(0);
+    expect(await screen.findByLabelText(/notifications/i)).toBeInTheDocument();
     expect(screen.queryByText(/1,240/)).not.toBeInTheDocument();
     expect(screen.queryByText('24')).not.toBeInTheDocument();
   });
 
-  it('does not render a community or leaderboard section', async () => {
+  it('does not render a leaderboard section on the world/capture screen', async () => {
     renderApp('/app');
-    await screen.findByRole('heading', { name: /dashboard/i });
+    await screen.findByLabelText(/notifications/i);
 
     expect(screen.queryByText(/leaderboard/i)).not.toBeInTheDocument();
-    expect(screen.queryByRole('heading', { name: /community/i })).not.toBeInTheDocument();
   });
 
   it('navigates to the quest board and filters quests', async () => {
@@ -97,7 +95,8 @@ describe('App (development auth mode)', () => {
   it('submits quest completion through the backend before showing completion feedback', async () => {
     renderApp('/app/quests');
 
-    fireEvent.click(await screen.findByRole('button', { name: /inspect quest/i }));
+    await screen.findAllByText(/morning mindfulness/i);
+    fireEvent.click(screen.getByRole('button', { name: /^open$/i }));
     fireEvent.change(await screen.findByLabelText(/write your reflection/i), { target: { value: 'A real reflection proof.' } });
     fireEvent.click(screen.getByRole('button', { name: /submit proof/i }));
 
@@ -112,10 +111,10 @@ describe('App (development auth mode)', () => {
   });
 
   it('exposes the five reference destinations and the community surface', async () => {
-    renderApp('/app/guild');
+    renderApp('/app/community');
     expect(await screen.findByRole('heading', { name: 'Community' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /quest feed/i })).toBeInTheDocument();
-    expect(screen.getAllByRole('link', { name: /rewards/i }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole('link', { name: /profile/i }).length).toBeGreaterThan(0);
   });
 
   it('renders profile progression from real account data', async () => {
@@ -125,15 +124,15 @@ describe('App (development auth mode)', () => {
     expect(screen.getByRole('button', { name: /change title/i })).toBeInTheDocument();
   });
 
-  it('shows the gallery empty state when no collectibles are unlocked', async () => {
-    renderApp('/app/gallery');
+  it('shows the collection empty state when no collectibles are unlocked', async () => {
+    renderApp('/app/collection');
 
     expect(await screen.findByText(/no stickers unlocked yet/i)).toBeInTheDocument();
   });
 
   it('redirects unauthenticated dev-mode users straight into the app (no fake landing bypass)', async () => {
     renderApp('/');
-    await waitFor(() => expect(screen.getByRole('heading', { name: /dashboard/i })).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByLabelText(/notifications/i)).toBeInTheDocument());
   });
 });
 

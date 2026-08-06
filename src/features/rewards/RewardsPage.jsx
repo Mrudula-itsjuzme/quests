@@ -122,7 +122,7 @@ function RewardsContent({
 
         <RewardPanel title="Badges" className="badges-panel">
           <div className="badge-row">{badgeDefinitions.map((badge) => <motion.article key={badge.label} className={collection.length >= badge.threshold ? '' : 'locked'} whileHover={{ scale: 1.05 }} onMouseEnter={playHover} transition={springConfig.tactile}><span className="round-emblem"><Icon name={badge.icon} /></span><strong>{collection.length >= badge.threshold ? badge.threshold : 0}</strong><small>{badge.label}</small></motion.article>)}</div>
-          <Link to="/app/gallery" onClick={playTap}>View all badges <span>›</span></Link>
+          <Link to="/app/collection" onClick={playTap}>View all badges <span>›</span></Link>
         </RewardPanel>
 
         <RewardPanel title="Rare Loot" className="loot-panel">
@@ -139,7 +139,7 @@ function RewardsContent({
             <motion.article whileHover={{ y: -3 }} onMouseEnter={playHover} transition={springConfig.tactile}><Icon name="chest" /><strong>{collection.filter((item) => item.rarity === 'Rare').length}</strong><span>Silver</span></motion.article>
             <motion.article whileHover={{ y: -3 }} onMouseEnter={playHover} transition={springConfig.tactile}><Icon name="chest" /><strong>{collection.filter((item) => ['Epic', 'Legendary'].includes(item.rarity)).length}</strong><span>Golden</span></motion.article>
           </div>
-          <Link to="/app/gallery" onClick={playTap}>View collection <span>›</span></Link>
+          <Link to="/app/collection" onClick={playTap}>View collection <span>›</span></Link>
         </RewardPanel>
 
         <RewardPanel title="Claimable Rewards" className="claim-panel">

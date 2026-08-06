@@ -16,11 +16,10 @@ import { WorldAmbience } from './WorldAmbience';
 import { DawnMoment, useDawnMoment } from './DawnMoment';
 
 const navItems = [
-  { to: '/app', label: 'Home', icon: 'home', end: true },
+  { to: '/app', label: 'Capture', icon: 'home', end: true },
   { to: '/app/quests', label: 'Quests', icon: 'scroll' },
-  { to: '/app/guild', label: 'Guild', icon: 'shield' },
-  { to: '/app/rewards', label: 'Rewards', icon: 'chest' },
-  { to: '/app/gallery', label: 'Gallery', icon: 'grid' },
+  { to: '/app/collection', label: 'Collection', icon: 'grid' },
+  { to: '/app/community', label: 'Community', icon: 'shield' },
   { to: '/app/profile', label: 'Profile', icon: 'user' },
 ];
 
@@ -34,6 +33,8 @@ export function AppShell() {
   const [levelUp, setLevelUp] = useState(null);
   const { visible: dawnVisible, dismiss: dismissDawn } = useDawnMoment();
 
+  const isWorldRoute = location.pathname === '/app';
+
   useEffect(() => {
     const onNotice = (event) => {
       setNotice(event.detail);
@@ -43,11 +44,14 @@ export function AppShell() {
       setLevelUp(event.detail);
       playLevelUp();
     };
+    const onOpenSettings = () => setSettingsOpen(true);
     window.addEventListener('habbit-notice', onNotice);
     window.addEventListener('habbit-level-up', onLevelUp);
+    window.addEventListener('habbit-open-settings', onOpenSettings);
     return () => {
       window.removeEventListener('habbit-notice', onNotice);
       window.removeEventListener('habbit-level-up', onLevelUp);
+      window.removeEventListener('habbit-open-settings', onOpenSettings);
     };
   }, []);
 
@@ -60,16 +64,16 @@ export function AppShell() {
           Development auth active — this is a local identity, not a real account.
         </div>
       )}
-      <header className="topbar">
+      <header className={`topbar ${isWorldRoute ? 'topbar-world-hidden' : ''}`}>
         <motion.div
           className="brand-lockup"
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
           onMouseEnter={playHover}
         >
-          <span className="brand-mark" aria-hidden="true">H</span>
+          <span className="brand-mark" aria-hidden="true">W</span>
           <div>
-            <strong>HABBIT QUESTS</strong>
+            <strong>WILD REALM</strong>
           </div>
         </motion.div>
         <nav className="top-nav" aria-label="Primary">
@@ -127,7 +131,7 @@ export function AppShell() {
       </header>
 
       {/* Main scrolling content area */}
-      <div className="mobile-content-area">
+      <div className={`mobile-content-area ${isWorldRoute ? 'mobile-content-area-world' : ''}`}>
         <PullToRefresh>
           <AnimatePresence mode="wait">
             <JournalTransition key={location.pathname} className="route-stage">
@@ -136,41 +140,34 @@ export function AppShell() {
           </AnimatePresence>
         </PullToRefresh>
 
-        {/* Floating Glass Bottom Dock */}
-        <nav className="mobile-bottom-dock" aria-label="Primary Navigation">
-          {navItems.slice(0, 4).map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              className={({ isActive }) => `dock-item ${isActive ? 'active' : ''}`}
-              onClick={playTap}
-              onMouseEnter={playHover}
-            >
-              {({ isActive }) => (
-                <>
-                  {isActive && (
-                    <motion.div
-                      className="dock-active-bg"
-                      layoutId="dockIndicator"
-                      transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-                    />
-                  )}
-                  <Icon name={item.icon} />
-                </>
-              )}
-            </NavLink>
-          ))}
-          {/* Settings / Profile Trigger on Dock */}
-          <button
-            type="button"
-            className="dock-item"
-            onClick={() => { playTap(); setSettingsOpen(true); }}
-            aria-label="Settings"
-          >
-            <Icon name="gear" />
-          </button>
-        </nav>
+        {/* Floating Glass Bottom Dock — hidden on the world screen, which has its own compass nav */}
+        {!isWorldRoute && (
+          <nav className="mobile-bottom-dock" aria-label="Primary Navigation">
+            {navItems.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.end}
+                className={({ isActive }) => `dock-item ${isActive ? 'active' : ''}`}
+                onClick={playTap}
+                onMouseEnter={playHover}
+              >
+                {({ isActive }) => (
+                  <>
+                    {isActive && (
+                      <motion.div
+                        className="dock-active-bg"
+                        layoutId="dockIndicator"
+                        transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                      />
+                    )}
+                    <Icon name={item.icon} />
+                  </>
+                )}
+              </NavLink>
+            ))}
+          </nav>
+        )}
       </div>
 
       <AnimatePresence>

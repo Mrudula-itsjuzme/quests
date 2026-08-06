@@ -1,16 +1,19 @@
 import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Icon, categoryIcon } from '../../components/Icon';
 import { QuestDetail } from '../quests/QuestDetail';
 import { questProgressRatio } from '../quests/QuestCard';
-import { useActiveQuests, useMe } from '../quests/queries';
+import { useActiveQuests, useCollectibles, useMe } from '../quests/queries';
 import { playTap } from '../../lib/useSoundEffects';
 import { DashboardSkeleton } from '../../components/motion/SkeletonLoader';
 import { staggerContainer, staggerItem, springConfig } from '../../components/motion/MotionVariants';
+import { deriveGold, deriveGems, getEnergy } from '../../lib/playerEconomy';
 
 export function DashboardPage() {
   const { data: me, isLoading: meLoading, isError: meError } = useMe();
   const { data: quests, isLoading: questsLoading } = useActiveQuests();
+  const { data: collectibles } = useCollectibles();
   const [selectedId, setSelectedId] = useState(null);
 
   const activeQuests = useMemo(() => quests || [], [quests]);
@@ -47,6 +50,7 @@ export function DashboardPage() {
           key="dashboard-content"
           me={me}
           activeQuests={activeQuests}
+          collectibles={collectibles || []}
           selected={selected}
           setSelectedId={setSelectedId}
         />
@@ -58,13 +62,23 @@ export function DashboardPage() {
 function DashboardContent({
   me,
   activeQuests,
+  collectibles,
   selected,
   setSelectedId,
 }) {
+  const navigate = useNavigate();
   const rankIndex = Math.max(0, Math.floor(((me?.totalXp) || 0) / 500));
   const rankNames = ['Novice I', 'Novice II', 'Novice III', 'Bronze I', 'Silver I', 'Gold I'];
   const rank = rankNames[Math.min(rankIndex, rankNames.length - 1)];
   const nextRankXp = (rankIndex + 1) * 500;
+
+  const gold = deriveGold(me?.totalXp);
+  const gems = deriveGems(collectibles);
+  const energy = getEnergy();
+  const hour = new Date().getHours();
+  const greeting = hour < 5 ? 'Good night' : hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+
+  const notify = (detail) => window.dispatchEvent(new CustomEvent('habbit-notice', { detail }));
 
   return (
     <motion.main
@@ -76,7 +90,143 @@ function DashboardContent({
       exit={{ opacity: 0, filter: 'blur(6px)', transition: { duration: 0.18 } }}
     >
       <h1 className="sr-only">Dashboard</h1>
-      <div className="dashboard-grid">
+
+      {/* Mobile-only RPG home screen */}
+      <section className="mobile-home-screen" aria-label="Adventurer home">
+        <div className="mobile-home-topbar">
+          <div className="mobile-home-identity">
+            <div className="mobile-home-avatar">
+              <span>{(me.displayName || 'S')[0].toUpperCase()}</span>
+              <b>{me.level}</b>
+            </div>
+            <div>
+              <strong>{me.displayName || 'Adventurer'}</strong>
+              <small>{rank}</small>
+            </div>
+          </div>
+          <div className="mobile-home-stats">
+            <div className="mobile-home-pill">
+              <Icon name="bolt" />
+              <span>{energy.value}/{energy.max}</span>
+            </div>
+            <div className="mobile-home-pill">
+              <Icon name="coin" />
+              <span>{gold.toLocaleString()}</span>
+            </div>
+            <div className="mobile-home-pill">
+              <Icon name="gem" />
+              <span>{gems.toLocaleString()}</span>
+            </div>
+          </div>
+          <button
+            type="button"
+            className="mobile-home-bell"
+            aria-label="Notifications"
+            onClick={() => { playTap(); notify('No new notices. Your path is clear.'); }}
+          >
+            <Icon name="bell" />
+            <span className="mobile-home-bell-dot" aria-hidden="true" />
+          </button>
+        </div>
+
+        <div className="mobile-home-banner">
+          <div className="mobile-home-banner-copy">
+            <span className="mobile-home-greeting">{greeting},</span>
+            <h2>Adventurer.</h2>
+            <p>&ldquo;Small steps today, legend tomorrow.&rdquo;</p>
+            <button type="button" className="continue-journey-btn" onClick={() => { playTap(); navigate('/app/quests'); }}>
+              Continue Journey <span>→</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="mobile-home-statrow">
+          <div className="mobile-home-stat">
+            <Icon name="flame" className="text-gold" />
+            <div>
+              <strong>{me.streakDays || 0}</strong>
+              <small>Day Streak</small>
+            </div>
+          </div>
+          <div className="mobile-home-stat">
+            <Icon name="shield" className="text-silver" />
+            <div>
+              <strong>{rank}</strong>
+              <small>{me.totalXp} / {nextRankXp} XP</small>
+            </div>
+          </div>
+          <div className="mobile-home-stat">
+            <Icon name="compass" className="text-bronze" />
+            <div>
+              <strong>{activeQuests.length}</strong>
+              <small>Active Quests</small>
+            </div>
+          </div>
+        </div>
+
+        <div className="mobile-home-section">
+          <div className="section-header">
+            <h2><span className="diamond-bullet">✦</span> TODAY&apos;S QUESTS</h2>
+            <span className="reset-time">Reset at midnight <Icon name="moon" /></span>
+          </div>
+          <div className="mobile-home-quest-list">
+            {activeQuests.slice(0, 4).map((quest) => {
+              const ratio = questProgressRatio(quest);
+              const isCompleted = quest.status === 'completed';
+              return (
+                <button
+                  key={quest.id}
+                  type="button"
+                  className="mobile-home-quest-row"
+                  onClick={() => { playTap(); setSelectedId(quest.id); }}
+                >
+                  <div className="mobile-home-quest-icon">
+                    <Icon name={categoryIcon(quest.category)} />
+                  </div>
+                  <div className="mobile-home-quest-copy">
+                    <strong>{quest.title}</strong>
+                    <small>{quest.description}</small>
+                    {!isCompleted && (
+                      <div className="mobile-home-quest-progress">
+                        <div style={{ width: `${ratio * 100}%` }} />
+                      </div>
+                    )}
+                  </div>
+                  <div className="mobile-home-quest-reward">
+                    <span className="xp-pill"><Icon name="star" />{quest.xpReward}</span>
+                    <span className="gold-pill"><Icon name="coin" />{Math.round(quest.xpReward / 5)}</span>
+                    <Icon name={isCompleted ? 'check' : 'compass'} className={isCompleted ? 'text-gold' : 'chevron'} />
+                  </div>
+                </button>
+              );
+            })}
+            {activeQuests.length === 0 && (
+              <p className="mobile-home-empty">No active quests. Visit the Quest board to start one.</p>
+            )}
+          </div>
+          <button type="button" className="mobile-home-view-all" onClick={() => { playTap(); navigate('/app/quests'); }}>
+            View All Quests <Icon name="compass" />
+          </button>
+        </div>
+
+        <nav className="mobile-home-navgrid" aria-label="Quick links">
+          {[
+            { label: 'Sanctuary', icon: 'home', to: '/app/guild' },
+            { label: 'Journal', icon: 'book', to: '/app/profile' },
+            { label: 'Codex', icon: 'scroll', to: '/app/gallery' },
+            { label: 'Achievements', icon: 'star', to: '/app/profile' },
+            { label: 'Inbox', icon: 'bell', to: '/app/guild' },
+            { label: 'Shop', icon: 'chest', to: '/app/rewards' },
+          ].map((item) => (
+            <button key={item.label} type="button" onClick={() => { playTap(); navigate(item.to); }}>
+              <Icon name={item.icon} />
+              <span>{item.label}</span>
+            </button>
+          ))}
+        </nav>
+      </section>
+
+      <div className="dashboard-grid dashboard-grid-desktop">
         {/* Left Column (Hero) */}
         <div className="dashboard-col-left">
           <motion.section className="hero-panorama" variants={staggerItem}>
@@ -229,8 +379,8 @@ function DashboardContent({
         </div>
       </div>
 
-      {/* Footer Bar */}
-      <motion.footer className="dashboard-footer" variants={staggerItem}>
+      {/* Footer Bar (desktop only) */}
+      <motion.footer className="dashboard-footer dashboard-footer-desktop" variants={staggerItem}>
         <div className="footer-quote">
           <Icon name="feather" />
           <p>"Discipline is the bridge between goals and glory." <span>— Unknown</span></p>

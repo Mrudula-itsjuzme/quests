@@ -168,6 +168,29 @@ export const GUEST_LEADERBOARD = [
   { position: 4, userId: 'u-104', displayName: 'Aria Sunwalker', rankTitle: 'Novice III', totalXp: 5400 },
 ];
 
+export const GUEST_CAPTURES = [
+  {
+    id: 'cap-1',
+    itemName: 'Still lake at dusk',
+    category: 'Discovery',
+    cardTitle: 'The Mirror Pond',
+    rarityTier: 'Gold',
+    rarityScore: 0.72,
+    description: 'A quietly dramatic waterline, caught right as the light turned gold.',
+    capturedAt: new Date(Date.now() - 259200000).toISOString(),
+  },
+  {
+    id: 'cap-2',
+    itemName: 'Cup of tea',
+    category: 'Mind',
+    cardTitle: 'Steepwater Sage',
+    rarityTier: 'Bronze',
+    rarityScore: 0.18,
+    description: 'A humble but honest companion for a slow morning.',
+    capturedAt: new Date(Date.now() - 604800000).toISOString(),
+  },
+];
+
 export const GUEST_REWARDS = [
   { level: 10, amount: 200, rewardType: 'xp', label: 'Milestone XP Boost', status: 'claimed' },
   { level: 15, amount: 1, rewardType: 'badge', label: 'Badge of the Golden Sun', status: 'claimable' },

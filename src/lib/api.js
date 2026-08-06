@@ -54,7 +54,10 @@ import {
   GUEST_FEED,
   GUEST_LEADERBOARD,
   GUEST_REWARDS,
+  GUEST_CAPTURES,
 } from './guestData';
+
+let guestCaptures = null;
 
 async function guestDelay(data, ms = 450) {
   await new Promise((resolve) => setTimeout(resolve, ms));
@@ -91,6 +94,37 @@ export function createApiClient(getToken) {
       const token = await getToken();
       if (token === 'guest') return guestDelay(GUEST_COLLECTIBLES, 450);
       return request('/collectibles', { signal, token });
+    },
+    getCaptures: async (signal) => {
+      const token = await getToken();
+      if (token === 'guest') return guestDelay(guestCaptures || GUEST_CAPTURES, 400);
+      return request('/captures', { signal, token });
+    },
+    createCapture: async (imageBase64, idempotencyKey) => {
+      const token = await getToken();
+      if (token === 'guest') {
+        const card = {
+          id: newIdempotencyKey(),
+          itemName: 'Mysterious Object',
+          category: ['Mind', 'Body', 'Discovery'][Math.floor(Math.random() * 3)],
+          cardTitle: 'The Curious Find',
+          rarityTier: ['Bronze', 'Silver', 'Gold', 'Platinum'][Math.floor(Math.random() * 4)],
+          rarityScore: Math.random(),
+          description: 'A guest-mode capture — sign in to use the real rarity engine.',
+          capturedAt: new Date().toISOString(),
+        };
+        guestCaptures = [card, ...(guestCaptures || GUEST_CAPTURES)];
+        return guestDelay(card, 900);
+      }
+      return request('/captures', { method: 'POST', body: { imageBase64 }, idempotencyKey, token });
+    },
+    renameCapture: async (captureId, cardTitle) => {
+      const token = await getToken();
+      if (token === 'guest') {
+        guestCaptures = (guestCaptures || GUEST_CAPTURES).map((item) => (item.id === captureId ? { ...item, cardTitle } : item));
+        return guestDelay(guestCaptures.find((item) => item.id === captureId), 200);
+      }
+      return request(`/captures/${captureId}`, { method: 'PATCH', body: { cardTitle }, token });
     },
     getQuestHistory: async (signal) => {
       const token = await getToken();

@@ -16,6 +16,7 @@ import { questDefinitions } from './lib/quest-definitions.js';
 import { createProviders, ProviderNotConfiguredError } from './lib/providers.js';
 import { MemoryQuestRepository } from './lib/memory-repository.js';
 import { PostgresQuestRepository } from './lib/postgres-repository.js';
+import { resolveVisionProvider, rarityTierFromScore, VisionClassificationError } from './lib/vision-providers.js';
 
 const idempotencySchema = z.string().min(8).max(160).regex(/^[A-Za-z0-9._:-]+$/);
 const assignmentIdSchema = z.string().uuid();
@@ -33,6 +34,11 @@ const profileSchema = z.object({
   tourVersionSeen: z.coerce.number().int().min(0).max(1000).optional(),
 }).strict().refine((value) => Object.keys(value).length > 0, 'profile update cannot be empty');
 const submissionSchema = z.object({ text: z.string().max(10_000).optional(), uploadId: z.string().max(100).optional(), feedOptIn: z.boolean().optional() }).strict();
+const captureIdSchema = z.string().uuid();
+const captureCreateSchema = z.object({
+  imageBase64: z.string().min(100).max(8_000_000).regex(/^data:image\/(png|jpe?g|webp);base64,/, 'must be a base64 data URL'),
+}).strict();
+const captureRenameSchema = z.object({ cardTitle: z.string().trim().min(1).max(80) }).strict();
 const legacyQuestSchema = z.object({
   title: z.string().trim().min(1).max(160),
   summary: z.string().trim().max(2000).optional(),
@@ -48,6 +54,7 @@ export function createApp(options = {}) {
   const repository = options.repository || new MemoryQuestRepository({ definitions: questDefinitions });
   const providers = options.providers || createProviders({ mode: config.PROVIDER_MODE, aiVerifyUrl: config.QUEST_AI_VERIFY_URL, providerSecret: config.QUEST_PROVIDER_SECRET, notificationUrl: config.QUEST_NOTIFICATION_URL });
   const engine = options.engine || new QuestEngine({ repository, providers });
+  const visionProvider = options.visionProvider || resolveVisionProvider(config);
   const app = express();
 
   app.disable('x-powered-by');
@@ -141,6 +148,30 @@ export function createApp(options = {}) {
   app.post('/api/v1/quests/:assignmentId/progress', writeLimiter, asyncRoute(async (req, res) => res.json(await engine.progress(req.identity, parse(assignmentIdSchema, req.params.assignmentId), parse(progressSchema, req.body), requireIdempotency(req)))));
   app.post('/api/v1/quests/:assignmentId/submissions', writeLimiter, asyncRoute(async (req, res) => res.status(201).json(await engine.submit(req.identity, parse(assignmentIdSchema, req.params.assignmentId), parse(submissionSchema, req.body), requireIdempotency(req)))));
   app.get('/api/v1/collectibles', asyncRoute(async (req, res) => sendCachedJson(req, res, await repository.getCollectibles(req.identity.id))));
+  app.post('/api/v1/captures', writeLimiter, asyncRoute(async (req, res) => {
+    const body = parse(captureCreateSchema, req.body);
+    const idempotencyKey = requireIdempotency(req);
+    const card = await repository.runIdempotent(req.identity.id, 'create-capture', idempotencyKey, async () => {
+      const classification = await visionProvider.classify(body.imageBase64);
+      return repository.createCapturedCard({
+        userId: req.identity.id,
+        itemName: classification.itemName,
+        category: classification.category,
+        cardTitle: classification.cardTitle,
+        rarityTier: rarityTierFromScore(classification.rarityScore),
+        rarityScore: classification.rarityScore,
+        description: classification.description,
+      });
+    });
+    res.status(201).json(card);
+  }));
+  app.get('/api/v1/captures', asyncRoute(async (req, res) => res.json(await repository.getCapturedCards(req.identity.id))));
+  app.patch('/api/v1/captures/:captureId', writeLimiter, asyncRoute(async (req, res) => {
+    const body = parse(captureRenameSchema, req.body);
+    const card = await repository.updateCapturedCard(req.identity.id, parse(captureIdSchema, req.params.captureId), body);
+    if (!card) return res.status(404).json({ error: { code: 'capture_not_found', requestId: req.id } });
+    res.json(card);
+  }));
   app.get('/api/v1/feed', asyncRoute(async (req, res) => res.json(await engine.feed(req.identity))));
   app.get('/api/v1/leaderboard', asyncRoute(async (req, res) => res.json(await engine.leaderboard(req.identity))));
   app.get('/api/v1/rewards', asyncRoute(async (req, res) => res.json(await engine.rewards(req.identity))));
@@ -181,13 +212,14 @@ export function createApp(options = {}) {
   }
 
   app.use((error, req, res, _next) => {
-    const status = Number(error.status) || (error instanceof z.ZodError ? 400 : error instanceof ProviderNotConfiguredError ? 503 : error.message === 'cors_origin_denied' ? 403 : 500);
+    const status = Number(error.status) || (error instanceof z.ZodError ? 400 : error instanceof ProviderNotConfiguredError ? 503 : error instanceof VisionClassificationError ? 502 : error.message === 'cors_origin_denied' ? 403 : 500);
     const parserCode = error.type === 'entity.too.large' ? 'payload_too_large' : error.type === 'entity.parse.failed' ? 'invalid_json' : null;
     const code = parserCode
       || (error instanceof z.ZodError ? 'invalid_request'
         : error instanceof ProviderNotConfiguredError ? 'provider_not_configured'
-          : status >= 500 ? 'internal_error'
-            : error.code || error.message);
+          : error instanceof VisionClassificationError ? error.code
+            : status >= 500 ? 'internal_error'
+              : error.code || error.message);
     if (status >= 500 && config.NODE_ENV !== 'test') console.error(JSON.stringify({ level: 'error', event: 'request_failed', requestId: req.id, method: req.method, path: req.path, code }));
     res.status(status).json({ error: { code, requestId: req.id } });
   });
