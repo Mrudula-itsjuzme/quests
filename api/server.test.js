@@ -251,7 +251,61 @@ describe('Quest API', () => {
     expect(denied.status).toBe(403);
     expect(denied.body.error.code).toBe('cors_origin_denied');
   });
+
+  it('runs a capture through the anti-cheat gate and mints a final card when telemetry is clean', async () => {
+    const app = createApp({ config: testConfig() });
+    const response = await request(app)
+      .post('/api/v1/captures')
+      .set('Idempotency-Key', 'capture-001')
+      .send({
+        captureId: '11111111-1111-4111-8111-111111111111',
+        imageBase64: PIXEL_PNG,
+        capturedAt: new Date().toISOString(),
+        gps: { lat: 12.9, lng: 77.6, accuracyM: 12 },
+        heading: 45,
+        liveness: { attested: true, method: 'capture-input-environment', score: 0.7 },
+      });
+    expect(response.status).toBe(201);
+    expect(response.body.status).toBe('final');
+    expect(response.body.antiCheatVerdict).toBe('PASS');
+  });
+
+  it('marks a capture provisional when a single anti-cheat flag is raised', async () => {
+    const app = createApp({ config: testConfig() });
+    const response = await request(app)
+      .post('/api/v1/captures')
+      .set('Idempotency-Key', 'capture-002')
+      .send({ imageBase64: PIXEL_PNG, liveness: { attested: false } });
+    expect(response.status).toBe(201);
+    expect(response.body.status).toBe('provisional');
+    expect(response.body.antiCheatVerdict).toBe('PASS_WITH_REVIEW');
+  });
+
+  it('rejects a capture outright when two anti-cheat flags are raised', async () => {
+    const app = createApp({ config: testConfig() });
+    const response = await request(app)
+      .post('/api/v1/captures')
+      .set('Idempotency-Key', 'capture-003')
+      .send({
+        imageBase64: PIXEL_PNG,
+        capturedAt: new Date(Date.now() + 25 * 60 * 60 * 1000).toISOString(),
+        liveness: { attested: false },
+      });
+    expect(response.status).toBe(422);
+    expect(response.body.error.code).toBe('anti_cheat_rejected');
+    expect(response.body.error.reason).toBe('multiple_integrity_flags');
+  });
+
+  it('polls a minted capture back by its id', async () => {
+    const app = createApp({ config: testConfig() });
+    const created = await request(app).post('/api/v1/captures').set('Idempotency-Key', 'capture-004').send({ imageBase64: PIXEL_PNG });
+    const fetched = await request(app).get(`/api/v1/captures/${created.body.id}`);
+    expect(fetched.status).toBe(200);
+    expect(fetched.body.id).toBe(created.body.id);
+  });
 });
+
+const PIXEL_PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
 
 function signedToken(privateKey, { issuer, audience }) {
   return new SignJWT({ name: 'Tester', zoneinfo: 'UTC' })

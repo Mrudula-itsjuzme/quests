@@ -193,16 +193,35 @@ export class MemoryQuestRepository {
   }
   async getCollectibles(userId) { return this.collectibles.filter((item) => item.userId === userId).map(clone); }
   async createCapturedCard(card) {
-    const value = { id: randomUUID(), capturedAt: new Date().toISOString(), ...card };
+    const value = { id: randomUUID(), status: 'final', capturedAt: new Date().toISOString(), serverReceivedAt: new Date().toISOString(), ...card };
     this.capturedCards.unshift(value);
     return clone(value);
   }
   async getCapturedCards(userId) { return this.capturedCards.filter((item) => item.userId === userId).map(clone); }
+  async getCapturedCardById(userId, cardId) {
+    const item = this.capturedCards.find((entry) => entry.userId === userId && entry.id === cardId);
+    return item ? clone(item) : null;
+  }
+  async getCapturedCardByCaptureId(userId, captureId) {
+    const item = this.capturedCards.find((entry) => entry.userId === userId && entry.captureId === captureId);
+    return item ? clone(item) : null;
+  }
   async updateCapturedCard(userId, cardId, patch) {
     const item = this.capturedCards.find((entry) => entry.userId === userId && entry.id === cardId);
     if (!item) return null;
     Object.assign(item, patch);
     return clone(item);
+  }
+  async getLastCaptureLocation(userId) {
+    const item = this.capturedCards.find((entry) => entry.userId === userId && entry.gps);
+    return item ? { gps: item.gps, capturedAt: item.capturedAt } : null;
+  }
+  async hasSimilarCaptureImageHash(userId, hash, threshold = 0.95) {
+    const tenMinutesAgo = Date.now() - 10 * 60 * 1000;
+    return this.capturedCards.some((item) => item.userId === userId && item.imageHash && new Date(item.capturedAt).getTime() >= tenMinutesAgo && hashSimilarity(item.imageHash, hash) >= threshold);
+  }
+  async hasGlobalSimilarCaptureImageHash(userId, hash, threshold = 0.98) {
+    return this.capturedCards.some((item) => item.userId !== userId && item.imageHash && hashSimilarity(item.imageHash, hash) >= threshold);
   }
   async createFeedEntry(entry) {
     if (this.feedEntries.some((item) => item.submissionId === entry.submissionId)) return clone(this.feedEntries.find((item) => item.submissionId === entry.submissionId));

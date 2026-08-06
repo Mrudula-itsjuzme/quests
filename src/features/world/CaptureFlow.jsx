@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Icon, categoryIcon } from '../../components/Icon';
 import { useCaptureItem, useRenameCapture } from '../quests/queries';
 import { playTap } from '../../lib/useSoundEffects';
+import { collectCaptureTelemetry } from '../../lib/captureTelemetry';
 
 function fileToDataUrl(file) {
   return new Promise((resolve, reject) => {
@@ -11,6 +12,16 @@ function fileToDataUrl(file) {
     reader.onerror = reject;
     reader.readAsDataURL(file);
   });
+}
+
+const ANTI_CHEAT_MESSAGES = {
+  matches_existing_capture: 'This photo has already been captured by someone else. Try a genuinely new find.',
+  velocity_exceeds_human_possible: 'That location doesn’t match your last capture. Check your location and try again.',
+  multiple_integrity_flags: 'We couldn’t verify this capture. Please retake the photo outdoors, live.',
+};
+
+function messageForRejection(reason) {
+  return ANTI_CHEAT_MESSAGES[reason] || 'We couldn’t verify this capture. Please retake the photo.';
 }
 
 export function CaptureFlow({ onClose }) {
@@ -28,13 +39,20 @@ export function CaptureFlow({ onClose }) {
     setStage('scanning');
     setErrorMessage('');
     try {
-      const dataUrl = await fileToDataUrl(file);
-      const result = await captureItem.mutateAsync(dataUrl);
+      const [dataUrl, telemetry] = await Promise.all([fileToDataUrl(file), collectCaptureTelemetry(file)]);
+      const result = await captureItem.mutateAsync({
+        captureId: crypto.randomUUID(),
+        imageBase64: dataUrl,
+        capturedAt: telemetry.capturedAt,
+        gps: telemetry.gps,
+        heading: telemetry.heading,
+        liveness: telemetry.liveness,
+      });
       setCard(result);
       setName(result.cardTitle);
       setStage('reveal');
-    } catch {
-      setErrorMessage('The rarity engine could not read that photo. Try again.');
+    } catch (error) {
+      setErrorMessage(error?.code === 'anti_cheat_rejected' ? messageForRejection(error.reason) : 'The rarity engine could not read that photo. Try again.');
       setStage('error');
     }
   };
@@ -144,6 +162,9 @@ export function CaptureFlow({ onClose }) {
               <span className="capture-card-icon"><Icon name={categoryIcon(card.category)} /></span>
               <span className="capture-card-item">{card.itemName}</span>
               {card.description && <p className="capture-card-desc">{card.description}</p>}
+              {card.status === 'provisional' && (
+                <span className="capture-card-pending">Pending human verification</span>
+              )}
             </div>
 
             <label className="capture-name-field">

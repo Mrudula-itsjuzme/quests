@@ -17,6 +17,7 @@ import { createProviders, ProviderNotConfiguredError } from './lib/providers.js'
 import { MemoryQuestRepository } from './lib/memory-repository.js';
 import { PostgresQuestRepository } from './lib/postgres-repository.js';
 import { resolveVisionProvider, rarityTierFromScore, VisionClassificationError } from './lib/vision-providers.js';
+import { antiCheatVerdict, GateVerdict } from './lib/anti-cheat.js';
 
 const idempotencySchema = z.string().min(8).max(160).regex(/^[A-Za-z0-9._:-]+$/);
 const assignmentIdSchema = z.string().uuid();
@@ -35,8 +36,25 @@ const profileSchema = z.object({
 }).strict().refine((value) => Object.keys(value).length > 0, 'profile update cannot be empty');
 const submissionSchema = z.object({ text: z.string().max(10_000).optional(), uploadId: z.string().max(100).optional(), feedOptIn: z.boolean().optional() }).strict();
 const captureIdSchema = z.string().uuid();
+const gpsSchema = z.object({
+  lat: z.number().min(-90).max(90),
+  lng: z.number().min(-180).max(180),
+  accuracyM: z.number().min(0).max(100_000).nullable().optional(),
+  altitude: z.number().nullable().optional(),
+  gpsFixMs: z.number().min(0).max(120_000).nullable().optional(),
+}).strict().nullable().optional();
+const livenessSchema = z.object({
+  attested: z.boolean(),
+  method: z.string().max(80).optional(),
+  score: z.number().min(0).max(1).optional(),
+}).strict().nullable().optional();
 const captureCreateSchema = z.object({
+  captureId: z.string().uuid().optional(),
   imageBase64: z.string().min(100).max(8_000_000).regex(/^data:image\/(png|jpe?g|webp);base64,/, 'must be a base64 data URL'),
+  capturedAt: z.string().datetime().optional(),
+  gps: gpsSchema,
+  heading: z.number().min(0).max(360).nullable().optional(),
+  liveness: livenessSchema,
 }).strict();
 const captureRenameSchema = z.object({ cardTitle: z.string().trim().min(1).max(80) }).strict();
 const legacyQuestSchema = z.object({
@@ -151,21 +169,49 @@ export function createApp(options = {}) {
   app.post('/api/v1/captures', writeLimiter, asyncRoute(async (req, res) => {
     const body = parse(captureCreateSchema, req.body);
     const idempotencyKey = requireIdempotency(req);
+    const serverReceivedAt = new Date();
+    const imageHash = createHash('sha256').update(body.imageBase64).digest('hex');
+    const capturedAt = body.capturedAt || serverReceivedAt.toISOString();
+
+    const gate = await antiCheatVerdict(
+      { capturedAt, gps: body.gps || null, heading: body.heading ?? null, liveness: body.liveness || null, imageHash },
+      { repository, userId: req.identity.id, serverReceivedAt },
+    );
+
+    if (gate.verdict === GateVerdict.REJECT) {
+      return res.status(422).json({ error: { code: 'anti_cheat_rejected', reason: gate.reason, requestId: req.id } });
+    }
+
     const card = await repository.runIdempotent(req.identity.id, 'create-capture', idempotencyKey, async () => {
       const classification = await visionProvider.classify(body.imageBase64);
       return repository.createCapturedCard({
         userId: req.identity.id,
+        captureId: body.captureId || null,
         itemName: classification.itemName,
         category: classification.category,
         cardTitle: classification.cardTitle,
         rarityTier: rarityTierFromScore(classification.rarityScore),
         rarityScore: classification.rarityScore,
         description: classification.description,
+        imageHash,
+        status: gate.verdict === GateVerdict.PASS_WITH_REVIEW ? 'provisional' : 'final',
+        gps: body.gps || null,
+        heading: body.heading ?? null,
+        capturedAt,
+        serverReceivedAt,
+        antiCheatVerdict: gate.verdict,
+        antiCheatReason: gate.reason,
+        antiCheatDetail: gate.results,
       });
     });
     res.status(201).json(card);
   }));
   app.get('/api/v1/captures', asyncRoute(async (req, res) => res.json(await repository.getCapturedCards(req.identity.id))));
+  app.get('/api/v1/captures/:captureId', asyncRoute(async (req, res) => {
+    const card = await repository.getCapturedCardById(req.identity.id, parse(captureIdSchema, req.params.captureId));
+    if (!card) return res.status(404).json({ error: { code: 'capture_not_found', requestId: req.id } });
+    res.json(card);
+  }));
   app.patch('/api/v1/captures/:captureId', writeLimiter, asyncRoute(async (req, res) => {
     const body = parse(captureRenameSchema, req.body);
     const card = await repository.updateCapturedCard(req.identity.id, parse(captureIdSchema, req.params.captureId), body);

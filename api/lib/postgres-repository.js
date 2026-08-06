@@ -281,19 +281,57 @@ export class PostgresQuestRepository {
     } catch (error) { await client.query('ROLLBACK'); throw error; } finally { client.release(); }
   }
   async getCollectibles(userId) { const { rows } = await this.pool.query('SELECT * FROM collectible_unlocks WHERE user_id = $1 ORDER BY unlocked_at DESC', [userId]); return rows.map((row) => ({ assetId: row.asset_id, questId: row.quest_id, title: row.title, category: row.category, rarity: row.rarity, caption: row.caption, unlockedAt: row.unlocked_at })); }
-  // Requires a `captured_cards` table (see api/migrate.js note) — not yet part of the applied schema.
   async createCapturedCard(card) {
     const { rows } = await this.pool.query(
-      `INSERT INTO captured_cards (id, user_id, item_name, category, card_title, rarity_tier, rarity_score, description, image_ref, captured_at)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,NOW()) RETURNING *`,
-      [randomUUID(), card.userId, card.itemName, card.category, card.cardTitle, card.rarityTier, card.rarityScore, card.description, card.imageRef || null],
+      `INSERT INTO captured_cards
+        (id, user_id, capture_id, item_name, category, card_title, rarity_tier, rarity_score, description, image_ref, image_hash,
+         status, gps_lat, gps_lng, gps_accuracy_m, gps_altitude, heading, captured_at, server_received_at,
+         anti_cheat_verdict, anti_cheat_reason, anti_cheat_detail, reject_reason)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23)
+       RETURNING *`,
+      [
+        randomUUID(), card.userId, card.captureId || null, card.itemName, card.category, card.cardTitle, card.rarityTier, card.rarityScore,
+        card.description, card.imageRef || null, card.imageHash || null,
+        card.status || 'final', card.gps?.lat ?? null, card.gps?.lng ?? null, card.gps?.accuracyM ?? null, card.gps?.altitude ?? null,
+        card.heading ?? null, card.capturedAt || new Date(), card.serverReceivedAt || new Date(),
+        card.antiCheatVerdict || null, card.antiCheatReason || null, JSON.stringify(card.antiCheatDetail || []), card.rejectReason || null,
+      ],
     );
     return mapCapturedCard(rows[0]);
   }
   async getCapturedCards(userId) { const { rows } = await this.pool.query('SELECT * FROM captured_cards WHERE user_id = $1 ORDER BY captured_at DESC', [userId]); return rows.map(mapCapturedCard); }
-  async updateCapturedCard(userId, cardId, patch) {
-    const { rows } = await this.pool.query('UPDATE captured_cards SET card_title = COALESCE($3, card_title) WHERE user_id = $1 AND id = $2 RETURNING *', [userId, cardId, patch.cardTitle ?? null]);
+  async getCapturedCardById(userId, cardId) {
+    const { rows } = await this.pool.query('SELECT * FROM captured_cards WHERE user_id = $1 AND id = $2', [userId, cardId]);
     return rows[0] ? mapCapturedCard(rows[0]) : null;
+  }
+  async getCapturedCardByCaptureId(userId, captureId) {
+    const { rows } = await this.pool.query('SELECT * FROM captured_cards WHERE user_id = $1 AND capture_id = $2', [userId, captureId]);
+    return rows[0] ? mapCapturedCard(rows[0]) : null;
+  }
+  async updateCapturedCard(userId, cardId, patch) {
+    const { rows } = await this.pool.query('UPDATE captured_cards SET card_title = COALESCE($3, card_title), updated_at = NOW() WHERE user_id = $1 AND id = $2 RETURNING *', [userId, cardId, patch.cardTitle ?? null]);
+    return rows[0] ? mapCapturedCard(rows[0]) : null;
+  }
+  async getLastCaptureLocation(userId) {
+    const { rows } = await this.pool.query(
+      `SELECT gps_lat, gps_lng, captured_at FROM captured_cards
+       WHERE user_id = $1 AND gps_lat IS NOT NULL AND gps_lng IS NOT NULL
+       ORDER BY captured_at DESC LIMIT 1`,
+      [userId],
+    );
+    if (!rows[0]) return null;
+    return { gps: { lat: Number(rows[0].gps_lat), lng: Number(rows[0].gps_lng) }, capturedAt: rows[0].captured_at };
+  }
+  async hasSimilarCaptureImageHash(userId, hash, threshold = 0.95) {
+    const { rows } = await this.pool.query(
+      "SELECT image_hash FROM captured_cards WHERE user_id = $1 AND image_hash IS NOT NULL AND captured_at >= NOW() - INTERVAL '10 minutes'",
+      [userId],
+    );
+    return rows.some((row) => hashSimilarity(row.image_hash, hash) >= threshold);
+  }
+  async hasGlobalSimilarCaptureImageHash(userId, hash, threshold = 0.98) {
+    const { rows } = await this.pool.query('SELECT image_hash FROM captured_cards WHERE user_id <> $1 AND image_hash IS NOT NULL', [userId]);
+    return rows.some((row) => hashSimilarity(row.image_hash, hash) >= threshold);
   }
   async createFeedEntry(entry) {
     const { rows } = await this.pool.query(`INSERT INTO quest_feed_entries
@@ -393,7 +431,27 @@ function mapSubmission(row) { return { id: row.id, userId: row.user_id, assignme
 function mapFeedEntry(row) { return { id: row.id, userId: row.user_id, assignmentId: row.assignment_id, submissionId: row.submission_id, questName: row.quest_name, displayName: row.display_name, xpEarned: Number(row.xp_earned), rankTitle: row.rank_title, imageRef: row.image_ref, createdAt: row.created_at }; }
 function mapReward(row) { return { level: Number(row.level), rewardType: row.reward_type, rewardKey: row.reward_key, amount: Number(row.amount), label: row.label, status: row.status, unlockedAt: row.unlocked_at, claimedAt: row.claimed_at }; }
 function mapNotification(row) { return { id: row.id, userId: row.user_id, kind: row.kind, title: row.title, body: row.body, readAt: row.read_at, createdAt: row.created_at }; }
-function mapCapturedCard(row) { return { id: row.id, userId: row.user_id, itemName: row.item_name, category: row.category, cardTitle: row.card_title, rarityTier: row.rarity_tier, rarityScore: Number(row.rarity_score), description: row.description, imageRef: row.image_ref, capturedAt: row.captured_at }; }
+function mapCapturedCard(row) {
+  return {
+    id: row.id,
+    userId: row.user_id,
+    captureId: row.capture_id,
+    itemName: row.item_name,
+    category: row.category,
+    cardTitle: row.card_title,
+    rarityTier: row.rarity_tier,
+    rarityScore: Number(row.rarity_score),
+    description: row.description,
+    imageRef: row.image_ref,
+    status: row.status,
+    gps: row.gps_lat != null ? { lat: Number(row.gps_lat), lng: Number(row.gps_lng), accuracyM: row.gps_accuracy_m != null ? Number(row.gps_accuracy_m) : null, altitude: row.gps_altitude != null ? Number(row.gps_altitude) : null } : null,
+    heading: row.heading != null ? Number(row.heading) : null,
+    capturedAt: row.captured_at,
+    antiCheatVerdict: row.anti_cheat_verdict,
+    antiCheatReason: row.anti_cheat_reason,
+    rejectReason: row.reject_reason,
+  };
+}
 function conflict(code) { const error = new Error(code); error.code = code; error.status = 409; return error; }
 function levelFromXp(totalXp) {
   let remaining = totalXp;

@@ -40,7 +40,7 @@ export function useCaptureItem() {
   const api = useApiClient();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (imageBase64) => api.createCapture(imageBase64, newIdempotencyKey()),
+    mutationFn: (bundle) => api.createCapture(bundle, newIdempotencyKey()),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['captures'] }),
   });
 }

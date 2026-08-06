@@ -1,11 +1,12 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 export class ApiError extends Error {
-  constructor(status, code, requestId) {
+  constructor(status, code, requestId, reason) {
     super(code || 'request_failed');
     this.status = status;
     this.code = code;
     this.requestId = requestId;
+    this.reason = reason;
   }
 }
 
@@ -40,7 +41,7 @@ async function request(path, { method = 'GET', body, token, idempotencyKey, sign
   }
 
   if (!response.ok) {
-    throw new ApiError(response.status, payload?.error?.code, payload?.error?.requestId);
+    throw new ApiError(response.status, payload?.error?.code, payload?.error?.requestId, payload?.error?.reason);
   }
   return payload;
 }
@@ -100,7 +101,7 @@ export function createApiClient(getToken) {
       if (token === 'guest') return guestDelay(guestCaptures || GUEST_CAPTURES, 400);
       return request('/captures', { signal, token });
     },
-    createCapture: async (imageBase64, idempotencyKey) => {
+    createCapture: async (bundle, idempotencyKey) => {
       const token = await getToken();
       if (token === 'guest') {
         const card = {
@@ -116,7 +117,7 @@ export function createApiClient(getToken) {
         guestCaptures = [card, ...(guestCaptures || GUEST_CAPTURES)];
         return guestDelay(card, 900);
       }
-      return request('/captures', { method: 'POST', body: { imageBase64 }, idempotencyKey, token });
+      return request('/captures', { method: 'POST', body: bundle, idempotencyKey, token });
     },
     renameCapture: async (captureId, cardTitle) => {
       const token = await getToken();
