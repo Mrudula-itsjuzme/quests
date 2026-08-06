@@ -114,6 +114,9 @@ export function resolveVisionProvider(config) {
   return new StubVisionProvider();
 }
 
+/** A species the AI identified that isn't in our curated catalog yet has no scarcity data to draw on. */
+const UNCATALOGED_SPECIES_BASE_RARITY = 0.5;
+
 /** Resolves an identification candidate against the species catalog, matching by common name. */
 export function resolveCandidateSpecies(candidate) {
   const matched = findSpeciesByCommonName(candidate.commonName);
@@ -124,7 +127,7 @@ export function resolveCandidateSpecies(candidate) {
     scientificName: candidate.scientificName,
     element: candidate.element,
     category: candidate.category,
-    baseRarity: 0.5,
+    baseRarity: UNCATALOGED_SPECIES_BASE_RARITY,
     nocturnal: false,
     sensitive: false,
     seasonalityMonths: [],

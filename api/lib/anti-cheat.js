@@ -8,35 +8,46 @@ export const GateVerdict = Object.freeze({
 const FLAG_THRESHOLD = 2;
 const MAX_HUMAN_SPEED_MPS = 120;
 
-function pass(detector, reason = null) {
-  return { detector, verdict: AntiCheatVerdict.PASS, reason };
+function pass(detector, reason = null, implemented = true) {
+  return { detector, verdict: AntiCheatVerdict.PASS, reason, implemented };
 }
 function flag(detector, reason) {
-  return { detector, verdict: AntiCheatVerdict.FLAG, reason };
+  return { detector, verdict: AntiCheatVerdict.FLAG, reason, implemented: true };
 }
 function reject(detector, reason) {
-  return { detector, verdict: AntiCheatVerdict.REJECT, reason };
+  return { detector, verdict: AntiCheatVerdict.REJECT, reason, implemented: true };
+}
+/** A detector that always passes because no real check has been wired in yet — never counts as evidence of authenticity. */
+function unimplementedPass(detector) {
+  return pass(detector, 'detector_not_implemented', false);
 }
 
-/** Client-attested liveness sanity check — stubbed pending native camera capture. */
+/**
+ * Client-attested liveness sanity check. `attested` reflects the browser's
+ * live-capture input hint, not a cryptographic proof (see captureTelemetry.js)
+ * — real screenshots and re-saved images frequently lack EXIF data, so its
+ * absence is treated as corroborating (soft) evidence, not a hard fail, since
+ * some browsers legitimately strip EXIF from genuine live captures too.
+ */
 export function livenessDetector(bundle) {
   if (!bundle.liveness?.attested) return flag('liveness', 'not_attested');
+  if (bundle.exif && bundle.exif.hasExif === false) return flag('liveness', 'no_exif_data');
   return pass('liveness');
 }
 
-/** Screenshot/screen-recapture classifier — stub until a vision model is wired in (blueprint §15.1). */
+/** Screenshot/screen-recapture classifier — NOT YET IMPLEMENTED (blueprint §15.1). Always passes; logged as such. */
 export function screenshotDetector(_bundle) {
-  return pass('screenshot');
+  return unimplementedPass('screenshot');
 }
 
-/** Generative-image (Midjourney/SD/GAN) classifier — stub until a vision model is wired in. */
+/** Generative-image (Midjourney/SD/GAN) classifier — NOT YET IMPLEMENTED. Always passes; logged as such. */
 export function aiGeneratedDetector(_bundle) {
-  return pass('ai_generated');
+  return unimplementedPass('ai_generated');
 }
 
-/** Printed-photo / re-photograph classifier — stub until a vision model is wired in. */
+/** Printed-photo / re-photograph classifier — NOT YET IMPLEMENTED. Always passes; logged as such. */
 export function printedPhotoDetector(_bundle) {
-  return pass('printed_photo');
+  return unimplementedPass('printed_photo');
 }
 
 /** Perceptual-hash match against previously seen images (this user + global corpus). */
@@ -92,18 +103,19 @@ const DEFAULT_DETECTORS = [
 
 export async function antiCheatVerdict(bundle, context, detectors = DEFAULT_DETECTORS) {
   const results = await Promise.all(detectors.map((detector) => detector(bundle, context)));
+  const unimplementedDetectors = results.filter((result) => result.implemented === false).map((result) => result.detector);
 
   const hardFail = results.find((result) => result.verdict === AntiCheatVerdict.REJECT);
-  if (hardFail) return { verdict: GateVerdict.REJECT, reason: hardFail.reason, detector: hardFail.detector, results };
+  if (hardFail) return { verdict: GateVerdict.REJECT, reason: hardFail.reason, detector: hardFail.detector, results, unimplementedDetectors };
 
   const softFlags = results.filter((result) => result.verdict === AntiCheatVerdict.FLAG);
   if (softFlags.length >= FLAG_THRESHOLD) {
-    return { verdict: GateVerdict.REJECT, reason: 'multiple_integrity_flags', results };
+    return { verdict: GateVerdict.REJECT, reason: 'multiple_integrity_flags', results, unimplementedDetectors };
   }
   if (softFlags.length >= 1) {
-    return { verdict: GateVerdict.PASS_WITH_REVIEW, reason: softFlags[0].reason, results };
+    return { verdict: GateVerdict.PASS_WITH_REVIEW, reason: softFlags[0].reason, results, unimplementedDetectors };
   }
-  return { verdict: GateVerdict.PASS, reason: null, results };
+  return { verdict: GateVerdict.PASS, reason: null, results, unimplementedDetectors };
 }
 
 function haversineMeters(a, b) {

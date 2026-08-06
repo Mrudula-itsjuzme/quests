@@ -66,6 +66,7 @@ export function CaptureFlow({ onClose }) {
       gps: telemetry.gps,
       heading: telemetry.heading,
       liveness: telemetry.liveness,
+      exif: telemetry.exif,
     });
   };
 

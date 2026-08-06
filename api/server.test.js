@@ -305,6 +305,31 @@ describe('Quest API', () => {
     expect(fetched.body.id).toBe(created.body.id);
   });
 
+  it('actually credits the capture XP reward to the player total, not just the card', async () => {
+    const app = createApp({ config: testConfig(), visionProvider: highConfidenceVisionProvider() });
+    const before = await request(app).get('/api/v1/me');
+    const captured = await request(app)
+      .post('/api/v1/captures')
+      .set('Idempotency-Key', 'capture-xp-001')
+      .send({ imageBase64: PIXEL_PNG, liveness: { attested: true, method: 'capture-input-environment', score: 0.7 } });
+    expect(captured.body.status).toBe('final');
+    expect(captured.body.xpAwarded).toBeGreaterThan(0);
+    const after = await request(app).get('/api/v1/me');
+    expect(after.body.totalXp).toBe(before.body.totalXp + captured.body.xpAwarded);
+  });
+
+  it('does not credit XP for a provisional (pending-review) capture until it is verified', async () => {
+    const app = createApp({ config: testConfig(), visionProvider: highConfidenceVisionProvider() });
+    const before = await request(app).get('/api/v1/me');
+    const captured = await request(app)
+      .post('/api/v1/captures')
+      .set('Idempotency-Key', 'capture-xp-002')
+      .send({ imageBase64: PIXEL_PNG, liveness: { attested: false } });
+    expect(captured.body.status).toBe('provisional');
+    const after = await request(app).get('/api/v1/me');
+    expect(after.body.totalXp).toBe(before.body.totalXp);
+  });
+
   it('asks for confirmation instead of minting when identification confidence is below threshold', async () => {
     const app = createApp({ config: testConfig() });
     const response = await request(app)

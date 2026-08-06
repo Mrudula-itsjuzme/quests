@@ -51,11 +51,21 @@ const livenessSchema = z.object({
   method: z.string().max(80).optional(),
   score: z.number().min(0).max(1).optional(),
 }).strict().nullable().optional();
+const exifSchema = z.object({
+  make: z.string().nullable().optional(),
+  model: z.string().nullable().optional(),
+  lens: z.string().nullable().optional(),
+  exposure: z.string().nullable().optional(),
+  iso: z.number().nullable().optional(),
+  orientation: z.number().nullable().optional(),
+  hasExif: z.boolean().optional(),
+}).strict().nullable().optional();
 const captureCreateSchema = z.object({
   captureId: z.string().uuid().optional(),
   imageBase64: z.string().min(100).max(8_000_000).regex(/^data:image\/(png|jpe?g|webp);base64,/, 'must be a base64 data URL'),
   capturedAt: z.string().datetime().optional(),
   gps: gpsSchema,
+  exif: exifSchema,
   heading: z.number().min(0).max(360).nullable().optional(),
   liveness: livenessSchema,
   chosenCandidateIndex: z.number().int().min(0).max(2).optional(),
@@ -178,9 +188,12 @@ export function createApp(options = {}) {
     const capturedAt = body.capturedAt || serverReceivedAt.toISOString();
 
     const gate = await antiCheatVerdict(
-      { capturedAt, gps: body.gps || null, heading: body.heading ?? null, liveness: body.liveness || null, imageHash },
+      { capturedAt, gps: body.gps || null, heading: body.heading ?? null, liveness: body.liveness || null, exif: body.exif || null, imageHash },
       { repository, userId: req.identity.id, serverReceivedAt },
     );
+    if (gate.unimplementedDetectors.length && config.NODE_ENV !== 'test') {
+      console.warn(JSON.stringify({ level: 'warn', event: 'anti_cheat_unimplemented_detectors', requestId: req.id, detectors: gate.unimplementedDetectors }));
+    }
 
     if (gate.verdict === GateVerdict.REJECT) {
       return res.status(422).json({ error: { code: 'anti_cheat_rejected', reason: gate.reason, requestId: req.id } });
@@ -202,6 +215,7 @@ export function createApp(options = {}) {
       const isFirstGlobal = speciesMatch.id
         ? !(await repository.hasAnyCaptureOfSpecies?.(speciesMatch.id))
         : false;
+      const discoveryStats = speciesMatch.id ? await repository.getSpeciesDiscoveryStats?.(speciesMatch.id) : null;
 
       const rarity = scoreDiscovery(
         {
@@ -212,6 +226,7 @@ export function createApp(options = {}) {
           lastCaptureGps: lastCapture?.gps || null,
           isFirstForPlayer,
           isFirstGlobal,
+          discoveryStats,
         },
         { version: 1, weights: DEFAULT_WEIGHTS, gradeBands: DEFAULT_GRADE_BANDS },
       );

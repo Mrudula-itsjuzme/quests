@@ -37,5 +37,9 @@ export const categoryColors = { Mind: 'mind', Body: 'body', Discovery: 'discover
 export function categoryIcon(category) {
   if (category === 'Body') return 'bolt';
   if (category === 'Mind') return 'leaf';
+  if (category === 'Fauna') return 'feather';
+  if (category === 'Flora') return 'leaf';
+  if (category === 'Landscape') return 'compass';
+  if (category === 'Heritage') return 'archive';
   return 'compass';
 }

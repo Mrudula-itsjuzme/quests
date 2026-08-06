@@ -31,10 +31,30 @@ describe('antiCheatVerdict', () => {
     expect(result.reason).toBeNull();
   });
 
+  it('honestly reports which detectors are not yet implemented, so a PASS is never mistaken for a real check', async () => {
+    const result = await antiCheatVerdict(bundle(), context());
+    expect(result.unimplementedDetectors).toEqual(expect.arrayContaining(['screenshot', 'ai_generated', 'printed_photo']));
+    for (const detector of result.results.filter((entry) => result.unimplementedDetectors.includes(entry.detector))) {
+      expect(detector.implemented).toBe(false);
+      expect(detector.verdict).toBe('PASS');
+    }
+  });
+
   it('flags an unattested liveness signal instead of rejecting outright', async () => {
     const result = await antiCheatVerdict(bundle({ liveness: { attested: false } }), context());
     expect(result.verdict).toBe(GateVerdict.PASS_WITH_REVIEW);
     expect(result.reason).toBe('not_attested');
+  });
+
+  it('flags a capture with no EXIF data as corroborating (not hard-fail) evidence', async () => {
+    const result = await antiCheatVerdict(bundle({ exif: { hasExif: false } }), context());
+    expect(result.verdict).toBe(GateVerdict.PASS_WITH_REVIEW);
+    expect(result.reason).toBe('no_exif_data');
+  });
+
+  it('does not flag liveness when EXIF is present', async () => {
+    const result = await antiCheatVerdict(bundle({ exif: { hasExif: true } }), context());
+    expect(result.verdict).toBe(GateVerdict.PASS);
   });
 
   it('rejects a capturedAt timestamp far in the future alongside another flag (two soft flags = reject)', async () => {

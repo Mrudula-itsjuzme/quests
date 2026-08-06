@@ -141,6 +141,10 @@ export async function collectCaptureTelemetry(file) {
     heading,
     motion,
     exif,
+    // `attested: true` reflects that the browser's live-capture input hint
+    // (capture="environment") was used, NOT a cryptographic liveness proof —
+    // browsers don't universally block gallery picking through that input,
+    // so this is a weak signal until a native camera pipeline replaces it.
     liveness: {
       attested: true,
       method: 'capture-input-environment',

@@ -69,12 +69,11 @@ function regionalRarityFactor() {
   return 0.5;
 }
 
-/**
- * How rarely this species is captured game-wide. Honest placeholder until a
- * live discovery-frequency feed is wired in — neutral until that data exists.
- */
-function discoveryFrequencyFactor() {
-  return 0.5;
+/** How rarely this species is captured game-wide, relative to total captures. */
+function discoveryFrequencyFactor({ discoveryStats }) {
+  if (!discoveryStats || discoveryStats.totalCount === 0) return 0.5;
+  const shareOfAllCaptures = discoveryStats.speciesCount / discoveryStats.totalCount;
+  return clamp01(1 - shareOfAllCaptures * 10);
 }
 
 /** Out-of-season / migratory timing — 1.0 if captured outside the species' listed active months. */

@@ -282,25 +282,44 @@ export class PostgresQuestRepository {
   }
   async getCollectibles(userId) { const { rows } = await this.pool.query('SELECT * FROM collectible_unlocks WHERE user_id = $1 ORDER BY unlocked_at DESC', [userId]); return rows.map((row) => ({ assetId: row.asset_id, questId: row.quest_id, title: row.title, category: row.category, rarity: row.rarity, caption: row.caption, unlockedAt: row.unlocked_at })); }
   async createCapturedCard(card) {
-    const { rows } = await this.pool.query(
-      `INSERT INTO captured_cards
-        (id, user_id, capture_id, item_name, category, card_title, rarity_tier, rarity_score, description, image_ref, image_hash,
-         status, gps_lat, gps_lng, gps_accuracy_m, gps_altitude, heading, captured_at, server_received_at,
-         anti_cheat_verdict, anti_cheat_reason, anti_cheat_detail, reject_reason,
-         species_id, confidence, rarity_grade, rarity_stars, rarity_weight_set_version, rarity_factor_breakdown, xp_awarded, coins_awarded)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31)
-       RETURNING *`,
-      [
-        randomUUID(), card.userId, card.captureId || null, card.itemName, card.category, card.cardTitle, card.rarityTier, card.rarityScore,
-        card.description, card.imageRef || null, card.imageHash || null,
-        card.status || 'final', card.gps?.lat ?? null, card.gps?.lng ?? null, card.gps?.accuracyM ?? null, card.gps?.altitude ?? null,
-        card.heading ?? null, card.capturedAt || new Date(), card.serverReceivedAt || new Date(),
-        card.antiCheatVerdict || null, card.antiCheatReason || null, JSON.stringify(card.antiCheatDetail || []), card.rejectReason || null,
-        card.speciesId || null, card.confidence ?? null, card.rarityGrade || null, card.rarityStars ?? null,
-        card.rarityWeightSetVersion ?? null, JSON.stringify(card.rarityFactorBreakdown || {}), card.xpAwarded || 0, card.coinsAwarded || 0,
-      ],
-    );
-    return mapCapturedCard(rows[0]);
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      const { rows } = await client.query(
+        `INSERT INTO captured_cards
+          (id, user_id, capture_id, item_name, category, card_title, rarity_tier, rarity_score, description, image_ref, image_hash,
+           status, gps_lat, gps_lng, gps_accuracy_m, gps_altitude, heading, captured_at, server_received_at,
+           anti_cheat_verdict, anti_cheat_reason, anti_cheat_detail, reject_reason,
+           species_id, confidence, rarity_grade, rarity_stars, rarity_weight_set_version, rarity_factor_breakdown, xp_awarded, coins_awarded)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31)
+         RETURNING *`,
+        [
+          randomUUID(), card.userId, card.captureId || null, card.itemName, card.category, card.cardTitle, card.rarityTier, card.rarityScore,
+          card.description, card.imageRef || null, card.imageHash || null,
+          card.status || 'final', card.gps?.lat ?? null, card.gps?.lng ?? null, card.gps?.accuracyM ?? null, card.gps?.altitude ?? null,
+          card.heading ?? null, card.capturedAt || new Date(), card.serverReceivedAt || new Date(),
+          card.antiCheatVerdict || null, card.antiCheatReason || null, JSON.stringify(card.antiCheatDetail || []), card.rejectReason || null,
+          card.speciesId || null, card.confidence ?? null, card.rarityGrade || null, card.rarityStars ?? null,
+          card.rarityWeightSetVersion ?? null, JSON.stringify(card.rarityFactorBreakdown || {}), card.xpAwarded || 0, card.coinsAwarded || 0,
+        ],
+      );
+      const created = rows[0];
+      // Provisional (pending human verification) captures don't credit XP until approved — blueprint §6/§21.
+      if (created.status === 'final' && card.xpAwarded > 0) {
+        await client.query(
+          'INSERT INTO capture_xp_ledger (id, card_id, user_id, amount) VALUES ($1,$2,$3,$4)',
+          [randomUUID(), created.id, card.userId, card.xpAwarded],
+        );
+        await client.query('UPDATE quest_users SET total_xp = total_xp + $2, updated_at = NOW() WHERE id = $1', [card.userId, card.xpAwarded]);
+      }
+      await client.query('COMMIT');
+      return mapCapturedCard(created);
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
   }
   async getCapturedCards(userId) { const { rows } = await this.pool.query('SELECT * FROM captured_cards WHERE user_id = $1 ORDER BY captured_at DESC', [userId]); return rows.map(mapCapturedCard); }
   async getCapturedCardById(userId, cardId) {
@@ -332,6 +351,13 @@ export class PostgresQuestRepository {
   async hasAnyCaptureOfSpecies(speciesId) {
     const { rowCount } = await this.pool.query('SELECT 1 FROM captured_cards WHERE species_id = $1 AND status <> $2 LIMIT 1', [speciesId, 'rejected']);
     return rowCount > 0;
+  }
+  async getSpeciesDiscoveryStats(speciesId) {
+    const [speciesCount, totalCount] = await Promise.all([
+      this.pool.query("SELECT COUNT(*)::int AS count FROM captured_cards WHERE species_id = $1 AND status <> 'rejected'", [speciesId]),
+      this.pool.query("SELECT COUNT(*)::int AS count FROM captured_cards WHERE status <> 'rejected'"),
+    ]);
+    return { speciesCount: speciesCount.rows[0].count, totalCount: totalCount.rows[0].count };
   }
   async hasSimilarCaptureImageHash(userId, hash, threshold = 0.95) {
     const { rows } = await this.pool.query(
@@ -466,6 +492,8 @@ function mapCapturedCard(row) {
     rarityGrade: row.rarity_grade,
     rarityStars: row.rarity_stars,
     rarityWeightSetVersion: row.rarity_weight_set_version,
+    // xpAwarded is credited to quest_users.total_xp when status is 'final' (see createCapturedCard).
+    // coinsAwarded is NOT yet credited anywhere — the coin ledger/wallet ships in Milestone 7.
     xpAwarded: row.xp_awarded != null ? Number(row.xp_awarded) : 0,
     coinsAwarded: row.coins_awarded != null ? Number(row.coins_awarded) : 0,
   };

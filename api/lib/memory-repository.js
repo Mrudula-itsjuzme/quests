@@ -195,6 +195,11 @@ export class MemoryQuestRepository {
   async createCapturedCard(card) {
     const value = { id: randomUUID(), status: 'final', capturedAt: new Date().toISOString(), serverReceivedAt: new Date().toISOString(), ...card };
     this.capturedCards.unshift(value);
+    // Provisional (pending human verification) captures don't credit XP until approved — blueprint §6/§21.
+    if (value.status === 'final' && value.xpAwarded > 0) {
+      const user = this.users.get(value.userId);
+      if (user) user.totalXp += value.xpAwarded;
+    }
     return clone(value);
   }
   async getCapturedCards(userId) { return this.capturedCards.filter((item) => item.userId === userId).map(clone); }
@@ -221,6 +226,13 @@ export class MemoryQuestRepository {
   }
   async hasAnyCaptureOfSpecies(speciesId) {
     return this.capturedCards.some((item) => item.speciesId === speciesId && item.status !== 'rejected');
+  }
+  async getSpeciesDiscoveryStats(speciesId) {
+    const notRejected = this.capturedCards.filter((item) => item.status !== 'rejected');
+    return {
+      speciesCount: notRejected.filter((item) => item.speciesId === speciesId).length,
+      totalCount: notRejected.length,
+    };
   }
   async hasSimilarCaptureImageHash(userId, hash, threshold = 0.95) {
     const tenMinutesAgo = Date.now() - 10 * 60 * 1000;
