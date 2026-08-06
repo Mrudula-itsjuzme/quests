@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { createPortal } from 'react-dom';
 import { Icon } from '../Icon';
 import { AnimatedCounter } from './AnimatedCounter';
 import { playSuccess, playTap } from '../../lib/useSoundEffects';
@@ -18,7 +19,7 @@ export function QuestSuccessModal({ quest, onClose }) {
     scale: 0.5 + (index % 4) * 0.16,
   }));
 
-  return (
+  return createPortal(
     <motion.div
       className="modal-overlay celebration-overlay"
       role="dialog"
@@ -81,6 +82,7 @@ export function QuestSuccessModal({ quest, onClose }) {
           Claim & Continue Path ›
         </button>
       </motion.div>
-    </motion.div>
+    </motion.div>,
+    document.body,
   );
 }

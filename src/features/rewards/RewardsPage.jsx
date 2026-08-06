@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Icon, categoryIcon } from '../../components/Icon';
@@ -167,22 +168,25 @@ function RewardsContent({
         </RewardPanel>
       </motion.div>
 
-      <AnimatePresence>
-        {showLeaderboard && (
-          <motion.div className="modal-backdrop" role="presentation" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onMouseDown={() => setShowLeaderboard(false)}>
-            <motion.section className="quest-modal leaderboard-modal" role="dialog" aria-modal="true" aria-labelledby="leaderboard-title" initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} transition={springConfig.snappy} onMouseDown={(event) => event.stopPropagation()}>
-              <div className="section-title"><h2 id="leaderboard-title">Global Leaderboard</h2><button type="button" onClick={() => { playTap(); setShowLeaderboard(false); }} aria-label="Close leaderboard">×</button></div>
-              <div className="leaderboard-list">
-                {leaderboard.map((entry) => (
-                  <motion.article key={entry.userId} className={entry.isCurrentUser ? 'current' : ''} whileHover={{ x: 4 }} onMouseEnter={playHover} transition={springConfig.tactile}>
-                    <strong>#{entry.position}</strong><span>{entry.displayName}<small>{entry.rankTitle}</small></span><b><AnimatedCounter value={entry.totalXp} /> XP</b>
-                  </motion.article>
-                ))}
-              </div>
-            </motion.section>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {createPortal(
+        <AnimatePresence>
+          {showLeaderboard && (
+            <motion.div className="modal-backdrop" role="presentation" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onMouseDown={() => setShowLeaderboard(false)}>
+              <motion.section className="quest-modal leaderboard-modal" role="dialog" aria-modal="true" aria-labelledby="leaderboard-title" initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} transition={springConfig.snappy} onMouseDown={(event) => event.stopPropagation()}>
+                <div className="section-title"><h2 id="leaderboard-title">Global Leaderboard</h2><button type="button" onClick={() => { playTap(); setShowLeaderboard(false); }} aria-label="Close leaderboard">×</button></div>
+                <div className="leaderboard-list">
+                  {leaderboard.map((entry) => (
+                    <motion.article key={entry.userId} className={entry.isCurrentUser ? 'current' : ''} whileHover={{ x: 4 }} onMouseEnter={playHover} transition={springConfig.tactile}>
+                      <strong>#{entry.position}</strong><span>{entry.displayName}<small>{entry.rankTitle}</small></span><b><AnimatedCounter value={entry.totalXp} /> XP</b>
+                    </motion.article>
+                  ))}
+                </div>
+              </motion.section>
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body,
+      )}
 
       <AnimatePresence>
         {notice && (

@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Icon, categoryIcon } from '../../components/Icon';
 import { useCaptureItem, useRenameCapture } from '../quests/queries';
@@ -88,7 +89,7 @@ export function CaptureFlow({ onClose }) {
     onClose();
   };
 
-  return (
+  return createPortal(
     <motion.div
       className="capture-flow-overlay"
       role="dialog"
@@ -228,6 +229,7 @@ export function CaptureFlow({ onClose }) {
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.div>
+    </motion.div>,
+    document.body,
   );
 }

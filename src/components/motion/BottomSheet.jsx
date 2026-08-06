@@ -1,5 +1,6 @@
 import { motion, useAnimation, useDragControls } from 'framer-motion';
 import { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 export function BottomSheet({ isOpen, onClose, children }) {
   const controls = useAnimation();
@@ -26,7 +27,7 @@ export function BottomSheet({ isOpen, onClose, children }) {
     }
   };
 
-  return (
+  return createPortal(
     <motion.div
       className="bottom-sheet-backdrop"
       initial={{ opacity: 0 }}
@@ -60,6 +61,7 @@ export function BottomSheet({ isOpen, onClose, children }) {
           {children}
         </div>
       </motion.div>
-    </motion.div>
+    </motion.div>,
+    document.body,
   );
 }
