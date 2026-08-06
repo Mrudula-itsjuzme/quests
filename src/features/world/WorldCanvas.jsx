@@ -11,7 +11,7 @@ export const WORLD_BUILDINGS = [
   { id: 'guild-hall', label: 'Guild Hall', icon: 'shield', to: '/app/community', x: 76, y: 32 },
   { id: 'marketplace', label: 'Marketplace', icon: 'chest', to: '/app/rewards', x: 14, y: 66 },
   { id: 'library', label: 'Library', icon: 'book', to: '/app/collection', x: 85, y: 62 },
-  { id: 'sanctuary', label: 'Sanctuary', icon: 'home', to: '/app/profile', x: 50, y: 74 },
+  { id: 'sanctuary', label: 'Sanctuary', icon: 'home', to: '/app/profile', x: 30, y: 82 },
   { id: 'watchtower', label: 'Watchtower', icon: 'compass', to: '/app/community', x: 55, y: 20 },
 ];
 
