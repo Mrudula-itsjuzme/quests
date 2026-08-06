@@ -1708,6 +1708,12 @@ a { color: var(--gold); }
   background: var(--gold-soft);
 }
 
+.guest-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
 /* ---------- Metrics ---------- */
 .metric-strip {
   grid-area: metrics;

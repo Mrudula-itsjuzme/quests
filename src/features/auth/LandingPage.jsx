@@ -17,9 +17,9 @@ export function LandingPage() {
         transition={{ type: 'spring', stiffness: 350, damping: 25 }}
       >
         <div className="landing-nyx"><NyxCat small /></div>
-        <span className="brand-mark" aria-hidden="true">Q</span>
-        <h1>HABBIT QUESTS</h1>
-        <p>An enchanted personal archive for daily and weekly wellness quests. Earn XP, build streaks, and fill your journal with collectibles as you grow.</p>
+        <span className="brand-mark" aria-hidden="true">W</span>
+        <h1>WILD REALM</h1>
+        <p>A living world for your daily quests. Explore, capture rare discoveries, earn XP, and fill your journal with collectibles as you grow.</p>
         <div className="landing-actions">
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Link className="primary-action" to="/sign-up" onClick={playTap} onMouseEnter={playHover}>Open your journal</Link>
@@ -36,7 +36,6 @@ export function LandingPage() {
                 enterAsGuest();
               }}
               onMouseEnter={playHover}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             >
               Enter as Guest <span>›</span>
             </button>
