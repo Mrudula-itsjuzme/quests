@@ -10932,11 +10932,47 @@ body, .app-shell {
   -webkit-backdrop-filter: blur(24px);
   border: 1px solid var(--wild-border-gold);
   border-radius: 24px;
-  padding: 20px;
+  padding: 16px 20px 20px;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(245, 158, 11, 0.2);
   color: var(--wild-text);
   position: relative;
   margin: 0 auto;
+}
+
+.discovery-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.discovery-header-badge {
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  color: var(--wild-gold-bright);
+  text-transform: uppercase;
+}
+
+.discovery-close-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--wild-text-muted);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  line-height: 1;
+  transition: all 0.15s ease;
+}
+
+.discovery-close-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
 }
 
 .discovery-hero-frame {

@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 
-export function DiscoveryCard({ card, imageUrl, onAddToLibrary, onShare }) {
+export function DiscoveryCard({ card, imageUrl, onAddToLibrary, onShare, onClose }) {
   const rarityTier = (card.rarityTier || card.rarity || 'legendary').toUpperCase();
   const cardImg = imageUrl || card.imageUrl || '/assets/african-grey-parrot.png';
   const itemName = card.itemName || card.cardTitle || card.title || 'African Grey Parrot';
@@ -12,6 +12,18 @@ export function DiscoveryCard({ card, imageUrl, onAddToLibrary, onShare }) {
 
   return (
     <div className="discovery-card-modal">
+      {/* Modal Header */}
+      <div className="discovery-modal-header">
+        <span className="discovery-header-badge">✨ NEW DISCOVERY!</span>
+        <button
+          type="button"
+          className="discovery-close-btn"
+          onClick={onClose || onAddToLibrary}
+          aria-label="Close modal"
+        >
+          ×
+        </button>
+      </div>
       {/* Creature Photo Frame */}
       <div className="discovery-hero-frame">
         <img className="discovery-hero-img" src={cardImg} alt={itemName} />
