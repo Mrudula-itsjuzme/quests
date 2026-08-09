@@ -21,9 +21,8 @@ const navItemsLeft = [
 ];
 
 const navItemsRight = [
-  { to: '/app/collection', label: 'Library', icon: 'book' },
+  { to: '/app/collection', label: 'Collection', icon: 'book' },
   { to: '/app/community', label: 'Community', icon: 'shield' },
-  { to: '/app/profile', label: 'Profile', icon: 'user' },
 ];
 
 export function AppShell() {

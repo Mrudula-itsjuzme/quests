@@ -90,6 +90,15 @@ const ELEMENT_TABS = [
   { id: 'Familiars', label: '🐾 Familiars' },
 ];
 
+const cardVariants = {
+  hidden: { opacity: 0, y: 12 },
+  visible: (i) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.05, duration: 0.22, ease: [0.16, 1, 0.3, 1] },
+  }),
+};
+
 export function GalleryPage() {
   const { data: collection } = useCollectibles();
   const [activeTab, setActiveTab] = useState('Familiars');
@@ -115,12 +124,17 @@ export function GalleryPage() {
 
   return (
     <main className="library-shell">
-      {/* Header */}
+      {/* Compact Header */}
       <div className="library-header">
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-          <span style={{ fontSize: '1.2rem' }}>📜 MY LIBRARY</span>
-          <button type="button" className="discovery-close-btn" style={{ fontSize: '1rem' }}>🔍</button>
-        </div>
+        <h1>MY LIBRARY</h1>
+        <motion.button
+          type="button"
+          className="library-search-btn"
+          aria-label="Search collection"
+          whileTap={{ scale: 0.9 }}
+        >
+          🔍
+        </motion.button>
       </div>
 
       {/* Collection Summary Stats Bar */}
@@ -142,7 +156,7 @@ export function GalleryPage() {
       {/* Element Category Tabs */}
       <div className="library-element-tabs">
         {ELEMENT_TABS.map((tab) => (
-          <button
+          <motion.button
             key={tab.id}
             type="button"
             className={`library-tab-btn ${activeTab === tab.id ? 'active' : ''}`}
@@ -150,26 +164,31 @@ export function GalleryPage() {
               playTap();
               setActiveTab(tab.id);
             }}
+            whileTap={{ scale: 0.95 }}
+            layout
           >
             {tab.label}
-          </button>
+          </motion.button>
         ))}
       </div>
 
       {/* View Mode: Category Overview Grid (when "all") vs 2-Column Card Grid */}
       {activeTab === 'all' ? (
         <div className="library-card-grid">
-          {CATEGORY_TILES.map((cat) => (
+          {CATEGORY_TILES.map((cat, i) => (
             <motion.div
               key={cat.id}
               className="library-photo-card"
-              whileHover={{ scale: 1.03 }}
+              custom={i}
+              initial="hidden"
+              animate="visible"
+              variants={cardVariants}
               whileTap={{ scale: 0.97 }}
               onClick={() => {
                 playTap();
                 setActiveTab(cat.id);
               }}
-              style={{ height: '160px' }}
+              style={{ height: '140px' }}
             >
               <div className="library-card-img-wrap" style={{ height: '100%' }}>
                 <img className="library-card-img" src={cat.imageUrl} alt={cat.label} />
@@ -178,16 +197,16 @@ export function GalleryPage() {
                     position: 'absolute',
                     inset: 0,
                     background: cat.bgGradient,
-                    padding: '12px',
+                    padding: '10px',
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'flex-end',
                   }}
                 >
-                  <h3 style={{ color: '#fff', fontSize: '1.1rem', fontWeight: '900', margin: 0 }}>
+                  <h3 style={{ color: '#fff', fontSize: '1rem', fontWeight: '900', margin: 0 }}>
                     {cat.label}
                   </h3>
-                  <span style={{ color: 'var(--wild-text-dim)', fontSize: '0.8rem', fontWeight: '700' }}>
+                  <span style={{ color: 'var(--wild-text-dim)', fontSize: '0.75rem', fontWeight: '700' }}>
                     {cat.count}
                   </span>
                 </div>
@@ -198,11 +217,11 @@ export function GalleryPage() {
       ) : (
         <>
           {/* Active Category Header */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '12px 0 10px' }}>
-            <span style={{ fontSize: '0.88rem', fontWeight: '800', color: '#fff' }}>
-              FAMILIARS ({displayList.length})
+          <div className="library-category-header">
+            <span className="library-category-label">
+              {activeTab.toUpperCase()} ({displayList.length})
             </span>
-            <div style={{ display: 'flex', gap: '8px', fontSize: '0.78rem', color: 'var(--wild-text-dim)' }}>
+            <div className="library-sort-controls">
               <span>Rarity ▾</span>
               <span>::</span>
             </div>
@@ -210,11 +229,14 @@ export function GalleryPage() {
 
           {/* 2-Column Photographic Card Grid */}
           <div className="library-card-grid">
-            {displayList.map((card) => (
+            {displayList.map((card, i) => (
               <motion.div
                 key={card.assetId}
                 className={`library-photo-card rank-${card.rarityTier.toLowerCase()}`}
-                whileHover={{ scale: 1.03 }}
+                custom={i}
+                initial="hidden"
+                animate="visible"
+                variants={cardVariants}
                 whileTap={{ scale: 0.97 }}
                 onClick={() => {
                   playTap();
