@@ -1,0 +1,235 @@
+/* Wild Realm Desktop UI Overhaul */
+
+/* Hide desktop components on mobile by default */
+.desktop-sidebar {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  /* Hide mobile elements */
+  .mobile-bottom-dock,
+  .topbar.mobile-only {
+    display: none !important;
+  }
+
+  /* Desktop Layout Structure */
+  .app-shell {
+    display: flex;
+    flex-direction: row;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden; /* Prevent body scroll, handle scroll in main area */
+  }
+
+  .desktop-sidebar {
+    display: flex;
+    flex-direction: column;
+    width: 280px;
+    height: 100%;
+    background: var(--quest-panel-raised);
+    border-right: 1px solid var(--quest-line);
+    padding: 24px;
+    z-index: 50;
+    box-shadow: var(--shadow-3);
+  }
+
+  .app-main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+    padding: 0;
+  }
+
+  /* Reset mobile content area constraints for desktop */
+  .mobile-content-area {
+    margin: 0 !important;
+    padding: 32px 48px;
+    max-width: 1200px;
+    margin: 0 auto !important; /* Center content */
+    width: 100%;
+  }
+
+  /* Sidebar styling details */
+  .sidebar-header {
+    margin-bottom: 48px;
+  }
+
+  .sidebar-header .brand-lockup {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+  }
+
+  .sidebar-header .brand-mark {
+    font-size: 1.5rem;
+  }
+
+  .sidebar-header strong {
+    color: var(--quest-cream);
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    letter-spacing: 0.05em;
+  }
+
+  .sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+  }
+
+  .sidebar-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    color: var(--quest-muted);
+    text-decoration: none;
+    font-size: 1.05rem;
+    font-weight: 600;
+    transition: all var(--duration-quick) var(--quest-ease);
+  }
+
+  .sidebar-nav-item svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+  }
+
+  .sidebar-nav-item:hover {
+    color: var(--quest-cream);
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .sidebar-nav-item.active {
+    color: var(--quest-gold-bright);
+    background: rgba(217, 164, 65, 0.1);
+    box-shadow: inset 4px 0 0 var(--quest-gold-bright);
+  }
+
+  .sidebar-shutter-container {
+    margin-top: 32px;
+  }
+
+  .sidebar-shutter-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: var(--radius-lg);
+    color: white;
+    font-weight: 800;
+    font-size: 1.1rem;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.2);
+  }
+
+  .sidebar-shutter-btn svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+  }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .sidebar-user-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-md);
+  }
+
+  .user-xp-badge {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+  }
+
+  .user-xp-badge strong {
+    color: var(--quest-gold-bright);
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+  }
+
+  .user-xp-badge span {
+    color: var(--quest-muted);
+    font-size: 0.75rem;
+    font-weight: 800;
+  }
+
+  .user-profile-meta {
+    color: var(--quest-cream);
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  .sidebar-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .sidebar-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: var(--quest-muted);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+    border-radius: var(--radius-sm);
+    transition: all var(--duration-quick) ease;
+  }
+
+  .sidebar-action-btn svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+  }
+
+  .sidebar-action-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--quest-cream);
+  }
+
+  /* Make sure internal pages like GuildPage look good on desktop */
+  .guild-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 24px 0;
+  }
+
+  .community-feed-stream {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 24px;
+  }
+
+  .page-stack {
+    max-width: 1000px;
+    margin: 0 auto;
+    width: 100%;
+  }
+}

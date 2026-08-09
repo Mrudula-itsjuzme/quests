@@ -15,6 +15,7 @@ import { MagneticButton } from './motion/MagneticButton';
 import { WorldAmbience } from './WorldAmbience';
 import { DawnMoment, useDawnMoment } from './DawnMoment';
 import { useAndroidBackButton } from '../lib/useAndroidBackButton';
+import { DesktopSidebar } from './DesktopSidebar';
 
 const navItemsLeft = [
   { to: '/app', label: 'Map', icon: 'compass', end: true },
@@ -82,45 +83,52 @@ export function AppShell() {
           Development auth active — this is a local identity, not a real account.
         </div>
       )}
-      <header className="topbar">
-        <motion.div
-          className="brand-lockup"
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.97 }}
-          onMouseEnter={playHover}
-        >
-          <span className="brand-mark" aria-hidden="true">🌿</span>
-          <div>
-            <strong>WILD REALM</strong>
-          </div>
-        </motion.div>
-        <div className="user-profile-trigger">
-          {!isLoading && !isError && me && (
-            <div className="quick-stat shell-xp">
-              <strong>{me.totalXp.toLocaleString()}</strong>
-              <span>XP</span>
+
+      <DesktopSidebar 
+        onOpenSettings={() => setSettingsOpen(true)}
+        onLogout={() => setLogoutDialogOpen(true)}
+      />
+
+      <div className="app-main-content">
+        <header className="topbar mobile-only">
+          <motion.div
+            className="brand-lockup"
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            onMouseEnter={playHover}
+          >
+            <span className="brand-mark" aria-hidden="true">🌿</span>
+            <div>
+              <strong>WILD REALM</strong>
             </div>
-          )}
-          <MagneticButton
-            type="button"
-            className="round-action"
-            aria-label="Settings"
-            strength={0.3}
-            onClick={() => setSettingsOpen(true)}
-          >
-            <Icon name="gear" />
-          </MagneticButton>
-          <MagneticButton
-            type="button"
-            className="ghost-action"
-            aria-label="Sign out"
-            strength={0.2}
-            onClick={() => setLogoutDialogOpen(true)}
-          >
-            Sign out
-          </MagneticButton>
-        </div>
-      </header>
+          </motion.div>
+          <div className="user-profile-trigger">
+            {!isLoading && !isError && me && (
+              <div className="quick-stat shell-xp">
+                <strong>{me.totalXp.toLocaleString()}</strong>
+                <span>XP</span>
+              </div>
+            )}
+            <MagneticButton
+              type="button"
+              className="round-action"
+              aria-label="Settings"
+              strength={0.3}
+              onClick={() => setSettingsOpen(true)}
+            >
+              <Icon name="gear" />
+            </MagneticButton>
+            <MagneticButton
+              type="button"
+              className="ghost-action"
+              aria-label="Sign out"
+              strength={0.2}
+              onClick={() => setLogoutDialogOpen(true)}
+            >
+              Sign out
+            </MagneticButton>
+          </div>
+        </header>
 
       {/* Main scrolling content area */}
       <div className={`mobile-content-area ${isWorldRoute ? 'mobile-content-area-world' : ''}`}>
@@ -176,6 +184,7 @@ export function AppShell() {
             </NavLink>
           ))}
         </nav>
+      </div>
       </div>
 
       <AnimatePresence>
