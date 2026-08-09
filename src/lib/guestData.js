@@ -196,3 +196,11 @@ export const GUEST_REWARDS = [
   { level: 15, amount: 1, rewardType: 'badge', label: 'Badge of the Golden Sun', status: 'claimable' },
   { level: 20, amount: 1, rewardType: 'title', label: 'Title: Master Wayfarer', status: 'locked' },
 ];
+
+export const GUEST_SPECIES = [
+  { id: 'sky-house-sparrow', commonName: 'House Sparrow', scientificName: 'Passer domesticus', element: 'Sky', category: 'Fauna', baseRarity: 0.05, nocturnal: false, sensitive: false, seasonalityMonths: [] },
+  { id: 'earth-red-fox', commonName: 'Red Fox', scientificName: 'Vulpes vulpes', element: 'Earth', category: 'Fauna', baseRarity: 0.45, nocturnal: true, sensitive: false, seasonalityMonths: [] },
+  { id: 'water-waterfall', commonName: 'Forest Waterfall', scientificName: null, element: 'Water', category: 'Landscape', baseRarity: 0.55, nocturnal: false, sensitive: false, seasonalityMonths: [] },
+  { id: 'grass-sunflower', commonName: 'Sunflower', scientificName: 'Helianthus annuus', element: 'Grass', category: 'Flora', baseRarity: 0.10, nocturnal: false, sensitive: false, seasonalityMonths: [] },
+  { id: 'fire-sunset', commonName: 'Sunset', scientificName: null, element: 'Fire', category: 'Landscape', baseRarity: 0.28, nocturnal: false, sensitive: false, seasonalityMonths: [] },
+];

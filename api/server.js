@@ -19,6 +19,13 @@ import { PostgresQuestRepository } from './lib/postgres-repository.js';
 import { resolveVisionProvider, resolveCandidateSpecies, VisionClassificationError } from './lib/vision-providers.js';
 import { antiCheatVerdict, GateVerdict } from './lib/anti-cheat.js';
 import { scoreDiscovery, DEFAULT_WEIGHTS, DEFAULT_GRADE_BANDS } from './lib/rarity-engine.js';
+import { speciesCatalog } from './lib/species-catalog.js';
+
+const PUBLIC_SPECIES_CATALOG = speciesCatalog
+  .filter((entry) => entry.enabled)
+  .map(({ id, commonName, scientificName, element, category, baseRarity, nocturnal, sensitive, seasonalityMonths, encyclopedia }) => ({
+    id, commonName, scientificName, element, category, baseRarity, nocturnal, sensitive, seasonalityMonths, encyclopedia,
+  }));
 
 const CONFIDENCE_THRESHOLD = 0.70;
 
@@ -180,6 +187,7 @@ export function createApp(options = {}) {
   app.post('/api/v1/quests/:assignmentId/progress', writeLimiter, asyncRoute(async (req, res) => res.json(await engine.progress(req.identity, parse(assignmentIdSchema, req.params.assignmentId), parse(progressSchema, req.body), requireIdempotency(req)))));
   app.post('/api/v1/quests/:assignmentId/submissions', writeLimiter, asyncRoute(async (req, res) => res.status(201).json(await engine.submit(req.identity, parse(assignmentIdSchema, req.params.assignmentId), parse(submissionSchema, req.body), requireIdempotency(req)))));
   app.get('/api/v1/collectibles', asyncRoute(async (req, res) => sendCachedJson(req, res, await repository.getCollectibles(req.identity.id))));
+  app.get('/api/v1/species', asyncRoute(async (req, res) => sendCachedJson(req, res, PUBLIC_SPECIES_CATALOG)));
   app.post('/api/v1/captures', writeLimiter, asyncRoute(async (req, res) => {
     const body = parse(captureCreateSchema, req.body);
     const idempotencyKey = requireIdempotency(req);

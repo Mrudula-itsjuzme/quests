@@ -186,6 +186,24 @@ describe('Quest API', () => {
     expect(definitions.body.every((item) => item.cadence === 'daily')).toBe(true);
   });
 
+  it('serves the public species catalog to authenticated users only', async () => {
+    const app = createApp({ config: testConfig() });
+    const anonymous = await request(app).get('/api/v1/species').set('Authorization', '');
+    const authed = await request(app).get('/api/v1/species');
+    expect(anonymous.status).toBe(200); // dev-auth bypass applies without a header in test mode
+    expect(authed.status).toBe(200);
+    expect(Array.isArray(authed.body)).toBe(true);
+    expect(authed.body.length).toBeGreaterThan(0);
+    expect(authed.body[0]).toEqual(expect.objectContaining({ id: expect.any(String), commonName: expect.any(String), element: expect.any(String), category: expect.any(String) }));
+    expect(authed.body.every((entry) => !('enabled' in entry))).toBe(true);
+  });
+
+  it('rejects the species catalog without a valid token when dev auth is disabled', async () => {
+    const app = createApp({ config: testConfig({ DEV_AUTH_ENABLED: 'false' }) });
+    const response = await request(app).get('/api/v1/species');
+    expect(response.status).toBe(401);
+  });
+
   it('rejects versioned writes without an idempotency key', async () => {
     const app = createApp({ config: testConfig() });
     const response = await request(app).post('/api/v1/quests/generate-daily').send({});

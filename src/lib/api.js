@@ -56,6 +56,7 @@ import {
   GUEST_LEADERBOARD,
   GUEST_REWARDS,
   GUEST_CAPTURES,
+  GUEST_SPECIES,
 } from './guestData';
 
 let guestCaptures = null;
@@ -114,6 +115,11 @@ export function createApiClient(getToken) {
       const token = await getToken();
       if (token === 'guest' || !token) return guestDelay(guestCaptures || GUEST_CAPTURES, 200);
       return withFallback(() => request('/captures', { signal, token }), GUEST_CAPTURES);
+    },
+    getSpecies: async (signal) => {
+      const token = await getToken();
+      if (token === 'guest' || !token) return guestDelay(GUEST_SPECIES, 200);
+      return withFallback(() => request('/species', { signal, token }), GUEST_SPECIES);
     },
     createCapture: async (bundle, idempotencyKey) => {
       const token = await getToken();

@@ -36,6 +36,11 @@ export function useCaptures() {
   return useQuery({ queryKey: ['captures'], queryFn: ({ signal }) => api.getCaptures(signal) });
 }
 
+export function useSpecies() {
+  const api = useApiClient();
+  return useQuery({ queryKey: ['species'], queryFn: ({ signal }) => api.getSpecies(signal), staleTime: 60 * 60 * 1000 });
+}
+
 export function useCaptureItem() {
   const api = useApiClient();
   const queryClient = useQueryClient();

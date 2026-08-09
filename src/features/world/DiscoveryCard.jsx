@@ -27,9 +27,9 @@ export function DiscoveryCard({ card, imageUrl, onAddToLibrary, onShare, onClose
   const itemName = cardData.itemName || cardData.cardTitle || cardData.title || 'Discovered Creature';
   const scientificName = cardData.scientificName || cardData.category || 'Fauna Wild';
   const cardImg = imageUrl || cardData.imageUrl || '/assets/african-grey-parrot.png';
-  const rawXp = cardData.xpEarned || cardData.xp || 500;
+  const rawXp = cardData.xpAwarded ?? cardData.xpEarned ?? cardData.xp ?? 0;
   const animatedXp = useCountUp(rawXp, 1000);
-  const confidence = cardData.confidence ? Math.round(cardData.confidence * 100) : 98;
+  const confidence = cardData.confidence != null ? Math.round(cardData.confidence * 100) : null;
   const locationText = cardData.location || (cardData.gps ? `${cardData.gps.lat?.toFixed(2)}°, ${cardData.gps.lng?.toFixed(2)}°` : 'Wild Sanctuary');
   const rarityTier = (cardData.rarityTier || cardData.rarity || 'A').toUpperCase();
   const elementCategory = cardData.element || cardData.category || 'Familiars';
@@ -157,11 +157,13 @@ export function DiscoveryCard({ card, imageUrl, onAddToLibrary, onShare, onClose
         </div>
         <div className="discovery-stat-box">
           <small>AI CONFIDENCE</small>
-          <strong>{confidence}%</strong>
+          <strong>{confidence != null ? `${confidence}%` : '—'}</strong>
         </div>
-        <div className="discovery-stat-box verified">
+        <div className={`discovery-stat-box ${cardData.status !== 'provisional' ? 'verified' : ''}`}>
           <small>STATUS</small>
-          <strong className="chip-verified">✔ Verified</strong>
+          <strong className={cardData.status === 'provisional' ? 'chip-pending' : 'chip-verified'}>
+            {cardData.status === 'provisional' ? '⏳ Under review' : '✔ Verified'}
+          </strong>
         </div>
       </div>
 

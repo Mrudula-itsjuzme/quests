@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { Icon } from '../../components/Icon';
-import { playHover, playTap } from '../../lib/useSoundEffects';
+import { motion } from 'framer-motion';
+import { playTap } from '../../lib/useSoundEffects';
 
 
 export function GuildPage() {
@@ -73,7 +72,7 @@ export function GuildPage() {
           <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--wild-text-dim)' }}>
             <span style={{ fontSize: '3rem', display: 'block', marginBottom: '16px', opacity: 0.5 }}>🌍</span>
             <p>No recent activity in your region.</p>
-            <p style={{ fontSize: '0.8rem', opacity: 0.7, marginTop: '8px' }}>Share a discovery to start the feed!</p>
+            <p style={{ fontSize: '0.8rem', opacity: 0.7, marginTop: '8px' }}>Community posting is coming soon.</p>
           </div>
         )}
       </div>
@@ -82,8 +81,10 @@ export function GuildPage() {
       <motion.button
         type="button"
         className="community-fab-btn"
-        aria-label="Create Post"
+        aria-label="Community posting is not available yet"
+        aria-disabled="true"
         whileTap={{ scale: 0.9 }}
+        onClick={() => { playTap(); window.dispatchEvent(new CustomEvent('habbit-notice', { detail: 'Community posting is coming soon.' })); }}
       >
         +
       </motion.button>

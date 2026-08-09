@@ -4,14 +4,14 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Icon, categoryIcon } from '../../components/Icon';
 import { QuestDetail } from '../quests/QuestDetail';
 import { questProgressRatio } from '../quests/QuestCard';
-import { useActiveQuests, useCollectibles, useMe } from '../quests/queries';
+import { useActiveQuests, useCollectibles, useMarkNotificationRead, useMe, useNotifications, useQuestHistory } from '../quests/queries';
 import { playTap } from '../../lib/useSoundEffects';
 import { DashboardSkeleton } from '../../components/motion/SkeletonLoader';
 import { staggerContainer, staggerItem, springConfig } from '../../components/motion/MotionVariants';
 import { deriveGold, deriveGems, getEnergy } from '../../lib/playerEconomy';
 import { PhysicalCard } from '../../components/motion/PhysicalCard';
 import { ParallaxLayer } from '../../components/motion/ParallaxLayer';
-import { AmbientIdle } from '../../components/motion/AmbientIdle';
+import { nextBestAction } from '../../lib/nextBestAction';
 
 const REALMS = [
   { key: 'Mind', label: 'Mind', tiers: ['Novice', 'Apprentice', 'Scholar', 'Sage'], icon: 'leaf' },
@@ -34,6 +34,8 @@ export function DashboardPage() {
   const { data: me, isLoading: meLoading, isError: meError } = useMe();
   const { data: quests, isLoading: questsLoading } = useActiveQuests();
   const { data: collectibles } = useCollectibles();
+  const { data: notifications } = useNotifications();
+  const { data: history } = useQuestHistory();
   const [selectedId, setSelectedId] = useState(null);
 
   const activeQuests = useMemo(() => quests || [], [quests]);
@@ -71,6 +73,8 @@ export function DashboardPage() {
           me={me}
           activeQuests={activeQuests}
           collectibles={collectibles || []}
+          notifications={notifications || []}
+          questsCompleted={(history || []).filter((q) => q.status === 'completed').length}
           selected={selected}
           setSelectedId={setSelectedId}
         />
@@ -83,20 +87,33 @@ function DashboardContent({
   me,
   activeQuests,
   collectibles,
+  notifications,
+  questsCompleted,
   selected,
   setSelectedId,
 }) {
   const navigate = useNavigate();
-  const rankIndex = Math.max(0, Math.floor(((me?.totalXp) || 0) / 500));
-  const rankNames = ['Novice I', 'Novice II', 'Novice III', 'Bronze I', 'Silver I', 'Gold I'];
-  const rank = rankNames[Math.min(rankIndex, rankNames.length - 1)];
-  const nextRankXp = (rankIndex + 1) * 500;
+  const markRead = useMarkNotificationRead();
+
+  // Level/tier/XP-to-next come straight from the server's progression engine
+  // (calculateProgression) — never recomputed client-side.
+  const rank = `${me.tier} ${me.level}`;
+  const xpIntoLevel = me.xpIntoLevel ?? 0;
+  const xpForCurrentLevel = me.xpForCurrentLevel ?? 1;
 
   const gold = deriveGold(me?.totalXp);
   const gems = deriveGems(collectibles);
   const energy = getEnergy();
   const hour = new Date().getHours();
   const greeting = hour < 5 ? 'Good night' : hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+
+  const unreadNotifications = useMemo(() => notifications.filter((n) => !n.readAt), [notifications]);
+  const latestUnread = unreadNotifications[0] || null;
+
+  const suggestedActions = useMemo(
+    () => nextBestAction({ activeQuests, notifications, streakDays: me.streakDays || 0 }),
+    [activeQuests, notifications, me.streakDays],
+  );
 
   const notify = (detail) => window.dispatchEvent(new CustomEvent('habbit-notice', { detail }));
 
@@ -141,11 +158,19 @@ function DashboardContent({
           <button
             type="button"
             className="mobile-home-bell"
-            aria-label="Notifications"
-            onClick={() => { playTap(); notify('No new notices. Your path is clear.'); }}
+            aria-label={unreadNotifications.length > 0 ? `${unreadNotifications.length} unread notifications` : 'Notifications'}
+            onClick={() => {
+              playTap();
+              if (latestUnread) {
+                notify(latestUnread.body || latestUnread.title);
+                markRead.mutate(latestUnread.id);
+              } else {
+                notify('No new notices. Your path is clear.');
+              }
+            }}
           >
             <Icon name="bell" />
-            <span className="mobile-home-bell-dot" aria-hidden="true" />
+            {unreadNotifications.length > 0 && <span className="mobile-home-bell-dot" aria-hidden="true" />}
           </button>
         </div>
 
@@ -172,7 +197,7 @@ function DashboardContent({
             <Icon name="shield" className="text-silver" />
             <div>
               <strong>{rank}</strong>
-              <small>{me.totalXp} / {nextRankXp} XP</small>
+              <small>{xpIntoLevel} / {xpForCurrentLevel} XP</small>
             </div>
           </div>
           <div className="mobile-home-stat">
@@ -273,7 +298,7 @@ function DashboardContent({
                 <Icon name="shield" className="text-silver" />
                 <div>
                   <strong>{rank}</strong>
-                  <small>{me.totalXp} / {nextRankXp} XP</small>
+                  <small>{xpIntoLevel} / {xpForCurrentLevel} XP</small>
                 </div>
               </div>
               <div className="hero-stat-card">
@@ -380,36 +405,35 @@ function DashboardContent({
             </div>
           </motion.section>
 
-          <motion.section className="dark-glass-card bonus-chest-card" variants={staggerItem}>
-            <div className="chest-info">
-              <div className="section-header">
-                <h2>DAILY BONUS CHEST <span className="diamond-bullet">✦</span></h2>
-              </div>
-              <p>Complete all active quests to unlock.</p>
-              <strong className="xp-bonus">+150 XP</strong>
-            </div>
-            <AmbientIdle amplitude={6} duration={4} className="chest-image-container">
-              <div className="magical-chest"></div>
-            </AmbientIdle>
-          </motion.section>
-
-          <motion.section className="dark-glass-card encounter-card" variants={staggerItem}>
+          <motion.section className="dark-glass-card up-next-card" variants={staggerItem}>
             <div className="section-header">
-              <h2><span className="diamond-bullet">✦</span> RARE ENCOUNTER <span className="diamond-bullet">✦</span></h2>
+              <h2><span className="diamond-bullet">✦</span> UP NEXT</h2>
             </div>
-            <div className="encounter-content">
-              <div className="encounter-info">
-                <h3>Sunset Chaser</h3>
-                <p>Capture today's most memorable moment.</p>
-                <button className="encounter-btn" onClick={playTap}>
-                  Begin <span>›</span>
-                </button>
+            {suggestedActions.length > 0 ? (
+              <div className="up-next-list">
+                {suggestedActions.map((action) => (
+                  <button
+                    key={action.id}
+                    type="button"
+                    className={`up-next-row up-next-${action.kind}`}
+                    onClick={() => {
+                      playTap();
+                      if (action.questId) setSelectedId(action.questId);
+                      else navigate(action.to);
+                    }}
+                  >
+                    <Icon name={action.kind === 'quest' ? 'compass' : action.kind === 'notification' ? 'bell' : action.kind === 'streak' ? 'flame' : 'star'} />
+                    <div className="up-next-copy">
+                      <strong>{action.title}</strong>
+                      <small>{action.detail}</small>
+                    </div>
+                    {action.xp != null && <span className="xp-pill"><Icon name="star" />{action.xp}</span>}
+                  </button>
+                ))}
               </div>
-              <div className="encounter-photo-frame">
-                <div className="vintage-photo"></div>
-                <div className="photo-paperclip"></div>
-              </div>
-            </div>
+            ) : (
+              <p className="mobile-home-empty">You're all caught up. Explore nearby to find your next quest.</p>
+            )}
           </motion.section>
         </div>
       </div>
@@ -431,7 +455,7 @@ function DashboardContent({
           </div>
           <div className="footer-stat">
             <Icon name="check" />
-            <div><small>Quests Done</small><strong>{me.completedQuests || 23}</strong></div>
+            <div><small>Quests Done</small><strong>{questsCompleted}</strong></div>
           </div>
           <div className="footer-stat">
             <Icon name="crown" />

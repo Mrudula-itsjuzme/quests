@@ -1,14 +1,13 @@
 import { useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useCollectibles } from '../quests/queries';
-import { playHover, playTap } from '../../lib/useSoundEffects';
+import { useCaptures, useSpecies } from '../quests/queries';
+import { playTap } from '../../lib/useSoundEffects';
 import { DiscoveryCard } from '../world/DiscoveryCard';
 
 const CATEGORY_BGS = {
   Fire: { imageUrl: '/assets/fire-volcano.png', bgGradient: 'linear-gradient(180deg, rgba(239, 68, 68, 0.2), rgba(6, 9, 7, 0.9))' },
   Water: { imageUrl: '/assets/water-fall.png', bgGradient: 'linear-gradient(180deg, rgba(59, 130, 246, 0.2), rgba(6, 9, 7, 0.9))' },
   Grass: { imageUrl: '/assets/verdant-explorer-banner.png', bgGradient: 'linear-gradient(180deg, rgba(34, 197, 94, 0.2), rgba(6, 9, 7, 0.9))' },
-  Familiars: { imageUrl: '/assets/african-grey-parrot.png', bgGradient: 'linear-gradient(180deg, rgba(245, 158, 11, 0.2), rgba(6, 9, 7, 0.9))' },
   Earth: { imageUrl: '/assets/earth-mountain.png', bgGradient: 'linear-gradient(180deg, rgba(168, 85, 247, 0.2), rgba(6, 9, 7, 0.9))' },
   Sky: { imageUrl: '/assets/sky-aurora.png', bgGradient: 'linear-gradient(180deg, rgba(14, 165, 233, 0.2), rgba(6, 9, 7, 0.9))' },
 };
@@ -18,7 +17,8 @@ const ELEMENT_TABS = [
   { id: 'Fire', label: '🔥 Fire' },
   { id: 'Water', label: '💧 Water' },
   { id: 'Grass', label: '🌿 Grass' },
-  { id: 'Familiars', label: '🐾 Familiars' },
+  { id: 'Earth', label: '🐾 Earth' },
+  { id: 'Sky', label: '🕊 Sky' },
 ];
 
 const cardVariants = {
@@ -31,22 +31,42 @@ const cardVariants = {
 };
 
 export function GalleryPage() {
-  const { data: collection, isLoading } = useCollectibles();
+  const { data: captures, isLoading: capturesLoading } = useCaptures();
+  const { data: species, isLoading: speciesLoading } = useSpecies();
   const [activeTab, setActiveTab] = useState('all');
   const [selectedCard, setSelectedCard] = useState(null);
+  const isLoading = capturesLoading || speciesLoading;
+
+  // A species counts as "discovered" once any non-rejected capture references it.
+  const discoveredSpeciesIds = useMemo(() => {
+    const ids = new Set();
+    for (const capture of captures || []) {
+      if (capture.speciesId && capture.status !== 'rejected') ids.add(capture.speciesId);
+    }
+    return ids;
+  }, [captures]);
+
+  const collection = useMemo(() => (captures || []).filter((c) => c.status !== 'rejected'), [captures]);
 
   const displayList = useMemo(() => {
-    if (!collection) return [];
     if (activeTab === 'all') return collection;
-    return collection.filter((c) => (c.category || c.element || 'Familiars').toLowerCase() === activeTab.toLowerCase());
-  }, [collection, activeTab]);
+    const speciesById = new Map((species || []).map((s) => [s.id, s]));
+    return collection.filter((c) => (speciesById.get(c.speciesId)?.element || 'Earth') === activeTab);
+  }, [collection, species, activeTab]);
 
   const categoryTiles = useMemo(() => {
-    return Object.entries(CATEGORY_BGS).map(([id, bg]) => {
-      const count = (collection || []).filter(c => (c.category || c.element || 'Familiars').toLowerCase() === id.toLowerCase()).length;
-      return { id, label: id.toUpperCase(), count, ...bg };
-    }).filter(tile => tile.count > 0 || activeTab === 'all'); // Show all in 'all' view, or only populated if needed
-  }, [collection, activeTab]);
+    return Object.entries(CATEGORY_BGS).map(([element, bg]) => {
+      const speciesInElement = (species || []).filter((s) => s.element === element);
+      const discoveredCount = speciesInElement.filter((s) => discoveredSpeciesIds.has(s.id)).length;
+      const total = speciesInElement.length;
+      const percent = total > 0 ? Math.round((discoveredCount / total) * 100) : 0;
+      return { id: element, label: element.toUpperCase(), count: discoveredCount, total, percent, ...bg };
+    }).filter((tile) => tile.total > 0);
+  }, [species, discoveredSpeciesIds]);
+
+  const totalSpecies = species?.length || 0;
+  const totalDiscovered = discoveredSpeciesIds.size;
+  const almostComplete = categoryTiles.filter((t) => t.percent >= 70 && t.percent < 100);
 
   return (
     <main className="library-shell">
@@ -66,18 +86,33 @@ export function GalleryPage() {
       {/* Collection Summary Stats Bar */}
       <div className="library-stats-bar">
         <div className="library-stat-item">
-          <small>Total Cards</small>
-          <strong>{(collection || []).length}</strong>
+          <small>Species Found</small>
+          <strong>{totalDiscovered}{totalSpecies > 0 ? ` / ${totalSpecies}` : ''}</strong>
         </div>
         <div className="library-stat-item">
           <small>S Rank</small>
-          <strong>{(collection || []).filter((c) => c.rarityTier === 'S' || c.rarity === 'S').length}</strong>
+          <strong>{collection.filter((c) => c.rarityTier === 'S').length}</strong>
         </div>
         <div className="library-stat-item">
           <small>XP Earned</small>
-          <strong>{(collection || []).reduce((acc, c) => acc + (c.xpEarned || c.xp || 0), 0).toLocaleString()}</strong>
+          <strong>{collection.reduce((acc, c) => acc + (c.xpAwarded || 0), 0).toLocaleString()}</strong>
         </div>
       </div>
+
+      {almostComplete.length > 0 && (
+        <div className="library-almost-complete-banner">
+          {almostComplete.map((tile) => (
+            <button
+              key={tile.id}
+              type="button"
+              className="library-almost-complete-pill"
+              onClick={() => { playTap(); setActiveTab(tile.id); }}
+            >
+              {tile.total - tile.count} more to complete <strong>{tile.label}</strong> ({tile.percent}%)
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Element Category Tabs */}
       <div className="library-element-tabs" style={{ position: 'relative' }}>
@@ -119,11 +154,37 @@ export function GalleryPage() {
       {isLoading ? (
         <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--wild-text-dim)' }}>Loading collection...</div>
       ) : displayList.length === 0 && activeTab !== 'all' ? (
-        <motion.div 
-          initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} 
+        <motion.div
+          initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
           style={{ textAlign: 'center', padding: '40px 0', color: 'var(--wild-text-dim)' }}
         >
-          No discoveries in this category yet.
+          <p>You haven&apos;t discovered any {activeTab} species yet.</p>
+          <motion.button
+            type="button"
+            className="continue-journey-btn"
+            style={{ marginTop: '12px' }}
+            whileTap={{ scale: 0.96 }}
+            onClick={() => { playTap(); window.dispatchEvent(new CustomEvent('wild-realm-open-capture')); }}
+          >
+            Find nearby <span>→</span>
+          </motion.button>
+        </motion.div>
+      ) : activeTab === 'all' && collection.length === 0 ? (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+          style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--wild-text-dim)' }}
+        >
+          <p style={{ fontSize: '1rem', color: '#fff', fontWeight: 700 }}>Your collection starts here.</p>
+          <p style={{ marginTop: '4px' }}>Capture your first discovery to begin filling the library.</p>
+          <motion.button
+            type="button"
+            className="continue-journey-btn"
+            style={{ marginTop: '12px' }}
+            whileTap={{ scale: 0.96 }}
+            onClick={() => { playTap(); window.dispatchEvent(new CustomEvent('wild-realm-open-capture')); }}
+          >
+            Start exploring <span>→</span>
+          </motion.button>
         </motion.div>
       ) : activeTab === 'all' ? (
         <motion.div layout className="library-card-grid">
@@ -162,7 +223,7 @@ export function GalleryPage() {
                       {cat.label}
                     </h3>
                     <span style={{ color: 'var(--wild-text-dim)', fontSize: '0.75rem', fontWeight: '700' }}>
-                      {cat.count} Discovered
+                      {cat.count}/{cat.total} Discovered · {cat.percent}%
                     </span>
                   </div>
                 </div>
@@ -187,8 +248,10 @@ export function GalleryPage() {
           <motion.div layout className="library-card-grid">
             <AnimatePresence>
               {displayList.map((card, i) => {
-                const rarity = card.rarityTier || card.rarity || 'A';
-                const cardId = card.assetId || card.id;
+                const rarity = card.rarityTier || 'A';
+                const cardId = card.id;
+                const speciesEntry = (species || []).find((s) => s.id === card.speciesId);
+                const placeholderImg = CATEGORY_BGS[speciesEntry?.element || 'Earth'].imageUrl;
                 return (
                   <motion.div
                     key={cardId}
@@ -206,13 +269,13 @@ export function GalleryPage() {
                     }}
                   >
                     <motion.div layoutId={`discovery-img-${cardId}`} className="library-card-img-wrap">
-                      <img className="library-card-img" src={card.imageUrl} alt={card.itemName || card.title} />
+                      <img className="library-card-img" src={placeholderImg} alt={card.itemName} />
                       <div className={`library-card-badge rank-badge-${rarity.toLowerCase()}`}>
                         {rarity}
                       </div>
                     </motion.div>
                     <motion.div layoutId={`discovery-info-${cardId}`} className="library-card-info">
-                      <h3 className="library-card-title">{card.itemName || card.title}</h3>
+                      <h3 className="library-card-title">{card.itemName}</h3>
                       <p className="library-card-sub">{rarity} Rank</p>
                       <span className="library-card-stars" style={{ color: rarity === 'S' ? '#fbbf24' : rarity === 'A' ? '#c084fc' : '#60a5fa' }}>
                         ★★★★★
