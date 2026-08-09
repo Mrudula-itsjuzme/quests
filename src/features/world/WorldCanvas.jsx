@@ -4,7 +4,8 @@ import { AmbientIdle } from '../../components/motion/AmbientIdle';
 import { Icon } from '../../components/Icon';
 import { PlayerAvatar } from './PlayerAvatar';
 import { WeatherLayer } from './WeatherLayer';
-import { playTap } from '../../lib/useSoundEffects';
+import { playHover, playTap } from '../../lib/useSoundEffects';
+import { springConfig } from '../../components/motion/MotionVariants';
 
 export const WORLD_BUILDINGS = [
   { id: 'quest-board', label: 'Quest Board', icon: 'scroll', to: '/app/quests', x: 22, y: 40, scale: 1 },
@@ -106,11 +107,14 @@ export function WorldCanvas({ phase, weather, avatarInitial, avatarTitle, onEnte
               <motion.button
                 type="button"
                 className="world-building"
-                whileTap={{ scale: 0.88 }}
+                whileHover={{ scale: 1.06 }}
+                whileTap={{ scale: 0.9 }}
+                transition={springConfig.tactile}
                 onClick={() => {
                   playTap();
                   onEnterBuilding(building);
                 }}
+                onMouseEnter={playHover}
                 aria-label={building.label}
               >
                 <span className="world-building-shadow" aria-hidden="true" />

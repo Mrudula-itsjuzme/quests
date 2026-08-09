@@ -9856,6 +9856,30 @@ button, a {
 }
 .capture-card-icon svg { width: 30px; height: 30px; }
 
+.capture-card-burst {
+  position: absolute;
+  top: 96px;
+  left: 50%;
+  width: 0;
+  height: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+.capture-card-spark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--quest-gold-bright);
+  box-shadow: 0 0 8px 2px rgba(240, 196, 107, 0.7);
+}
+.capture-card-reveal.rarity-epic .capture-card-spark { background: var(--rarity-epic); box-shadow: 0 0 8px 2px rgba(180, 127, 224, 0.6); }
+@media (prefers-reduced-motion: reduce) {
+  .capture-card-burst { display: none; }
+}
+
 .capture-card-image {
   width: 100%;
   aspect-ratio: 1 / 1;
