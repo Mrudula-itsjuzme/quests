@@ -25,6 +25,16 @@ function messageForRejection(reason) {
   return ANTI_CHEAT_MESSAGES[reason] || 'We couldn’t verify this capture. Please retake the photo.';
 }
 
+function triggerHaptic(pattern = [15, 30, 15]) {
+  if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+    try {
+      navigator.vibrate(pattern);
+    } catch {
+      // ignore
+    }
+  }
+}
+
 export function CaptureFlow({ onClose }) {
   const inputRef = useRef(null);
   const [stage, setStage] = useState('prompt'); // prompt | scanning | candidates | reveal | error
@@ -37,6 +47,7 @@ export function CaptureFlow({ onClose }) {
   const renameCapture = useRenameCapture();
 
   const submitCapture = async (bundle) => {
+    triggerHaptic([20, 40, 20]);
     try {
       const result = await captureItem.mutateAsync(bundle);
       if (result.needsConfirmation) {
@@ -48,7 +59,9 @@ export function CaptureFlow({ onClose }) {
       setCard(result);
       setName(result.cardTitle);
       setStage('reveal');
+      triggerHaptic([40, 60, 40, 60, 100]);
     } catch (error) {
+      triggerHaptic([80, 40, 80]);
       setErrorMessage(error?.code === 'anti_cheat_rejected' ? messageForRejection(error.reason) : 'The rarity engine could not read that photo. Try again.');
       setStage('error');
     }

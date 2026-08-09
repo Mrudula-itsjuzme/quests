@@ -10048,3 +10048,238 @@ button, a {
   padding: 0 var(--space-6);
 }
 
+/* ==========================================================================
+   FINAL PHASE — MOBILE APP & TOUCH INTERACTION POLISH
+   ========================================================================== */
+
+/* Safe Area Inset variables & Touch Interaction Rules */
+:root {
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+}
+
+html, body {
+  min-height: 100dvh;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
+button, a, input, select, textarea, [role="button"], .dock-item, .world-radial-item, .swipe-card {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Minimum Touch Targets (~44px) */
+button, .button, .primary-btn, .secondary-btn, .continue-journey-btn,
+.round-action, .ghost-action, .mobile-bottom-dock a, .detail-close, .capture-flow-close,
+.toggle-switch, .option-btn, .world-radial-item {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* Prevent accidental text selection on interactive game elements */
+.world-screen,
+.world-hud,
+.mobile-bottom-dock,
+.swipe-deck-container,
+.swipe-card,
+.capture-flow-overlay,
+.world-radial-menu,
+.round-action,
+.ghost-action,
+.avatar-medallion,
+.hold-button,
+.bottom-sheet {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Dynamic Viewport Height Containers */
+.app-shell,
+.landing-shell,
+.auth-shell,
+.onboarding-shell,
+.world-screen {
+  min-height: 100dvh;
+}
+
+/* Safe area padding adjustments */
+.topbar {
+  padding-top: max(12px, var(--sat));
+  padding-left: max(16px, var(--sal));
+  padding-right: max(16px, var(--sar));
+}
+
+@media (max-width: 1100px) {
+  .mobile-bottom-dock {
+    bottom: max(10px, var(--sab));
+    left: max(12px, var(--sal));
+    right: max(12px, var(--sar));
+    padding-bottom: max(5px, calc(var(--sab) / 2));
+  }
+}
+
+.mobile-content-area {
+  min-height: calc(100dvh - 80px);
+  padding-bottom: max(100px, calc(90px + var(--sab)));
+}
+
+.mobile-content-area-world {
+  padding-bottom: 0;
+  min-height: 100dvh;
+}
+
+/* Safe area & viewport adjustments for modals and overlays */
+.modal-overlay,
+.bottom-sheet-backdrop,
+.capture-flow-overlay,
+.dawn-moment-overlay {
+  padding-top: var(--sat);
+  padding-bottom: var(--sab);
+  padding-left: var(--sal);
+  padding-right: var(--sar);
+}
+
+.bottom-sheet {
+  max-height: calc(92dvh - var(--sat));
+  padding-bottom: max(var(--space-6), calc(var(--space-4) + var(--sab)));
+}
+
+.capture-flow-panel {
+  max-height: calc(90dvh - var(--sat) - var(--sab));
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.settings-modal,
+.logout-dialog,
+.leaderboard-modal {
+  max-height: calc(90dvh - var(--sat) - var(--sab));
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Mobile responsive fixes for narrow screen sizes (320px - 430px) */
+@media (max-width: 430px) {
+  .quest-reference {
+    width: 100%;
+    padding-inline: 12px;
+  }
+
+  .quest-command-hero {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .quest-hero-stats {
+    flex-wrap: wrap;
+    gap: 8px 16px;
+  }
+
+  .quest-status-panel {
+    padding: 14px;
+  }
+
+  .swipe-deck-container {
+    height: 380px;
+  }
+
+  .swipe-card {
+    padding: 18px;
+  }
+
+  .swipe-card h3 {
+    font-size: 1.25rem;
+  }
+
+  .rewards-hero {
+    padding: 16px;
+  }
+
+  .rewards-hero img {
+    height: 140px;
+  }
+
+  .rewards-panel-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .badge-row, .loot-row, .chest-row, .claim-row {
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  }
+
+  .world-hud-top {
+    left: max(8px, var(--sal));
+    right: max(8px, var(--sar));
+    top: max(8px, var(--sat));
+  }
+
+  .world-hud-pill {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+  }
+
+  .world-compass-button {
+    bottom: max(20px, calc(16px + var(--sab)));
+    right: max(16px, var(--sar));
+  }
+
+  .world-capture-button {
+    bottom: max(20px, calc(16px + var(--sab)));
+    left: 50%;
+  }
+
+  .radial-menu {
+    transform: scale(0.9);
+  }
+
+  .capture-flow-panel {
+    width: min(340px, 92vw);
+    padding: 20px 16px;
+  }
+}
+
+@media (max-width: 360px) {
+  .app-shell {
+    padding-inline: 6px;
+  }
+
+  .swipe-card {
+    padding: 14px;
+  }
+
+  .swipe-card-actions button {
+    padding: 8px 14px;
+    font-size: 0.82rem;
+  }
+
+  .quest-status-actions button span {
+    font-size: 0.75rem;
+  }
+
+  .community-tabs button {
+    padding: 8px 10px;
+    font-size: 0.78rem;
+  }
+
+  .settings-modal {
+    padding: 16px 12px;
+  }
+}
+
+/* Reduced motion GPU acceleration optimization */
+@media (prefers-reduced-motion: no-preference) {
+  .swipe-card,
+  .physical-card,
+  .dock-item,
+  .world-radial-item,
+  .toast-notice {
+    will-change: transform, opacity;
+  }
+}
+
+

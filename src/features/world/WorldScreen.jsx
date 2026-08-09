@@ -27,7 +27,7 @@ export function WorldScreen() {
   const phase = useMemo(() => timeOfDayPhase(new Date().getHours()), []);
   const weather = useMemo(() => pickWeather(), []);
 
-  const activeQuests = quests || [];
+  const activeQuests = useMemo(() => quests || [], [quests]);
   const presentation = useMemo(
     () => derivePlayerPresentation(me, activeQuests, [], collectibles || []),
     [me, activeQuests, collectibles],
