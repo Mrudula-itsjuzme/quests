@@ -22,7 +22,7 @@ function useCountUp(targetValue, duration = 1200) {
   return count;
 }
 
-export function DiscoveryCard({ card, imageUrl, onAddToLibrary, onShare, onClose }) {
+export function DiscoveryCard({ card, imageUrl, onAddToLibrary, onShare, onClose, layoutIdPrefix = '' }) {
   const cardData = card || {};
   const itemName = cardData.itemName || cardData.cardTitle || cardData.title || 'Discovered Creature';
   const scientificName = cardData.scientificName || cardData.category || 'Fauna Wild';
@@ -35,13 +35,15 @@ export function DiscoveryCard({ card, imageUrl, onAddToLibrary, onShare, onClose
   const elementCategory = cardData.element || cardData.category || 'Familiars';
   const capturedAtDate = cardData.capturedAt ? new Date(cardData.capturedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
+  const cardId = cardData.assetId || cardData.id || 'new';
+
   // 3D Tilt interaction logic
   const cardRef = useRef(null);
   const x = useMotionValue(0);
   const y = useMotionValue(0);
 
-  const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [15, -15]), { stiffness: 300, damping: 20 });
-  const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-15, 15]), { stiffness: 300, damping: 20 });
+  const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [10, -10]), { stiffness: 300, damping: 20 });
+  const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-10, 10]), { stiffness: 300, damping: 20 });
   const glareX = useTransform(x, [-0.5, 0.5], ['0%', '100%']);
   const glareY = useTransform(y, [-0.5, 0.5], ['0%', '100%']);
 
@@ -63,13 +65,23 @@ export function DiscoveryCard({ card, imageUrl, onAddToLibrary, onShare, onClose
 
   return (
     <motion.div
+      layoutId={layoutIdPrefix ? `${layoutIdPrefix}card-${cardId}` : undefined}
       className={`discovery-card-modal rank-${rarityTier.toLowerCase()}`}
       ref={cardRef}
+      drag="y"
+      dragConstraints={{ top: 0, bottom: 0 }}
+      dragElastic={0.4}
+      onDragEnd={(e, info) => {
+        if (info.offset.y > 100) {
+          (onClose || onAddToLibrary)();
+        }
+      }}
       style={{
         rotateX,
         rotateY,
         transformStyle: 'preserve-3d',
         perspective: 1000,
+        touchAction: 'none' // Better for drag physics
       }}
       onPointerMove={handlePointerMove}
       onPointerLeave={handlePointerLeave}
@@ -96,7 +108,7 @@ export function DiscoveryCard({ card, imageUrl, onAddToLibrary, onShare, onClose
       </div>
 
       {/* Hero Image Frame with Holographic Overlay */}
-      <div className="discovery-hero-frame">
+      <motion.div layoutId={layoutIdPrefix ? `${layoutIdPrefix}img-${cardId}` : undefined} className="discovery-hero-frame">
         <img className="discovery-hero-img" src={cardImg} alt={itemName} />
         
         {/* Dynamic Holographic Glare Layer */}
@@ -108,7 +120,7 @@ export function DiscoveryCard({ card, imageUrl, onAddToLibrary, onShare, onClose
             }}
           />
         )}
-      </div>
+      </motion.div>
 
       {/* Creature Title, Elements & Gold Hex Rarity Badge */}
       <div className="discovery-title-row">

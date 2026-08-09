@@ -9,7 +9,7 @@ export function JournalTransition({ children, className = '' }) {
       initial="initial"
       animate="animate"
       exit="exit"
-      style={{ perspective: 1200, transformStyle: 'preserve-3d', width: '100%' }}
+      style={{ width: '100%' }}
     >
       {children}
     </motion.div>

@@ -80,71 +80,96 @@ export function GalleryPage() {
       </div>
 
       {/* Element Category Tabs */}
-      <div className="library-element-tabs">
-        {ELEMENT_TABS.map((tab) => (
-          <motion.button
-            key={tab.id}
-            type="button"
-            className={`library-tab-btn ${activeTab === tab.id ? 'active' : ''}`}
-            onClick={() => {
-              playTap();
-              setActiveTab(tab.id);
-            }}
-            whileTap={{ scale: 0.95 }}
-            layout
-          >
-            {tab.label}
-          </motion.button>
-        ))}
+      <div className="library-element-tabs" style={{ position: 'relative' }}>
+        {ELEMENT_TABS.map((tab) => {
+          const isActive = activeTab === tab.id;
+          return (
+            <motion.button
+              key={tab.id}
+              type="button"
+              className={`library-tab-btn ${isActive ? 'active' : ''}`}
+              onClick={() => {
+                playTap();
+                setActiveTab(tab.id);
+              }}
+              whileTap={{ scale: 0.95 }}
+              style={{ position: 'relative', zIndex: 1 }}
+            >
+              {isActive && (
+                <motion.div
+                  layoutId="gallery-tab-indicator"
+                  className="library-tab-indicator"
+                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    background: 'var(--quest-surface)',
+                    borderRadius: '8px',
+                    zIndex: -1,
+                    border: '1px solid rgba(255,255,255,0.06)'
+                  }}
+                />
+              )}
+              <span style={{ position: 'relative', zIndex: 2 }}>{tab.label}</span>
+            </motion.button>
+          );
+        })}
       </div>
 
       {isLoading ? (
         <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--wild-text-dim)' }}>Loading collection...</div>
       ) : displayList.length === 0 && activeTab !== 'all' ? (
-        <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--wild-text-dim)' }}>
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} 
+          style={{ textAlign: 'center', padding: '40px 0', color: 'var(--wild-text-dim)' }}
+        >
           No discoveries in this category yet.
-        </div>
+        </motion.div>
       ) : activeTab === 'all' ? (
-        <div className="library-card-grid">
-          {categoryTiles.map((cat, i) => (
-            <motion.div
-              key={cat.id}
-              className="library-photo-card"
-              custom={i}
-              initial="hidden"
-              animate="visible"
-              variants={cardVariants}
-              whileTap={{ scale: 0.97 }}
-              onClick={() => {
-                playTap();
-                setActiveTab(cat.id);
-              }}
-              style={{ height: '140px' }}
-            >
-              <div className="library-card-img-wrap" style={{ height: '100%' }}>
-                <img className="library-card-img" src={cat.imageUrl} alt={cat.label} />
-                <div
-                  style={{
-                    position: 'absolute',
-                    inset: 0,
-                    background: cat.bgGradient,
-                    padding: '10px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'flex-end',
-                  }}
-                >
-                  <h3 style={{ color: '#fff', fontSize: '1rem', fontWeight: '900', margin: 0 }}>
-                    {cat.label}
-                  </h3>
-                  <span style={{ color: 'var(--wild-text-dim)', fontSize: '0.75rem', fontWeight: '700' }}>
-                    {cat.count} Discovered
-                  </span>
+        <motion.div layout className="library-card-grid">
+          <AnimatePresence>
+            {categoryTiles.map((cat, i) => (
+              <motion.div
+                key={cat.id}
+                layout
+                className="library-photo-card"
+                custom={i}
+                initial="hidden"
+                animate="visible"
+                exit="hidden"
+                variants={cardVariants}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => {
+                  playTap();
+                  setActiveTab(cat.id);
+                }}
+                style={{ height: '140px' }}
+              >
+                <div className="library-card-img-wrap" style={{ height: '100%' }}>
+                  <img className="library-card-img" src={cat.imageUrl} alt={cat.label} />
+                  <div
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      background: cat.bgGradient,
+                      padding: '10px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'flex-end',
+                    }}
+                  >
+                    <h3 style={{ color: '#fff', fontSize: '1rem', fontWeight: '900', margin: 0 }}>
+                      {cat.label}
+                    </h3>
+                    <span style={{ color: 'var(--wild-text-dim)', fontSize: '0.75rem', fontWeight: '700' }}>
+                      {cat.count} Discovered
+                    </span>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </motion.div>
       ) : (
         <>
           {/* Active Category Header */}
@@ -159,66 +184,67 @@ export function GalleryPage() {
           </div>
 
           {/* 2-Column Photographic Card Grid */}
-          <div className="library-card-grid">
-            {displayList.map((card, i) => {
-              const rarity = card.rarityTier || card.rarity || 'A';
-              return (
-                <motion.div
-                  key={card.assetId || card.id}
-                  className={`library-photo-card rank-${rarity.toLowerCase()}`}
-                  custom={i}
-                  initial="hidden"
-                  animate="visible"
-                  variants={cardVariants}
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => {
-                    playTap();
-                    setSelectedCard(card);
-                  }}
-                >
-                  <div className="library-card-img-wrap">
-                    <img className="library-card-img" src={card.imageUrl} alt={card.itemName || card.title} />
-                    <div className={`library-card-badge rank-badge-${rarity.toLowerCase()}`}>
-                      {rarity}
-                    </div>
-                  </div>
-                  <div className="library-card-info">
-                    <h3 className="library-card-title">{card.itemName || card.title}</h3>
-                    <p className="library-card-sub">{rarity} Rank</p>
-                    <span className="library-card-stars" style={{ color: rarity === 'S' ? '#fbbf24' : rarity === 'A' ? '#c084fc' : '#60a5fa' }}>
-                      ★★★★★
-                    </span>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
+          <motion.div layout className="library-card-grid">
+            <AnimatePresence>
+              {displayList.map((card, i) => {
+                const rarity = card.rarityTier || card.rarity || 'A';
+                const cardId = card.assetId || card.id;
+                return (
+                  <motion.div
+                    key={cardId}
+                    layoutId={`discovery-card-${cardId}`}
+                    className={`library-photo-card rank-${rarity.toLowerCase()}`}
+                    custom={i}
+                    initial="hidden"
+                    animate="visible"
+                    exit="hidden"
+                    variants={cardVariants}
+                    whileTap={{ scale: 0.96 }}
+                    onClick={() => {
+                      playTap();
+                      setSelectedCard(card);
+                    }}
+                  >
+                    <motion.div layoutId={`discovery-img-${cardId}`} className="library-card-img-wrap">
+                      <img className="library-card-img" src={card.imageUrl} alt={card.itemName || card.title} />
+                      <div className={`library-card-badge rank-badge-${rarity.toLowerCase()}`}>
+                        {rarity}
+                      </div>
+                    </motion.div>
+                    <motion.div layoutId={`discovery-info-${cardId}`} className="library-card-info">
+                      <h3 className="library-card-title">{card.itemName || card.title}</h3>
+                      <p className="library-card-sub">{rarity} Rank</p>
+                      <span className="library-card-stars" style={{ color: rarity === 'S' ? '#fbbf24' : rarity === 'A' ? '#c084fc' : '#60a5fa' }}>
+                        ★★★★★
+                      </span>
+                    </motion.div>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+          </motion.div>
         </>
       )}
 
       {/* Discovery Detail Modal */}
       <AnimatePresence>
         {selectedCard && (
-          <div
+          <motion.div
             className="selection-overlay"
             role="dialog"
             aria-modal="true"
             onClick={() => setSelectedCard(null)}
+            initial={{ backgroundColor: 'rgba(0, 0, 0, 0)' }}
+            animate={{ backgroundColor: 'rgba(0, 0, 0, 0.85)' }}
+            exit={{ backgroundColor: 'rgba(0, 0, 0, 0)' }}
           >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <DiscoveryCard
-                card={selectedCard}
-                imageUrl={selectedCard.imageUrl}
-                onAddToLibrary={() => setSelectedCard(null)}
-                onShare={() => setSelectedCard(null)}
-              />
-            </motion.div>
-          </div>
+            <DiscoveryCard
+              card={selectedCard}
+              layoutIdPrefix="discovery-"
+              onAddToLibrary={() => setSelectedCard(null)}
+              onShare={() => setSelectedCard(null)}
+            />
+          </motion.div>
         )}
       </AnimatePresence>
     </main>

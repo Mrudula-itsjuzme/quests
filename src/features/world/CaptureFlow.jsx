@@ -211,10 +211,10 @@ export function CaptureFlow({ onClose }) {
           <motion.div
             key="reveal"
             className="capture-flow-panel-clean"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ type: 'spring', stiffness: 260, damping: 22 }}
+            initial={{ opacity: 0, scale: 0.8, filter: 'blur(10px)' }}
+            animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, scale: 0.9, filter: 'blur(5px)' }}
+            transition={{ type: 'spring', stiffness: 200, damping: 25, mass: 1 }}
           >
             <DiscoveryCard
               card={card}

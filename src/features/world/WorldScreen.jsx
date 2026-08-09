@@ -132,7 +132,7 @@ export function WorldScreen() {
               <motion.div
                 key={place.id}
                 className="explore-hotspot-card"
-                whileHover={{ scale: 1.04 }}
+                whileHover={{ scale: 1.04, y: -4 }}
                 whileTap={{ scale: 0.96 }}
                 onClick={() => {
                   playTap();
@@ -150,8 +150,13 @@ export function WorldScreen() {
               </motion.div>
             ))
           ) : (
-            <div style={{ textAlign: 'center', padding: '20px', width: '100%', color: 'var(--wild-text-dim)', fontSize: '0.9rem' }}>
-              Scanning area for new hotspots...
+            <div style={{ textAlign: 'center', padding: '30px 20px', width: '100%', color: 'var(--wild-text-dim)', fontSize: '0.9rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+              <motion.div
+                animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
+                transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
+                style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'var(--quest-gold-soft)', border: '1px solid var(--quest-gold-bright)' }}
+              />
+              Scanning environment...
             </div>
           )}
         </div>

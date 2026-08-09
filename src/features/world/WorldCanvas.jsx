@@ -18,8 +18,9 @@ export function WorldCanvas({ phase, weather, hotspots = HOTSPOT_LOCATIONS, onSe
           className="map-hotspot-pin"
           style={{ left: `${pin.x}%`, top: `${pin.y}%` }}
           initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          whileHover={{ scale: 1.15 }}
+          animate={{ scale: [1, 1.05, 1], opacity: 1 }}
+          transition={{ scale: { repeat: Infinity, duration: 3, ease: 'easeInOut' } }}
+          whileHover={{ scale: 1.15, y: -2 }}
           onClick={() => onSelectHotspot(pin)}
         >
           <div className="map-hotspot-thumb" style={{ backgroundImage: `url(${pin.thumb})` }} />

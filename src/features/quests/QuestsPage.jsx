@@ -69,28 +69,36 @@ export function QuestsPage() {
       </div>
 
       {/* Cadence Filter Tabs */}
-      <div className="quest-cadence-tabs">
-        <button
-          type="button"
-          className={`quest-cadence-btn ${tab === 'daily' ? 'active' : ''}`}
-          onClick={() => { playTap(); setTab('daily'); }}
-        >
-          DAILY
-        </button>
-        <button
-          type="button"
-          className={`quest-cadence-btn ${tab === 'weekly' ? 'active' : ''}`}
-          onClick={() => { playTap(); setTab('weekly'); }}
-        >
-          WEEKLY
-        </button>
-        <button
-          type="button"
-          className={`quest-cadence-btn ${tab === 'monthly' ? 'active' : ''}`}
-          onClick={() => { playTap(); setTab('monthly'); }}
-        >
-          MONTHLY
-        </button>
+      <div className="quest-cadence-tabs" style={{ position: 'relative' }}>
+        {['daily', 'weekly', 'monthly'].map((t) => {
+          const isActive = tab === t;
+          return (
+            <motion.button
+              key={t}
+              type="button"
+              className={`quest-cadence-btn ${isActive ? 'active' : ''}`}
+              onClick={() => { playTap(); setTab(t); }}
+              whileTap={{ scale: 0.95 }}
+              style={{ position: 'relative', zIndex: 1 }}
+            >
+              {isActive && (
+                <motion.div
+                  layoutId="quests-tab-indicator"
+                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    background: 'var(--quest-surface)',
+                    borderRadius: '8px',
+                    zIndex: -1,
+                    border: '1px solid rgba(255,255,255,0.06)'
+                  }}
+                />
+              )}
+              <span style={{ position: 'relative', zIndex: 2 }}>{t.toUpperCase()}</span>
+            </motion.button>
+          );
+        })}
       </div>
 
       {/* Quests List */}
