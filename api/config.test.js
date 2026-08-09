@@ -36,7 +36,7 @@ describe('configuration security', () => {
     expect(config.DEV_AUTH_ENABLED).toBe(false);
   });
 
-  it('rejects the stub vision provider in production', () => {
+  it('rejects the stub vision provider in production unless explicitly allowed', () => {
     expect(() => loadConfig({
       NODE_ENV: 'production',
       DEV_AUTH_ENABLED: 'false',
@@ -50,6 +50,22 @@ describe('configuration security', () => {
       OIDC_AUDIENCE: 'habbit-api',
       CORS_ORIGINS: 'https://app.example.com',
     })).toThrow(/Production requires a real VISION_PROVIDER/);
+
+    const config = loadConfig({
+      NODE_ENV: 'production',
+      DEV_AUTH_ENABLED: 'false',
+      DEV_ALLOW_LEGACY_MUTATIONS: 'false',
+      PROVIDER_MODE: 'http',
+      QUEST_AI_VERIFY_URL: 'https://verify.example.com/v1/proofs',
+      QUEST_PROVIDER_SECRET: 'provider-secret-value',
+      CRON_SECRET: 'cron-secret-value',
+      DATABASE_URL: 'postgres://quest_app:secret@db:5432/quests',
+      OIDC_ISSUER: 'https://identity.example.com',
+      OIDC_AUDIENCE: 'habbit-api',
+      CORS_ORIGINS: 'https://app.example.com',
+      ALLOW_STUB_VISION_IN_PRODUCTION: 'true',
+    });
+    expect(config.VISION_PROVIDER).toBe('stub');
   });
 
   it('derives the Supabase issuer, audience, and asymmetric JWKS endpoint', () => {

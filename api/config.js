@@ -35,6 +35,7 @@ const schema = z.object({
   QUEST_NOTIFICATION_URL: z.string().url().optional(),
   CRON_SECRET: z.string().min(16).optional(),
   RENDER_EXTERNAL_URL: z.string().url().optional(),
+  ALLOW_STUB_VISION_IN_PRODUCTION: booleanValue.default(false),
   VISION_PROVIDER: z.enum(['stub', 'openrouter']).default('stub'),
   OPENROUTER_API_KEY: z.string().min(1).optional(),
   OPENROUTER_VISION_MODEL: z.string().min(1).default('google/gemini-2.0-flash-001'),
@@ -85,8 +86,8 @@ export function loadConfig(env = process.env, options = {}) {
     if (config.PROVIDER_MODE === 'http' && (!config.QUEST_AI_VERIFY_URL || !config.QUEST_PROVIDER_SECRET)) {
       throw new Error('Production requires configured HTTP quest providers (QUEST_AI_VERIFY_URL and QUEST_PROVIDER_SECRET).');
     }
-    if (config.VISION_PROVIDER === 'stub') {
-      throw new Error('Production requires a real VISION_PROVIDER (stub identification would mint fake species for every capture).');
+    if (config.VISION_PROVIDER === 'stub' && !config.ALLOW_STUB_VISION_IN_PRODUCTION) {
+      throw new Error('Production requires a real VISION_PROVIDER (stub identification would mint fake species for every capture). Set VISION_PROVIDER=openrouter and OPENROUTER_API_KEY, or set ALLOW_STUB_VISION_IN_PRODUCTION=true for demo deployments.');
     }
     if (config.VISION_PROVIDER === 'openrouter' && !config.OPENROUTER_API_KEY) {
       throw new Error('Production requires OPENROUTER_API_KEY when VISION_PROVIDER=openrouter.');
