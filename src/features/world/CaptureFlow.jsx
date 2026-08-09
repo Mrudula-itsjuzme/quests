@@ -1,10 +1,11 @@
 import { useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Icon, categoryIcon } from '../../components/Icon';
+import { Icon } from '../../components/Icon';
 import { useCaptureItem, useRenameCapture } from '../quests/queries';
 import { playTap } from '../../lib/useSoundEffects';
 import { collectCaptureTelemetry } from '../../lib/captureTelemetry';
+import { DiscoveryCard } from './DiscoveryCard';
 
 function fileToDataUrl(file) {
   return new Promise((resolve, reject) => {
@@ -215,16 +216,7 @@ export function CaptureFlow({ onClose }) {
             exit={{ opacity: 0, scale: 0.9 }}
             transition={{ type: 'spring', stiffness: 260, damping: 22 }}
           >
-            <div className={`capture-card-reveal rarity-${card.rarityTier.toLowerCase()}`}>
-              <span className="capture-card-shine" aria-hidden="true" />
-              <span className="capture-card-rarity">{card.rarityTier}</span>
-              <span className="capture-card-icon"><Icon name={categoryIcon(card.category)} /></span>
-              <span className="capture-card-item">{card.itemName}</span>
-              {card.description && <p className="capture-card-desc">{card.description}</p>}
-              {card.status === 'provisional' && (
-                <span className="capture-card-pending">Pending human verification</span>
-              )}
-            </div>
+            <DiscoveryCard card={card} />
 
             <label className="capture-name-field">
               <span>Card name</span>

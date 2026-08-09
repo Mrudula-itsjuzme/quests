@@ -155,7 +155,7 @@ function QuestsContent({
     >
       <motion.header className="quest-command-hero" variants={staggerItem}>
         <div className="quest-hero-copy">
-          <span className="quest-hero-kicker">Habbit Quest Board</span>
+          <span className="quest-hero-kicker">Wild Realm Quest Board</span>
           <h1>Good morning, {me?.displayName || 'Wayfarer'}</h1>
           <p>Pick a path, clear the deck, and turn tiny rituals into visible progress.</p>
         </div>
