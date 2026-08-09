@@ -1,8 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, HashRouter } from 'react-router-dom';
+import { Capacitor } from '@capacitor/core';
 import { QueryClientProvider } from '@tanstack/react-query';
 import App from './App';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { queryClient } from './lib/queryClient';
 import '@fontsource/cormorant-garamond/500.css';
 import '@fontsource/cormorant-garamond/600.css';
@@ -13,20 +15,25 @@ import '@fontsource/manrope/600.css';
 import '@fontsource/manrope/700.css';
 import './index.css';
 
+const Router = Capacitor.isNativePlatform() ? HashRouter : BrowserRouter;
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <Router>
+          <App />
+        </Router>
+      </QueryClientProvider>
+    </ErrorBoundary>
   </React.StrictMode>,
 );
 
-if (typeof window !== 'undefined' && 'serviceWorker' in navigator && import.meta.env.PROD) {
+if (typeof window !== 'undefined' && 'serviceWorker' in navigator && import.meta.env.PROD && !Capacitor.isNativePlatform()) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').catch((err) => {
       console.warn('PWA service worker registration failed:', err);
     });
   });
 }
+

@@ -19,8 +19,9 @@ const REALMS = [
   { key: 'Discovery', label: 'Discovery', tiers: ['Novice', 'Seeker', 'Ranger', 'Pathfinder'], icon: 'compass' },
 ];
 
-function realmMastery(activeQuests, realmKey) {
-  const realmQuests = activeQuests.filter((quest) => quest.category === realmKey);
+function realmMastery(activeQuests = [], realmKey) {
+  const safeQuests = Array.isArray(activeQuests) ? activeQuests : [];
+  const realmQuests = safeQuests.filter((quest) => quest.category === realmKey);
   const completed = realmQuests.filter((quest) => quest.status === 'completed');
   const earnedXp = completed.reduce((sum, quest) => sum + (quest.xpReward || 0), 0);
   const tierIndex = Math.min(3, Math.floor(earnedXp / 150));

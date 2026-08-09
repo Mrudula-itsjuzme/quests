@@ -5,6 +5,7 @@ const apiTarget = process.env.VITE_API_TARGET || 'http://localhost:3001';
 const devHost = process.env.VITE_DEV_HOST || '127.0.0.1';
 
 export default defineConfig({
+  base: './',
   plugins: [react()],
   server: {
     host: devHost,
@@ -18,3 +19,4 @@ export default defineConfig({
     },
   },
 });
+

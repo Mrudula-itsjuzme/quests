@@ -10,7 +10,8 @@ export function deriveGold(totalXp = 0) {
 
 /** Gems are a count of rarity value already unlocked via collectibles. */
 export function deriveGems(collectibles = []) {
-  return collectibles.reduce((sum, item) => sum + (GEM_VALUE_BY_RARITY[item?.rarity] || 0), 0);
+  const safeList = Array.isArray(collectibles) ? collectibles : [];
+  return safeList.reduce((sum, item) => sum + (GEM_VALUE_BY_RARITY[item?.rarity] || 0), 0);
 }
 
 function todayKey() {
