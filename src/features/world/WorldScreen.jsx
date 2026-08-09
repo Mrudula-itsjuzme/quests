@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useActiveQuests, useCollectibles, useMe } from '../quests/queries';
+import { useActiveQuests, useCollectibles, useMarkNotificationRead, useMe, useNotifications } from '../quests/queries';
 import { deriveGold, deriveGems, getEnergy } from '../../lib/playerEconomy';
 import { derivePlayerPresentation } from '../../lib/playerPresentation';
 import { timeOfDayPhase } from '../../lib/worldTime';
@@ -18,12 +18,14 @@ export function WorldScreen() {
   const { data: me, isLoading: meLoading } = useMe();
   const { data: quests } = useActiveQuests();
   const { data: collectibles } = useCollectibles();
+  const { data: notifications } = useNotifications();
+  const markNotificationRead = useMarkNotificationRead();
   const navigate = useNavigate();
 
   const [captureOpen, setCaptureOpen] = useState(false);
   const [selectedTag, setSelectedTag] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeHotspot, setActiveHotspot] = useState(null);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   const phase = useMemo(() => timeOfDayPhase(new Date().getHours()), []);
   const weather = useMemo(() => pickWeather(), []);
@@ -36,6 +38,7 @@ export function WorldScreen() {
   const gold = deriveGold(me?.totalXp);
   const gems = deriveGems(collectibles);
   const energy = getEnergy();
+  const unreadNotifications = useMemo(() => (notifications || []).filter((n) => !n.readAt), [notifications]);
 
   useEffect(() => {
     const handleOpenCaptureEvent = () => {
@@ -97,6 +100,48 @@ export function WorldScreen() {
         </div>
       </div>
 
+      <WorldHud
+        me={me}
+        rankProgress={presentation.rankProgress}
+        energy={energy}
+        gold={gold}
+        gems={gems}
+        onOpenNotifications={() => { playTap(); setNotificationsOpen((open) => !open); }}
+      />
+
+      <AnimatePresence>
+        {notificationsOpen && (
+          <motion.div
+            className="notification-popover"
+            style={{ position: 'fixed', top: 'calc(env(safe-area-inset-top, 0px) + 168px)', right: '24px' }}
+            initial={{ opacity: 0, y: -8, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.96 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+          >
+            <div>
+              <strong>Notifications</strong>
+              <button type="button" aria-label="Close notifications" onClick={() => setNotificationsOpen(false)}>×</button>
+            </div>
+            {unreadNotifications.length === 0 && (notifications || []).length === 0 ? (
+              <p style={{ padding: '10px', color: 'var(--quest-muted)', fontSize: '0.85rem' }}>No notifications yet.</p>
+            ) : (
+              (notifications || []).slice(0, 8).map((n) => (
+                <button
+                  key={n.id}
+                  type="button"
+                  className={!n.readAt ? 'unread' : ''}
+                  onClick={() => { if (!n.readAt) markNotificationRead.mutate(n.id); }}
+                >
+                  <strong>{n.title}</strong>
+                  <span>{n.body}</span>
+                </button>
+              ))
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Satellite Terrain Map & Pin Canvas */}
       <WorldCanvas
         phase={phase}
@@ -104,7 +149,6 @@ export function WorldScreen() {
         hotspots={filteredHotspots}
         onSelectHotspot={(hotspot) => {
           playTap();
-          setActiveHotspot(hotspot);
           navigate(hotspot.to);
         }}
       />
@@ -150,13 +194,9 @@ export function WorldScreen() {
               </motion.div>
             ))
           ) : (
-            <div style={{ textAlign: 'center', padding: '30px 20px', width: '100%', color: 'var(--wild-text-dim)', fontSize: '0.9rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
-              <motion.div
-                animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
-                transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
-                style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'var(--quest-gold-soft)', border: '1px solid var(--quest-gold-bright)' }}
-              />
-              Scanning environment...
+            <div style={{ textAlign: 'center', padding: '30px 20px', width: '100%', color: 'var(--wild-text-dim)', fontSize: '0.9rem' }}>
+              <p style={{ margin: 0 }}>No nearby hotspots yet.</p>
+              <p style={{ margin: '4px 0 0', fontSize: '0.8rem', opacity: 0.7 }}>Capture a discovery to start mapping your area.</p>
             </div>
           )}
         </div>

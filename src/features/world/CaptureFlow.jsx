@@ -159,7 +159,7 @@ export function CaptureFlow({ onClose }) {
               <motion.div
                 className="capture-scan-line"
                 animate={{ y: ['0%', '100%', '0%'] }}
-                transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
+                transition={{ duration: 0.9, repeat: Infinity, ease: 'easeInOut' }}
               />
             </div>
             <p>Identifying and scoring rarity…</p>

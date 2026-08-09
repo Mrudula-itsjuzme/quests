@@ -1,23 +1,24 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Icon } from './Icon';
-import { playHover, playTap } from '../lib/useSoundEffects';
+import { playHover, playTap, SOUND_MUTED_KEY } from '../lib/useSoundEffects';
+import { isMotionReduced, setMotionReduced } from '../lib/useMotionPreference';
 
 export function SettingsModal({ onClose, user, onLogout }) {
-  const [soundEnabled, setSoundEnabled] = useState(() => localStorage.getItem('habbit_sound_muted') !== 'true');
-  const [motionIntensity, setMotionIntensity] = useState(() => localStorage.getItem('habbit_motion_reduced') === 'true' ? 'reduced' : 'full');
+  const [soundEnabled, setSoundEnabled] = useState(() => localStorage.getItem(SOUND_MUTED_KEY) !== 'true');
+  const [motionIntensity, setMotionIntensity] = useState(() => isMotionReduced() ? 'reduced' : 'full');
 
   const toggleSound = () => {
-    playTap();
     const next = !soundEnabled;
     setSoundEnabled(next);
-    localStorage.setItem('habbit_sound_muted', next ? 'false' : 'true');
+    localStorage.setItem(SOUND_MUTED_KEY, next ? 'false' : 'true');
+    if (next) playTap();
   };
 
   const setMotion = (mode) => {
     playTap();
     setMotionIntensity(mode);
-    localStorage.setItem('habbit_motion_reduced', mode === 'reduced' ? 'true' : 'false');
+    setMotionReduced(mode === 'reduced');
   };
 
   return (

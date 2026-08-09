@@ -26,17 +26,12 @@ export function saveCosmetics(value) {
 
 export function derivePlayerPresentation(me, active = [], history = [], collectibles = []) {
   const completed = history.filter((quest) => quest.status === 'completed');
-  const totalXp = me?.totalXp || 0;
-  const rankIndex = Math.max(0, Math.floor(totalXp / 500));
-  const rankNames = ['Novice I', 'Novice II', 'Novice III', 'Silver I', 'Silver II', 'Gold I'];
-  const rank = rankNames[Math.min(rankIndex, rankNames.length - 1)];
-  const nextRankXp = (rankIndex + 1) * 500;
   return {
     completedCount: completed.length,
     totalQuests: completed.length + active.length,
-    rank,
-    rankProgress: Math.min(1, totalXp / nextRankXp),
-    nextRankXp,
+    rank: me?.tier ? `${me.tier} ${me.level}` : 'Adventurer',
+    rankProgress: me?.progressToNextLevel ?? 0,
+    nextRankXp: me?.xpForCurrentLevel ?? 0,
     achievements: [
       { id: 'first', label: 'First Steps', unlocked: completed.length >= 1, icon: 'scroll' },
       { id: 'streak', label: 'Relentless', unlocked: (me?.streakDays || 0) >= 7, icon: 'flame' },

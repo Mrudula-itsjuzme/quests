@@ -269,7 +269,7 @@ export function GalleryPage() {
                     }}
                   >
                     <motion.div layoutId={`discovery-img-${cardId}`} className="library-card-img-wrap">
-                      <img className="library-card-img" src={placeholderImg} alt={card.itemName} />
+                      <img className="library-card-img" src={placeholderImg} alt={card.itemName} loading="lazy" decoding="async" />
                       <div className={`library-card-badge rank-badge-${rarity.toLowerCase()}`}>
                         {rarity}
                       </div>

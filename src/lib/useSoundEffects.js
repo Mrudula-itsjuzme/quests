@@ -1,10 +1,21 @@
 // src/lib/useSoundEffects.js
 // Synthesized Web Audio API sound effects for micro-interactions.
 
+export const SOUND_MUTED_KEY = 'habbit_sound_muted';
+
 let audioCtx = null;
 
+function isMuted() {
+  if (typeof window === 'undefined') return false;
+  try {
+    return window.localStorage.getItem(SOUND_MUTED_KEY) === 'true';
+  } catch {
+    return false;
+  }
+}
+
 function getAudioContext() {
-  if (typeof window === 'undefined') return null;
+  if (typeof window === 'undefined' || isMuted()) return null;
   if (!audioCtx) {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     if (AudioContextClass) {

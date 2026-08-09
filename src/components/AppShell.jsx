@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from '../features/auth/AuthContext';
@@ -14,6 +14,7 @@ import { PullToRefresh } from './motion/PullToRefresh';
 import { MagneticButton } from './motion/MagneticButton';
 import { WorldAmbience } from './WorldAmbience';
 import { DawnMoment, useDawnMoment } from './DawnMoment';
+import { useAndroidBackButton } from '../lib/useAndroidBackButton';
 
 const navItemsLeft = [
   { to: '/app', label: 'Map', icon: 'compass', end: true },
@@ -61,6 +62,16 @@ export function AppShell() {
       window.removeEventListener('habbit-open-settings', onOpenSettings);
     };
   }, []);
+
+  const handleHardwareBack = useCallback(() => {
+    if (logoutDialogOpen) { setLogoutDialogOpen(false); return true; }
+    if (settingsOpen) { setSettingsOpen(false); return true; }
+    if (notice) { setNotice(''); return true; }
+    if (levelUp) { setLevelUp(null); return true; }
+    return false;
+  }, [logoutDialogOpen, settingsOpen, notice, levelUp]);
+
+  useAndroidBackButton(handleHardwareBack);
 
   return (
     <div className="app-shell">
@@ -132,12 +143,8 @@ export function AppShell() {
               onClick={playTap}
               onMouseEnter={playHover}
             >
-              {({ isActive }) => (
-                <>
-                  <Icon name={item.icon} />
-                  <span>{item.label}</span>
-                </>
-              )}
+              <Icon name={item.icon} />
+              <span>{item.label}</span>
             </NavLink>
           ))}
 
@@ -164,12 +171,8 @@ export function AppShell() {
               onClick={playTap}
               onMouseEnter={playHover}
             >
-              {({ isActive }) => (
-                <>
-                  <Icon name={item.icon} />
-                  <span>{item.label}</span>
-                </>
-              )}
+              <Icon name={item.icon} />
+              <span>{item.label}</span>
             </NavLink>
           ))}
         </nav>

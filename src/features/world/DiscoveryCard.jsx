@@ -134,16 +134,26 @@ export function DiscoveryCard({ card, imageUrl, onAddToLibrary, onShare, onClose
         </div>
 
         {/* Rarity Hexagon Badge */}
-        <div className="discovery-hex-badge-wrap">
+        <motion.div 
+          className="discovery-hex-badge-wrap"
+          initial={{ opacity: 0, scale: 0.5, rotate: -30 }}
+          animate={{ opacity: 1, scale: 1, rotate: 0 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.15 }}
+        >
           <div className={`discovery-hex-badge rank-hex-${rarityTier.toLowerCase()}`}>
             <span>{rarityTier}</span>
           </div>
           <small>{rarityTier === 'S' ? 'LEGENDARY' : rarityTier === 'A' ? 'EPIC' : rarityTier === 'B' ? 'RARE' : 'COMMON'}</small>
-        </div>
+        </motion.div>
       </div>
 
       {/* 4-Column Stat Grid */}
-      <div className="discovery-stat-grid">
+      <motion.div 
+        className="discovery-stat-grid"
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, type: 'spring', stiffness: 400, damping: 30 }}
+      >
         <div className={`discovery-stat-box ${rarityTier === 'S' ? 'gold' : ''}`}>
           <small>RARITY</small>
           <strong>{rarityTier} Rank</strong>
@@ -165,12 +175,17 @@ export function DiscoveryCard({ card, imageUrl, onAddToLibrary, onShare, onClose
             {cardData.status === 'provisional' ? '⏳ Under review' : '✔ Verified'}
           </strong>
         </div>
-      </div>
+      </motion.div>
 
       {/* Description Text */}
-      <p className="discovery-description">
+      <motion.p 
+        className="discovery-description"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3 }}
+      >
         {cardData.description || `Discovered specimen of ${itemName} (${scientificName}). Verified by the Wild Realm engine.`}
-      </p>
+      </motion.p>
 
       {/* Metadata Strip */}
       <div className="discovery-env-strip-row">

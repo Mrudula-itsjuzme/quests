@@ -17,6 +17,12 @@ export default defineConfig({
         secure: false,
       },
     },
+    fs: {
+      deny: ['android', 'api', 'server'],
+    },
+  },
+  optimizeDeps: {
+    entries: ['index.html'],
   },
 });
 

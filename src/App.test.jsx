@@ -88,7 +88,7 @@ describe('App (development auth mode)', () => {
   it('navigates to the quest board and filters quests', async () => {
     renderApp('/app/quests');
 
-    await screen.findByRole('heading', { name: /quest deck/i });
+    await screen.findByRole('heading', { name: /^quests$/i, hidden: true });
     expect((await screen.findAllByText(/morning mindfulness/i)).length).toBeGreaterThan(0);
   });
 
@@ -96,7 +96,7 @@ describe('App (development auth mode)', () => {
     renderApp('/app/quests');
 
     await screen.findAllByText(/morning mindfulness/i);
-    fireEvent.click(screen.getByRole('button', { name: /^open$/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^view$/i }));
     fireEvent.change(await screen.findByLabelText(/write your reflection/i), { target: { value: 'A real reflection proof.' } });
     fireEvent.click(screen.getByRole('button', { name: /submit proof/i }));
 
@@ -112,22 +112,22 @@ describe('App (development auth mode)', () => {
 
   it('exposes the five reference destinations and the community surface', async () => {
     renderApp('/app/community');
-    expect(await screen.findByRole('heading', { name: 'Community' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /quest feed/i })).toBeInTheDocument();
-    expect(screen.getAllByRole('link', { name: /profile/i }).length).toBeGreaterThan(0);
+    expect(await screen.findByRole('heading', { name: /^community$/i, hidden: true })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^feed$/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^friends$/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^map$/i })).toBeInTheDocument();
   });
 
   it('renders profile progression from real account data', async () => {
     renderApp('/app/profile');
-    expect(await screen.findByRole('heading', { name: /^profile$/i })).toBeInTheDocument();
-    expect(screen.getByText(/statistics/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /change title/i })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: /Local Adventurer/i })).toBeInTheDocument();
+    expect(screen.getByText(/Bronze 2/i)).toBeInTheDocument();
   });
 
   it('shows the collection empty state when no collectibles are unlocked', async () => {
     renderApp('/app/collection');
 
-    expect(await screen.findByText(/no stickers unlocked yet/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Your collection starts here/i)).toBeInTheDocument();
   });
 
   it('redirects unauthenticated dev-mode users straight into the app (no fake landing bypass)', async () => {

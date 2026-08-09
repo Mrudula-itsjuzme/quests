@@ -48,6 +48,7 @@ export function QuestsPage() {
 
   return (
     <main className="quests-shell">
+      <h1 className="sr-only">Quests</h1>
       {/* Top User Bar */}
       <div className="quest-user-topbar">
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -143,17 +144,36 @@ export function QuestsPage() {
                     </div>
                   </div>
 
-                  <button
-                    type="button"
-                    className={`quest-claim-btn ${isDone ? '' : 'glass'}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      playTap();
-                      setSelectedId(quest.id);
-                    }}
-                  >
-                    {isDone ? 'Done' : 'View'}
-                  </button>
+                  <AnimatePresence mode="wait">
+                    {isDone ? (
+                      <motion.div
+                        key="done"
+                        initial={{ scale: 0, opacity: 0, rotate: -45 }}
+                        animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                        transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                        className="quest-claim-btn"
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: '1px solid var(--quest-gold-dim)', color: 'var(--quest-gold-bright)' }}
+                      >
+                        ✔
+                      </motion.div>
+                    ) : (
+                      <motion.button
+                        key="claim"
+                        initial={{ opacity: 1 }}
+                        exit={{ scale: 0, opacity: 0 }}
+                        type="button"
+                        className="quest-claim-btn glass"
+                        whileTap={{ scale: 0.9 }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          playTap();
+                          setSelectedId(quest.id);
+                        }}
+                      >
+                        View
+                      </motion.button>
+                    )}
+                  </AnimatePresence>
                 </div>
               </motion.div>
             );

@@ -46,7 +46,7 @@ export function AuthProvider({ children }) {
       isAuthenticated: devMode || isGuest || Boolean(session),
       getToken: async () => {
         if (isGuest) return 'guest';
-        if (devMode) return null;
+        if (devMode) return 'dev';
         const { data } = await supabase.auth.getSession();
         return data.session?.access_token ?? null;
       },

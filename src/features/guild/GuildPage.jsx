@@ -9,6 +9,7 @@ export function GuildPage() {
 
   return (
     <main className="guild-page page-stack">
+      <h1 className="sr-only">Community</h1>
       {/* Top Tabs Bar: FEED, FRIENDS, MAP */}
       <div className="community-tabs-bar">
         <button
@@ -41,7 +42,7 @@ export function GuildPage() {
             <div key={post.id} className="community-post-card">
               <div className="post-header-row">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <img className="post-author-avatar" src={post.avatarUrl} alt={post.authorName} />
+                  <img className="post-author-avatar" src={post.avatarUrl} alt={post.authorName} loading="lazy" decoding="async" />
                   <div>
                     <h4 style={{ margin: 0, fontSize: '0.88rem', color: '#fff' }}>{post.authorName}</h4>
                     <small style={{ color: 'var(--wild-text-dim)', fontSize: '0.72rem' }}>{post.timeAgo}</small>
@@ -50,7 +51,7 @@ export function GuildPage() {
                 <span className="post-rank-badge">{post.rankBadge}</span>
               </div>
               <div className="post-photo-wrap">
-                <img className="post-photo-img" src={post.imageUrl} alt={post.title} />
+                <img className="post-photo-img" src={post.imageUrl} alt={post.title} loading="lazy" decoding="async" />
               </div>
               <div className="post-info-block">
                 <h3 style={{ margin: '6px 0 2px', fontSize: '1rem', color: '#fff' }}>{post.title}</h3>

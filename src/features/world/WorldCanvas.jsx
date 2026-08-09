@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion';
-import { Icon } from '../../components/Icon';
 import { WeatherLayer } from './WeatherLayer';
 
 export const HOTSPOT_LOCATIONS = [];
