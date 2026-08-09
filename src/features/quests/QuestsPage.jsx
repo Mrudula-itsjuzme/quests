@@ -10,53 +10,6 @@ import {
   useMe,
 } from './queries';
 
-const SAMPLE_QUESTS = [
-  {
-    id: 'q1',
-    title: 'Photograph 3 Different Birds',
-    description: 'Capture distinct bird species in your area',
-    progressText: '2 / 3',
-    xpReward: 150,
-    coinReward: 50,
-    status: 'in_progress',
-    cadence: 'daily',
-    icon: '🦜',
-  },
-  {
-    id: 'q2',
-    title: 'Discover a Waterfall',
-    description: 'Find and photograph a landscape waterfall point',
-    progressText: '0 / 1',
-    xpReward: 200,
-    coinReward: 75,
-    status: 'in_progress',
-    cadence: 'daily',
-    icon: '🌊',
-  },
-  {
-    id: 'q3',
-    title: 'Find a Red Flower',
-    description: 'Capture a vibrant red flora specimen',
-    progressText: '1 / 1',
-    xpReward: 100,
-    coinReward: 50,
-    status: 'completed_unclaimed',
-    cadence: 'daily',
-    icon: '🌺',
-  },
-  {
-    id: 'q4',
-    title: 'Explore for 30 Minutes',
-    description: 'Track outdoor walking time in nature',
-    progressText: '18 / 30',
-    xpReward: 120,
-    coinReward: 50,
-    status: 'in_progress',
-    cadence: 'daily',
-    icon: '🧭',
-  },
-];
-
 export function QuestsPage() {
   const activeQuery = useActiveQuests();
   const meQuery = useMe();
@@ -66,8 +19,7 @@ export function QuestsPage() {
   const [completedQuestModal, setCompletedQuestModal] = useState(null);
 
   const quests = useMemo(() => {
-    const fetched = activeQuery.data || [];
-    return fetched.length > 0 ? fetched : SAMPLE_QUESTS;
+    return activeQuery.data || [];
   }, [activeQuery.data]);
 
   const me = meQuery.data;
@@ -143,56 +95,64 @@ export function QuestsPage() {
 
       {/* Quests List */}
       <div className="quests-card-list">
-        {visibleQuests.map((quest) => {
-          const isClaimable = quest.status === 'completed_unclaimed';
-          const isDone = quest.status === 'completed';
-          return (
-            <motion.div
-              key={quest.id}
-              className={`quest-item-card ${isDone ? 'completed' : ''}`}
-              whileHover={{ scale: 1.01 }}
-              onClick={() => { playTap(); setSelectedId(quest.id); }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span className="quest-item-emoji">{quest.icon || '📜'}</span>
-                <div style={{ flex: 1 }}>
-                  <h4 className="quest-item-title">{quest.title}</h4>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '4px' }}>
-                    <span className="quest-progress-num">{quest.progressText || '1 / 1'}</span>
-                    <span className="quest-reward-pill">XP {quest.xpReward || 150}</span>
-                    <span className="quest-reward-pill gold">🪙 {quest.coinReward || 50}</span>
+        {activeQuery.isLoading ? (
+          <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--wild-text-dim)' }}>Loading quests...</div>
+        ) : visibleQuests.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--wild-text-dim)' }}>
+            No {tab} quests available right now. Check back later!
+          </div>
+        ) : (
+          visibleQuests.map((quest) => {
+            const isClaimable = quest.status === 'completed_unclaimed';
+            const isDone = quest.status === 'completed';
+            return (
+              <motion.div
+                key={quest.id}
+                className={`quest-item-card ${isDone ? 'completed' : ''}`}
+                whileHover={{ scale: 1.01 }}
+                onClick={() => { playTap(); setSelectedId(quest.id); }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <span className="quest-item-emoji">{quest.icon || '📜'}</span>
+                  <div style={{ flex: 1 }}>
+                    <h4 className="quest-item-title">{quest.title}</h4>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '4px' }}>
+                      <span className="quest-progress-num">{quest.progressText || '1 / 1'}</span>
+                      <span className="quest-reward-pill">XP {quest.xpReward || 150}</span>
+                      <span className="quest-reward-pill gold">🪙 {quest.coinReward || 50}</span>
+                    </div>
                   </div>
-                </div>
 
-                {isClaimable ? (
-                  <button
-                    type="button"
-                    className="quest-claim-btn"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      playTap();
-                      setCompletedQuestModal(quest);
-                    }}
-                  >
-                    CLAIM
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    className="quest-claim-btn glass"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      playTap();
-                      setSelectedId(quest.id);
-                    }}
-                  >
-                    View
-                  </button>
-                )}
-              </div>
-            </motion.div>
-          );
-        })}
+                  {isClaimable ? (
+                    <button
+                      type="button"
+                      className="quest-claim-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        playTap();
+                        setCompletedQuestModal(quest);
+                      }}
+                    >
+                      CLAIM
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="quest-claim-btn glass"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        playTap();
+                        setSelectedId(quest.id);
+                      }}
+                    >
+                      View
+                    </button>
+                  )}
+                </div>
+              </motion.div>
+            );
+          })
+        )}
       </div>
 
       {/* Season Progress Footer Card */}

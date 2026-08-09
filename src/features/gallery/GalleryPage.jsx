@@ -4,83 +4,14 @@ import { useCollectibles } from '../quests/queries';
 import { playHover, playTap } from '../../lib/useSoundEffects';
 import { DiscoveryCard } from '../world/DiscoveryCard';
 
-const CATEGORY_TILES = [
-  { id: 'Fire', label: 'FIRE', count: '32 / 60', imageUrl: '/assets/fire-volcano.png', bgGradient: 'linear-gradient(180deg, rgba(239, 68, 68, 0.2), rgba(6, 9, 7, 0.9))' },
-  { id: 'Water', label: 'WATER', count: '41 / 68', imageUrl: '/assets/water-fall.png', bgGradient: 'linear-gradient(180deg, rgba(59, 130, 246, 0.2), rgba(6, 9, 7, 0.9))' },
-  { id: 'Grass', label: 'GRASS', count: '55 / 92', imageUrl: '/assets/verdant-explorer-banner.png', bgGradient: 'linear-gradient(180deg, rgba(34, 197, 94, 0.2), rgba(6, 9, 7, 0.9))' },
-  { id: 'Familiars', label: 'FAMILIARS', count: '68 / 120', imageUrl: '/assets/african-grey-parrot.png', bgGradient: 'linear-gradient(180deg, rgba(245, 158, 11, 0.2), rgba(6, 9, 7, 0.9))' },
-  { id: 'Earth', label: 'EARTH', count: '28 / 60', imageUrl: '/assets/earth-mountain.png', bgGradient: 'linear-gradient(180deg, rgba(168, 85, 247, 0.2), rgba(6, 9, 7, 0.9))' },
-  { id: 'Sky', label: 'SKY', count: '32 / 70', imageUrl: '/assets/sky-aurora.png', bgGradient: 'linear-gradient(180deg, rgba(14, 165, 233, 0.2), rgba(6, 9, 7, 0.9))' },
-];
-
-const SAMPLE_WILDLIFE = [
-  {
-    assetId: 'w1',
-    itemName: 'African Grey Parrot',
-    scientificName: 'Psittacus erithacus',
-    rarityTier: 'S',
-    element: 'Familiars',
-    imageUrl: '/assets/african-grey-parrot.png',
-    location: 'Kakum, Ghana',
-    stars: '★★★★★',
-    xpEarned: 900,
-  },
-  {
-    assetId: 'w2',
-    itemName: 'Scarlet Macaw',
-    scientificName: 'Ara macao',
-    rarityTier: 'A',
-    element: 'Familiars',
-    imageUrl: '/assets/african-grey-parrot.png',
-    location: 'Amazon Basin, Brazil',
-    stars: '★★★★★',
-    xpEarned: 750,
-  },
-  {
-    assetId: 'w3',
-    itemName: 'Bald Eagle',
-    scientificName: 'Haliaeetus leucocephalus',
-    rarityTier: 'A',
-    element: 'Familiars',
-    imageUrl: '/assets/blue-billed-cuckoo.png',
-    location: 'Alaska, USA',
-    stars: '★★★★★',
-    xpEarned: 800,
-  },
-  {
-    assetId: 'w4',
-    itemName: 'Emperor Penguin',
-    scientificName: 'Aptenodytes forsteri',
-    rarityTier: 'B',
-    element: 'Familiars',
-    imageUrl: '/assets/african-grey-parrot.png',
-    location: 'Antarctica',
-    stars: '★★★★★',
-    xpEarned: 500,
-  },
-  {
-    assetId: 'w5',
-    itemName: 'Red Fox',
-    scientificName: 'Vulpes vulpes',
-    rarityTier: 'B',
-    element: 'Familiars',
-    imageUrl: '/assets/verdant-explorer-banner.png',
-    location: 'Black Forest, Germany',
-    stars: '★★★★★',
-    xpEarned: 450,
-  },
-  {
-    assetId: 'w6',
-    itemName: 'Snow Leopard',
-    scientificName: 'Panthera uncia',
-    rarityTier: 'A',
-    element: 'Familiars',
-    imageUrl: '/assets/african-grey-parrot.png',
-    location: 'Himalayas, Nepal',
-    stars: '★★★★★',
-    xpEarned: 850,
-  },
-];
+const CATEGORY_BGS = {
+  Fire: { imageUrl: '/assets/fire-volcano.png', bgGradient: 'linear-gradient(180deg, rgba(239, 68, 68, 0.2), rgba(6, 9, 7, 0.9))' },
+  Water: { imageUrl: '/assets/water-fall.png', bgGradient: 'linear-gradient(180deg, rgba(59, 130, 246, 0.2), rgba(6, 9, 7, 0.9))' },
+  Grass: { imageUrl: '/assets/verdant-explorer-banner.png', bgGradient: 'linear-gradient(180deg, rgba(34, 197, 94, 0.2), rgba(6, 9, 7, 0.9))' },
+  Familiars: { imageUrl: '/assets/african-grey-parrot.png', bgGradient: 'linear-gradient(180deg, rgba(245, 158, 11, 0.2), rgba(6, 9, 7, 0.9))' },
+  Earth: { imageUrl: '/assets/earth-mountain.png', bgGradient: 'linear-gradient(180deg, rgba(168, 85, 247, 0.2), rgba(6, 9, 7, 0.9))' },
+  Sky: { imageUrl: '/assets/sky-aurora.png', bgGradient: 'linear-gradient(180deg, rgba(14, 165, 233, 0.2), rgba(6, 9, 7, 0.9))' },
+};
 
 const ELEMENT_TABS = [
   { id: 'all', label: 'All' },
@@ -100,26 +31,21 @@ const cardVariants = {
 };
 
 export function GalleryPage() {
-  const { data: collection } = useCollectibles();
-  const [activeTab, setActiveTab] = useState('Familiars');
+  const { data: collection, isLoading } = useCollectibles();
+  const [activeTab, setActiveTab] = useState('all');
   const [selectedCard, setSelectedCard] = useState(null);
 
   const displayList = useMemo(() => {
-    const userCards = (collection || []).map((item, idx) => ({
-      assetId: item.assetId || `usr-${idx}`,
-      itemName: item.itemName || item.title || 'Discovered Familiar',
-      scientificName: item.scientificName || 'Fauna Wild',
-      rarityTier: item.rarityTier || item.rarity || 'A',
-      element: item.category || 'Familiars',
-      imageUrl: item.imageUrl || (idx % 2 === 0 ? '/assets/african-grey-parrot.png' : '/assets/blue-billed-cuckoo.png'),
-      location: item.location || 'Wild Sanctuary',
-      stars: '★★★★★',
-      xpEarned: 500,
-    }));
+    if (!collection) return [];
+    if (activeTab === 'all') return collection;
+    return collection.filter((c) => (c.category || c.element || 'Familiars').toLowerCase() === activeTab.toLowerCase());
+  }, [collection, activeTab]);
 
-    const combined = [...SAMPLE_WILDLIFE, ...userCards];
-    if (activeTab === 'all') return combined;
-    return combined.filter((c) => c.element.toLowerCase() === activeTab.toLowerCase());
+  const categoryTiles = useMemo(() => {
+    return Object.entries(CATEGORY_BGS).map(([id, bg]) => {
+      const count = (collection || []).filter(c => (c.category || c.element || 'Familiars').toLowerCase() === id.toLowerCase()).length;
+      return { id, label: id.toUpperCase(), count, ...bg };
+    }).filter(tile => tile.count > 0 || activeTab === 'all'); // Show all in 'all' view, or only populated if needed
   }, [collection, activeTab]);
 
   return (
@@ -141,15 +67,15 @@ export function GalleryPage() {
       <div className="library-stats-bar">
         <div className="library-stat-item">
           <small>Total Cards</small>
-          <strong>284</strong>
+          <strong>{(collection || []).length}</strong>
         </div>
         <div className="library-stat-item">
           <small>S Rank</small>
-          <strong>28</strong>
+          <strong>{(collection || []).filter((c) => c.rarityTier === 'S' || c.rarity === 'S').length}</strong>
         </div>
         <div className="library-stat-item">
           <small>XP Earned</small>
-          <strong>58,450</strong>
+          <strong>{(collection || []).reduce((acc, c) => acc + (c.xpEarned || c.xp || 0), 0).toLocaleString()}</strong>
         </div>
       </div>
 
@@ -172,10 +98,15 @@ export function GalleryPage() {
         ))}
       </div>
 
-      {/* View Mode: Category Overview Grid (when "all") vs 2-Column Card Grid */}
-      {activeTab === 'all' ? (
+      {isLoading ? (
+        <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--wild-text-dim)' }}>Loading collection...</div>
+      ) : displayList.length === 0 && activeTab !== 'all' ? (
+        <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--wild-text-dim)' }}>
+          No discoveries in this category yet.
+        </div>
+      ) : activeTab === 'all' ? (
         <div className="library-card-grid">
-          {CATEGORY_TILES.map((cat, i) => (
+          {categoryTiles.map((cat, i) => (
             <motion.div
               key={cat.id}
               className="library-photo-card"
@@ -207,7 +138,7 @@ export function GalleryPage() {
                     {cat.label}
                   </h3>
                   <span style={{ color: 'var(--wild-text-dim)', fontSize: '0.75rem', fontWeight: '700' }}>
-                    {cat.count}
+                    {cat.count} Discovered
                   </span>
                 </div>
               </div>
@@ -229,35 +160,38 @@ export function GalleryPage() {
 
           {/* 2-Column Photographic Card Grid */}
           <div className="library-card-grid">
-            {displayList.map((card, i) => (
-              <motion.div
-                key={card.assetId}
-                className={`library-photo-card rank-${card.rarityTier.toLowerCase()}`}
-                custom={i}
-                initial="hidden"
-                animate="visible"
-                variants={cardVariants}
-                whileTap={{ scale: 0.97 }}
-                onClick={() => {
-                  playTap();
-                  setSelectedCard(card);
-                }}
-              >
-                <div className="library-card-img-wrap">
-                  <img className="library-card-img" src={card.imageUrl} alt={card.itemName} />
-                  <div className={`library-card-badge rank-badge-${card.rarityTier.toLowerCase()}`}>
-                    {card.rarityTier}
+            {displayList.map((card, i) => {
+              const rarity = card.rarityTier || card.rarity || 'A';
+              return (
+                <motion.div
+                  key={card.assetId || card.id}
+                  className={`library-photo-card rank-${rarity.toLowerCase()}`}
+                  custom={i}
+                  initial="hidden"
+                  animate="visible"
+                  variants={cardVariants}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => {
+                    playTap();
+                    setSelectedCard(card);
+                  }}
+                >
+                  <div className="library-card-img-wrap">
+                    <img className="library-card-img" src={card.imageUrl} alt={card.itemName || card.title} />
+                    <div className={`library-card-badge rank-badge-${rarity.toLowerCase()}`}>
+                      {rarity}
+                    </div>
                   </div>
-                </div>
-                <div className="library-card-info">
-                  <h3 className="library-card-title">{card.itemName}</h3>
-                  <p className="library-card-sub">{card.rarityTier} Rank</p>
-                  <span className="library-card-stars" style={{ color: card.rarityTier === 'S' ? '#fbbf24' : card.rarityTier === 'A' ? '#c084fc' : '#60a5fa' }}>
-                    {card.stars}
-                  </span>
-                </div>
-              </motion.div>
-            ))}
+                  <div className="library-card-info">
+                    <h3 className="library-card-title">{card.itemName || card.title}</h3>
+                    <p className="library-card-sub">{rarity} Rank</p>
+                    <span className="library-card-stars" style={{ color: rarity === 'S' ? '#fbbf24' : rarity === 'A' ? '#c084fc' : '#60a5fa' }}>
+                      ★★★★★
+                    </span>
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         </>
       )}

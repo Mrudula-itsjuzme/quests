@@ -7,8 +7,15 @@ import { SettingsModal } from '../../components/SettingsModal';
 
 export function ProfilePage() {
   const { data: me } = useMe();
+  const { data: collection } = useCollectibles();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [activeNotice, setActiveNotice] = useState('');
+
+  const totalCount = collection ? collection.length : 0;
+  const sRankCount = collection ? collection.filter((c) => c.rarityTier === 'S' || c.rarity === 'S').length : 0;
+  const totalXp = me?.totalXp || 0;
+  const totalCoins = me?.coins || 0;
+  const currentStreak = me?.streak || 0;
 
   const MENU_ITEMS = [
     { id: 'profile', label: 'My Profile', icon: '👤', badge: null },
@@ -23,7 +30,12 @@ export function ProfilePage() {
   return (
     <main className="profile-shell">
       {/* Top Explorer Hero Card */}
-      <div className="profile-hero-card">
+      <motion.div
+        className="profile-hero-card"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25 }}
+      >
         <div className="profile-avatar-ring">
           <img
             className="profile-avatar-img"
@@ -33,35 +45,35 @@ export function ProfilePage() {
           <span className="profile-avatar-edit">✏️</span>
         </div>
         <div className="profile-identity-info">
-          <h2>{me?.displayName || 'Explorer One'} ✏️</h2>
+          <h2>{me?.displayName || 'Sabareesh'} ✏️</h2>
           <div className="profile-identity-title">🏆 Gold Explorer II</div>
           <div className="profile-xp-row">
             <span>Level 28</span>
-            <span>12,450 / 18,000 XP</span>
+            <span>{totalXp.toLocaleString()} / 18,000 XP</span>
           </div>
           <div className="profile-xp-bar-wrap">
-            <div className="profile-xp-bar-fill" style={{ width: '69%' }} />
+            <div className="profile-xp-bar-fill" style={{ width: `${Math.min(100, Math.round((totalXp / 18000) * 100))}%` }} />
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* 4-Block Stat Summary Grid */}
       <div className="profile-stats-grid">
         <div className="profile-stat-card">
           <small>Discoveries</small>
-          <strong>152</strong>
+          <strong>{totalCount}</strong>
         </div>
         <div className="profile-stat-card">
           <small>S Rank</small>
-          <strong>12</strong>
+          <strong>{sRankCount}</strong>
         </div>
         <div className="profile-stat-card">
           <small>XP Earned</small>
-          <strong>48,750</strong>
+          <strong>{totalXp.toLocaleString()}</strong>
         </div>
         <div className="profile-stat-card">
           <small>Badges</small>
-          <strong>38</strong>
+          <strong>0</strong>
         </div>
       </div>
 
@@ -103,13 +115,13 @@ export function ProfilePage() {
             COINS & CHESTS
           </h4>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '8px 0' }}>
-            <span style={{ fontSize: '1.2rem', fontWeight: '900', color: '#fff' }}>🪙 3,425</span>
+            <span style={{ fontSize: '1.2rem', fontWeight: '900', color: '#fff' }}>🪙 {totalCoins.toLocaleString()}</span>
             <button type="button" className="circle-add-btn">+</button>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
             <div>
               <small style={{ color: 'var(--wild-text-dim)', fontSize: '0.68rem', display: 'block' }}>NEXT CHEST IN</small>
-              <strong style={{ fontSize: '0.88rem', color: '#fff' }}>7 / 10 days</strong>
+              <strong style={{ fontSize: '0.88rem', color: '#fff' }}>{currentStreak} / 10 days</strong>
             </div>
             <span style={{ fontSize: '1.6rem' }}>📦</span>
           </div>

@@ -127,27 +127,33 @@ export function WorldScreen() {
         </div>
 
         <div className="explore-hotspot-cards">
-          {NEARBY_HOTSPOTS.map((place) => (
-            <motion.div
-              key={place.id}
-              className="explore-hotspot-card"
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.96 }}
-              onClick={() => {
-                playTap();
-                navigate('/app/collection');
-              }}
-            >
-              <div className="explore-hotspot-bg" style={{ backgroundImage: `url(${place.bg})` }} />
-              <div className="explore-hotspot-overlay">
-                <h4 className="explore-hotspot-title">{place.title}</h4>
-                <div className="explore-hotspot-meta">
-                  <span>{place.distance}</span>
-                  <span className="explore-hotspot-rating">★ {place.rating}</span>
+          {NEARBY_HOTSPOTS.length > 0 ? (
+            NEARBY_HOTSPOTS.map((place) => (
+              <motion.div
+                key={place.id}
+                className="explore-hotspot-card"
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.96 }}
+                onClick={() => {
+                  playTap();
+                  navigate('/app/collection');
+                }}
+              >
+                <div className="explore-hotspot-bg" style={{ backgroundImage: `url(${place.bg})` }} />
+                <div className="explore-hotspot-overlay">
+                  <h4 className="explore-hotspot-title">{place.title}</h4>
+                  <div className="explore-hotspot-meta">
+                    <span>{place.distance}</span>
+                    <span className="explore-hotspot-rating">★ {place.rating}</span>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            ))
+          ) : (
+            <div style={{ textAlign: 'center', padding: '20px', width: '100%', color: 'var(--wild-text-dim)', fontSize: '0.9rem' }}>
+              Scanning area for new hotspots...
+            </div>
+          )}
         </div>
       </div>
 

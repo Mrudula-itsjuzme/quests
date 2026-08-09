@@ -1,17 +1,79 @@
-import { motion } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
+
+function useCountUp(targetValue, duration = 1200) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (!targetValue) return;
+    let startTimestamp = null;
+    const step = (timestamp) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      const easeOutQuad = 1 - (1 - progress) * (1 - progress);
+      setCount(Math.floor(easeOutQuad * targetValue));
+      if (progress < 1) {
+        window.requestAnimationFrame(step);
+      }
+    };
+    window.requestAnimationFrame(step);
+  }, [targetValue, duration]);
+
+  return count;
+}
 
 export function DiscoveryCard({ card, imageUrl, onAddToLibrary, onShare, onClose }) {
   const cardData = card || {};
-  const itemName = cardData.itemName || cardData.cardTitle || cardData.title || 'African Grey Parrot';
-  const scientificName = cardData.scientificName || 'Psittacus erithacus';
+  const itemName = cardData.itemName || cardData.cardTitle || cardData.title || 'Discovered Creature';
+  const scientificName = cardData.scientificName || cardData.category || 'Fauna Wild';
   const cardImg = imageUrl || cardData.imageUrl || '/assets/african-grey-parrot.png';
-  const xpEarned = cardData.xpEarned || 900;
+  const rawXp = cardData.xpEarned || cardData.xp || 500;
+  const animatedXp = useCountUp(rawXp, 1000);
   const confidence = cardData.confidence ? Math.round(cardData.confidence * 100) : 98;
-  const locationText = cardData.location || 'Kakum National Park, Ghana, Africa';
-  const streakDays = cardData.streakDays || 5;
+  const locationText = cardData.location || (cardData.gps ? `${cardData.gps.lat?.toFixed(2)}°, ${cardData.gps.lng?.toFixed(2)}°` : 'Wild Sanctuary');
+  const rarityTier = (cardData.rarityTier || cardData.rarity || 'A').toUpperCase();
+  const elementCategory = cardData.element || cardData.category || 'Familiars';
+  const capturedAtDate = cardData.capturedAt ? new Date(cardData.capturedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+  // 3D Tilt interaction logic
+  const cardRef = useRef(null);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [15, -15]), { stiffness: 300, damping: 20 });
+  const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-15, 15]), { stiffness: 300, damping: 20 });
+  const glareX = useTransform(x, [-0.5, 0.5], ['0%', '100%']);
+  const glareY = useTransform(y, [-0.5, 0.5], ['0%', '100%']);
+
+  const handlePointerMove = (e) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    x.set(mouseX / width - 0.5);
+    y.set(mouseY / height - 0.5);
+  };
+
+  const handlePointerLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
 
   return (
-    <div className="discovery-card-modal">
+    <motion.div
+      className={`discovery-card-modal rank-${rarityTier.toLowerCase()}`}
+      ref={cardRef}
+      style={{
+        rotateX,
+        rotateY,
+        transformStyle: 'preserve-3d',
+        perspective: 1000,
+      }}
+      onPointerMove={handlePointerMove}
+      onPointerLeave={handlePointerLeave}
+    >
       {/* Top Navigation Bar */}
       <div className="discovery-modal-header">
         <button
@@ -33,14 +95,19 @@ export function DiscoveryCard({ card, imageUrl, onAddToLibrary, onShare, onClose
         </button>
       </div>
 
-      {/* Hero Image Frame with Gold Hex Badge */}
+      {/* Hero Image Frame with Holographic Overlay */}
       <div className="discovery-hero-frame">
         <img className="discovery-hero-img" src={cardImg} alt={itemName} />
         
-        {/* Pagination Dots */}
-        <div className="discovery-hero-dots">
-          <span></span><span></span><span className="active"></span><span></span><span></span>
-        </div>
+        {/* Dynamic Holographic Glare Layer */}
+        {(rarityTier === 'S' || rarityTier === 'A') && (
+          <motion.div
+            className="discovery-holo-glare"
+            style={{
+              background: `radial-gradient(circle at ${glareX} ${glareY}, rgba(255,255,255,0.35) 0%, rgba(245,158,11,0.15) 40%, transparent 80%)`,
+            }}
+          />
+        )}
       </div>
 
       {/* Creature Title, Elements & Gold Hex Rarity Badge */}
@@ -49,47 +116,49 @@ export function DiscoveryCard({ card, imageUrl, onAddToLibrary, onShare, onClose
           <h2>{itemName}</h2>
           <em>{scientificName}</em>
           <div className="discovery-element-tags">
-            <span className="discovery-tag">🐾 Familiar</span>
-            <span className="discovery-tag">💨 Wind</span>
+            <span className="discovery-tag">🐾 {elementCategory}</span>
+            <span className="discovery-tag">🌿 Wild</span>
           </div>
         </div>
 
-        {/* Metallic Gold Hexagon Badge */}
+        {/* Rarity Hexagon Badge */}
         <div className="discovery-hex-badge-wrap">
-          <div className="discovery-hex-badge">
-            <span>$</span>
+          <div className={`discovery-hex-badge rank-hex-${rarityTier.toLowerCase()}`}>
+            <span>{rarityTier}</span>
           </div>
-          <small>LEGENDARY</small>
+          <small>{rarityTier === 'S' ? 'LEGENDARY' : rarityTier === 'A' ? 'EPIC' : rarityTier === 'B' ? 'RARE' : 'COMMON'}</small>
         </div>
       </div>
 
       {/* 4-Column Stat Grid */}
       <div className="discovery-stat-grid">
-        <div className="discovery-stat-box gold">
+        <div className={`discovery-stat-box ${rarityTier === 'S' ? 'gold' : ''}`}>
           <small>RARITY</small>
-          <strong>S Rank</strong>
-          <span className="stat-sub font-gold">(LEGENDARY)</span>
+          <strong>{rarityTier} Rank</strong>
+          <span className="stat-sub font-gold">
+            ({rarityTier === 'S' ? 'LEGENDARY' : rarityTier === 'A' ? 'EPIC' : 'RARE'})
+          </span>
         </div>
         <div className="discovery-stat-box gold">
           <small>XP EARNED</small>
-          <strong>+{xpEarned} XP</strong>
+          <strong>+{animatedXp} XP</strong>
         </div>
         <div className="discovery-stat-box">
           <small>AI CONFIDENCE</small>
           <strong>{confidence}%</strong>
         </div>
         <div className="discovery-stat-box verified">
-          <small>VERIFIED</small>
-          <strong className="chip-verified">✔ Human Verified</strong>
+          <small>STATUS</small>
+          <strong className="chip-verified">✔ Verified</strong>
         </div>
       </div>
 
       {/* Description Text */}
       <p className="discovery-description">
-        Highly intelligent and social parrots native to the rainforests of West and Central Africa. Known for their remarkable mimicry and problem solving abilities.
+        {cardData.description || `Discovered specimen of ${itemName} (${scientificName}). Verified by the Wild Realm engine.`}
       </p>
 
-      {/* Metadata Strip (Location, Date/Time, Weather) */}
+      {/* Metadata Strip */}
       <div className="discovery-env-strip-row">
         <div className="env-box">
           <small>LOCATION</small>
@@ -97,36 +166,30 @@ export function DiscoveryCard({ card, imageUrl, onAddToLibrary, onShare, onClose
         </div>
         <div className="env-box">
           <small>DATE & TIME</small>
-          <span>📅 12 May 2025 07:42 AM</span>
-        </div>
-        <div className="env-box">
-          <small>WEATHER</small>
-          <span>☁️ 23°C Cloudy</span>
+          <span>📅 {capturedAtDate}</span>
         </div>
       </div>
 
       {/* Primary Action Buttons */}
       <div className="discovery-action-btns">
-        <button type="button" className="discovery-btn-glass" onClick={onAddToLibrary}>
+        <motion.button
+          type="button"
+          className="discovery-btn-glass"
+          onClick={onAddToLibrary}
+          whileTap={{ scale: 0.95 }}
+        >
           📖 ADD TO LIBRARY
-        </button>
-        <button type="button" className="discovery-btn-primary" onClick={onShare}>
+        </motion.button>
+        <motion.button
+          type="button"
+          className="discovery-btn-primary"
+          onClick={onShare}
+          whileTap={{ scale: 0.95 }}
+        >
           🔗 SHARE
-        </button>
+        </motion.button>
       </div>
-
-      {/* Discovery Streak Banner */}
-      <div className="discovery-streak-banner">
-        <div className="streak-info">
-          <span className="streak-icon">🎁</span>
-          <div>
-            <strong>Discovery Streak: {streakDays} Days 🔥</strong>
-            <p>Keep it up! Next chest at 10 days.</p>
-          </div>
-        </div>
-        <span className="chest-badge-icon">📦</span>
-      </div>
-    </div>
+    </motion.div>
   );
 }
 
