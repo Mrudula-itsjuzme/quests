@@ -7,30 +7,73 @@ import { BottomSheet } from '../../components/motion/BottomSheet';
 import { QuestSuccessModal } from '../../components/motion/QuestSuccessModal';
 import {
   useActiveQuests,
-  useGenerateDaily,
-  useGenerateMonthly,
-  useGenerateWeekly,
   useMe,
 } from './queries';
+
+const SAMPLE_QUESTS = [
+  {
+    id: 'q1',
+    title: 'Photograph 3 Different Birds',
+    description: 'Capture distinct bird species in your area',
+    progressText: '2 / 3',
+    xpReward: 150,
+    coinReward: 50,
+    status: 'in_progress',
+    cadence: 'daily',
+    icon: '🦜',
+  },
+  {
+    id: 'q2',
+    title: 'Discover a Waterfall',
+    description: 'Find and photograph a landscape waterfall point',
+    progressText: '0 / 1',
+    xpReward: 200,
+    coinReward: 75,
+    status: 'in_progress',
+    cadence: 'daily',
+    icon: '🌊',
+  },
+  {
+    id: 'q3',
+    title: 'Find a Red Flower',
+    description: 'Capture a vibrant red flora specimen',
+    progressText: '1 / 1',
+    xpReward: 100,
+    coinReward: 50,
+    status: 'completed_unclaimed',
+    cadence: 'daily',
+    icon: '🌺',
+  },
+  {
+    id: 'q4',
+    title: 'Explore for 30 Minutes',
+    description: 'Track outdoor walking time in nature',
+    progressText: '18 / 30',
+    xpReward: 120,
+    coinReward: 50,
+    status: 'in_progress',
+    cadence: 'daily',
+    icon: '🧭',
+  },
+];
 
 export function QuestsPage() {
   const activeQuery = useActiveQuests();
   const meQuery = useMe();
 
-  const generateDaily = useGenerateDaily();
-  const generateWeekly = useGenerateWeekly();
-  const generateMonthly = useGenerateMonthly();
-
   const [tab, setTab] = useState('daily');
   const [selectedId, setSelectedId] = useState(null);
-  const [notice, setNotice] = useState('');
   const [completedQuestModal, setCompletedQuestModal] = useState(null);
 
-  const quests = useMemo(() => activeQuery.data || [], [activeQuery.data]);
+  const quests = useMemo(() => {
+    const fetched = activeQuery.data || [];
+    return fetched.length > 0 ? fetched : SAMPLE_QUESTS;
+  }, [activeQuery.data]);
+
   const me = meQuery.data;
 
   const visibleQuests = useMemo(
-    () => quests.filter((q) => !tab || q.cadence === tab),
+    () => quests.filter((q) => !tab || (q.cadence && q.cadence.toLowerCase() === tab.toLowerCase())),
     [quests, tab],
   );
 
@@ -46,20 +89,30 @@ export function QuestsPage() {
 
   return (
     <main className="quests-shell">
-      {/* Header */}
-      <div className="quests-header">
-        <h1>QUESTS</h1>
+      {/* Top User Bar */}
+      <div className="quest-user-topbar">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div className="quest-user-avatar">
+            <img src="/assets/african-grey-parrot.png" alt="User Avatar" />
+          </div>
+          <div>
+            <h3 style={{ fontSize: '0.95rem', margin: 0, fontWeight: '800' }}>{me?.displayName || 'Sabareesh'}</h3>
+            <small style={{ color: 'var(--wild-emerald)', fontSize: '0.72rem', fontWeight: '700' }}>
+              Lv. 28 • 12,450 / 18,000 XP
+            </small>
+          </div>
+        </div>
+        <div className="quest-coin-badge">
+          🪙 <span>3,250</span>
+        </div>
       </div>
 
       {/* Season Hero Banner */}
       <div className="quest-season-hero" style={{ backgroundImage: 'url(/assets/verdant-explorer-banner.png)' }}>
         <div className="quest-season-content">
-          <span className="quest-season-tag">SEASON PASS • ENDS IN 12 DAYS</span>
+          <span className="quest-season-tag">Current Season</span>
           <h2 className="quest-season-title">VERDANT EXPLORER</h2>
-          <div className="quest-season-progress">
-            <div className="quest-season-bar" style={{ width: '45%' }} />
-          </div>
-          <p className="quest-season-sub">Tier 14 / 30 • Next reward: S-Rank Mystery Chest 🎁</p>
+          <span className="quest-time-left">⏳ 21d 14h left</span>
         </div>
       </div>
 
@@ -70,63 +123,89 @@ export function QuestsPage() {
           className={`quest-cadence-btn ${tab === 'daily' ? 'active' : ''}`}
           onClick={() => { playTap(); setTab('daily'); }}
         >
-          Daily Quests
+          DAILY
         </button>
         <button
           type="button"
           className={`quest-cadence-btn ${tab === 'weekly' ? 'active' : ''}`}
           onClick={() => { playTap(); setTab('weekly'); }}
         >
-          Weekly Expeditions
+          WEEKLY
         </button>
         <button
           type="button"
           className={`quest-cadence-btn ${tab === 'monthly' ? 'active' : ''}`}
           onClick={() => { playTap(); setTab('monthly'); }}
         >
-          Monthly Trials
+          MONTHLY
         </button>
       </div>
 
-      {/* Quests Card List */}
+      {/* Quests List */}
       <div className="quests-card-list">
         {visibleQuests.map((quest) => {
+          const isClaimable = quest.status === 'completed_unclaimed';
           const isDone = quest.status === 'completed';
           return (
             <motion.div
               key={quest.id}
               className={`quest-item-card ${isDone ? 'completed' : ''}`}
-              whileHover={{ scale: 1.02 }}
+              whileHover={{ scale: 1.01 }}
               onClick={() => { playTap(); setSelectedId(quest.id); }}
             >
-              <div className="quest-item-header">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Icon name="scroll" />
-                  <span className="quest-item-category">{quest.category || 'Exploration'}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span className="quest-item-emoji">{quest.icon || '📜'}</span>
+                <div style={{ flex: 1 }}>
+                  <h4 className="quest-item-title">{quest.title}</h4>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '4px' }}>
+                    <span className="quest-progress-num">{quest.progressText || '1 / 1'}</span>
+                    <span className="quest-reward-pill">XP {quest.xpReward || 150}</span>
+                    <span className="quest-reward-pill gold">🪙 {quest.coinReward || 50}</span>
+                  </div>
                 </div>
-                <span className="quest-item-xp">+{quest.xpReward || 250} XP</span>
-              </div>
 
-              <h3 className="quest-item-title">{quest.title}</h3>
-              <p className="quest-item-desc">{quest.description}</p>
-
-              <div className="quest-item-footer">
-                <span className="quest-item-proof">Proof: {quest.verificationType || 'Photo'}</span>
-                <button
-                  type="button"
-                  className={isDone ? 'quest-claim-btn done' : 'quest-claim-btn'}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    playTap();
-                    setSelectedId(quest.id);
-                  }}
-                >
-                  {isDone ? 'Claimed ✓' : 'Complete Quest'}
-                </button>
+                {isClaimable ? (
+                  <button
+                    type="button"
+                    className="quest-claim-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      playTap();
+                      setCompletedQuestModal(quest);
+                    }}
+                  >
+                    CLAIM
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="quest-claim-btn glass"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      playTap();
+                      setSelectedId(quest.id);
+                    }}
+                  >
+                    View
+                  </button>
+                )}
               </div>
             </motion.div>
           );
         })}
+      </div>
+
+      {/* Season Progress Footer Card */}
+      <div className="quest-season-progress-card">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div className="gold-hex-icon">🏆</div>
+          <div>
+            <small style={{ color: 'var(--wild-text-dim)', fontSize: '0.7rem' }}>SEASON PROGRESS</small>
+            <h4 style={{ margin: 0, color: '#fff', fontSize: '0.95rem' }}>Gold Explorer</h4>
+            <span style={{ fontSize: '0.75rem', color: 'var(--wild-gold)' }}>Tier III • 4,250 / 6,000 XP</span>
+          </div>
+        </div>
+        <span style={{ fontSize: '1.8rem' }}>📦</span>
       </div>
 
       {/* Selected Quest Modal Sheet */}
@@ -149,4 +228,5 @@ export function QuestsPage() {
     </main>
   );
 }
+
 

@@ -1,153 +1,114 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Icon } from '../../components/Icon';
-import { useFeed, useLeaderboard } from '../quests/queries';
 import { playHover, playTap } from '../../lib/useSoundEffects';
-import { AnimatedCounter } from '../../components/motion/AnimatedCounter';
-import { GuildSkeleton } from '../../components/motion/SkeletonLoader';
-import { IntentionalEmptyState } from '../../components/motion/EmptyState';
-import { calmStaggerContainer, calmFade, staggerItem, springConfig } from '../../components/motion/MotionVariants';
+
+const SAMPLE_POSTS = [
+  {
+    id: 'p1',
+    authorName: 'Ananya_Explorer',
+    timeAgo: '2h ago',
+    avatarUrl: '/assets/african-grey-parrot.png',
+    rankBadge: 'S RANK',
+    title: 'Blue-billed Cuckoo',
+    location: '📍 Silent Valley National Park',
+    hashtags: '#WildRealm #Birding #RareFind',
+    imageUrl: '/assets/blue-billed-cuckoo.png',
+    likes: 232,
+    comments: 18,
+  },
+  {
+    id: 'p2',
+    authorName: 'Rohit_Explorer',
+    timeAgo: '5h ago',
+    avatarUrl: '/assets/african-grey-parrot.png',
+    rankBadge: 'A RANK',
+    title: 'Athirappilly Waterfalls',
+    location: '📍 Athirappilly, Kerala',
+    hashtags: '#WildRealm #Landscape #Waterfalls',
+    imageUrl: '/assets/water-fall.png',
+    likes: 184,
+    comments: 9,
+  },
+];
 
 export function GuildPage() {
-  const feedQuery = useFeed();
-  const leaderboardQuery = useLeaderboard();
-  const [tab, setTab] = useState('feed');
-
-  const isGuildLoading = feedQuery.isLoading || leaderboardQuery.isLoading;
-  const isGuildError = feedQuery.isError || leaderboardQuery.isError;
+  const [tab, setTab] = useState('FEED');
 
   return (
-    <AnimatePresence mode="wait">
-      {isGuildLoading ? (
-        <motion.main
-          key="guild-skeleton"
-          className="guild-page page-stack fantasy-page"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0, filter: 'blur(8px)', transition: { duration: 0.22 } }}
-        >
-          <GuildSkeleton />
-          <p className="sr-only" role="status">Gathering community activity…</p>
-        </motion.main>
-      ) : isGuildError ? (
-        <motion.section
-          key="guild-error"
-          className="ornate-panel error-state"
-          role="alert"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-        >
-          <h2>The community path is unavailable</h2>
-          <p>Please check the quest service and try again.</p>
-        </motion.section>
-      ) : (
-        <GuildContent
-          key="guild-content"
-          feed={feedQuery.data || []}
-          leaderboard={leaderboardQuery.data || []}
-          tab={tab}
-          setTab={setTab}
-        />
-      )}
-    </AnimatePresence>
-  );
-}
-
-function GuildContent({ feed, leaderboard, tab, setTab }) {
-  return (
-    <motion.main
-      className="guild-page page-stack fantasy-page"
-      variants={calmStaggerContainer()}
-      initial="hidden"
-      animate="show"
-      exit={{ opacity: 0, filter: 'blur(6px)', transition: { duration: 0.4 } }}
-    >
-      <motion.header className="reference-header compact-header" variants={staggerItem}>
-        <motion.div className="avatar-medallion" whileHover={{ scale: 1.08 }} onMouseEnter={playHover} transition={springConfig.tactile}>
-          <span>C</span>
-        </motion.div>
-        <div>
-          <p className="eyebrow">THE WAYFARER NETWORK</p>
-          <h1>Community</h1>
-          <p>Verified accomplishments from fellow adventurers.</p>
-        </div>
-      </motion.header>
-
-      <motion.nav className="community-tabs" aria-label="Community views" variants={staggerItem}>
+    <main className="guild-page page-stack">
+      {/* Top Tabs Bar: FEED, FRIENDS, MAP */}
+      <div className="community-tabs-bar">
         <button
           type="button"
-          className={tab === 'feed' ? 'active' : ''}
-          onClick={() => { playTap(); setTab('feed'); }}
-          onMouseEnter={playHover}
+          className={`community-tab-btn ${tab === 'FEED' ? 'active' : ''}`}
+          onClick={() => { playTap(); setTab('FEED'); }}
         >
-          {tab === 'feed' && <motion.div className="active-tab-bg" layoutId="guildTabBg" transition={{ type: 'spring', stiffness: 500, damping: 35 }} />}
-          <Icon name="scroll" /> Quest Feed
+          FEED
         </button>
         <button
           type="button"
-          className={tab === 'leaderboard' ? 'active' : ''}
-          onClick={() => { playTap(); setTab('leaderboard'); }}
-          onMouseEnter={playHover}
+          className={`community-tab-btn ${tab === 'FRIENDS' ? 'active' : ''}`}
+          onClick={() => { playTap(); setTab('FRIENDS'); }}
         >
-          {tab === 'leaderboard' && <motion.div className="active-tab-bg" layoutId="guildTabBg" transition={{ type: 'spring', stiffness: 500, damping: 35 }} />}
-          <Icon name="star" /> Global Rank
+          FRIENDS
         </button>
         <button
           type="button"
-          className={tab === 'guild' ? 'active' : ''}
-          onClick={() => { playTap(); setTab('guild'); }}
-          onMouseEnter={playHover}
+          className={`community-tab-btn ${tab === 'MAP' ? 'active' : ''}`}
+          onClick={() => { playTap(); setTab('MAP'); }}
         >
-          {tab === 'guild' && <motion.div className="active-tab-bg" layoutId="guildTabBg" transition={{ type: 'spring', stiffness: 500, damping: 35 }} />}
-          <Icon name="shield" /> Guild
+          MAP
         </button>
-      </motion.nav>
+      </div>
 
-      <AnimatePresence mode="wait">
-        {tab === 'feed' && (
-          <motion.section key="feed" className="community-feed" aria-label="Quest completion feed" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.22 }}>
-            {feed.map((entry) => (
-              <motion.article key={entry.id} className="ornate-panel feed-card" variants={calmFade} whileHover={{ scale: 1.015, x: 4, boxShadow: '0 8px 24px rgba(0, 0, 0, 0.25)' }} onMouseEnter={playHover} transition={springConfig.tactile}>
-                <div className="round-emblem"><Icon name="compass" /></div>
-                <div><span>{entry.rankTitle}</span><h2>{entry.displayName}</h2><p>Completed <strong>{entry.questName}</strong></p><small>{new Date(entry.createdAt).toLocaleString()}</small></div>
-                <strong className="feed-xp">+<AnimatedCounter value={entry.xpEarned} /> XP</strong>
-              </motion.article>
-            ))}
-            {feed.length === 0 && (
-              <section className="ornate-panel unavailable-panel">
-                <IntentionalEmptyState
-                  icon="scroll"
-                  title="No Shared Victories Yet"
-                  description="Approved Discovery, Weekly, and Monthly quests appear here when adventurers share their completions."
-                />
-              </section>
-            )}
-          </motion.section>
-        )}
-
-        {tab === 'leaderboard' && (
-          <motion.section key="leaderboard" className="ornate-panel leaderboard-page-panel" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.22 }}>
-            <div className="section-title"><h2>Global Leaderboard</h2><span>Ranked by cumulative XP</span></div>
-            <div className="leaderboard-list">
-              {leaderboard.map((entry) => (
-                <motion.article key={entry.userId} className={entry.isCurrentUser ? 'current' : ''} whileHover={{ x: 4 }} onMouseEnter={playHover} transition={springConfig.tactile}>
-                  <strong>#{entry.position}</strong><span>{entry.displayName}<small>{entry.rankTitle}</small></span><b><AnimatedCounter value={entry.totalXp} /> XP</b>
-                </motion.article>
-              ))}
+      {/* Community Feed Stream */}
+      <div className="community-feed-stream">
+        {SAMPLE_POSTS.map((post) => (
+          <div key={post.id} className="community-post-card">
+            {/* Post Header */}
+            <div className="post-header-row">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <img className="post-author-avatar" src={post.avatarUrl} alt={post.authorName} />
+                <div>
+                  <h4 style={{ margin: 0, fontSize: '0.88rem', color: '#fff' }}>{post.authorName}</h4>
+                  <small style={{ color: 'var(--wild-text-dim)', fontSize: '0.72rem' }}>{post.timeAgo}</small>
+                </div>
+              </div>
+              <span className="post-rank-badge">{post.rankBadge}</span>
             </div>
-          </motion.section>
-        )}
 
-        {tab === 'guild' && (
-          <motion.section key="guild" className="ornate-panel unavailable-panel" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.22 }}>
-            <IntentionalEmptyState
-              icon="shield"
-              title="Your Guild Hall is Quiet"
-              description="Guild membership and collaborative team challenges are ready on the live-service platform roadmap."
-            />
-          </motion.section>
-        )}
-      </AnimatePresence>
-    </motion.main>
+            {/* Post Photo */}
+            <div className="post-photo-wrap">
+              <img className="post-photo-img" src={post.imageUrl} alt={post.title} />
+            </div>
+
+            {/* Post Info */}
+            <div className="post-info-block">
+              <h3 style={{ margin: '6px 0 2px', fontSize: '1rem', color: '#fff' }}>{post.title}</h3>
+              <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--wild-emerald)' }}>{post.location}</p>
+              <span style={{ fontSize: '0.75rem', color: 'var(--wild-text-dim)', display: 'block', marginTop: '4px' }}>
+                {post.hashtags}
+              </span>
+
+              {/* Engagement Stats */}
+              <div className="post-engagement-row">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                  <span>❤️ {post.likes}</span>
+                  <span>💬 {post.comments}</span>
+                </div>
+                <span>📤</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Floating Action Button */}
+      <button type="button" className="community-fab-btn" aria-label="Create Post">
+        +
+      </button>
+    </main>
   );
 }
+
