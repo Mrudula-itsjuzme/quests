@@ -2721,11 +2721,12 @@ a { color: var(--gold); }
 .dev-auth-banner {
   background: var(--gold-soft);
   color: var(--brass);
-  padding: 10px 16px;
-  font-size: 0.85rem;
+  padding: 6px 12px;
+  font-size: 0.75rem;
   text-align: center;
   font-weight: 700;
   border-bottom: 1px solid var(--border-hairline);
+  line-height: 1.2;
 }
 
 .fullscreen-status {
@@ -7559,7 +7560,7 @@ html, body {
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 20px 16px calc(env(safe-area-inset-bottom) + 100px);
+  padding: 0;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
 }
@@ -10509,8 +10510,10 @@ body, .app-shell {
 }
 
 .app-shell {
-  padding: env(safe-area-inset-top, 0px) 0 calc(84px + env(safe-area-inset-bottom, 0px)) !important;
+  padding: 0 !important;
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 /* --------------------------------------------------------------------------
@@ -11181,7 +11184,7 @@ body, .app-shell {
    LIBRARY & FAMILIARS COLLECTION (Experience 3 - GalleryPage)
    -------------------------------------------------------------------------- */
 .library-shell {
-  padding: 12px 14px calc(100px + env(safe-area-inset-bottom, 0px));
+  padding: calc(10px + env(safe-area-inset-top, 0px)) 14px calc(115px + env(safe-area-inset-bottom, 0px));
   max-width: 800px;
   margin: 0 auto;
 }
@@ -11190,7 +11193,7 @@ body, .app-shell {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .library-header h1 {
@@ -11225,7 +11228,7 @@ body, .app-shell {
   display: flex;
   gap: 6px;
   overflow-x: auto;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
   scroll-snap-type: x proximity;
@@ -11237,7 +11240,7 @@ body, .app-shell {
 }
 
 .library-tab-btn {
-  padding: 7px 14px;
+  padding: 6px 14px;
   border-radius: 999px;
   background: rgba(12, 19, 15, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -11265,8 +11268,8 @@ body, .app-shell {
   background: rgba(10, 16, 12, 0.7);
   border: 1px solid rgba(34, 197, 94, 0.15);
   border-radius: 12px;
-  padding: 10px 8px;
-  margin-bottom: 12px;
+  padding: 8px 6px;
+  margin-bottom: 10px;
   text-align: center;
 }
 
@@ -11290,11 +11293,11 @@ body, .app-shell {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 8px 0;
+  margin: 6px 0 8px;
 }
 
 .library-category-label {
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 800;
   color: #fff;
 }
@@ -11342,7 +11345,7 @@ body, .app-shell {
 
 .library-card-img-wrap {
   width: 100%;
-  height: 120px;
+  height: 115px;
   position: relative;
   overflow: hidden;
 }
