@@ -3,7 +3,6 @@ import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Icon, categoryIcon } from '../../components/Icon';
-import { PlayerHeader } from '../quests/QuestsPage';
 import { useClaimRewards, useCollectibles, useLeaderboard, useMe, useRewards } from '../quests/queries';
 import { playHover, playSuccess, playTap } from '../../lib/useSoundEffects';
 import { AnimatedCounter } from '../../components/motion/AnimatedCounter';
@@ -96,8 +95,8 @@ function RewardsContent({
       animate="show"
       exit={{ opacity: 0, filter: 'blur(6px)', transition: { duration: 0.18 } }}
     >
-      <motion.div variants={staggerItem}>
-        <PlayerHeader me={me} page="Rewards" />
+      <motion.div variants={staggerItem} className="quests-header">
+        <h1>REWARDS & STORE</h1>
       </motion.div>
 
       <motion.section className="rewards-hero ornate-panel" variants={staggerItem}>

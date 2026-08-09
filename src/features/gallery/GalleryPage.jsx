@@ -1,181 +1,179 @@
 import { useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { AnimatedCollectible } from '../../components/AnimatedCollectible';
-import { categoryColors } from '../../components/Icon';
 import { useCollectibles } from '../quests/queries';
 import { playHover, playTap } from '../../lib/useSoundEffects';
-import { PhysicalCard } from '../../components/motion/PhysicalCard';
-import { GallerySkeleton } from '../../components/motion/SkeletonLoader';
-import { IntentionalEmptyState } from '../../components/motion/EmptyState';
-import { BottomSheet } from '../../components/motion/BottomSheet';
-import { calmStaggerContainer, calmFade } from '../../components/motion/MotionVariants';
 import { DiscoveryCard } from '../world/DiscoveryCard';
 
-const filters = [
-  { id: 'all', label: 'All' },
-  { id: 'Mind', label: 'Mind' },
-  { id: 'Body', label: 'Body' },
-  { id: 'Discovery', label: 'Discovery' },
+const SAMPLE_WILDLIFE = [
+  {
+    assetId: 'w1',
+    itemName: 'African Grey Parrot',
+    scientificName: 'Psittacus erithacus',
+    rarityTier: 'S',
+    element: 'Familiars',
+    imageUrl: '/assets/african-grey-parrot.png',
+    location: 'Kakum, Ghana',
+    stars: '★★★★★',
+    xpEarned: 900,
+  },
+  {
+    assetId: 'w2',
+    itemName: 'Blue-billed Cuckoo',
+    scientificName: 'Phaenicophaeus diardi',
+    rarityTier: 'A',
+    element: 'Water',
+    imageUrl: '/assets/blue-billed-cuckoo.png',
+    location: 'Borneo, Malaysia',
+    stars: '★★★★☆',
+    xpEarned: 650,
+  },
+  {
+    assetId: 'w3',
+    itemName: 'Red Fox',
+    scientificName: 'Vulpes vulpes',
+    rarityTier: 'B',
+    element: 'Grass',
+    imageUrl: '/assets/verdant-explorer-banner.png',
+    location: 'Black Forest, Germany',
+    stars: '★★★☆☆',
+    xpEarned: 400,
+  },
+  {
+    assetId: 'w4',
+    itemName: 'Snow Leopard',
+    scientificName: 'Panthera uncia',
+    rarityTier: 'S',
+    element: 'Familiars',
+    imageUrl: '/assets/african-grey-parrot.png',
+    location: 'Himalayas, Nepal',
+    stars: '★★★★★',
+    xpEarned: 1200,
+  },
 ];
 
-function formatDate(value) {
-  if (!value) return null;
-  try {
-    return new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-  } catch {
-    return null;
-  }
-}
+const ELEMENT_TABS = [
+  { id: 'all', label: 'All' },
+  { id: 'Fire', label: '🔥 Fire' },
+  { id: 'Water', label: '💧 Water' },
+  { id: 'Grass', label: '🌿 Grass' },
+  { id: 'Familiars', label: '🐾 Familiars' },
+];
 
 export function GalleryPage() {
-  const { data: collection, isLoading, isError } = useCollectibles();
-  const [filter, setFilter] = useState('all');
-  const [selected, setSelected] = useState(null);
+  const { data: collection } = useCollectibles();
+  const [activeTab, setActiveTab] = useState('all');
+  const [selectedCard, setSelectedCard] = useState(null);
 
+  const displayList = useMemo(() => {
+    const userCards = (collection || []).map((item, idx) => ({
+      assetId: item.assetId || `usr-${idx}`,
+      itemName: item.itemName || item.title || 'Discovered Familiar',
+      scientificName: item.scientificName || 'Fauna Wild',
+      rarityTier: item.rarityTier || item.rarity || 'A',
+      element: item.category || 'Familiars',
+      imageUrl: item.imageUrl || (idx % 2 === 0 ? '/assets/african-grey-parrot.png' : '/assets/blue-billed-cuckoo.png'),
+      location: item.location || 'Wild Sanctuary',
+      stars: '★★★★☆',
+      xpEarned: 500,
+    }));
 
-  const filtered = useMemo(
-    () => (collection || []).filter((item) => filter === 'all' || item.category === filter),
-    [collection, filter],
-  );
-
-  return (
-    <AnimatePresence mode="wait">
-      {isLoading ? (
-        <motion.main
-          key="gallery-skeleton"
-          className="gallery-shell page-stack fantasy-page"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0, filter: 'blur(8px)', transition: { duration: 0.22 } }}
-        >
-          <GallerySkeleton />
-          <p className="sr-only" role="status">Loading your journal gallery…</p>
-        </motion.main>
-      ) : isError ? (
-        <motion.section
-          key="gallery-error"
-          className="ornate-panel error-state"
-          role="alert"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-        >
-          <h2>Your gallery is currently unreachable</h2>
-          <p>Please check your connection and try again.</p>
-        </motion.section>
-      ) : (
-        <GalleryContent
-          key="gallery-content"
-          collection={collection || []}
-          filtered={filtered}
-          filter={filter}
-          setFilter={setFilter}
-          selected={selected}
-          setSelected={setSelected}
-        />
-      )}
-    </AnimatePresence>
-  );
-}
-
-function GalleryContent({
-  collection,
-  filtered,
-  filter,
-  setFilter,
-  selected,
-  setSelected,
-}) {
+    const combined = [...userCards, ...SAMPLE_WILDLIFE];
+    if (activeTab === 'all') return combined;
+    return combined.filter((c) => c.element.toLowerCase() === activeTab.toLowerCase());
+  }, [collection, activeTab]);
 
   return (
-    <motion.main
-      className="gallery-shell page-stack fantasy-page"
-      variants={calmStaggerContainer(0.06, 0.04)}
-      initial="hidden"
-      animate="show"
-      exit={{ opacity: 0, filter: 'blur(6px)', transition: { duration: 0.4 } }}
-    >
-      <motion.div className="page-heading" variants={calmFade}>
-        <div>
-          <h1>Library</h1>
-          <p>Every familiar and artifact unlocked during your quest journey.</p>
+    <main className="library-shell">
+      <div className="library-header">
+        <h1>LIBRARY</h1>
+      </div>
+
+      {/* Element Category Tabs */}
+      <div className="library-element-tabs">
+        {ELEMENT_TABS.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            className={`library-tab-btn ${activeTab === tab.id ? 'active' : ''}`}
+            onClick={() => {
+              playTap();
+              setActiveTab(tab.id);
+            }}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Collection Summary Stats Bar */}
+      <div className="library-stats-bar">
+        <div className="library-stat-item">
+          <small>Total Cards</small>
+          <strong>{displayList.length + 148}</strong>
         </div>
-      </motion.div>
+        <div className="library-stat-item">
+          <small>S Rank</small>
+          <strong>12</strong>
+        </div>
+        <div className="library-stat-item">
+          <small>Total XP</small>
+          <strong>48,750</strong>
+        </div>
+      </div>
 
-      {!collection || collection.length === 0 ? (
-        <motion.div variants={calmFade}>
-          <IntentionalEmptyState
-            icon="star"
-            title="No stickers unlocked yet"
-            description="Complete verified daily or campaign quests to earn your first collectible badge."
-          />
-        </motion.div>
-      ) : (
-        <motion.section className="panel ornate-panel" aria-label="Library" variants={calmFade}>
-          <div className="segmented-control" role="group" aria-label="Filter memories by category">
-            {filters.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                className={filter === item.id ? 'active' : ''}
-                onClick={() => {
-                  playTap();
-                  setFilter(item.id);
-                }}
-                onMouseEnter={playHover}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-
-          {filtered.length === 0 ? (
-            <p className="empty-state">No unlocked artifacts in this category yet.</p>
-          ) : (
-            <div className="library-grid">
-              <AnimatePresence mode="popLayout">
-                {filtered.map((item) => (
-                  <motion.div variants={calmFade} key={item.assetId} layout>
-                    <PhysicalCard
-                      className="library-tile"
-                      onClick={() => {
-                        playTap();
-                        setSelected(item);
-                      }}
-                    >
-                      <DiscoveryCard card={item} compact />
-                      <span className="library-tile-meta">
-                        <span className={`pill ${categoryColors[item.category] || ''}`}>{item.category}</span>
-                        {formatDate(item.unlockedAt) && <span className="library-tile-date">{formatDate(item.unlockedAt)}</span>}
-                      </span>
-                    </PhysicalCard>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
+      {/* 2-Column Photographic Card Grid */}
+      <div className="library-card-grid">
+        {displayList.map((card) => (
+          <motion.div
+            key={card.assetId}
+            className={`library-photo-card rank-${card.rarityTier.toLowerCase()}`}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => {
+              playTap();
+              setSelectedCard(card);
+            }}
+          >
+            <div className="library-card-img-wrap">
+              <img className="library-card-img" src={card.imageUrl} alt={card.itemName} />
+              <div className="library-card-badge">{card.rarityTier}</div>
             </div>
-          )}
-        </motion.section>
-      )}
+            <div className="library-card-info">
+              <h3 className="library-card-title">{card.itemName}</h3>
+              <p className="library-card-sub">📍 {card.location}</p>
+              <span className="library-card-stars">{card.stars}</span>
+            </div>
+          </motion.div>
+        ))}
+      </div>
 
+      {/* Discovery Detail Modal */}
       <AnimatePresence>
-        {selected && (
-          <BottomSheet isOpen={!!selected} onClose={() => { playTap(); setSelected(null); }}>
-            <div className="journal-detail-sheet">
-              <div className="journal-detail-preview">
-                <AnimatedCollectible collectible={selected} preview />
-              </div>
-              <h2 className="journal-detail-title">{selected.title}</h2>
-              <div className="journal-detail-tags">
-                <span className={`pill ${categoryColors[selected.category] || ''}`}>{selected.category}</span>
-                <span className="pill journal-detail-rarity-pill">{selected.rarity}</span>
-              </div>
-              {selected.caption && (
-                <p className="journal-detail-caption">"{selected.caption}"</p>
-              )}
-            </div>
-          </BottomSheet>
+        {selectedCard && (
+          <div
+            className="selection-overlay"
+            role="dialog"
+            aria-modal="true"
+            onClick={() => setSelectedCard(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <DiscoveryCard
+                card={selectedCard}
+                imageUrl={selectedCard.imageUrl}
+                onAddToLibrary={() => setSelectedCard(null)}
+                onShare={() => setSelectedCard(null)}
+              />
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
-    </motion.main>
+    </main>
   );
 }
+
 

@@ -10472,4 +10472,1032 @@ button, .button, .primary-btn, .secondary-btn, .continue-journey-btn,
   }
 }
 
+/* ==========================================================================
+   WILD REALM — VISUAL SYSTEM REBUILD (REFERENCE COMPOSITIONS)
+   ========================================================================== */
+
+:root {
+  --wild-obsidian: #060907;
+  --wild-obsidian-card: #0c130f;
+  --wild-panel: rgba(12, 19, 15, 0.88);
+  --wild-panel-glass: rgba(10, 16, 12, 0.76);
+  --wild-border: rgba(34, 197, 94, 0.18);
+  --wild-border-gold: rgba(245, 158, 11, 0.35);
+  --wild-border-subtle: rgba(255, 255, 255, 0.08);
+  --wild-emerald: #22c55e;
+  --wild-emerald-dark: #15803d;
+  --wild-emerald-glow: rgba(34, 197, 94, 0.45);
+  --wild-lime: #10b981;
+  --wild-gold: #f59e0b;
+  --wild-gold-bright: #fbbf24;
+  --wild-gold-dim: #92400e;
+  --wild-purple: #a855f7;
+  --wild-blue: #3b82f6;
+  --wild-text: #f0fdf4;
+  --wild-text-muted: #86efac;
+  --wild-text-dim: #9ca3af;
+}
+
+/* App Background & Foundation */
+body, .app-shell {
+  background: var(--wild-obsidian) !important;
+  color: var(--wild-text);
+  font-family: 'Manrope', system-ui, -apple-system, sans-serif;
+}
+
+.app-shell {
+  padding: 0 0 84px !important;
+  min-height: 100vh;
+}
+
+/* --------------------------------------------------------------------------
+   Mobile-First HUD Dock & Navigation
+   -------------------------------------------------------------------------- */
+.mobile-bottom-dock {
+  display: flex !important;
+  position: fixed;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(430px, 94vw);
+  height: 66px;
+  background: rgba(8, 14, 10, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(34, 197, 94, 0.25);
+  border-radius: 999px;
+  padding: 4px 10px;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65), 0 0 20px rgba(34, 197, 94, 0.15);
+  z-index: 999;
+}
+
+.dock-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  height: 100%;
+  color: #6b7280;
+  text-decoration: none;
+  font-size: 0.7rem;
+  font-weight: 600;
+  gap: 3px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.dock-item.active {
+  color: var(--wild-emerald);
+}
+
+.dock-item svg {
+  width: 22px;
+  height: 22px;
+  stroke-width: 2px;
+}
+
+.dock-item.active svg {
+  filter: drop-shadow(0 0 8px rgba(34, 197, 94, 0.6));
+}
+
+/* Central Shutter Button on Bottom Dock */
+.dock-shutter-item {
+  position: relative;
+  top: -14px;
+}
+
+.dock-shutter-btn {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #22c55e, #15803d);
+  border: 3px solid #060907;
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 0 24px rgba(34, 197, 94, 0.6), 0 8px 16px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dock-shutter-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 32px rgba(34, 197, 94, 0.8);
+}
+
+.dock-shutter-btn svg {
+  width: 26px;
+  height: 26px;
+}
+
+/* Topbar Header */
+.topbar {
+  background: rgba(8, 14, 10, 0.85) !important;
+  border-bottom: 1px solid rgba(34, 197, 94, 0.15) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  padding: 10px 16px;
+  margin-bottom: 0;
+}
+
+/* --------------------------------------------------------------------------
+   MAP & EXPLORE VIEW (Experience 1 - WorldScreen)
+   -------------------------------------------------------------------------- */
+.world-explore-container {
+  position: relative;
+  width: 100%;
+  min-height: calc(100vh - 80px);
+  background: radial-gradient(circle at 50% 30%, #0d1a12 0%, #060907 70%);
+  overflow: hidden;
+}
+
+/* Top Search & Filter Bar Overlay */
+.explore-search-bar {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(420px, 92vw);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.explore-search-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(12, 19, 15, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(34, 197, 94, 0.25);
+  border-radius: 999px;
+  padding: 8px 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.explore-search-input-wrap svg {
+  color: var(--wild-emerald);
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.explore-search-input {
+  background: transparent;
+  border: none;
+  color: var(--wild-text);
+  font-size: 0.9rem;
+  width: 100%;
+  outline: none;
+}
+
+.explore-search-input::placeholder {
+  color: #6b7280;
+}
+
+.explore-filter-btn {
+  background: transparent;
+  border: none;
+  color: var(--wild-emerald);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+/* Category Filter Tags */
+.explore-category-tags {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+
+.explore-category-tags::-webkit-scrollbar {
+  display: none;
+}
+
+.explore-tag {
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: rgba(15, 23, 18, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--wild-text-dim);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.explore-tag.active {
+  background: var(--wild-emerald);
+  color: #041208;
+  border-color: var(--wild-emerald);
+  font-weight: 700;
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.4);
+}
+
+/* Map Canvas Satellite Terrain Overlay */
+.explore-map-terrain {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    radial-gradient(circle at 40% 40%, rgba(34, 197, 94, 0.08) 0%, transparent 60%),
+    linear-gradient(180deg, rgba(6, 9, 7, 0.4), rgba(6, 9, 7, 0.85)),
+    url('https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=1600&q=80');
+  background-size: cover;
+  background-position: center;
+  filter: contrast(1.1) brightness(0.7);
+}
+
+/* Map Hotspot Circular Pins */
+.map-hotspot-pin {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  z-index: 15;
+  transition: transform 0.2s ease;
+}
+
+.map-hotspot-pin:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+  z-index: 25;
+}
+
+.map-hotspot-thumb {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 2px solid var(--wild-gold-bright);
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.5), 0 4px 12px rgba(0, 0, 0, 0.6);
+  position: relative;
+}
+
+.map-hotspot-label {
+  margin-top: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(8, 14, 10, 0.9);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: var(--wild-text);
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.map-hotspot-rating {
+  color: var(--wild-gold-bright);
+}
+
+/* User Location Blue Pulse Pin */
+.map-user-pin {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 18;
+}
+
+.map-user-pulse {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--wild-blue);
+  border: 3px solid #ffffff;
+  box-shadow: 0 0 20px var(--wild-blue);
+  position: relative;
+}
+
+.map-user-pulse::after {
+  content: '';
+  position: absolute;
+  inset: -12px;
+  border-radius: 50%;
+  border: 2px solid var(--wild-blue);
+  opacity: 0.6;
+  animation: mapPulse 2s infinite ease-out;
+}
+
+@keyframes mapPulse {
+  0% { transform: scale(0.6); opacity: 0.8; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+/* Map Overlay Floating Control Buttons */
+.map-control-btn {
+  position: absolute;
+  right: 16px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(12, 19, 15, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(34, 197, 94, 0.25);
+  color: var(--wild-emerald);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  z-index: 20;
+}
+
+.map-control-layers { top: 80px; }
+.map-control-locate { top: 130px; }
+
+/* Bottom Sheet: Top Nature Hotspots Near You */
+.explore-bottom-sheet {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(180deg, rgba(8, 14, 10, 0.75) 0%, rgba(6, 9, 7, 0.98) 30%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(34, 197, 94, 0.2);
+  padding: 16px 16px 84px;
+  z-index: 20;
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+}
+
+.explore-sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.explore-sheet-header h3 {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--wild-text);
+  margin: 0;
+}
+
+.explore-sheet-see-all {
+  color: var(--wild-emerald);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.explore-hotspot-cards {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+
+.explore-hotspot-cards::-webkit-scrollbar {
+  display: none;
+}
+
+.explore-hotspot-card {
+  flex: 0 0 160px;
+  height: 140px;
+  border-radius: 14px;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.explore-hotspot-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--wild-emerald);
+}
+
+.explore-hotspot-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+}
+
+.explore-hotspot-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 30%, rgba(6, 9, 7, 0.95) 100%);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.explore-hotspot-title {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 2px;
+  line-height: 1.2;
+}
+
+.explore-hotspot-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.72rem;
+  color: var(--wild-text-dim);
+}
+
+.explore-hotspot-rating {
+  color: var(--wild-gold-bright);
+  font-weight: 700;
+}
+
+/* --------------------------------------------------------------------------
+   DISCOVERY CARD / CAPTURE REVEAL MODAL (Experience 2 - CaptureFlow)
+   -------------------------------------------------------------------------- */
+.discovery-card-modal {
+  max-width: 400px;
+  width: 92vw;
+  background: rgba(10, 16, 12, 0.95);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--wild-border-gold);
+  border-radius: 24px;
+  padding: 20px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(245, 158, 11, 0.2);
+  color: var(--wild-text);
+  position: relative;
+  margin: 0 auto;
+}
+
+.discovery-hero-frame {
+  width: 100%;
+  height: 240px;
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.discovery-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Metallic Gold Hexagonal Emblem */
+.discovery-hex-badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 54px;
+  height: 62px;
+  background: linear-gradient(135deg, #f59e0b, #78350f);
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-weight: 900;
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.6);
+  border: 1px solid #fbbf24;
+}
+
+.discovery-hex-badge span {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.discovery-hex-badge small {
+  font-size: 0.55rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #fef08a;
+}
+
+/* Creature Title & Tags */
+.discovery-title-section {
+  margin: 16px 0 12px;
+}
+
+.discovery-title-section h2 {
+  font-size: 1.4rem;
+  font-weight: 800;
+  margin: 0 0 2px;
+  color: #ffffff;
+}
+
+.discovery-title-section em {
+  font-size: 0.85rem;
+  color: var(--wild-text-dim);
+  font-style: italic;
+}
+
+.discovery-element-tags {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.discovery-tag {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  color: var(--wild-text-muted);
+}
+
+/* Discovery Stat Grid (4 items) */
+.discovery-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  background: rgba(6, 9, 7, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 10px 8px;
+  margin: 12px 0;
+  text-align: center;
+}
+
+.discovery-stat-box small {
+  display: block;
+  font-size: 0.62rem;
+  color: var(--wild-text-dim);
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.discovery-stat-box strong {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--wild-emerald);
+}
+
+.discovery-stat-box.gold strong {
+  color: var(--wild-gold-bright);
+}
+
+/* Location & Environment Strip */
+.discovery-env-strip {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: var(--wild-text-dim);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-bottom: 16px;
+}
+
+/* Action Buttons */
+.discovery-action-btns {
+  display: flex;
+  gap: 10px;
+}
+
+.discovery-btn-glass {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--wild-text);
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.discovery-btn-primary {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #22c55e, #15803d);
+  border: none;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 0.85rem;
+  cursor: pointer;
+  box-shadow: 0 0 16px rgba(34, 197, 94, 0.4);
+}
+
+/* Discovery Streak Banner */
+.discovery-streak-banner {
+  margin-top: 14px;
+  padding: 10px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05));
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: var(--wild-gold-bright);
+}
+
+/* --------------------------------------------------------------------------
+   LIBRARY & FAMILIARS COLLECTION (Experience 3 - GalleryPage)
+   -------------------------------------------------------------------------- */
+.library-shell {
+  padding: 16px 16px 90px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.library-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.library-header h1 {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--wild-text);
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+/* Category Filter Tabs */
+.library-element-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  margin-bottom: 16px;
+  scrollbar-width: none;
+}
+
+.library-tab-btn {
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: rgba(12, 19, 15, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--wild-text-dim);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.library-tab-btn.active {
+  background: rgba(245, 158, 11, 0.2);
+  border-color: var(--wild-gold);
+  color: var(--wild-gold-bright);
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.3);
+}
+
+/* Collection Summary Stats Bar */
+.library-stats-bar {
+  display: flex;
+  justify-content: space-around;
+  background: rgba(10, 16, 12, 0.8);
+  border: 1px solid rgba(34, 197, 94, 0.18);
+  border-radius: 14px;
+  padding: 12px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.library-stat-item small {
+  display: block;
+  font-size: 0.65rem;
+  color: var(--wild-text-dim);
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.library-stat-item strong {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--wild-emerald);
+}
+
+/* 2-Column Photographic Card Grid */
+.library-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.library-photo-card {
+  background: var(--wild-obsidian-card);
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.library-photo-card.rank-s {
+  border-color: var(--wild-gold);
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.25);
+}
+
+.library-photo-card.rank-a {
+  border-color: var(--wild-purple);
+}
+
+.library-photo-card.rank-b {
+  border-color: var(--wild-blue);
+}
+
+.library-card-img-wrap {
+  width: 100%;
+  height: 140px;
+  position: relative;
+}
+
+.library-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.library-card-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: rgba(6, 9, 7, 0.85);
+  border: 1px solid var(--wild-gold-bright);
+  color: var(--wild-gold-bright);
+  font-weight: 900;
+  font-size: 0.8rem;
+  display: grid;
+  place-items: center;
+}
+
+.library-card-info {
+  padding: 10px;
+}
+
+.library-card-title {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.library-card-sub {
+  font-size: 0.72rem;
+  color: var(--wild-text-dim);
+  margin: 0 0 4px;
+}
+
+.library-card-stars {
+  color: var(--wild-gold-bright);
+  font-size: 0.65rem;
+}
+
+/* --------------------------------------------------------------------------
+   PROFILE & SETTINGS VIEW (Experience 4 - ProfilePage)
+   -------------------------------------------------------------------------- */
+.profile-shell {
+  padding: 16px 16px 90px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Top Explorer Card */
+.profile-hero-card {
+  background: linear-gradient(180deg, rgba(14, 21, 17, 0.95), rgba(8, 14, 10, 0.98));
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+}
+
+.profile-avatar-ring {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 3px solid var(--wild-gold);
+  padding: 3px;
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+  flex-shrink: 0;
+}
+
+.profile-avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.profile-identity-info h2 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin: 0 0 2px;
+  color: #ffffff;
+}
+
+.profile-identity-title {
+  color: var(--wild-gold-bright);
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.profile-xp-bar-wrap {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.profile-xp-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #22c55e, #10b981);
+  border-radius: 999px;
+}
+
+/* 4-Block Stat Grid */
+.profile-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.profile-stat-card {
+  background: rgba(10, 16, 12, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 12px 8px;
+  text-align: center;
+}
+
+.profile-stat-card small {
+  display: block;
+  font-size: 0.65rem;
+  color: var(--wild-text-dim);
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.profile-stat-card strong {
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: var(--wild-text);
+}
+
+/* Menu Items List */
+.profile-menu-list {
+  background: rgba(10, 16, 12, 0.8);
+  border: 1px solid rgba(34, 197, 94, 0.15);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.profile-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--wild-text);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+
+.profile-menu-item:last-child {
+  border-bottom: none;
+}
+
+.profile-menu-item svg {
+  color: var(--wild-text-dim);
+}
+
+/* Coins & Store Section */
+.profile-store-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.profile-store-card {
+  background: rgba(12, 19, 15, 0.85);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: 16px;
+  padding: 14px;
+}
+
+.profile-store-card h4 {
+  margin: 0 0 6px;
+  font-size: 0.85rem;
+  color: var(--wild-gold-bright);
+}
+
+/* --------------------------------------------------------------------------
+   QUESTS & SEASON HERO (QuestsPage)
+   -------------------------------------------------------------------------- */
+.quests-season-hero {
+  width: 100%;
+  height: 180px;
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 16px;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.quests-season-bg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.quests-season-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(6, 9, 7, 0.3) 0%, rgba(6, 9, 7, 0.9) 100%);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.quests-season-overlay h2 {
+  font-size: 1.4rem;
+  font-weight: 900;
+  margin: 0 0 4px;
+  color: #ffffff;
+  letter-spacing: 0.5px;
+}
+
+/* Quest Card Updates */
+.quest-item-card {
+  background: rgba(10, 16, 12, 0.85);
+  border: 1px solid rgba(34, 197, 94, 0.18);
+  border-radius: 16px;
+  padding: 14px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.quest-claim-btn {
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #22c55e, #15803d);
+  border: none;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 0.8rem;
+  cursor: pointer;
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.4);
+}
+
+/* --------------------------------------------------------------------------
+   COMMUNITY FEED (GuildPage)
+   -------------------------------------------------------------------------- */
+.community-feed-card {
+  background: rgba(10, 16, 12, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.community-post-hero {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+}
+
+.community-post-body {
+  padding: 14px;
+}
+
+
 

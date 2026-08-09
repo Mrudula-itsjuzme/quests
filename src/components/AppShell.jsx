@@ -15,10 +15,13 @@ import { MagneticButton } from './motion/MagneticButton';
 import { WorldAmbience } from './WorldAmbience';
 import { DawnMoment, useDawnMoment } from './DawnMoment';
 
-const navItems = [
-  { to: '/app', label: 'Capture', icon: 'home', end: true },
+const navItemsLeft = [
+  { to: '/app', label: 'Map', icon: 'compass', end: true },
   { to: '/app/quests', label: 'Quests', icon: 'scroll' },
-  { to: '/app/collection', label: 'Collection', icon: 'grid' },
+];
+
+const navItemsRight = [
+  { to: '/app/collection', label: 'Library', icon: 'book' },
   { to: '/app/community', label: 'Community', icon: 'shield' },
   { to: '/app/profile', label: 'Profile', icon: 'user' },
 ];
@@ -34,6 +37,11 @@ export function AppShell() {
   const { visible: dawnVisible, dismiss: dismissDawn } = useDawnMoment();
 
   const isWorldRoute = location.pathname === '/app';
+
+  const handleOpenCapture = () => {
+    playTap();
+    window.dispatchEvent(new CustomEvent('wild-realm-open-capture'));
+  };
 
   useEffect(() => {
     const onNotice = (event) => {
@@ -64,44 +72,18 @@ export function AppShell() {
           Development auth active — this is a local identity, not a real account.
         </div>
       )}
-      <header className={`topbar ${isWorldRoute ? 'topbar-world-hidden' : ''}`}>
+      <header className="topbar">
         <motion.div
           className="brand-lockup"
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
           onMouseEnter={playHover}
         >
-          <span className="brand-mark" aria-hidden="true">W</span>
+          <span className="brand-mark" aria-hidden="true">🌿</span>
           <div>
             <strong>WILD REALM</strong>
           </div>
         </motion.div>
-        <nav className="top-nav" aria-label="Primary">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              className={({ isActive }) => (isActive ? 'active' : '')}
-              onClick={playTap}
-              onMouseEnter={playHover}
-            >
-              {({ isActive }) => (
-                <>
-                  {isActive && (
-                    <motion.div
-                      className="active-indicator"
-                      layoutId="topNavIndicator"
-                      transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-                    />
-                  )}
-                  <Icon name={item.icon} />
-                  <span>{item.label}</span>
-                </>
-              )}
-            </NavLink>
-          ))}
-        </nav>
         <div className="user-profile-trigger">
           {!isLoading && !isError && me && (
             <div className="quick-stat shell-xp">
@@ -140,34 +122,58 @@ export function AppShell() {
           </AnimatePresence>
         </PullToRefresh>
 
-        {/* Floating Glass Bottom Dock — hidden on the world screen, which has its own compass nav */}
-        {!isWorldRoute && (
-          <nav className="mobile-bottom-dock" aria-label="Primary Navigation">
-            {navItems.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.end}
-                className={({ isActive }) => `dock-item ${isActive ? 'active' : ''}`}
-                onClick={playTap}
-                onMouseEnter={playHover}
-              >
-                {({ isActive }) => (
-                  <>
-                    {isActive && (
-                      <motion.div
-                        className="dock-active-bg"
-                        layoutId="dockIndicator"
-                        transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-                      />
-                    )}
-                    <Icon name={item.icon} />
-                  </>
-                )}
-              </NavLink>
-            ))}
-          </nav>
-        )}
+        {/* Floating Glass Bottom HUD Dock */}
+        <nav className="mobile-bottom-dock" aria-label="Primary Navigation">
+          {navItemsLeft.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.end}
+              className={({ isActive }) => `dock-item ${isActive ? 'active' : ''}`}
+              onClick={playTap}
+              onMouseEnter={playHover}
+            >
+              {({ isActive }) => (
+                <>
+                  <Icon name={item.icon} />
+                  <span>{item.label}</span>
+                </>
+              )}
+            </NavLink>
+          ))}
+
+          {/* Central Emerald Camera Shutter Action */}
+          <div className="dock-shutter-item">
+            <motion.button
+              type="button"
+              className="dock-shutter-btn"
+              aria-label="Open Camera Capture"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={handleOpenCapture}
+            >
+              <Icon name="camera" />
+            </motion.button>
+          </div>
+
+          {navItemsRight.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.end}
+              className={({ isActive }) => `dock-item ${isActive ? 'active' : ''}`}
+              onClick={playTap}
+              onMouseEnter={playHover}
+            >
+              {({ isActive }) => (
+                <>
+                  <Icon name={item.icon} />
+                  <span>{item.label}</span>
+                </>
+              )}
+            </NavLink>
+          ))}
+        </nav>
       </div>
 
       <AnimatePresence>

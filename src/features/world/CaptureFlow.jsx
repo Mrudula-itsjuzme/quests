@@ -210,27 +210,17 @@ export function CaptureFlow({ onClose }) {
         {stage === 'reveal' && card && (
           <motion.div
             key="reveal"
-            className="capture-flow-panel"
-            initial={{ opacity: 0, scale: 0.9, rotateY: -20 }}
-            animate={{ opacity: 1, scale: 1, rotateY: 0 }}
+            className="capture-flow-panel-clean"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             transition={{ type: 'spring', stiffness: 260, damping: 22 }}
           >
-            <DiscoveryCard card={card} />
-
-            <label className="capture-name-field">
-              <span>Card name</span>
-              <input
-                type="text"
-                value={name}
-                maxLength={80}
-                onChange={(event) => setName(event.target.value)}
-              />
-            </label>
-
-            <button type="button" className="continue-journey-btn" onClick={handleConfirm}>
-              Add to Library <span>→</span>
-            </button>
+            <DiscoveryCard
+              card={card}
+              onAddToLibrary={handleConfirm}
+              onShare={handleConfirm}
+            />
           </motion.div>
         )}
       </AnimatePresence>

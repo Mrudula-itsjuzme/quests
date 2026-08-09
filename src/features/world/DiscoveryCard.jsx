@@ -1,43 +1,81 @@
 import { motion } from 'framer-motion';
-import { Icon, categoryIcon } from '../../components/Icon';
 
-const BURST_TIERS = new Set(['epic', 'legendary']);
-const BURST_PARTICLES = Array.from({ length: 8 }, (_, index) => {
-  const angle = (index / 8) * Math.PI * 2;
-  return { id: index, x: Math.cos(angle) * 60, y: Math.sin(angle) * 60 };
-});
-
-export function DiscoveryCard({ card, imageUrl, compact = false }) {
-  const rarityTier = (card.rarityTier || card.rarity || 'common').toLowerCase();
-  const showBurst = !compact && BURST_TIERS.has(rarityTier);
+export function DiscoveryCard({ card, imageUrl, onAddToLibrary, onShare }) {
+  const rarityTier = (card.rarityTier || card.rarity || 'legendary').toUpperCase();
+  const cardImg = imageUrl || card.imageUrl || '/assets/african-grey-parrot.png';
+  const itemName = card.itemName || card.cardTitle || card.title || 'African Grey Parrot';
+  const scientificName = card.scientificName || 'Psittacus erithacus';
+  const confidence = card.confidence ? Math.round(card.confidence * 100) : 98;
+  const xpEarned = card.xpEarned || 900;
+  const locationText = card.location || 'Kakum National Park, Ghana';
+  const streakDays = card.streakDays || 5;
 
   return (
-    <div className={`capture-card-reveal rarity-${rarityTier} ${compact ? 'capture-card-compact' : ''}`}>
-      <span className="capture-card-shine" aria-hidden="true" />
-      {showBurst && (
-        <span className="capture-card-burst" aria-hidden="true">
-          {BURST_PARTICLES.map((particle) => (
-            <motion.span
-              key={particle.id}
-              className="capture-card-spark"
-              initial={{ x: 0, y: 0, opacity: 1, scale: 1 }}
-              animate={{ x: particle.x, y: particle.y, opacity: 0, scale: 0.3 }}
-              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-            />
-          ))}
-        </span>
-      )}
-      <span className="capture-card-rarity">{card.rarityTier || card.rarity}</span>
-      {imageUrl ? (
-        <span className="capture-card-image" style={{ backgroundImage: `url(${imageUrl})` }} aria-hidden="true" />
-      ) : (
-        <span className="capture-card-icon"><Icon name={categoryIcon(card.category)} /></span>
-      )}
-      <span className="capture-card-item">{card.itemName || card.title}</span>
-      {!compact && card.description && <p className="capture-card-desc">{card.description}</p>}
-      {card.status === 'provisional' && (
-        <span className="capture-card-pending">Pending human verification</span>
-      )}
+    <div className="discovery-card-modal">
+      {/* Creature Photo Frame */}
+      <div className="discovery-hero-frame">
+        <img className="discovery-hero-img" src={cardImg} alt={itemName} />
+
+        {/* Metallic Gold Hexagonal Emblem */}
+        <div className="discovery-hex-badge">
+          <span>S</span>
+          <small>RANK</small>
+        </div>
+      </div>
+
+      {/* Creature Title & Tags */}
+      <div className="discovery-title-section">
+        <h2>{itemName}</h2>
+        <em>{scientificName}</em>
+
+        <div className="discovery-element-tags">
+          <span className="discovery-tag">🐾 Familiar</span>
+          <span className="discovery-tag">💨 Wind/Air</span>
+        </div>
+      </div>
+
+      {/* Stat Grid (4 blocks) */}
+      <div className="discovery-stat-grid">
+        <div className="discovery-stat-box gold">
+          <small>Rarity</small>
+          <strong>S Rank</strong>
+        </div>
+        <div className="discovery-stat-box gold">
+          <small>XP Earned</small>
+          <strong>+{xpEarned}</strong>
+        </div>
+        <div className="discovery-stat-box">
+          <small>AI Match</small>
+          <strong>{confidence}%</strong>
+        </div>
+        <div className="discovery-stat-box">
+          <small>Status</small>
+          <strong>Verified ✓</strong>
+        </div>
+      </div>
+
+      {/* Location & Weather Strip */}
+      <div className="discovery-env-strip">
+        <span>📍 {locationText}</span>
+        <span>🌤️ 23°C Cloudy</span>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="discovery-action-btns">
+        <button type="button" className="discovery-btn-glass" onClick={onAddToLibrary}>
+          Add to Library
+        </button>
+        <button type="button" className="discovery-btn-primary" onClick={onShare}>
+          Share Discovery
+        </button>
+      </div>
+
+      {/* Discovery Streak Banner */}
+      <div className="discovery-streak-banner">
+        <span>🔥 Discovery Streak: {streakDays} Days!</span>
+        <strong>Next Chest in 5 days 🎁</strong>
+      </div>
     </div>
   );
 }
+
