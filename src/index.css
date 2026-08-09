@@ -637,7 +637,7 @@ body {
   flex-direction: column;
   width: 100%;
   min-height: 100vh;
-  padding: 18px 24px 120px;
+  padding: calc(18px + env(safe-area-inset-top, 0px)) 24px calc(120px + env(safe-area-inset-bottom, 0px));
   background: transparent;
 }
 
@@ -2518,22 +2518,25 @@ a { color: var(--gold); }
     position: fixed;
     left: 0; right: 0; bottom: 0;
     z-index: 15;
-    justify-content: space-around;
-    padding: 8px 6px calc(8px + env(safe-area-inset-bottom));
+    justify-content: space-between;
+    padding: 8px 6px calc(16px + env(safe-area-inset-bottom, 0px));
     background: linear-gradient(180deg, var(--leather), var(--espresso));
     border-top: 1px solid var(--border-hairline);
     box-shadow: 0 -8px 24px rgba(0,0,0,0.4);
   }
   .mobile-bottom-dock a {
-    display: grid;
-    justify-items: center;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    align-items: center;
+    justify-content: center;
     gap: 3px;
-    min-width: 56px;
     min-height: 48px;
-    padding: 6px 4px;
+    padding: 6px 2px;
     border-radius: 8px;
     color: var(--parchment-shadow);
-    font-size: 0.65rem;
+    font-size: clamp(0.55rem, 2vw, 0.65rem);
     font-weight: 700;
     text-decoration: none;
     text-transform: uppercase;
@@ -10617,10 +10620,10 @@ body, .app-shell {
 /* Top Search & Filter Bar Overlay */
 .explore-search-bar {
   position: absolute;
-  top: 16px;
+  top: calc(16px + env(safe-area-inset-top, 0px));
   left: 50%;
   transform: translateX(-50%);
-  width: min(420px, 92vw);
+  width: min(420px, calc(100vw - 32px));
   z-index: 20;
   display: flex;
   flex-direction: column;
@@ -10638,6 +10641,7 @@ body, .app-shell {
   border-radius: 999px;
   padding: 8px 16px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  min-width: 0;
 }
 
 .explore-search-input-wrap svg {
@@ -10676,6 +10680,7 @@ body, .app-shell {
   overflow-x: auto;
   padding-bottom: 4px;
   scrollbar-width: none;
+  max-width: 100%;
 }
 
 .explore-category-tags::-webkit-scrollbar {
@@ -10800,7 +10805,7 @@ body, .app-shell {
 /* Map Overlay Floating Control Buttons */
 .map-control-btn {
   position: absolute;
-  right: 16px;
+  right: calc(16px + env(safe-area-inset-right, 0px));
   width: 42px;
   height: 42px;
   border-radius: 50%;
@@ -10828,7 +10833,7 @@ body, .app-shell {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-top: 1px solid rgba(34, 197, 94, 0.2);
-  padding: 16px 16px 84px;
+  padding: 16px 16px calc(92px + env(safe-area-inset-bottom, 0px));
   z-index: 20;
   border-top-left-radius: 24px;
   border-top-right-radius: 24px;
