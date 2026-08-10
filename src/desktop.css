@@ -2,55 +2,83 @@
 
 /* Hide desktop components on mobile by default */
 .desktop-sidebar {
-  display: none;
+  display: none !important;
 }
 
 @media (min-width: 900px) {
-  /* Hide mobile elements */
-  .mobile-bottom-dock,
-  .topbar.mobile-only {
-    display: none !important;
+  html, body, #root {
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
   }
 
-  /* Desktop Layout Structure */
-  .app-shell {
-    display: flex;
-    flex-direction: row;
-    padding: 0;
-    height: 100vh;
-    overflow: hidden; /* Prevent body scroll, handle scroll in main area */
+  /* Hide mobile elements, using very high specificity */
+  body .mobile-bottom-dock,
+  body .app-shell .mobile-bottom-dock,
+  body #root .app-shell .mobile-bottom-dock,
+  .app-shell:has(*) .mobile-bottom-dock,
+  body .topbar.mobile-only {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    height: 0 !important;
   }
 
   .desktop-sidebar {
-    display: flex;
-    flex-direction: column;
-    width: 280px;
-    height: 100%;
-    background: var(--quest-panel-raised);
-    border-right: 1px solid var(--quest-line);
-    padding: 24px;
-    z-index: 50;
-    box-shadow: var(--shadow-3);
+    display: flex !important;
+    flex-direction: column !important;
+    width: 280px !important;
+    min-width: 280px !important;
+    height: 100vh !important;
+    background: var(--quest-panel-raised) !important;
+    border-right: 1px solid var(--quest-line) !important;
+    padding: 24px !important;
+    z-index: 50 !important;
+    box-shadow: var(--shadow-3) !important;
   }
 
-  .app-main-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    overflow-y: auto;
-    overflow-x: hidden;
-    position: relative;
-    padding: 0;
+  /* Desktop Layout Structure */
+  body .app-shell {
+    display: flex !important;
+    flex-direction: row !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    padding: 0 !important;
+    height: 100vh !important;
+    overflow: hidden !important; 
+    gap: 0 !important;
+    margin: 0 !important;
+    justify-content: flex-start !important;
+    align-items: flex-start !important;
+  }
+
+  body .app-main-content {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100vh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    position: relative !important;
+    padding: 0 !important;
+    width: calc(100vw - 280px) !important;
+    max-width: calc(100vw - 280px) !important;
   }
 
   /* Reset mobile content area constraints for desktop */
-  .mobile-content-area {
+  body .mobile-content-area,
+  body .mobile-content-area-world {
     margin: 0 !important;
-    padding: 32px 48px;
-    max-width: 1200px;
+    padding: 32px 48px !important;
+    max-width: 1400px !important;
     margin: 0 auto !important; /* Center content */
-    width: 100%;
+    width: 100% !important;
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
   }
 
   /* Sidebar styling details */
