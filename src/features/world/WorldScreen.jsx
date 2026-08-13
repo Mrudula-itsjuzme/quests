@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useActiveQuests, useCollectibles, useMarkNotificationRead, useMe, useNotifications } from '../quests/queries';
+import { useActiveQuests, useCaptures, useCollectibles, useMarkNotificationRead, useMe, useNotifications, useSpecies } from '../quests/queries';
 import { coinBalance, deriveGems, getEnergy } from '../../lib/playerEconomy';
 import { derivePlayerPresentation } from '../../lib/playerPresentation';
 import { timeOfDayPhase } from '../../lib/worldTime';
-import { WorldCanvas, HOTSPOT_LOCATIONS, NEARBY_HOTSPOTS } from './WorldCanvas';
+import { buildDiscoveryHotspots } from '../../lib/discoveryHotspots';
+import { WorldCanvas } from './WorldCanvas';
 import { WorldHud } from './WorldHud';
 import { CaptureFlow } from './CaptureFlow';
 import { pickWeather } from './WeatherLayer';
@@ -19,8 +20,11 @@ export function WorldScreen() {
   const { data: quests } = useActiveQuests();
   const { data: collectibles } = useCollectibles();
   const { data: notifications } = useNotifications();
+  const { data: captures } = useCaptures();
+  const { data: species } = useSpecies();
   const markNotificationRead = useMarkNotificationRead();
   const navigate = useNavigate();
+  const [lastKnownPosition, setLastKnownPosition] = useState(null);
 
   const [captureOpen, setCaptureOpen] = useState(false);
   const [selectedTag, setSelectedTag] = useState('All');
@@ -48,13 +52,35 @@ export function WorldScreen() {
     return () => window.removeEventListener('wild-realm-open-capture', handleOpenCaptureEvent);
   }, []);
 
+  // Distances are only shown when the browser actually grants a position;
+  // a denied or unavailable fix simply omits them.
+  useEffect(() => {
+    if (typeof navigator === 'undefined' || !navigator.geolocation) return undefined;
+    let cancelled = false;
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        if (!cancelled) setLastKnownPosition({ lat: position.coords.latitude, lng: position.coords.longitude });
+      },
+      () => {},
+      { enableHighAccuracy: false, timeout: 8000, maximumAge: 300_000 },
+    );
+    return () => { cancelled = true; };
+  }, []);
+
+  // Hotspots are the player's own discovery locations. There is no places
+  // provider wired up, so this maps real captures rather than inventing parks.
+  const hotspots = useMemo(
+    () => buildDiscoveryHotspots(captures, species, lastKnownPosition),
+    [captures, species, lastKnownPosition],
+  );
+
   const filteredHotspots = useMemo(() => {
-    return HOTSPOT_LOCATIONS.filter((item) => {
+    return hotspots.filter((item) => {
       const matchesCategory = selectedTag === 'All' || item.category === selectedTag;
       const matchesSearch = !searchQuery || item.title.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesCategory && matchesSearch;
     });
-  }, [selectedTag, searchQuery]);
+  }, [hotspots, selectedTag, searchQuery]);
 
   if (meLoading || !me) {
     return <div className="world-screen world-screen-loading" aria-busy="true" />;
@@ -147,9 +173,11 @@ export function WorldScreen() {
         phase={phase}
         weather={weather}
         hotspots={filteredHotspots}
-        onSelectHotspot={(hotspot) => {
+        onSelectHotspot={() => {
           playTap();
-          navigate(hotspot.to);
+          // Hotspots are clusters of the player's own captures, so the pin
+          // leads back into the collection that produced them.
+          navigate('/app/collection');
         }}
       />
 
@@ -171,32 +199,34 @@ export function WorldScreen() {
         </div>
 
         <div className="explore-hotspot-cards">
-          {NEARBY_HOTSPOTS.length > 0 ? (
-            NEARBY_HOTSPOTS.map((place) => (
-              <motion.div
+          {filteredHotspots.length > 0 ? (
+            filteredHotspots.map((place) => (
+              <motion.button
+                type="button"
                 key={place.id}
-                className="explore-hotspot-card"
+                className={`explore-hotspot-card element-${place.element.toLowerCase()}`}
                 whileHover={{ scale: 1.04, y: -4 }}
                 whileTap={{ scale: 0.96 }}
-                onClick={() => {
-                  playTap();
-                  navigate('/app/collection');
-                }}
+                onClick={() => { playTap(); navigate('/app/collection'); }}
               >
-                <div className="explore-hotspot-bg" style={{ backgroundImage: `url(${place.bg})` }} />
                 <div className="explore-hotspot-overlay">
+                  <span className={`explore-hotspot-grade rank-hex-${place.grade.toLowerCase()}`}>{place.grade}</span>
                   <h4 className="explore-hotspot-title">{place.title}</h4>
                   <div className="explore-hotspot-meta">
-                    <span>{place.distance}</span>
-                    <span className="explore-hotspot-rating">★ {place.rating}</span>
+                    <span>{place.discoveries} discover{place.discoveries === 1 ? 'y' : 'ies'}</span>
+                    {place.distanceLabel && <span className="explore-hotspot-rating">{place.distanceLabel}</span>}
                   </div>
                 </div>
-              </motion.div>
+              </motion.button>
             ))
           ) : (
-            <div style={{ textAlign: 'center', padding: '30px 20px', width: '100%', color: 'var(--wild-text-dim)', fontSize: '0.9rem' }}>
-              <p style={{ margin: 0 }}>No nearby hotspots yet.</p>
-              <p style={{ margin: '4px 0 0', fontSize: '0.8rem', opacity: 0.7 }}>Capture a discovery to start mapping your area.</p>
+            <div className="explore-hotspot-empty">
+              <p>{hotspots.length === 0 ? 'No nearby hotspots yet.' : `No ${selectedTag.toLowerCase()} hotspots match.`}</p>
+              <p>
+                {hotspots.length === 0
+                  ? 'Capture a discovery to start mapping your area.'
+                  : 'Try a different category or search term.'}
+              </p>
             </div>
           )}
         </div>

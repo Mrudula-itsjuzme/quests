@@ -13005,3 +13005,64 @@ span.post-author-avatar {
   height: 24px;
   fill: #f97316;
 }
+
+/* --- Explore: hotspots derived from the player's own captures --- */
+
+/* No POI imagery to load, so the card ground is the element colour. */
+.explore-hotspot-card {
+  padding: 0;
+  text-align: left;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(6, 9, 7, 0.95));
+  color: inherit;
+  font: inherit;
+}
+.explore-hotspot-card.element-fire { background: linear-gradient(180deg, rgba(239, 68, 68, 0.28), rgba(6, 9, 7, 0.96)); }
+.explore-hotspot-card.element-water { background: linear-gradient(180deg, rgba(59, 130, 246, 0.28), rgba(6, 9, 7, 0.96)); }
+.explore-hotspot-card.element-grass { background: linear-gradient(180deg, rgba(34, 197, 94, 0.28), rgba(6, 9, 7, 0.96)); }
+.explore-hotspot-card.element-earth { background: linear-gradient(180deg, rgba(168, 85, 247, 0.28), rgba(6, 9, 7, 0.96)); }
+.explore-hotspot-card.element-sky { background: linear-gradient(180deg, rgba(14, 165, 233, 0.28), rgba(6, 9, 7, 0.96)); }
+.explore-hotspot-card:focus-visible {
+  outline: 2px solid var(--wild-gold-bright);
+  outline-offset: 2px;
+}
+
+.explore-hotspot-grade {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 30px;
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  background: rgba(0, 0, 0, 0.55);
+  color: currentColor;
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+.explore-hotspot-empty {
+  width: 100%;
+  padding: 30px 20px;
+  text-align: center;
+  color: var(--wild-text-dim);
+  font-size: 0.9rem;
+}
+.explore-hotspot-empty > p { margin: 0; }
+.explore-hotspot-empty > p + p {
+  margin-top: 4px;
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+/* Map pins carry the cluster's best grade rather than a POI photo. */
+.map-hotspot-thumb {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  background: rgba(6, 12, 9, 0.9);
+  color: currentColor;
+  font-weight: 900;
+  font-size: 0.9rem;
+}

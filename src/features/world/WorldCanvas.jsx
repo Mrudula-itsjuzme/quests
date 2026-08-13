@@ -1,10 +1,7 @@
 import { motion } from 'framer-motion';
 import { WeatherLayer } from './WeatherLayer';
 
-export const HOTSPOT_LOCATIONS = [];
-export const NEARBY_HOTSPOTS = [];
-
-export function WorldCanvas({ phase, weather, hotspots = HOTSPOT_LOCATIONS, onSelectHotspot }) {
+export function WorldCanvas({ phase, weather, hotspots = [], onSelectHotspot }) {
   return (
     <div className={`world-canvas-wrap world-phase-${phase}`}>
       {/* Terrain & Satellite Map Image Background */}
@@ -23,12 +20,12 @@ export function WorldCanvas({ phase, weather, hotspots = HOTSPOT_LOCATIONS, onSe
             scale: { repeat: Infinity, duration: 4, ease: 'easeInOut', delay: Math.random() * 2 }
           }}
           whileHover={{ scale: 1.15, y: -4 }}
-          onClick={() => onSelectHotspot(pin)}
+          onClick={() => onSelectHotspot?.(pin)}
         >
-          <div className="map-hotspot-thumb" style={{ backgroundImage: `url(${pin.thumb})` }} />
+          <div className={`map-hotspot-thumb rank-hex-${(pin.grade || 'd').toLowerCase()}`}>{pin.grade}</div>
           <div className="map-hotspot-label">
             <span>{pin.title}</span>
-            <span className="map-hotspot-rating">★ {pin.rating}</span>
+            {pin.distanceLabel && <span className="map-hotspot-rating">{pin.distanceLabel}</span>}
           </div>
         </motion.div>
       ))}
