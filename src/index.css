@@ -13066,3 +13066,157 @@ span.post-author-avatar {
   font-weight: 900;
   font-size: 0.9rem;
 }
+
+/* --- Explore: curated world hotspots --- */
+
+/* Curated places have no element, so category drives their tint. */
+.explore-hotspot-card.category-parks { background: linear-gradient(180deg, rgba(34, 197, 94, 0.28), rgba(6, 9, 7, 0.96)); }
+.explore-hotspot-card.category-waterfalls { background: linear-gradient(180deg, rgba(59, 130, 246, 0.28), rgba(6, 9, 7, 0.96)); }
+.explore-hotspot-card.category-birding { background: linear-gradient(180deg, rgba(14, 165, 233, 0.28), rgba(6, 9, 7, 0.96)); }
+.explore-hotspot-card.category-hotspots { background: linear-gradient(180deg, rgba(245, 158, 11, 0.28), rgba(6, 9, 7, 0.96)); }
+
+.explore-hotspot-chip {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 2px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.5);
+  color: var(--quest-cream, #e8e4da);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.map-hotspot-curated {
+  border-color: var(--wild-emerald, #22c55e);
+  color: var(--wild-emerald, #22c55e);
+}
+
+.explore-hotspot-retry {
+  padding: 6px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--quest-cream, #e8e4da);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Detail sheet for a selected map location. */
+.explore-hotspot-detail {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+  z-index: 40;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  background: rgba(8, 14, 11, 0.97);
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.6);
+  max-height: 60vh;
+  overflow-y: auto;
+}
+.explore-hotspot-detail-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.explore-hotspot-detail-head h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: #fff;
+}
+.explore-hotspot-detail-head p {
+  margin: 2px 0 0;
+  font-size: 0.76rem;
+  color: var(--wild-emerald, #22c55e);
+}
+.explore-hotspot-detail-head button {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--wild-text-dim, #9ca3af);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.explore-hotspot-detail-body {
+  margin: 10px 0 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--quest-cream, #e8e4da);
+}
+.explore-hotspot-species { margin-top: 12px; }
+.explore-hotspot-species > small {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--wild-text-dim, #9ca3af);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.explore-hotspot-species > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.explore-hotspot-species-chip {
+  padding: 4px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--quest-cream, #e8e4da);
+  font-size: 0.74rem;
+}
+.explore-hotspot-detail-actions { margin-top: 14px; }
+.explore-hotspot-detail-actions > .continue-journey-btn { width: 100%; }
+
+@media (min-width: 900px) {
+  .explore-hotspot-detail {
+    left: auto;
+    right: 32px;
+    bottom: 32px;
+    width: 380px;
+  }
+}
+
+/* Curated locations cluster tightly at world zoom, so pin labels are shown on
+   interaction only. The marker itself stays visible at all times. */
+.map-hotspot-label {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-quick, 0.18s) ease;
+}
+.map-hotspot-pin:hover .map-hotspot-label,
+.map-hotspot-pin:focus-visible .map-hotspot-label {
+  opacity: 1;
+}
+/* Smaller than a photo pin needs, with a bright ring so a marker still reads
+   against the dark terrain at world zoom. */
+.map-hotspot-thumb {
+  width: 26px;
+  height: 26px;
+  font-size: 0.72rem;
+  border-width: 2px;
+  background: rgba(4, 10, 7, 0.92);
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.55), 0 2px 6px rgba(0, 0, 0, 0.7);
+}
+.map-hotspot-curated {
+  border-color: var(--wild-emerald, #22c55e);
+  color: var(--wild-emerald, #22c55e);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-hotspot-label { transition: none; }
+}

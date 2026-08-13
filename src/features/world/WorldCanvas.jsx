@@ -22,7 +22,11 @@ export function WorldCanvas({ phase, weather, hotspots = [], onSelectHotspot }) 
           whileHover={{ scale: 1.15, y: -4 }}
           onClick={() => onSelectHotspot?.(pin)}
         >
-          <div className={`map-hotspot-thumb rank-hex-${(pin.grade || 'd').toLowerCase()}`}>{pin.grade}</div>
+          {/* Capture clusters show their best rarity grade; curated places
+              show a category initial so both read as map pins. */}
+          <div className={pin.grade ? `map-hotspot-thumb rank-hex-${pin.grade.toLowerCase()}` : 'map-hotspot-thumb map-hotspot-curated'}>
+            {pin.grade || (pin.category ? pin.category[0] : '·')}
+          </div>
           <div className="map-hotspot-label">
             <span>{pin.title}</span>
             {pin.distanceLabel && <span className="map-hotspot-rating">{pin.distanceLabel}</span>}

@@ -162,6 +162,15 @@ export const GUEST_FEED = [
   },
 ];
 
+// Guest mode has no backend, so it serves a small slice of the same curated
+// hotspots the API returns. Signed-in sessions always read the real table.
+export const GUEST_WORLD_HOTSPOTS = [
+  { id: 'demo-cubbon-park', name: 'Cubbon Park', category: 'Parks', description: 'A 300-acre green lung in the middle of the city, dense with old rain trees and resident birdlife.', gps: { lat: 12.9763, lng: 77.5924 }, region: 'Bengaluru, India', featuredSpecies: ['sky-house-sparrow', 'sky-common-myna'], isDemo: true },
+  { id: 'demo-hebbal-lake', name: 'Hebbal Lake', category: 'Birding', description: 'Wetland margins that draw pelicans, herons and wintering waterfowl at dawn.', gps: { lat: 13.0356, lng: 77.5913 }, region: 'Bengaluru, India', featuredSpecies: ['sky-kingfisher', 'sky-flamingo'], isDemo: true },
+  { id: 'demo-jog-falls', name: 'Jog Falls', category: 'Waterfalls', description: 'The Sharavathi drops in four distinct cascades — loudest and fullest just after the monsoon.', gps: { lat: 14.2295, lng: 74.8126 }, region: 'Karnataka, India', featuredSpecies: ['water-waterfall', 'water-river'], isDemo: true },
+  { id: 'demo-nandi-hills', name: 'Nandi Hills', category: 'Hotspots', description: 'An escarpment that clears the morning cloud layer — the classic sunrise vantage point.', gps: { lat: 13.3702, lng: 77.6835 }, region: 'Karnataka, India', featuredSpecies: ['fire-sunrise', 'earth-mountain-vista'], isDemo: true },
+];
+
 // Guest-mode only. Signed-in sessions always read real posts from
 // /api/v1/community/posts and show an empty state when there are none.
 export const GUEST_COMMUNITY_POSTS = [

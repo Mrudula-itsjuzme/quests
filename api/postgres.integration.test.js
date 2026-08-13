@@ -4,6 +4,7 @@ import { runMigrations } from './migrate.js';
 import { PostgresQuestRepository } from './lib/postgres-repository.js';
 import { QuestEngine } from './lib/quest-engine.js';
 import { createProviders } from './lib/providers.js';
+import { speciesCatalog } from './lib/species-catalog.js';
 
 const databaseUrl = process.env.TEST_DATABASE_URL;
 const suite = databaseUrl ? describe : describe.skip;
@@ -135,6 +136,62 @@ suite('PostgreSQL quest repository', () => {
   it('does not return another user assignment', async () => {
     const [assignment] = await engine.generateDaily(identity, 'integration-daily-001');
     expect(await repository.getAssignment('another-user', assignment.id)).toBeNull();
+  });
+
+  describe('world hotspots', () => {
+    it('serves the seeded curated locations', async () => {
+      const all = await repository.listWorldHotspots();
+      expect(all.length).toBeGreaterThan(0);
+      expect(all.every((spot) => spot.isDemo)).toBe(true);
+    });
+
+    it('returns coordinates as numbers on the correct axes', async () => {
+      const all = await repository.listWorldHotspots();
+      const jog = all.find((spot) => spot.id === 'demo-jog-falls');
+      // Jog Falls is ~14.23N, ~74.81E. A swapped pair would put latitude at
+      // 74.81, which no range check can catch — so assert the values directly.
+      expect(jog.gps.lat).toBeCloseTo(14.2295, 4);
+      expect(jog.gps.lng).toBeCloseTo(74.8126, 4);
+      expect(typeof jog.gps.lat).toBe('number');
+      expect(typeof jog.gps.lng).toBe('number');
+    });
+
+    it('filters by category', async () => {
+      const falls = await repository.listWorldHotspots({ category: 'Waterfalls' });
+      expect(falls.length).toBeGreaterThan(0);
+      expect(falls.every((spot) => spot.category === 'Waterfalls')).toBe(true);
+    });
+
+    it('filters by bounding box without mixing up the axes', async () => {
+      const inBox = await repository.listWorldHotspots({
+        bbox: { minLat: 11, maxLat: 14, minLng: 74, maxLng: 78 },
+      });
+      expect(inBox.length).toBeGreaterThan(0);
+      for (const spot of inBox) {
+        expect(spot.gps.lat).toBeGreaterThanOrEqual(11);
+        expect(spot.gps.lat).toBeLessThanOrEqual(14);
+        expect(spot.gps.lng).toBeGreaterThanOrEqual(74);
+        expect(spot.gps.lng).toBeLessThanOrEqual(78);
+      }
+      // Valley of Flowers sits at ~30.7N, well outside the box.
+      expect(inBox.some((spot) => spot.id === 'demo-valley-of-flowers')).toBe(false);
+    });
+
+    it('rejects an out-of-range latitude at the database level', async () => {
+      await expect(pool.query(
+        "INSERT INTO world_hotspots (id,name,category,lat,lng) VALUES ('bad-lat','Bad','Parks',95,12)",
+      )).rejects.toThrow();
+    });
+
+    it('references only species that exist in the catalog', async () => {
+      const all = await repository.listWorldHotspots();
+      const known = new Set(speciesCatalog.map((entry) => entry.id));
+      for (const spot of all) {
+        for (const id of spot.featuredSpecies) {
+          expect(known.has(id), `${spot.id} references unknown species ${id}`).toBe(true);
+        }
+      }
+    });
   });
 
   describe('coin wallet', () => {

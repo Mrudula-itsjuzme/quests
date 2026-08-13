@@ -31,6 +31,45 @@ export VITE_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
 
 Production derives the JWT issuer and JWKS endpoint from `SUPABASE_URL`, requires audience `authenticated`, and rejects symmetric algorithms. Never expose a service-role key to either client.
 
+## API base URL
+
+The web deployment serves the built client and the API from the **same origin**
+(`api/server.js` mounts `/api` and also serves `dist/`), so `VITE_API_BASE_URL`
+is not required and the client's default relative `/api` base is correct.
+
+Native (Capacitor) builds are different: the WebView loads from
+`capacitor://localhost`, where a relative `/api` resolves to the device rather
+than the server. Native builds must be given an absolute URL:
+
+```bash
+VITE_API_BASE_URL=https://your-backend.example.com/api npm run build:native
+npx cap sync android
+```
+
+`npm run build:native` sets `VITE_NATIVE_BUILD=true`, which makes a missing
+`VITE_API_BASE_URL` fail at build time instead of shipping a client that
+silently calls the device. The backend must also list the native origin in
+`CORS_ORIGINS`, since a native build is cross-origin:
+
+```bash
+export CORS_ORIGINS=https://your-backend.example.com,capacitor://localhost,http://localhost
+```
+
+## Explore map data
+
+The Explore map renders two real layers:
+
+- **Curated world hotspots** — `world_hotspots`, served by
+  `GET /api/v1/world/hotspots` (optional `category` and
+  `bbox=minLng,minLat,maxLng,maxLat` filters). Migration `018` seeds demo rows
+  flagged `is_demo = TRUE`; replace them with curated content by inserting rows
+  with `is_demo = FALSE`.
+- **The player's own capture clusters** — derived from GPS-tagged captures.
+
+Both arrive through the normal React Query data layer. Running `npm run migrate`
+creates and seeds the table; without `DATABASE_URL` the in-memory repository
+serves the same demo set from `api/lib/world-hotspots.js`.
+
 ## Docker
 
 ```bash

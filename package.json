@@ -10,6 +10,7 @@
     "dev:full": "sh scripts/start-dev.sh",
     "migrate": "node api/migrate.js",
     "build": "vite build",
+    "build:native": "VITE_NATIVE_BUILD=true vite build",
     "preview": "vite preview",
     "test": "vitest run",
     "test:ci": "vitest run --coverage=false",

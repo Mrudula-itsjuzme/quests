@@ -1,4 +1,11 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+// The web build is served by the same Express process that mounts /api (see
+// api/server.js), so a same-origin relative base is correct there and needs no
+// configuration. A Capacitor build is NOT same-origin — it loads from
+// capacitor://localhost, where '/api' resolves to the device itself — so the
+// native build must be given an absolute backend URL at build time.
+// `npm run build:native` fails the build if VITE_API_BASE_URL is missing, so a
+// native bundle can never reach this line with a relative base.
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 export class ApiError extends Error {
   constructor(status, code, requestId, reason) {
@@ -69,6 +76,7 @@ import {
   GUEST_CAPTURES,
   GUEST_SPECIES,
   GUEST_COMMUNITY_POSTS,
+  GUEST_WORLD_HOTSPOTS,
 } from './guestData';
 
 let guestCaptures = null;
@@ -178,6 +186,15 @@ export function createApiClient(getToken) {
       const token = await getToken();
       if (token === 'guest') return guestDelay(GUEST_ACTIVE_QUESTS[0], 200);
       return request(`/quests/${assignmentId}/submissions`, { method: 'POST', body: payload, idempotencyKey, token });
+    },
+    getWorldHotspots: async (filters = {}, signal) => {
+      const token = await getToken();
+      if (token === 'guest') return guestDelay(GUEST_WORLD_HOTSPOTS, 200);
+      const params = new URLSearchParams();
+      if (filters.category) params.set('category', filters.category);
+      if (filters.bbox) params.set('bbox', filters.bbox);
+      const query = params.toString();
+      return request(`/world/hotspots${query ? `?${query}` : ''}`, { signal, token });
     },
     getCommunityPosts: async (scope = 'public', signal) => {
       const token = await getToken();

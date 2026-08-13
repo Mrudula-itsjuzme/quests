@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { buildDiscoveryHotspots, distanceKm, formatDistance } from './discoveryHotspots';
+import { buildDiscoveryHotspots, distanceKm, formatDistance, mapCuratedHotspots, mergeHotspots } from './discoveryHotspots';
 
 const species = [
   { id: 'sky-house-sparrow', element: 'Sky' },
@@ -83,6 +83,76 @@ describe('buildDiscoveryHotspots', () => {
     ], species, origin);
     expect(result[0].id.startsWith('20.05')).toBe(true);
     expect(result[0].distanceKm).toBeLessThan(result[1].distanceKm);
+  });
+});
+
+describe('mapCuratedHotspots', () => {
+  const curated = [{
+    id: 'demo-jog-falls',
+    name: 'Jog Falls',
+    category: 'Waterfalls',
+    description: 'Four cascades.',
+    gps: { lat: 14.2295, lng: 74.8126 },
+    region: 'Karnataka, India',
+    featuredSpecies: ['water-waterfall'],
+    isDemo: true,
+  }];
+
+  it('shapes API hotspots for the map without losing their identity', () => {
+    const [spot] = mapCuratedHotspots(curated);
+    expect(spot.id).toBe('demo-jog-falls');
+    expect(spot.title).toBe('Jog Falls');
+    expect(spot.category).toBe('Waterfalls');
+    expect(spot.source).toBe('curated');
+    expect(spot.region).toBe('Karnataka, India');
+  });
+
+  it('projects latitude and longitude onto the correct canvas axes', () => {
+    const [spot] = mapCuratedHotspots(curated);
+    // x follows longitude, y follows latitude — swapping them would place
+    // markers in the wrong hemisphere.
+    expect(spot.x).toBeCloseTo(((74.8126 + 180) / 360) * 100, 6);
+    expect(spot.y).toBeCloseTo(((90 - 14.2295) / 180) * 100, 6);
+  });
+
+  it('drops entries with missing or non-numeric coordinates', () => {
+    expect(mapCuratedHotspots([
+      { id: 'a', name: 'No GPS', category: 'Parks' },
+      { id: 'b', name: 'Bad GPS', category: 'Parks', gps: { lat: null, lng: 12 } },
+    ])).toEqual([]);
+  });
+
+  it('measures distance from the player when a position is known', () => {
+    const [spot] = mapCuratedHotspots(curated, { lat: 14.2295, lng: 74.8126 });
+    expect(spot.distanceKm).toBeCloseTo(0, 3);
+    expect(spot.distanceLabel).toBe('0 m');
+  });
+
+  it('tolerates an absent hotspot list', () => {
+    expect(mapCuratedHotspots(undefined)).toEqual([]);
+  });
+});
+
+describe('mergeHotspots', () => {
+  it('combines curated places with the player’s own clusters, nearest first', () => {
+    const merged = mergeHotspots(
+      [{ id: 'far', distanceKm: 40, source: 'curated' }],
+      [{ id: 'near', distanceKm: 2, source: 'discovered' }],
+    );
+    expect(merged.map((item) => item.id)).toEqual(['near', 'far']);
+  });
+
+  it('keeps entries with unknown distance last rather than dropping them', () => {
+    const merged = mergeHotspots(
+      [{ id: 'unknown', distanceKm: null, source: 'curated' }],
+      [{ id: 'known', distanceKm: 5, source: 'discovered' }],
+    );
+    expect(merged.map((item) => item.id)).toEqual(['known', 'unknown']);
+  });
+
+  it('returns curated content even when the player has captured nothing', () => {
+    const merged = mergeHotspots([{ id: 'curated-only', distanceKm: null }], []);
+    expect(merged).toHaveLength(1);
   });
 });
 

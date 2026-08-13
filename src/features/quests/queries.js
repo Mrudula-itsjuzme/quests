@@ -59,6 +59,16 @@ export function useRenameCapture() {
   });
 }
 
+export function useWorldHotspots(filters = {}) {
+  const api = useApiClient();
+  return useQuery({
+    queryKey: ['world', 'hotspots', filters],
+    queryFn: ({ signal }) => api.getWorldHotspots(filters, signal),
+    // Curated content changes rarely; no need to refetch on every visit.
+    staleTime: 60 * 60 * 1000,
+  });
+}
+
 export function useCommunityPosts(scope = 'public') {
   const api = useApiClient();
   return useQuery({

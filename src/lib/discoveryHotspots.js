@@ -49,6 +49,42 @@ export function formatDistance(km) {
 }
 
 /**
+ * Curated hotspots from /api/v1/world/hotspots, shaped like capture clusters
+ * so the map and the nearby list can render one merged collection.
+ */
+export function mapCuratedHotspots(hotspots = [], origin = null) {
+  return (hotspots || [])
+    .filter((item) => item?.gps && Number.isFinite(item.gps.lat) && Number.isFinite(item.gps.lng))
+    .map((item) => {
+      const km = distanceKm(origin, item.gps);
+      return {
+        id: item.id,
+        title: item.name,
+        category: item.category,
+        description: item.description,
+        region: item.region,
+        featuredSpecies: item.featuredSpecies || [],
+        source: 'curated',
+        gps: item.gps,
+        distanceKm: km,
+        distanceLabel: formatDistance(km),
+        x: ((item.gps.lng + 180) / 360) * 100,
+        y: ((90 - item.gps.lat) / 180) * 100,
+      };
+    });
+}
+
+/**
+ * Merges curated world hotspots with the player's own discovery clusters into
+ * the single list the Explore map renders, nearest first.
+ */
+export function mergeHotspots(curated = [], discovered = []) {
+  return [...curated, ...discovered].sort(
+    (left, right) => (left.distanceKm ?? Infinity) - (right.distanceKm ?? Infinity),
+  );
+}
+
+/**
  * @param captures capture cards from /api/v1/captures
  * @param species  species catalog from /api/v1/species
  * @param origin   optional {lat,lng} to measure distance from
@@ -79,6 +115,7 @@ export function buildDiscoveryHotspots(captures = [], species = [], origin = nul
         category: CATEGORY_BY_ELEMENT[element] || 'Hotspots',
         element,
         grade: bestGrade(cards),
+        source: 'discovered',
         discoveries: cards.length,
         gps: { lat, lng },
         distanceKm: km,

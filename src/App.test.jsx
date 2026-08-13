@@ -52,6 +52,17 @@ const mockCommunityPost = {
   createdAt: '2026-08-01T06:00:00.000Z',
 };
 
+const mockHotspot = {
+  id: 'demo-jog-falls',
+  name: 'Jog Falls',
+  category: 'Waterfalls',
+  description: 'The Sharavathi drops in four distinct cascades.',
+  gps: { lat: 14.2295, lng: 74.8126 },
+  region: 'Karnataka, India',
+  featuredSpecies: ['water-waterfall'],
+  isDemo: true,
+};
+
 vi.mock('./lib/supabase', () => ({ supabase: null, supabaseConfigured: false }));
 
 function renderApp(initialPath = '/app') {
@@ -75,6 +86,7 @@ describe('App (development auth mode)', () => {
       if (url.includes('/v1/quests/history')) return jsonResponse([]);
       if (url.includes('/v1/quests/definitions')) return jsonResponse([]);
       if (url.includes('/v1/collectibles')) return jsonResponse([]);
+      if (url.includes('/v1/world/hotspots')) return jsonResponse([mockHotspot]);
       if (url.includes('/v1/community/friends')) return jsonResponse([]);
       if (url.includes('/v1/community/posts')) return jsonResponse([]);
       if (url.includes('/v1/feed')) return jsonResponse([]);
@@ -171,6 +183,34 @@ describe('App (development auth mode)', () => {
     // error, so this needs longer than the default 1s findBy timeout.
     expect(await screen.findByRole('alert', {}, { timeout: 10_000 })).toHaveTextContent(/couldn’t reach the community service/i);
     expect(screen.queryByText(/Malabar Trogon/i)).not.toBeInTheDocument();
+  }, 15_000);
+
+  it('renders curated world hotspots on Explore for an account with no captures', async () => {
+    global.fetch = vi.fn((url) => {
+      if (url.includes('/v1/me')) return jsonResponse(mockMe);
+      if (url.includes('/v1/world/hotspots')) return jsonResponse([mockHotspot]);
+      if (url.includes('/v1/captures')) return jsonResponse([]);
+      return jsonResponse([]);
+    });
+    renderApp('/app');
+    // The map must have content even though the player has captured nothing.
+    const titles = await screen.findAllByText(/Jog Falls/i);
+    expect(titles.length).toBeGreaterThan(0);
+    // The curated place carries its category chip, not a rarity grade.
+    expect(screen.getAllByText('Waterfalls').length).toBeGreaterThan(0);
+  });
+
+  it('shows a retryable error state when the hotspot endpoint fails', async () => {
+    global.fetch = vi.fn((url) => {
+      if (url.includes('/v1/me')) return jsonResponse(mockMe);
+      if (url.includes('/v1/world/hotspots')) return jsonResponse({ error: { code: 'internal_error' } }, 500);
+      return jsonResponse([]);
+    });
+    renderApp('/app');
+    // A failed map request must be visible, never a silently blank map.
+    expect(await screen.findByRole('alert', {}, { timeout: 10_000 }))
+      .toHaveTextContent(/couldn’t be loaded/i);
+    expect(screen.getByRole('button', { name: /try again/i })).toBeInTheDocument();
   }, 15_000);
 
   it('leaves the rewards skeleton once every query resolves', async () => {

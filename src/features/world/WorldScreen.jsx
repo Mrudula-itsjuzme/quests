@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useActiveQuests, useCaptures, useCollectibles, useMarkNotificationRead, useMe, useNotifications, useSpecies } from '../quests/queries';
+import { useActiveQuests, useCaptures, useCollectibles, useMarkNotificationRead, useMe, useNotifications, useSpecies, useWorldHotspots } from '../quests/queries';
 import { coinBalance, deriveGems, getEnergy } from '../../lib/playerEconomy';
 import { derivePlayerPresentation } from '../../lib/playerPresentation';
 import { timeOfDayPhase } from '../../lib/worldTime';
-import { buildDiscoveryHotspots } from '../../lib/discoveryHotspots';
+import { buildDiscoveryHotspots, mapCuratedHotspots, mergeHotspots } from '../../lib/discoveryHotspots';
 import { WorldCanvas } from './WorldCanvas';
 import { WorldHud } from './WorldHud';
 import { CaptureFlow } from './CaptureFlow';
@@ -22,6 +22,12 @@ export function WorldScreen() {
   const { data: notifications } = useNotifications();
   const { data: captures } = useCaptures();
   const { data: species } = useSpecies();
+  const {
+    data: worldHotspots,
+    isLoading: hotspotsLoading,
+    isError: hotspotsError,
+    refetch: refetchHotspots,
+  } = useWorldHotspots();
   const markNotificationRead = useMarkNotificationRead();
   const navigate = useNavigate();
   const [lastKnownPosition, setLastKnownPosition] = useState(null);
@@ -30,6 +36,7 @@ export function WorldScreen() {
   const [selectedTag, setSelectedTag] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [selectedHotspot, setSelectedHotspot] = useState(null);
 
   const phase = useMemo(() => timeOfDayPhase(new Date().getHours()), []);
   const weather = useMemo(() => pickWeather(), []);
@@ -67,12 +74,17 @@ export function WorldScreen() {
     return () => { cancelled = true; };
   }, []);
 
-  // Hotspots are the player's own discovery locations. There is no places
-  // provider wired up, so this maps real captures rather than inventing parks.
-  const hotspots = useMemo(
+  // Explore shows two real layers: curated world hotspots served by
+  // /api/v1/world/hotspots, and clusters of the player's own captures.
+  const curated = useMemo(
+    () => mapCuratedHotspots(worldHotspots, lastKnownPosition),
+    [worldHotspots, lastKnownPosition],
+  );
+  const discovered = useMemo(
     () => buildDiscoveryHotspots(captures, species, lastKnownPosition),
     [captures, species, lastKnownPosition],
   );
+  const hotspots = useMemo(() => mergeHotspots(curated, discovered), [curated, discovered]);
 
   const filteredHotspots = useMemo(() => {
     return hotspots.filter((item) => {
@@ -173,11 +185,9 @@ export function WorldScreen() {
         phase={phase}
         weather={weather}
         hotspots={filteredHotspots}
-        onSelectHotspot={() => {
+        onSelectHotspot={(hotspot) => {
           playTap();
-          // Hotspots are clusters of the player's own captures, so the pin
-          // leads back into the collection that produced them.
-          navigate('/app/collection');
+          setSelectedHotspot(hotspot);
         }}
       />
 
@@ -199,21 +209,44 @@ export function WorldScreen() {
         </div>
 
         <div className="explore-hotspot-cards">
-          {filteredHotspots.length > 0 ? (
+          {hotspotsLoading ? (
+            <div className="explore-hotspot-empty" aria-busy="true">
+              <p role="status">Charting nearby nature…</p>
+            </div>
+          ) : hotspotsError ? (
+            <div className="explore-hotspot-empty" role="alert">
+              <p>Nearby locations couldn’t be loaded.</p>
+              <p>
+                <button type="button" className="explore-hotspot-retry" onClick={() => { playTap(); refetchHotspots(); }}>
+                  Try again
+                </button>
+              </p>
+            </div>
+          ) : filteredHotspots.length > 0 ? (
             filteredHotspots.map((place) => (
               <motion.button
                 type="button"
                 key={place.id}
-                className={`explore-hotspot-card element-${place.element.toLowerCase()}`}
+                className={`explore-hotspot-card ${place.element ? `element-${place.element.toLowerCase()}` : `category-${place.category.toLowerCase()}`}`}
                 whileHover={{ scale: 1.04, y: -4 }}
                 whileTap={{ scale: 0.96 }}
-                onClick={() => { playTap(); navigate('/app/collection'); }}
+                onClick={() => { playTap(); setSelectedHotspot(place); }}
               >
                 <div className="explore-hotspot-overlay">
-                  <span className={`explore-hotspot-grade rank-hex-${place.grade.toLowerCase()}`}>{place.grade}</span>
+                  {/* Curated places carry a category chip; the player's own
+                      capture clusters carry their best rarity grade. */}
+                  {place.source === 'discovered' ? (
+                    <span className={`explore-hotspot-grade rank-hex-${place.grade.toLowerCase()}`}>{place.grade}</span>
+                  ) : (
+                    <span className="explore-hotspot-chip">{place.category}</span>
+                  )}
                   <h4 className="explore-hotspot-title">{place.title}</h4>
                   <div className="explore-hotspot-meta">
-                    <span>{place.discoveries} discover{place.discoveries === 1 ? 'y' : 'ies'}</span>
+                    <span>
+                      {place.source === 'discovered'
+                        ? `${place.discoveries} discover${place.discoveries === 1 ? 'y' : 'ies'}`
+                        : place.region || place.category}
+                    </span>
                     {place.distanceLabel && <span className="explore-hotspot-rating">{place.distanceLabel}</span>}
                   </div>
                 </div>
@@ -221,7 +254,7 @@ export function WorldScreen() {
             ))
           ) : (
             <div className="explore-hotspot-empty">
-              <p>{hotspots.length === 0 ? 'No nearby hotspots yet.' : `No ${selectedTag.toLowerCase()} hotspots match.`}</p>
+              <p>{hotspots.length === 0 ? 'No locations charted yet.' : `No ${selectedTag.toLowerCase()} locations match.`}</p>
               <p>
                 {hotspots.length === 0
                   ? 'Capture a discovery to start mapping your area.'
@@ -231,6 +264,62 @@ export function WorldScreen() {
           )}
         </div>
       </div>
+
+      <AnimatePresence>
+        {selectedHotspot && (
+          <motion.div
+            className="explore-hotspot-detail"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="hotspot-detail-title"
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 24 }}
+          >
+            <div className="explore-hotspot-detail-head">
+              <div>
+                <h3 id="hotspot-detail-title">{selectedHotspot.title}</h3>
+                <p>
+                  {selectedHotspot.category}
+                  {selectedHotspot.region ? ` · ${selectedHotspot.region}` : ''}
+                  {selectedHotspot.distanceLabel ? ` · ${selectedHotspot.distanceLabel}` : ''}
+                </p>
+              </div>
+              <button type="button" onClick={() => { playTap(); setSelectedHotspot(null); }} aria-label="Close location details">×</button>
+            </div>
+
+            {selectedHotspot.description && <p className="explore-hotspot-detail-body">{selectedHotspot.description}</p>}
+
+            {selectedHotspot.featuredSpecies?.length > 0 && (
+              <div className="explore-hotspot-species">
+                <small>Likely finds</small>
+                <div>
+                  {selectedHotspot.featuredSpecies.map((id) => {
+                    const entry = (species || []).find((s) => s.id === id);
+                    return <span key={id} className="explore-hotspot-species-chip">{entry?.commonName || id}</span>;
+                  })}
+                </div>
+              </div>
+            )}
+
+            {selectedHotspot.source === 'discovered' && (
+              <p className="explore-hotspot-detail-body">
+                {selectedHotspot.discoveries} of your discoveries came from here.
+              </p>
+            )}
+
+            <div className="explore-hotspot-detail-actions">
+              <button
+                type="button"
+                className="continue-journey-btn"
+                onClick={() => { playTap(); setSelectedHotspot(null); setCaptureOpen(true); }}
+              >
+                Capture here <span>→</span>
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {captureOpen && <CaptureFlow onClose={() => setCaptureOpen(false)} />}

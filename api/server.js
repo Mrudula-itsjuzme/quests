@@ -79,6 +79,17 @@ const captureCreateSchema = z.object({
 }).strict();
 const captureRenameSchema = z.object({ cardTitle: z.string().trim().min(1).max(80) }).strict();
 const postIdSchema = z.string().uuid();
+const hotspotCategorySchema = z.enum(['Hotspots', 'Parks', 'Waterfalls', 'Birding']);
+// "minLng,minLat,maxLng,maxLat" — the GeoJSON/slippy-map ordering, so the
+// parser is the single place that decides which number is which axis.
+const bboxSchema = z.string().regex(/^-?\d+(\.\d+)?(,-?\d+(\.\d+)?){3}$/).transform((value, ctx) => {
+  const [minLng, minLat, maxLng, maxLat] = value.split(',').map(Number);
+  if (minLat < -90 || maxLat > 90 || minLat > maxLat || minLng < -180 || maxLng > 180 || minLng > maxLng) {
+    ctx.addIssue({ code: 'custom', message: 'invalid bbox' });
+    return z.NEVER;
+  }
+  return { minLat, maxLat, minLng, maxLng };
+});
 const communityPostSchema = z.object({
   cardId: z.string().uuid(),
   caption: z.string().trim().max(500).optional(),
@@ -294,6 +305,17 @@ export function createApp(options = {}) {
     const card = await repository.updateCapturedCard(req.identity.id, parse(captureIdSchema, req.params.captureId), body);
     if (!card) return res.status(404).json({ error: { code: 'capture_not_found', requestId: req.id } });
     res.json(card);
+  }));
+  app.get('/api/v1/world/hotspots', asyncRoute(async (req, res) => {
+    const category = req.query.category == null || req.query.category === ''
+      ? null
+      : parse(hotspotCategorySchema, req.query.category);
+    const bbox = req.query.bbox == null || req.query.bbox === ''
+      ? null
+      : parse(bboxSchema, req.query.bbox);
+    // Curated content is identical for every player, so it is safe to cache
+    // and revalidate the same way as the species catalog.
+    sendCachedJson(req, res, await repository.listWorldHotspots({ category, bbox, limit: req.query.limit }));
   }));
   app.get('/api/v1/community/posts', asyncRoute(async (req, res) => {
     const scope = req.query.scope == null || req.query.scope === '' ? 'public' : parse(communityScopeSchema, req.query.scope);

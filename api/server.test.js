@@ -393,6 +393,79 @@ describe('Quest API', () => {
   });
 });
 
+describe('World API', () => {
+  it('serves curated hotspots so a brand-new account has map content', async () => {
+    const app = createApp({ config: testConfig() });
+    const response = await request(app).get('/api/v1/world/hotspots');
+    expect(response.status).toBe(200);
+    expect(response.body.length).toBeGreaterThan(0);
+    expect(response.body[0]).toEqual(expect.objectContaining({
+      id: expect.any(String),
+      name: expect.any(String),
+      category: expect.any(String),
+      gps: { lat: expect.any(Number), lng: expect.any(Number) },
+    }));
+  });
+
+  it('keeps every coordinate inside its own axis range', async () => {
+    const app = createApp({ config: testConfig() });
+    const { body } = await request(app).get('/api/v1/world/hotspots');
+    for (const spot of body) {
+      expect(spot.gps.lat).toBeGreaterThanOrEqual(-90);
+      expect(spot.gps.lat).toBeLessThanOrEqual(90);
+      expect(spot.gps.lng).toBeGreaterThanOrEqual(-180);
+      expect(spot.gps.lng).toBeLessThanOrEqual(180);
+    }
+  });
+
+  it('flags seeded rows as demo data', async () => {
+    const app = createApp({ config: testConfig() });
+    const { body } = await request(app).get('/api/v1/world/hotspots');
+    expect(body.every((spot) => spot.isDemo === true)).toBe(true);
+  });
+
+  it('filters by category', async () => {
+    const app = createApp({ config: testConfig() });
+    const { body } = await request(app).get('/api/v1/world/hotspots?category=Waterfalls');
+    expect(body.length).toBeGreaterThan(0);
+    expect(body.every((spot) => spot.category === 'Waterfalls')).toBe(true);
+  });
+
+  it('rejects an unknown category instead of silently ignoring it', async () => {
+    const app = createApp({ config: testConfig() });
+    const response = await request(app).get('/api/v1/world/hotspots?category=Volcanoes');
+    expect(response.status).toBe(400);
+  });
+
+  it('filters by bounding box on the correct axes', async () => {
+    const app = createApp({ config: testConfig() });
+    // Karnataka-ish box: lng 74-78, lat 11-14. Ordering is minLng,minLat,maxLng,maxLat.
+    const { body } = await request(app).get('/api/v1/world/hotspots?bbox=74,11,78,14');
+    expect(body.length).toBeGreaterThan(0);
+    for (const spot of body) {
+      expect(spot.gps.lat).toBeGreaterThanOrEqual(11);
+      expect(spot.gps.lat).toBeLessThanOrEqual(14);
+      expect(spot.gps.lng).toBeGreaterThanOrEqual(74);
+      expect(spot.gps.lng).toBeLessThanOrEqual(78);
+    }
+    // The Uttarakhand seed (lat 30.7) must fall outside that box.
+    expect(body.some((spot) => spot.id === 'demo-valley-of-flowers')).toBe(false);
+  });
+
+  it('rejects a bounding box whose latitude is out of range', async () => {
+    const app = createApp({ config: testConfig() });
+    // Swapped lat/lng ordering puts 77 in the latitude slot.
+    const response = await request(app).get('/api/v1/world/hotspots?bbox=11,74,14,95');
+    expect(response.status).toBe(400);
+  });
+
+  it('requires authentication like every other data route', async () => {
+    const app = createApp({ config: testConfig({ DEV_AUTH_ENABLED: 'false' }) });
+    const response = await request(app).get('/api/v1/world/hotspots');
+    expect(response.status).toBe(401);
+  });
+});
+
 describe('Community API', () => {
   it('shares a capture as a real post carrying the author rank and discovery', async () => {
     const app = createApp({ config: testConfig(), visionProvider: highConfidenceVisionProvider() });

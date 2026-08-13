@@ -380,6 +380,26 @@ export class PostgresQuestRepository {
     const { rows } = await this.pool.query('SELECT image_hash FROM captured_cards WHERE user_id <> $1 AND image_hash IS NOT NULL', [userId]);
     return rows.some((row) => hashSimilarity(row.image_hash, hash) >= threshold);
   }
+  // --- World ---
+  async listWorldHotspots({ category = null, bbox = null, limit = 200 } = {}) {
+    const values = [];
+    const where = ['enabled'];
+    if (category) { values.push(category); where.push(`category = $${values.length}`); }
+    if (bbox) {
+      // Explicit min/max per axis, so a caller cannot accidentally filter
+      // latitude by a longitude range.
+      values.push(bbox.minLat, bbox.maxLat, bbox.minLng, bbox.maxLng);
+      where.push(`lat BETWEEN $${values.length - 3} AND $${values.length - 2}`);
+      where.push(`lng BETWEEN $${values.length - 1} AND $${values.length}`);
+    }
+    values.push(Math.min(Number(limit) || 200, 500));
+    const { rows } = await this.pool.query(
+      `SELECT * FROM world_hotspots WHERE ${where.join(' AND ')} ORDER BY name LIMIT $${values.length}`,
+      values,
+    );
+    return rows.map(mapWorldHotspot);
+  }
+
   // --- Community ---
   async createCommunityPost(post) {
     const client = await this.pool.connect();
@@ -654,6 +674,21 @@ function mapCommunityPost(row) {
     commentCount: Number(row.comment_count),
     viewerLiked: Boolean(row.viewer_liked),
     createdAt: row.created_at,
+  };
+}
+
+function mapWorldHotspot(row) {
+  return {
+    id: row.id,
+    name: row.name,
+    category: row.category,
+    description: row.description,
+    // Numeric columns arrive as strings from pg; coerce so the client never
+    // does arithmetic on a string coordinate.
+    gps: { lat: Number(row.lat), lng: Number(row.lng) },
+    region: row.region,
+    featuredSpecies: row.featured_species || [],
+    isDemo: row.is_demo,
   };
 }
 

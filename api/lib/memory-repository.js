@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { progressionEngine } from './progression-engine.js';
+import { demoWorldHotspots } from './world-hotspots.js';
 
 export class MemoryQuestRepository {
   constructor({ definitions = [] } = {}) {
@@ -20,10 +21,23 @@ export class MemoryQuestRepository {
     this.userRewards = [];
     this.inventory = [];
     this.coinLedger = [];
+    this.worldHotspots = demoWorldHotspots.map((item) => ({ ...item }));
     this.communityPosts = [];
     this.communityLikes = [];
     this.communityComments = [];
     this.friendships = [];
+  }
+
+  // --- World ---
+  async listWorldHotspots({ category = null, bbox = null, limit = 200 } = {}) {
+    return this.worldHotspots
+      .filter((item) => item.enabled)
+      .filter((item) => !category || item.category === category)
+      .filter((item) => !bbox
+        || (item.gps.lat >= bbox.minLat && item.gps.lat <= bbox.maxLat
+          && item.gps.lng >= bbox.minLng && item.gps.lng <= bbox.maxLng))
+      .slice(0, Math.min(Number(limit) || 200, 500))
+      .map(({ enabled, ...rest }) => clone(rest));
   }
 
   // --- Community ---
