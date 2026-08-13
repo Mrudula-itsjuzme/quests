@@ -362,6 +362,43 @@ h1, h2, h3, h4, h5, h6, .brand-lockup strong {
   backdrop-filter: blur(12px) !important;
   box-shadow: 0 8px 24px rgba(0,0,0,0.3) !important;
 }
+.quest-item-card.with-photo {
+  position: relative !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  min-height: 120px !important;
+  display: flex !important;
+  align-items: flex-end !important;
+}
+.quest-card-bg {
+  position: absolute !important;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-size: cover !important;
+  background-position: center !important;
+  opacity: 0.6 !important;
+  z-index: 1 !important;
+  transition: opacity 0.3s ease !important;
+}
+.quest-item-card:hover .quest-card-bg {
+  opacity: 0.8 !important;
+}
+.quest-item-card::after {
+  content: '' !important;
+  position: absolute !important;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(to top, rgba(10,20,16,1) 0%, rgba(10,20,16,0.1) 100%) !important;
+  z-index: 2 !important;
+  pointer-events: none !important;
+}
+.quest-card-content {
+  position: relative !important;
+  z-index: 3 !important;
+  width: 100% !important;
+  padding: 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
 .quest-item-card.completed {
   border-left-color: var(--quest-gold-bright) !important;
   background: rgba(240, 196, 107, 0.05) !important;

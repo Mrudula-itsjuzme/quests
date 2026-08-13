@@ -130,12 +130,15 @@ export function QuestsPage() {
             return (
               <motion.div
                 key={quest.id}
-                className={`quest-item-card ${isDone ? 'completed' : ''}`}
+                className={`quest-item-card ${isDone ? 'completed' : ''} with-photo`}
                 whileHover={{ scale: 1.01 }}
                 onClick={() => { playTap(); setSelectedId(quest.id); }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <span className="quest-item-emoji">📜</span>
+                <div 
+                  className="quest-card-bg"
+                  style={{ backgroundImage: `url(https://images.unsplash.com/photo-${quest.id.length % 3 === 0 ? '1472214103451-9374bd1c798e' : quest.id.length % 3 === 1 ? '1511497584788-876760111969' : '1501862700950-18382cd114a8'}?auto=format&fit=crop&w=600&q=80)` }}
+                />
+                <div className="quest-card-content">
                   <div style={{ flex: 1 }}>
                     <h4 className="quest-item-title">{quest.title}</h4>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '4px' }}>
