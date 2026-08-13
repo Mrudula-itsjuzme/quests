@@ -23,7 +23,7 @@ suite('PostgreSQL quest repository', () => {
   });
 
   beforeEach(async () => {
-    await pool.query('TRUNCATE quest_idempotency_keys, quest_xp_ledger, quest_submissions, collectible_unlocks, quest_daily_states, quest_generation_runs, quest_assignments, quest_users CASCADE');
+    await pool.query('TRUNCATE quest_idempotency_keys, quest_xp_ledger, quest_submissions, collectible_unlocks, quest_daily_states, quest_generation_runs, quest_assignments, coin_ledger, community_post_likes, community_post_comments, community_posts, community_friendships, quest_users CASCADE');
   });
 
   afterAll(async () => { await pool?.end(); });
@@ -135,5 +135,117 @@ suite('PostgreSQL quest repository', () => {
   it('does not return another user assignment', async () => {
     const [assignment] = await engine.generateDaily(identity, 'integration-daily-001');
     expect(await repository.getAssignment('another-user', assignment.id)).toBeNull();
+  });
+
+  describe('coin wallet', () => {
+    it('credits coins for a final capture and leaves provisional captures uncredited', async () => {
+      await repository.ensureUser(identity);
+      await repository.createCapturedCard({
+        userId: identity.id, itemName: 'Bengal Tiger', category: 'Fauna', cardTitle: 'Bengal Tiger',
+        rarityTier: 'B', rarityScore: 0.64, description: '', status: 'final', xpAwarded: 250, coinsAwarded: 40,
+      });
+      expect(await repository.getCoinBalance(identity.id)).toBe(40);
+
+      await repository.createCapturedCard({
+        userId: identity.id, itemName: 'Red Fox', category: 'Fauna', cardTitle: 'Red Fox',
+        rarityTier: 'A', rarityScore: 0.8, description: '', status: 'provisional', xpAwarded: 500, coinsAwarded: 100,
+      });
+      expect(await repository.getCoinBalance(identity.id)).toBe(40);
+    });
+
+    it('keeps each capture credit unique so a replay cannot double-pay', async () => {
+      await repository.ensureUser(identity);
+      const card = await repository.createCapturedCard({
+        userId: identity.id, itemName: 'Barn Owl', category: 'Fauna', cardTitle: 'Barn Owl',
+        rarityTier: 'B', rarityScore: 0.6, description: '', status: 'final', xpAwarded: 250, coinsAwarded: 40,
+      });
+      await pool.query(
+        `INSERT INTO coin_ledger (id, ledger_key, user_id, card_id, amount, reason)
+         VALUES (gen_random_uuid(), $1, $2, $3, 40, 'capture_reward') ON CONFLICT (ledger_key) DO NOTHING`,
+        [`capture:${card.id}`, identity.id, card.id],
+      );
+      expect(await repository.getCoinBalance(identity.id)).toBe(40);
+    });
+  });
+
+  describe('community', () => {
+    it('stores a shared discovery and reads it back with author and card data', async () => {
+      await repository.ensureUser(identity);
+      const card = await repository.createCapturedCard({
+        userId: identity.id, itemName: 'Indian Roller', category: 'Fauna', cardTitle: 'Indian Roller',
+        rarityTier: 'B', rarityScore: 0.6, description: '', status: 'final',
+        rarityGrade: 'B', rarityStars: 3, xpAwarded: 250, coinsAwarded: 40,
+      });
+      const { post, created } = await repository.createCommunityPost({
+        userId: identity.id, cardId: card.id, caption: 'On the wire at dawn.', hashtags: ['#birding'],
+      });
+      expect(created).toBe(true);
+      expect(post.discovery.itemName).toBe('Indian Roller');
+      expect(post.discovery.rarityStars).toBe(3);
+      expect(post.author.rankTitle).toBe('Adventurer');
+      expect(post.hashtags).toEqual(['#birding']);
+
+      const feed = await repository.listCommunityPosts(identity.id);
+      expect(feed.map((item) => item.id)).toEqual([post.id]);
+    });
+
+    it('refuses to create a second post for the same capture', async () => {
+      await repository.ensureUser(identity);
+      const card = await repository.createCapturedCard({
+        userId: identity.id, itemName: 'Common Myna', category: 'Fauna', cardTitle: 'Common Myna',
+        rarityTier: 'D', rarityScore: 0.1, description: '', status: 'final',
+      });
+      const first = await repository.createCommunityPost({ userId: identity.id, cardId: card.id });
+      const second = await repository.createCommunityPost({ userId: identity.id, cardId: card.id });
+      expect(second.created).toBe(false);
+      expect(second.post.id).toBe(first.post.id);
+      expect((await pool.query('SELECT COUNT(*)::int AS count FROM community_posts')).rows[0].count).toBe(1);
+    });
+
+    it('recomputes like counts so repeated likes cannot inflate the total', async () => {
+      await repository.ensureUser(identity);
+      const card = await repository.createCapturedCard({
+        userId: identity.id, itemName: 'Spotted Deer', category: 'Fauna', cardTitle: 'Spotted Deer',
+        rarityTier: 'C', rarityScore: 0.3, description: '', status: 'final',
+      });
+      const { post } = await repository.createCommunityPost({ userId: identity.id, cardId: card.id });
+
+      await repository.setCommunityPostLike(identity.id, post.id, true);
+      const twice = await repository.setCommunityPostLike(identity.id, post.id, true);
+      expect(twice.likeCount).toBe(1);
+      expect(twice.viewerLiked).toBe(true);
+
+      const removed = await repository.setCommunityPostLike(identity.id, post.id, false);
+      expect(removed.likeCount).toBe(0);
+      expect(removed.viewerLiked).toBe(false);
+    });
+
+    it('keeps the comment counter in step with stored comments', async () => {
+      await repository.ensureUser(identity);
+      const card = await repository.createCapturedCard({
+        userId: identity.id, itemName: 'Grey Mongoose', category: 'Fauna', cardTitle: 'Grey Mongoose',
+        rarityTier: 'C', rarityScore: 0.3, description: '', status: 'final',
+      });
+      const { post } = await repository.createCommunityPost({ userId: identity.id, cardId: card.id });
+      await repository.createCommunityComment(identity.id, post.id, 'Great find.');
+
+      expect(await repository.listCommunityComments(post.id)).toHaveLength(1);
+      expect((await repository.getCommunityPost(identity.id, post.id)).commentCount).toBe(1);
+    });
+
+    it('never deletes a post belonging to another user', async () => {
+      await repository.ensureUser(identity);
+      const card = await repository.createCapturedCard({
+        userId: identity.id, itemName: 'Palm Squirrel', category: 'Fauna', cardTitle: 'Palm Squirrel',
+        rarityTier: 'D', rarityScore: 0.1, description: '', status: 'final',
+      });
+      const { post } = await repository.createCommunityPost({ userId: identity.id, cardId: card.id });
+
+      await repository.ensureUser({ id: 'intruder', displayName: 'Intruder', timezone: 'UTC' });
+      expect(await repository.deleteCommunityPost('intruder', post.id)).toBe(false);
+      expect(await repository.getCommunityPost(identity.id, post.id)).not.toBeNull();
+
+      expect(await repository.deleteCommunityPost(identity.id, post.id)).toBe(true);
+    });
   });
 });
