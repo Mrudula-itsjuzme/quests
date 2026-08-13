@@ -1,19 +1,23 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useMe, useCollectibles } from '../quests/queries';
+import { useMe, useCaptures } from '../quests/queries';
 import { coinBalance } from '../../lib/playerEconomy';
 import { playTap } from '../../lib/useSoundEffects';
 import { SettingsModal } from '../../components/SettingsModal';
+import { Icon } from '../../components/Icon';
 
 export function ProfilePage() {
   const { data: me } = useMe();
-  const { data: collection } = useCollectibles();
+  const { data: captures } = useCaptures();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [notice, setNotice] = useState('');
 
-  const totalCount = collection ? collection.length : 0;
-  const sRankCount = collection ? collection.filter((c) => c.rarityTier === 'S' || c.rarity === 'S').length : 0;
+  // Discoveries are captures, not quest collectible unlocks — the Collection
+  // page counts the same source, so the two screens agree.
+  const discoveries = (captures || []).filter((card) => card.status !== 'rejected');
+  const totalCount = discoveries.length;
+  const sRankCount = discoveries.filter((card) => (card.rarityGrade || card.rarityTier) === 'S').length;
   const totalXp = me?.totalXp || 0;
   const totalCoins = coinBalance(me);
   const currentStreak = me?.streakDays || 0;
@@ -21,10 +25,11 @@ export function ProfilePage() {
   const unavailable = (message) => { playTap(); setNotice(message); };
 
   const MENU_ITEMS = [
-    { id: 'achievements', label: 'Achievements', icon: '🏆', to: '/app/rewards' },
-    { id: 'collection', label: 'Collection', icon: '📖', to: '/app/collection' },
-    { id: 'settings', label: 'Settings', icon: '⚙️', action: () => setSettingsOpen(true) },
-    { id: 'help', label: 'Help & Support', icon: '❓', action: () => unavailable('Help & support is not connected yet.') },
+    { id: 'rewards', label: 'Rewards & Store', icon: 'chest', to: '/app/rewards' },
+    { id: 'collection', label: 'Collection', icon: 'book', to: '/app/collection' },
+    { id: 'community', label: 'Community', icon: 'shield', to: '/app/community' },
+    { id: 'settings', label: 'Settings', icon: 'gear', action: () => setSettingsOpen(true) },
+    { id: 'help', label: 'Help & Support', icon: 'feather', action: () => unavailable('Help & support is not connected yet.') },
   ];
 
   return (
@@ -37,13 +42,12 @@ export function ProfilePage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.25 }}
       >
+        {/* Avatar uploads aren't supported server-side, so the ring shows the
+            player's initials rather than a stock bird standing in as them. */}
         <div className="profile-avatar-ring">
-          <img
-            className="profile-avatar-img"
-            src="/assets/african-grey-parrot.png"
-            alt="Explorer Avatar"
-          />
-          <span className="profile-avatar-edit">✏️</span>
+          <span className="profile-avatar-initials" aria-hidden="true">
+            {(me?.displayName || 'Adventurer').split(/\s+/).slice(0, 2).map((part) => part[0]?.toUpperCase() || '').join('')}
+          </span>
         </div>
         <div className="profile-identity-info">
           <h2>{me?.displayName || 'Adventurer'}</h2>
@@ -88,11 +92,11 @@ export function ProfilePage() {
         {MENU_ITEMS.map((item) => {
           const content = (
             <>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span style={{ fontSize: '1.1rem' }}>{item.icon}</span>
+              <span className="profile-menu-label">
+                <Icon name={item.icon} />
                 <span>{item.label}</span>
-              </div>
-              <span style={{ opacity: 0.5, fontSize: '0.9rem' }}>❯</span>
+              </span>
+              <span className="profile-menu-chevron" aria-hidden="true">›</span>
             </>
           );
           return item.to ? (
@@ -114,20 +118,19 @@ export function ProfilePage() {
         })}
       </div>
 
-      {/* Coins & Chests */}
+      {/* Coins & streak — both server-authoritative values. */}
       <div className="profile-store-card">
-        <h4 style={{ color: 'var(--wild-text-dim)', fontSize: '0.78rem', letterSpacing: '0.05em' }}>
-          COINS & STREAK
-        </h4>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '8px 0' }}>
-          <span style={{ fontSize: '1.2rem', fontWeight: '900', color: '#fff' }}>🪙 {totalCoins.toLocaleString()}</span>
+        <h4>Coins &amp; Streak</h4>
+        <div className="profile-coin-row">
+          <Icon name="coin" />
+          <strong>{totalCoins.toLocaleString()}</strong>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+        <div className="profile-streak-row">
           <div>
-            <small style={{ color: 'var(--wild-text-dim)', fontSize: '0.68rem', display: 'block' }}>CURRENT STREAK</small>
-            <strong style={{ fontSize: '0.88rem', color: '#fff' }}>{currentStreak} day{currentStreak === 1 ? '' : 's'}</strong>
+            <small>Current streak</small>
+            <strong>{currentStreak} day{currentStreak === 1 ? '' : 's'}</strong>
           </div>
-          <span style={{ fontSize: '1.6rem' }}>🔥</span>
+          <Icon name="flame" />
         </div>
       </div>
 

@@ -12109,6 +12109,17 @@ body, .app-shell {
     height: 0 !important;
   }
 
+  /* The shell becomes a flex row here, so the dev banner would otherwise take
+     a column of its own and push the sidebar away from the viewport edge.
+     Pin it over the layout instead of letting it consume row space. */
+  body .app-shell > .dev-auth-banner {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 200 !important;
+  }
+
   .desktop-sidebar {
     display: flex !important;
     flex-direction: column !important;
@@ -12885,3 +12896,112 @@ span.post-author-avatar {
   font-weight: 700;
 }
 .store-item > button[disabled] { cursor: not-allowed; opacity: 0.65; }
+
+/* Feed placeholder crest — self-contained, unlike .discovery-hex-badge which
+   is absolutely positioned against the discovery modal. */
+.post-photo-placeholder {
+  flex-direction: column;
+  gap: 8px;
+  align-content: center;
+}
+.post-rarity-crest {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 53px;
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.04));
+  color: currentColor;
+  font-weight: 900;
+  font-size: 1.15rem;
+}
+.post-rarity-stars {
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  color: currentColor;
+}
+.post-rarity-stars > i { font-style: normal; opacity: 0.25; }
+
+/* Shorter than a real photo would need, so an image-less card doesn't leave a
+   large empty well in the feed. */
+.post-photo-wrap:has(.post-photo-placeholder) { height: 132px; }
+
+/* --- Profile --- */
+
+.profile-avatar-initials {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 35%, rgba(34, 197, 94, 0.22), rgba(6, 9, 7, 0.95));
+  color: var(--wild-emerald);
+  font-weight: 900;
+  font-size: 1.5rem;
+  letter-spacing: 0.03em;
+}
+
+.profile-menu-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.profile-menu-label > svg {
+  width: 20px;
+  height: 20px;
+  fill: var(--wild-emerald);
+  opacity: 0.9;
+}
+.profile-menu-chevron {
+  opacity: 0.5;
+  font-size: 1.1rem;
+}
+
+.profile-store-card h4 {
+  margin: 0;
+  color: var(--wild-text-dim);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.profile-coin-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
+}
+.profile-coin-row > svg {
+  width: 22px;
+  height: 22px;
+  fill: var(--wild-gold-bright);
+}
+.profile-coin-row > strong {
+  font-size: 1.2rem;
+  font-weight: 900;
+  color: #fff;
+}
+.profile-streak-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.profile-streak-row small {
+  display: block;
+  color: var(--wild-text-dim);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.profile-streak-row strong {
+  font-size: 0.88rem;
+  color: #fff;
+}
+.profile-streak-row > svg {
+  width: 24px;
+  height: 24px;
+  fill: #f97316;
+}

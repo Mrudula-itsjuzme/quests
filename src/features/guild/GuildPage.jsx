@@ -168,9 +168,14 @@ function CommunityFeed({ onShare }) {
                 // Capture images are not served publicly yet, so the card shows
                 // its rarity crest rather than a stand-in wildlife photo.
                 <div className="post-photo-placeholder">
-                  <span className={`discovery-hex-badge rank-hex-${(post.discovery.rarityGrade || 'd').toLowerCase()}`}>
-                    <span>{post.discovery.rarityGrade || post.discovery.rarityTier || '—'}</span>
+                  <span className={`post-rarity-crest rank-hex-${(post.discovery.rarityGrade || 'd').toLowerCase()}`}>
+                    {post.discovery.rarityGrade || post.discovery.rarityTier || '—'}
                   </span>
+                  {post.discovery.rarityStars != null && (
+                    <span className="post-rarity-stars" aria-label={`${post.discovery.rarityStars} of 5 rarity stars`}>
+                      {'★'.repeat(post.discovery.rarityStars)}<i>{'★'.repeat(Math.max(0, 5 - post.discovery.rarityStars))}</i>
+                    </span>
+                  )}
                 </div>
               )}
             </div>

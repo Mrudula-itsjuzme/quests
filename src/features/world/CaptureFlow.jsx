@@ -176,14 +176,29 @@ export function CaptureFlow({ onClose }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <div className="capture-scan-frame">
+            <div className="capture-scan-frame cinematic-scanner">
+              <div className="scanner-bracket top-left"></div>
+              <div className="scanner-bracket top-right"></div>
+              <div className="scanner-bracket bottom-left"></div>
+              <div className="scanner-bracket bottom-right"></div>
+              
               <motion.div
                 className="capture-scan-line"
                 animate={{ y: ['0%', '100%', '0%'] }}
-                transition={{ duration: 0.9, repeat: Infinity, ease: 'easeInOut' }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
               />
+              
+              <motion.div className="scanner-reticle"
+                animate={{ scale: [1, 1.1, 1], rotate: [0, 90] }}
+                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+              />
+              
+              <div className="scanner-hud">
+                <span className="hud-data">AI ANALYSIS: ACTIVE</span>
+                <span className="hud-data right">LOCKED</span>
+              </div>
             </div>
-            <p>Identifying and scoring rarity…</p>
+            <p className="scanner-text-pulse">Identifying and scoring rarity…</p>
           </motion.div>
         )}
 

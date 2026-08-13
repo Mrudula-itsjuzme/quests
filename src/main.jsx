@@ -14,6 +14,7 @@ import '@fontsource/manrope/500.css';
 import '@fontsource/manrope/600.css';
 import '@fontsource/manrope/700.css';
 import './index.css';
+import './wild-realm.css';
 
 const Router = Capacitor.isNativePlatform() ? HashRouter : BrowserRouter;
 
