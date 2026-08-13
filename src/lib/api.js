@@ -28,12 +28,21 @@ async function request(path, { method = 'GET', body, token, idempotencyKey, sign
       headers,
       body: body !== undefined ? JSON.stringify(body) : undefined,
       signal,
+      // Endpoints served via sendCachedJson set `Cache-Control: private,
+      // no-cache` and an ETag. Without an explicit cache mode the browser can
+      // hand back a bare 304 with no body, which is not `ok` and has no JSON
+      // to parse. Letting fetch manage revalidation means it resolves the 304
+      // against its own cache and always yields a complete response.
+      cache: 'no-store',
     });
   } catch {
     throw new ApiError(0, 'network_unavailable');
   }
 
   if (response.status === 204) return null;
+  // `cache: 'no-store'` above means a bare 304 should never reach here. If one
+  // does, surface it rather than returning null and blanking real data.
+  if (response.status === 304) throw new ApiError(304, 'stale_revalidation_failed');
 
   let payload = null;
   try {

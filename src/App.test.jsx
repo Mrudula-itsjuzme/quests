@@ -173,6 +173,25 @@ describe('App (development auth mode)', () => {
     expect(screen.queryByText(/Malabar Trogon/i)).not.toBeInTheDocument();
   }, 15_000);
 
+  it('leaves the rewards skeleton once every query resolves', async () => {
+    renderApp('/app/rewards');
+    // The page must reach its real content, not sit in the loading skeleton.
+    expect(await screen.findByText(/Reward Track/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Opening the reward vault/i)).not.toBeInTheDocument();
+  });
+
+  it('shows the server coin balance in the store panel', async () => {
+    global.fetch = vi.fn((url) => {
+      if (url.includes('/v1/me')) return jsonResponse({ ...mockMe, coins: 1234 });
+      return jsonResponse([]);
+    });
+    renderApp('/app/rewards');
+    expect(await screen.findByText(/coins earned from captures/i)).toBeInTheDocument();
+    expect(screen.getByText('1,234')).toBeInTheDocument();
+    // Redemption has no endpoint, so it must be visibly disabled, not fake.
+    screen.getAllByRole('button', { name: /coming soon/i }).forEach((b) => expect(b).toBeDisabled());
+  });
+
   it('renders profile progression from real account data', async () => {
     renderApp('/app/profile');
     expect(await screen.findByRole('heading', { name: /Local Adventurer/i })).toBeInTheDocument();
