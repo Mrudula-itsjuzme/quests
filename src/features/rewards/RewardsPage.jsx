@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Icon, categoryIcon } from '../../components/Icon';
 import { useClaimRewards, useCollectibles, useLeaderboard, useMe, useRewards } from '../quests/queries';
 import { playHover, playSuccess, playTap } from '../../lib/useSoundEffects';
+import { coinBalance } from '../../lib/playerEconomy';
 import { AnimatedCounter } from '../../components/motion/AnimatedCounter';
 import { RewardsSkeleton } from '../../components/motion/SkeletonLoader';
 import { HoldButton } from '../../components/motion/HoldButton';
@@ -14,6 +15,13 @@ const badgeDefinitions = [
   { icon: 'sun', label: 'First Light', threshold: 1 },
   { icon: 'shield', label: 'Quest Guard', threshold: 3 },
   { icon: 'compass', label: 'Pathfinder', threshold: 5 },
+];
+
+// Store catalogue is presentational only until a redemption endpoint exists —
+// see the disabled state and note in the Store panel.
+const STORE_ITEMS = [
+  { key: 'explorer-chest', label: 'Explorer Chest', cost: 500 },
+  { key: 'elite-chest', label: 'Elite Chest', cost: 2000 },
 ];
 
 export function RewardsPage() {
@@ -81,8 +89,12 @@ function RewardsContent({
   showLeaderboard,
   setShowLeaderboard,
 }) {
-  const seasonTarget = 10000;
-  const seasonProgress = Math.min(1, me.totalXp / seasonTarget);
+  // The reward track is level-gated by quest_level_rewards, so "progress to the
+  // next reward" is progress through the current level — not a hardcoded XP goal.
+  const coins = coinBalance(me);
+  const claimable = rewards.filter((reward) => reward.status === 'claimable');
+  const nextRewardLevel = rewards.find((reward) => reward.level > me.level)?.level ?? null;
+  const seasonProgress = Math.min(1, Math.max(0, me.progressToNextLevel || 0));
   const currentRank = leaderboard.find((entry) => entry.isCurrentUser) || { position: '—', rankTitle: 'Adventurer', totalXp: me.totalXp };
   const unavailable = (message) => { playTap(); setNotice(message); };
 
@@ -103,12 +115,20 @@ function RewardsContent({
         <img src="/rewards-season-chest.png" alt="" />
         <div className="rewards-hero-copy">
           <p className="eyebrow">◆ &nbsp; Season Chest &nbsp; ◆</p>
-          <h1>Complete quests to fill the chest.</h1>
+          <h1>
+            {claimable.length
+              ? `${claimable.length} reward${claimable.length === 1 ? '' : 's'} ready to claim.`
+              : 'Complete quests to fill the chest.'}
+          </h1>
         </div>
         <div className="season-progress">
-          <strong><AnimatedCounter value={me.totalXp} /> / {seasonTarget.toLocaleString()}</strong>
+          <strong><AnimatedCounter value={me.xpIntoLevel} /> / {me.xpForCurrentLevel.toLocaleString()} XP</strong>
           <div className="gold-progress"><motion.i initial={{ width: 0 }} animate={{ width: `${seasonProgress * 100}%` }} transition={{ type: 'spring', stiffness: 300, damping: 30 }} /></div>
-          <span>{Math.round(seasonProgress * 100)}% to next reward</span>
+          <span>
+            {nextRewardLevel
+              ? `${Math.round(seasonProgress * 100)}% toward level ${me.level + 1} · next reward at level ${nextRewardLevel}`
+              : `${Math.round(seasonProgress * 100)}% toward level ${me.level + 1}`}
+          </span>
         </div>
         <div className="character-dialogue"><Icon name="leaf" /><span>Every quest brings you closer to glory.</span></div>
       </motion.section>
@@ -131,6 +151,31 @@ function RewardsContent({
             {collection.length === 0 && <p className="reward-empty">Complete verified quests to discover rare loot.</p>}
           </div>
           <button type="button" onClick={() => unavailable('Inventory management is not connected yet.')}>View inventory <span>›</span></button>
+        </RewardPanel>
+
+        <RewardPanel title="Store" className="store-panel">
+          <div className="store-balance">
+            <Icon name="coin" />
+            <strong><AnimatedCounter value={coins} /></strong>
+            <span>coins earned from captures</span>
+          </div>
+          <div className="store-item-row">
+            {STORE_ITEMS.map((item) => (
+              <article key={item.key} className="store-item">
+                <Icon name="chest" />
+                <strong>{item.label}</strong>
+                <span>{item.cost.toLocaleString()} coins</span>
+                {/* Redemption has no server endpoint yet, so the control is
+                    genuinely disabled rather than faking a transaction. */}
+                <button type="button" disabled aria-describedby="store-availability">
+                  Coming soon
+                </button>
+              </article>
+            ))}
+          </div>
+          <p id="store-availability" className="reward-empty">
+            Chest redemption is not available yet. Coins keep accruing from verified captures.
+          </p>
         </RewardPanel>
 
         <RewardPanel title="Chest Collection" className="chest-panel">

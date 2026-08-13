@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { Icon } from '../../components/Icon';
 
 function useCountUp(targetValue, duration = 1200) {
   const [count, setCount] = useState(0);
@@ -22,17 +23,28 @@ function useCountUp(targetValue, duration = 1200) {
   return count;
 }
 
-export function DiscoveryCard({ card, imageUrl, onAddToLibrary, onShare, onClose, layoutIdPrefix = '' }) {
+const GRADE_LABELS = { S: 'LEGENDARY', A: 'EPIC', B: 'RARE', C: 'UNCOMMON', D: 'COMMON' };
+
+export function DiscoveryCard({ card, species, imageUrl, isNew = false, onAddToLibrary, onShare, onClose, layoutIdPrefix = '' }) {
   const cardData = card || {};
+  // The species catalog carries the scientific name and element; the capture
+  // row only stores the species id, so resolve rather than guess.
+  const speciesEntry = species?.find((entry) => entry.id === cardData.speciesId) || null;
   const itemName = cardData.itemName || cardData.cardTitle || cardData.title || 'Discovered Creature';
-  const scientificName = cardData.scientificName || cardData.category || 'Fauna Wild';
-  const cardImg = imageUrl || cardData.imageUrl || '/assets/african-grey-parrot.png';
+  const scientificName = cardData.scientificName || speciesEntry?.scientificName || null;
+  const cardImg = imageUrl || cardData.imageUrl || cardData.imageRef || null;
   const rawXp = cardData.xpAwarded ?? cardData.xpEarned ?? cardData.xp ?? 0;
   const animatedXp = useCountUp(rawXp, 1000);
+  const coins = cardData.coinsAwarded ?? 0;
   const confidence = cardData.confidence != null ? Math.round(cardData.confidence * 100) : null;
-  const locationText = cardData.location || (cardData.gps ? `${cardData.gps.lat?.toFixed(2)}°, ${cardData.gps.lng?.toFixed(2)}°` : 'Wild Sanctuary');
-  const rarityTier = (cardData.rarityTier || cardData.rarity || 'A').toUpperCase();
-  const elementCategory = cardData.element || cardData.category || 'Familiars';
+  const locationText = cardData.location
+    || (cardData.gps ? `${cardData.gps.lat?.toFixed(2)}°, ${cardData.gps.lng?.toFixed(2)}°` : null);
+  // rarityGrade is the S–D grade from the rarity engine; rarityTier is the
+  // legacy Bronze/Silver label kept for older collectibles.
+  const rarityTier = (cardData.rarityGrade || cardData.rarityTier || cardData.rarity || 'D').toUpperCase();
+  const gradeLabel = GRADE_LABELS[rarityTier] || rarityTier;
+  const stars = cardData.rarityStars ?? null;
+  const elementCategory = cardData.element || speciesEntry?.element || cardData.category || null;
   const capturedAtDate = cardData.capturedAt ? new Date(cardData.capturedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
   const cardId = cardData.assetId || cardData.id || 'new';
@@ -92,25 +104,35 @@ export function DiscoveryCard({ card, imageUrl, onAddToLibrary, onShare, onClose
           type="button"
           className="discovery-close-btn"
           onClick={onClose || onAddToLibrary}
-          aria-label="Close modal"
+          aria-label="Close discovery card"
         >
-          ✕
+          <Icon name="plus" />
         </button>
-        <span className="discovery-header-badge">✨ NEW DISCOVERY!</span>
+        {/* Only a just-minted card is a new discovery; the same component also
+            renders existing cards opened from the collection. */}
+        <span className="discovery-header-badge">{isNew ? 'New discovery' : gradeLabel}</span>
         <button
           type="button"
           className="discovery-share-top-btn"
           onClick={onShare}
           aria-label="Share discovery"
         >
-          📤
+          <Icon name="feather" />
         </button>
       </div>
 
       {/* Hero Image Frame with Holographic Overlay */}
       <motion.div layoutId={layoutIdPrefix ? `${layoutIdPrefix}img-${cardId}` : undefined} className="discovery-hero-frame">
-        <img className="discovery-hero-img" src={cardImg} alt={itemName} />
-        
+        {cardImg ? (
+          <img className="discovery-hero-img" src={cardImg} alt={itemName} />
+        ) : (
+          // Capture photos are not served back from the API yet, so the hero
+          // shows the rarity crest instead of an unrelated stock animal.
+          <div className={`discovery-hero-fallback rank-hex-${rarityTier.toLowerCase()}`} role="img" aria-label={`${itemName}, ${gradeLabel} rank`}>
+            <span>{rarityTier}</span>
+          </div>
+        )}
+
         {/* Dynamic Holographic Glare Layer */}
         {(rarityTier === 'S' || rarityTier === 'A') && (
           <motion.div
@@ -126,10 +148,14 @@ export function DiscoveryCard({ card, imageUrl, onAddToLibrary, onShare, onClose
       <div className="discovery-title-row">
         <div className="discovery-title-info">
           <h2>{itemName}</h2>
-          <em>{scientificName}</em>
+          {scientificName && <em>{scientificName}</em>}
           <div className="discovery-element-tags">
-            <span className="discovery-tag">🐾 {elementCategory}</span>
-            <span className="discovery-tag">🌿 Wild</span>
+            {elementCategory && <span className="discovery-tag">{elementCategory}</span>}
+            {stars != null && (
+              <span className="discovery-tag discovery-stars" aria-label={`${stars} of 5 rarity stars`}>
+                {'★'.repeat(stars)}<i>{'★'.repeat(Math.max(0, 5 - stars))}</i>
+              </span>
+            )}
           </div>
         </div>
 
@@ -143,7 +169,7 @@ export function DiscoveryCard({ card, imageUrl, onAddToLibrary, onShare, onClose
           <div className={`discovery-hex-badge rank-hex-${rarityTier.toLowerCase()}`}>
             <span>{rarityTier}</span>
           </div>
-          <small>{rarityTier === 'S' ? 'LEGENDARY' : rarityTier === 'A' ? 'EPIC' : rarityTier === 'B' ? 'RARE' : 'COMMON'}</small>
+          <small>{gradeLabel}</small>
         </motion.div>
       </div>
 
@@ -157,45 +183,47 @@ export function DiscoveryCard({ card, imageUrl, onAddToLibrary, onShare, onClose
         <div className={`discovery-stat-box ${rarityTier === 'S' ? 'gold' : ''}`}>
           <small>RARITY</small>
           <strong>{rarityTier} Rank</strong>
-          <span className="stat-sub font-gold">
-            ({rarityTier === 'S' ? 'LEGENDARY' : rarityTier === 'A' ? 'EPIC' : 'RARE'})
-          </span>
+          <span className="stat-sub font-gold">({gradeLabel})</span>
         </div>
         <div className="discovery-stat-box gold">
           <small>XP EARNED</small>
           <strong>+{animatedXp} XP</strong>
+          {coins > 0 && <span className="stat-sub font-gold">+{coins} coins</span>}
         </div>
         <div className="discovery-stat-box">
           <small>AI CONFIDENCE</small>
           <strong>{confidence != null ? `${confidence}%` : '—'}</strong>
         </div>
-        <div className={`discovery-stat-box ${cardData.status !== 'provisional' ? 'verified' : ''}`}>
+        {/* 'rejected' must never read as verified — each status gets its own chip. */}
+        <div className={`discovery-stat-box ${cardData.status === 'final' ? 'verified' : ''}`}>
           <small>STATUS</small>
-          <strong className={cardData.status === 'provisional' ? 'chip-pending' : 'chip-verified'}>
-            {cardData.status === 'provisional' ? '⏳ Under review' : '✔ Verified'}
+          <strong className={`chip-${cardData.status === 'final' ? 'verified' : cardData.status === 'rejected' ? 'rejected' : 'pending'}`}>
+            {cardData.status === 'final' ? 'Verified' : cardData.status === 'rejected' ? 'Not verified' : 'Under review'}
           </strong>
         </div>
       </motion.div>
 
-      {/* Description Text */}
-      <motion.p 
-        className="discovery-description"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3 }}
-      >
-        {cardData.description || `Discovered specimen of ${itemName} (${scientificName}). Verified by the Wild Realm engine.`}
-      </motion.p>
+      {/* Description Text — species encyclopedia entry, never invented copy. */}
+      {(cardData.description || speciesEntry?.encyclopedia) && (
+        <motion.p
+          className="discovery-description"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+        >
+          {cardData.description || speciesEntry.encyclopedia}
+        </motion.p>
+      )}
 
       {/* Metadata Strip */}
       <div className="discovery-env-strip-row">
         <div className="env-box">
           <small>LOCATION</small>
-          <span>📍 {locationText}</span>
+          <span>{locationText || 'Not recorded'}</span>
         </div>
         <div className="env-box">
-          <small>DATE & TIME</small>
-          <span>📅 {capturedAtDate}</span>
+          <small>DATE &amp; TIME</small>
+          <span>{capturedAtDate}</span>
         </div>
       </div>
 
@@ -207,7 +235,7 @@ export function DiscoveryCard({ card, imageUrl, onAddToLibrary, onShare, onClose
           onClick={onAddToLibrary}
           whileTap={{ scale: 0.95 }}
         >
-          📖 ADD TO LIBRARY
+          <Icon name="book" /> {isNew ? 'Add to library' : 'Close'}
         </motion.button>
         <motion.button
           type="button"
@@ -215,7 +243,7 @@ export function DiscoveryCard({ card, imageUrl, onAddToLibrary, onShare, onClose
           onClick={onShare}
           whileTap={{ scale: 0.95 }}
         >
-          🔗 SHARE
+          <Icon name="feather" /> Share
         </motion.button>
       </div>
     </motion.div>

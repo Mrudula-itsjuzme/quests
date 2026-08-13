@@ -12679,3 +12679,209 @@ span.post-author-avatar {
 @media (prefers-reduced-motion: reduce) {
   .community-post-skeleton { animation: none; }
 }
+
+/* --- Collection: element tiles, crests, real rarity stars --- */
+
+.library-element-tile {
+  position: relative;
+  min-height: 140px;
+  display: flex;
+  align-items: flex-end;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(6, 9, 7, 0.92));
+}
+.library-element-tile:focus-visible {
+  outline: 2px solid var(--wild-gold-bright);
+  outline-offset: 2px;
+}
+.library-element-tile-body {
+  width: 100%;
+  padding: 12px;
+}
+.library-element-tile-body h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: 0.04em;
+}
+.library-element-tile-body > span {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--wild-text-dim);
+}
+.library-element-progress {
+  margin-top: 8px;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+.library-element-progress > i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+/* One colour per element, reused by both the tiles and the card crests. */
+.element-fire { color: #f87171; }
+.element-water { color: #60a5fa; }
+.element-grass { color: #4ade80; }
+.element-earth { color: #c084fc; }
+.element-sky { color: #38bdf8; }
+
+.library-element-tile.element-fire { background: linear-gradient(180deg, rgba(239, 68, 68, 0.22), rgba(6, 9, 7, 0.94)); }
+.library-element-tile.element-water { background: linear-gradient(180deg, rgba(59, 130, 246, 0.22), rgba(6, 9, 7, 0.94)); }
+.library-element-tile.element-grass { background: linear-gradient(180deg, rgba(34, 197, 94, 0.22), rgba(6, 9, 7, 0.94)); }
+.library-element-tile.element-earth { background: linear-gradient(180deg, rgba(168, 85, 247, 0.22), rgba(6, 9, 7, 0.94)); }
+.library-element-tile.element-sky { background: linear-gradient(180deg, rgba(14, 165, 233, 0.22), rgba(6, 9, 7, 0.94)); }
+
+.library-card-crest {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  min-height: 110px;
+  background:
+    radial-gradient(circle at 50% 38%, rgba(255, 255, 255, 0.07), transparent 68%),
+    linear-gradient(180deg, #0b1410, #060907);
+}
+.library-card-crest > span {
+  font: 800 0.7rem/1 var(--font-ui, sans-serif);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: currentColor;
+  opacity: 0.85;
+}
+
+/* Unearned stars stay in place as dimmed outlines so the rating reads as
+   "3 of 5", not "3". */
+.library-card-stars > i,
+.discovery-stars > i {
+  font-style: normal;
+  opacity: 0.22;
+}
+.library-card-stars.stars-s, .discovery-stars { color: var(--wild-gold-bright); }
+.library-card-stars.stars-a { color: #c084fc; }
+.library-card-stars.stars-b { color: #60a5fa; }
+.library-card-stars.stars-c, .library-card-stars.stars-d { color: var(--wild-text-dim); }
+
+.library-sort-controls select {
+  min-height: 36px;
+  padding: 4px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.4);
+  color: var(--quest-cream, #e8e4da);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+/* --- Discovery card --- */
+
+.discovery-hero-fallback {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  min-height: 180px;
+  background:
+    radial-gradient(circle at 50% 40%, rgba(255, 255, 255, 0.08), transparent 70%),
+    linear-gradient(180deg, #0b1410, #060907);
+}
+.discovery-hero-fallback > span {
+  font-size: 3rem;
+  font-weight: 900;
+  color: currentColor;
+}
+
+.discovery-modal-header button > svg,
+.discovery-action-btns button > svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+/* The close control reuses the plus glyph rotated into an ×. */
+.discovery-close-btn > svg { transform: rotate(45deg); }
+
+.discovery-action-btns button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.chip-rejected { color: #fca5a5; }
+
+/* --- Rewards: store panel --- */
+
+.store-balance {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.store-balance > svg {
+  width: 22px;
+  height: 22px;
+  fill: var(--wild-gold-bright);
+}
+.store-balance > strong {
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: var(--wild-gold-bright);
+}
+.store-balance > span {
+  font-size: 0.75rem;
+  color: var(--wild-text-dim);
+}
+
+.store-item-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin: 12px 0;
+}
+.store-item {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+.store-item > svg {
+  width: 26px;
+  height: 26px;
+  fill: var(--wild-gold-bright);
+  opacity: 0.85;
+}
+.store-item > strong {
+  font-size: 0.86rem;
+  color: #fff;
+}
+.store-item > span {
+  font-size: 0.74rem;
+  color: var(--wild-text-dim);
+}
+.store-item > button {
+  margin-top: 6px;
+  padding: 6px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--wild-text-dim);
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+.store-item > button[disabled] { cursor: not-allowed; opacity: 0.65; }

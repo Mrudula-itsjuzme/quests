@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Icon } from '../../components/Icon';
-import { useCaptureItem, useRenameCapture } from '../quests/queries';
+import { useCaptureItem, useRenameCapture, useShareDiscovery, useSpecies } from '../quests/queries';
 import { playTap } from '../../lib/useSoundEffects';
 import { collectCaptureTelemetry } from '../../lib/captureTelemetry';
 import { DiscoveryCard } from './DiscoveryCard';
@@ -46,6 +46,8 @@ export function CaptureFlow({ onClose }) {
   const [candidates, setCandidates] = useState([]);
   const captureItem = useCaptureItem();
   const renameCapture = useRenameCapture();
+  const shareDiscovery = useShareDiscovery();
+  const { data: species } = useSpecies();
 
   const submitCapture = async (bundle) => {
     triggerHaptic([20, 40, 20]);
@@ -101,6 +103,25 @@ export function CaptureFlow({ onClose }) {
       }
     }
     onClose();
+  };
+
+  // Sharing publishes a real community post for this capture. The card is
+  // already saved either way, so a failed share reports itself instead of
+  // silently closing as if it had succeeded.
+  const handleShare = async () => {
+    playTap();
+    if (!card || shareDiscovery.isPending) return;
+    try {
+      await shareDiscovery.mutateAsync({ cardId: card.id });
+      window.dispatchEvent(new CustomEvent('habbit-notice', { detail: 'Shared to the community feed.' }));
+      onClose();
+    } catch (error) {
+      window.dispatchEvent(new CustomEvent('habbit-notice', {
+        detail: error?.code === 'guest_write_unavailable'
+          ? 'Guest mode is read-only. Sign in to share discoveries.'
+          : 'Your discovery was saved, but sharing failed. Try again from Community.',
+      }));
+    }
   };
 
   return createPortal(
@@ -218,8 +239,10 @@ export function CaptureFlow({ onClose }) {
           >
             <DiscoveryCard
               card={card}
+              species={species}
+              isNew
               onAddToLibrary={handleConfirm}
-              onShare={handleConfirm}
+              onShare={handleShare}
             />
           </motion.div>
         )}

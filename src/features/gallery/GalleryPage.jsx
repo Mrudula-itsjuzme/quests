@@ -4,22 +4,20 @@ import { useCaptures, useSpecies } from '../quests/queries';
 import { playTap } from '../../lib/useSoundEffects';
 import { DiscoveryCard } from '../world/DiscoveryCard';
 
-const CATEGORY_BGS = {
-  Fire: { imageUrl: '/assets/fire-volcano.png', bgGradient: 'linear-gradient(180deg, rgba(239, 68, 68, 0.2), rgba(6, 9, 7, 0.9))' },
-  Water: { imageUrl: '/assets/water-fall.png', bgGradient: 'linear-gradient(180deg, rgba(59, 130, 246, 0.2), rgba(6, 9, 7, 0.9))' },
-  Grass: { imageUrl: '/assets/verdant-explorer-banner.png', bgGradient: 'linear-gradient(180deg, rgba(34, 197, 94, 0.2), rgba(6, 9, 7, 0.9))' },
-  Earth: { imageUrl: '/assets/earth-mountain.png', bgGradient: 'linear-gradient(180deg, rgba(168, 85, 247, 0.2), rgba(6, 9, 7, 0.9))' },
-  Sky: { imageUrl: '/assets/sky-aurora.png', bgGradient: 'linear-gradient(180deg, rgba(14, 165, 233, 0.2), rgba(6, 9, 7, 0.9))' },
-};
-
+// Element identity is expressed with the design system's colour tokens rather
+// than image files; the four element photos these tiles used to reference were
+// never present in /public and 404'd.
 const ELEMENT_TABS = [
   { id: 'all', label: 'All' },
-  { id: 'Fire', label: '🔥 Fire' },
-  { id: 'Water', label: '💧 Water' },
-  { id: 'Grass', label: '🌿 Grass' },
-  { id: 'Earth', label: '🐾 Earth' },
-  { id: 'Sky', label: '🕊 Sky' },
+  { id: 'Fire', label: 'Fire' },
+  { id: 'Water', label: 'Water' },
+  { id: 'Grass', label: 'Grass' },
+  { id: 'Earth', label: 'Earth' },
+  { id: 'Sky', label: 'Sky' },
 ];
+
+// Highest grade first, matching the rarity engine's S–D scale.
+const RARITY_ORDER = ['S', 'A', 'B', 'C', 'D'];
 
 const cardVariants = {
   hidden: { opacity: 0, y: 12 },
@@ -34,6 +32,7 @@ export function GalleryPage() {
   const { data: captures, isLoading: capturesLoading } = useCaptures();
   const { data: species, isLoading: speciesLoading } = useSpecies();
   const [activeTab, setActiveTab] = useState('all');
+  const [sortBy, setSortBy] = useState('rarity');
   const [selectedCard, setSelectedCard] = useState(null);
   const isLoading = capturesLoading || speciesLoading;
 
@@ -49,18 +48,29 @@ export function GalleryPage() {
   const collection = useMemo(() => (captures || []).filter((c) => c.status !== 'rejected'), [captures]);
 
   const displayList = useMemo(() => {
-    if (activeTab === 'all') return collection;
     const speciesById = new Map((species || []).map((s) => [s.id, s]));
-    return collection.filter((c) => (speciesById.get(c.speciesId)?.element || 'Earth') === activeTab);
-  }, [collection, species, activeTab]);
+    const filtered = activeTab === 'all'
+      ? collection
+      : collection.filter((c) => (speciesById.get(c.speciesId)?.element || 'Earth') === activeTab);
 
+    const byRarity = (card) => RARITY_ORDER.indexOf((card.rarityGrade || card.rarityTier || 'D').toUpperCase());
+    return [...filtered].sort((left, right) => {
+      if (sortBy === 'name') return (left.itemName || '').localeCompare(right.itemName || '');
+      if (sortBy === 'recent') return new Date(right.capturedAt) - new Date(left.capturedAt);
+      return byRarity(left) - byRarity(right) || new Date(right.capturedAt) - new Date(left.capturedAt);
+    });
+  }, [collection, species, activeTab, sortBy]);
+
+  // Elements are derived from the catalog the server actually serves, so a new
+  // element never needs a matching constant here to appear.
   const categoryTiles = useMemo(() => {
-    return Object.entries(CATEGORY_BGS).map(([element, bg]) => {
+    const elements = [...new Set((species || []).map((s) => s.element).filter(Boolean))].sort();
+    return elements.map((element) => {
       const speciesInElement = (species || []).filter((s) => s.element === element);
       const discoveredCount = speciesInElement.filter((s) => discoveredSpeciesIds.has(s.id)).length;
       const total = speciesInElement.length;
       const percent = total > 0 ? Math.round((discoveredCount / total) * 100) : 0;
-      return { id: element, label: element.toUpperCase(), count: discoveredCount, total, percent, ...bg };
+      return { id: element, label: element.toUpperCase(), count: discoveredCount, total, percent };
     }).filter((tile) => tile.total > 0);
   }, [species, discoveredSpeciesIds]);
 
@@ -193,38 +203,25 @@ export function GalleryPage() {
               <motion.div
                 key={cat.id}
                 layout
-                className="library-photo-card"
+                className={`library-element-tile element-${cat.id.toLowerCase()}`}
                 custom={i}
                 initial="hidden"
                 animate="visible"
                 exit="hidden"
                 variants={cardVariants}
                 whileTap={{ scale: 0.97 }}
-                onClick={() => {
-                  playTap();
-                  setActiveTab(cat.id);
+                role="button"
+                tabIndex={0}
+                onClick={() => { playTap(); setActiveTab(cat.id); }}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); playTap(); setActiveTab(cat.id); }
                 }}
-                style={{ height: '140px' }}
               >
-                <div className="library-card-img-wrap" style={{ height: '100%' }}>
-                  <img className="library-card-img" src={cat.imageUrl} alt={cat.label} />
-                  <div
-                    style={{
-                      position: 'absolute',
-                      inset: 0,
-                      background: cat.bgGradient,
-                      padding: '10px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'flex-end',
-                    }}
-                  >
-                    <h3 style={{ color: '#fff', fontSize: '1rem', fontWeight: '900', margin: 0 }}>
-                      {cat.label}
-                    </h3>
-                    <span style={{ color: 'var(--wild-text-dim)', fontSize: '0.75rem', fontWeight: '700' }}>
-                      {cat.count}/{cat.total} Discovered · {cat.percent}%
-                    </span>
+                <div className="library-element-tile-body">
+                  <h3>{cat.label}</h3>
+                  <span>{cat.count}/{cat.total} discovered · {cat.percent}%</span>
+                  <div className="library-element-progress" role="progressbar" aria-valuenow={cat.percent} aria-valuemin={0} aria-valuemax={100} aria-label={`${cat.label} completion`}>
+                    <i style={{ width: `${cat.percent}%` }} />
                   </div>
                 </div>
               </motion.div>
@@ -239,8 +236,16 @@ export function GalleryPage() {
               {activeTab.toUpperCase()} ({displayList.length})
             </span>
             <div className="library-sort-controls">
-              <span>Rarity ▾</span>
-              <span>::</span>
+              <label className="sr-only" htmlFor="library-sort">Sort collection</label>
+              <select
+                id="library-sort"
+                value={sortBy}
+                onChange={(event) => { playTap(); setSortBy(event.target.value); }}
+              >
+                <option value="rarity">Rarity</option>
+                <option value="recent">Most recent</option>
+                <option value="name">Name</option>
+              </select>
             </div>
           </div>
 
@@ -248,10 +253,10 @@ export function GalleryPage() {
           <motion.div layout className="library-card-grid">
             <AnimatePresence>
               {displayList.map((card, i) => {
-                const rarity = card.rarityTier || 'A';
+                const rarity = (card.rarityGrade || card.rarityTier || 'D').toUpperCase();
                 const cardId = card.id;
                 const speciesEntry = (species || []).find((s) => s.id === card.speciesId);
-                const placeholderImg = CATEGORY_BGS[speciesEntry?.element || 'Earth'].imageUrl;
+                const stars = card.rarityStars ?? 0;
                 return (
                   <motion.div
                     key={cardId}
@@ -269,7 +274,12 @@ export function GalleryPage() {
                     }}
                   >
                     <motion.div layoutId={`discovery-img-${cardId}`} className="library-card-img-wrap">
-                      <img className="library-card-img" src={placeholderImg} alt={card.itemName} loading="lazy" decoding="async" />
+                      {/* Capture photos aren't served back from the API, so the
+                          tile carries its element crest rather than a stand-in
+                          photo of a different animal. */}
+                      <div className={`library-card-crest element-${(speciesEntry?.element || 'Earth').toLowerCase()}`} aria-hidden="true">
+                        <span>{speciesEntry?.element || 'Wild'}</span>
+                      </div>
                       <div className={`library-card-badge rank-badge-${rarity.toLowerCase()}`}>
                         {rarity}
                       </div>
@@ -277,8 +287,9 @@ export function GalleryPage() {
                     <motion.div layoutId={`discovery-info-${cardId}`} className="library-card-info">
                       <h3 className="library-card-title">{card.itemName}</h3>
                       <p className="library-card-sub">{rarity} Rank</p>
-                      <span className="library-card-stars" style={{ color: rarity === 'S' ? '#fbbf24' : rarity === 'A' ? '#c084fc' : '#60a5fa' }}>
-                        ★★★★★
+                      {/* Stars come from the rarity engine, not a fixed run of five. */}
+                      <span className={`library-card-stars stars-${rarity.toLowerCase()}`} aria-label={`${stars} of 5 rarity stars`}>
+                        {'★'.repeat(stars)}<i>{'★'.repeat(Math.max(0, 5 - stars))}</i>
                       </span>
                     </motion.div>
                   </motion.div>
@@ -303,6 +314,7 @@ export function GalleryPage() {
           >
             <DiscoveryCard
               card={selectedCard}
+              species={species}
               layoutIdPrefix="discovery-"
               onAddToLibrary={() => setSelectedCard(null)}
               onShare={() => setSelectedCard(null)}
