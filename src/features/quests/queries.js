@@ -59,6 +59,63 @@ export function useRenameCapture() {
   });
 }
 
+export function useCommunityPosts(scope = 'public') {
+  const api = useApiClient();
+  return useQuery({
+    queryKey: ['community', 'posts', scope],
+    queryFn: ({ signal }) => api.getCommunityPosts(scope, signal),
+  });
+}
+
+export function useFriends() {
+  const api = useApiClient();
+  return useQuery({ queryKey: ['community', 'friends'], queryFn: ({ signal }) => api.getFriends(signal) });
+}
+
+export function useCommunityComments(postId) {
+  const api = useApiClient();
+  return useQuery({
+    queryKey: ['community', 'comments', postId],
+    queryFn: ({ signal }) => api.getCommunityComments(postId, signal),
+    enabled: Boolean(postId),
+  });
+}
+
+export function useShareDiscovery() {
+  const api = useApiClient();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload) => api.createCommunityPost(payload, newIdempotencyKey()),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['community', 'posts'] }),
+  });
+}
+
+export function useToggleCommunityLike() {
+  const api = useApiClient();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ postId, liked }) => api.setCommunityPostLike(postId, liked),
+    // The server returns the updated post, so patch it into every cached scope
+    // rather than refetching the whole feed on each tap.
+    onSuccess: (post) => {
+      queryClient.setQueriesData({ queryKey: ['community', 'posts'] }, (previous) =>
+        Array.isArray(previous) ? previous.map((item) => (item.id === post.id ? post : item)) : previous);
+    },
+  });
+}
+
+export function useAddCommunityComment() {
+  const api = useApiClient();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ postId, body }) => api.createCommunityComment(postId, body),
+    onSuccess: (_comment, { postId }) => {
+      queryClient.invalidateQueries({ queryKey: ['community', 'comments', postId] });
+      queryClient.invalidateQueries({ queryKey: ['community', 'posts'] });
+    },
+  });
+}
+
 export function useFeed() {
   const api = useApiClient();
   return useQuery({ queryKey: ['feed'], queryFn: ({ signal }) => api.getFeed(signal) });

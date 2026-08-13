@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { progressionEngine } from './progression-engine.js';
 
 export class MemoryQuestRepository {
   constructor({ definitions = [] } = {}) {
@@ -18,6 +19,123 @@ export class MemoryQuestRepository {
     this.notifications = [];
     this.userRewards = [];
     this.inventory = [];
+    this.coinLedger = [];
+    this.communityPosts = [];
+    this.communityLikes = [];
+    this.communityComments = [];
+    this.friendships = [];
+  }
+
+  // --- Community ---
+  async createCommunityPost(post) {
+    // Sharing the same capture twice returns the original post rather than
+    // creating a duplicate, matching the partial unique index in Postgres.
+    if (post.cardId) {
+      const existing = this.communityPosts.find((item) => item.cardId === post.cardId);
+      if (existing) return { post: await this.getCommunityPost(post.userId, existing.id), created: false };
+    }
+    const value = {
+      id: randomUUID(),
+      userId: post.userId,
+      cardId: post.cardId || null,
+      caption: post.caption || '',
+      hashtags: post.hashtags || [],
+      placeLabel: post.placeLabel || null,
+      gps: post.gps || null,
+      visibility: post.visibility || 'public',
+      createdAt: new Date().toISOString(),
+    };
+    this.communityPosts.unshift(value);
+    return { post: await this.getCommunityPost(post.userId, value.id), created: true };
+  }
+
+  async listCommunityPosts(viewerId, { scope = 'public', limit = 50 } = {}) {
+    let posts = this.communityPosts.filter((item) => item.visibility === 'public');
+    if (scope === 'friends') {
+      const friendIds = new Set((await this.listFriends(viewerId)).filter((f) => f.status === 'accepted').map((f) => f.userId));
+      posts = posts.filter((item) => friendIds.has(item.userId));
+    }
+    return posts.slice(0, Math.min(Number(limit) || 50, 100)).map((item) => this._decorateCommunityPost(viewerId, item));
+  }
+
+  async getCommunityPost(viewerId, postId) {
+    const item = this.communityPosts.find((entry) => entry.id === postId);
+    return item ? this._decorateCommunityPost(viewerId, item) : null;
+  }
+
+  _decorateCommunityPost(viewerId, item) {
+    const author = this.users.get(item.userId);
+    const card = item.cardId ? this.capturedCards.find((entry) => entry.id === item.cardId) : null;
+    const totalXp = Number(author?.totalXp || 0);
+    return clone({
+      ...item,
+      author: {
+        userId: item.userId,
+        displayName: author?.displayName || 'Adventurer',
+        totalXp,
+        rankTitle: progressionEngine.rankTitleForXp(totalXp),
+      },
+      discovery: card
+        ? {
+          itemName: card.itemName,
+          cardTitle: card.cardTitle,
+          rarityTier: card.rarityTier,
+          rarityGrade: card.rarityGrade ?? null,
+          rarityStars: card.rarityStars ?? null,
+          speciesId: card.speciesId ?? null,
+          imageRef: card.imageRef ?? null,
+          capturedAt: card.capturedAt,
+        }
+        : null,
+      likeCount: this.communityLikes.filter((like) => like.postId === item.id).length,
+      commentCount: this.communityComments.filter((comment) => comment.postId === item.id).length,
+      viewerLiked: this.communityLikes.some((like) => like.postId === item.id && like.userId === viewerId),
+    });
+  }
+
+  async setCommunityPostLike(userId, postId, liked) {
+    if (!this.communityPosts.some((item) => item.id === postId)) return null;
+    const existing = this.communityLikes.findIndex((like) => like.postId === postId && like.userId === userId);
+    if (liked && existing === -1) this.communityLikes.push({ postId, userId });
+    if (!liked && existing !== -1) this.communityLikes.splice(existing, 1);
+    return this.getCommunityPost(userId, postId);
+  }
+
+  async createCommunityComment(userId, postId, body) {
+    if (!this.communityPosts.some((item) => item.id === postId)) return null;
+    const value = { id: randomUUID(), postId, userId, displayName: this.users.get(userId)?.displayName || 'Adventurer', body, createdAt: new Date().toISOString() };
+    this.communityComments.push(value);
+    return clone(value);
+  }
+
+  async listCommunityComments(postId) {
+    return this.communityComments.filter((item) => item.postId === postId).map(clone);
+  }
+
+  async deleteCommunityPost(userId, postId) {
+    const index = this.communityPosts.findIndex((item) => item.id === postId && item.userId === userId);
+    if (index === -1) return false;
+    this.communityPosts.splice(index, 1);
+    this.communityLikes = this.communityLikes.filter((like) => like.postId !== postId);
+    this.communityComments = this.communityComments.filter((comment) => comment.postId !== postId);
+    return true;
+  }
+
+  async listFriends(userId) {
+    return this.friendships
+      .filter((item) => (item.requesterId === userId || item.addresseeId === userId) && item.status !== 'blocked')
+      .map((item) => {
+        const otherId = item.requesterId === userId ? item.addresseeId : item.requesterId;
+        const other = this.users.get(otherId);
+        return {
+          userId: otherId,
+          displayName: other?.displayName || 'Adventurer',
+          totalXp: Number(other?.totalXp || 0),
+          streakDays: Number(other?.streakDays || 0),
+          status: item.status,
+          direction: item.requesterId === userId ? 'outgoing' : 'incoming',
+        };
+      });
   }
 
   async ensureUser(user) {
@@ -200,7 +318,17 @@ export class MemoryQuestRepository {
       const user = this.users.get(value.userId);
       if (user) user.totalXp += value.xpAwarded;
     }
+    // Coins follow the same rule as XP: only credited once the capture is final.
+    if (value.status === 'final' && value.coinsAwarded > 0) {
+      const ledgerKey = `capture:${value.id}`;
+      if (!this.coinLedger.some((entry) => entry.ledgerKey === ledgerKey)) {
+        this.coinLedger.push({ ledgerKey, userId: value.userId, cardId: value.id, amount: value.coinsAwarded, reason: 'capture_reward' });
+      }
+    }
     return clone(value);
+  }
+  async getCoinBalance(userId) {
+    return this.coinLedger.filter((entry) => entry.userId === userId).reduce((sum, entry) => sum + entry.amount, 0);
   }
   async getCapturedCards(userId) { return this.capturedCards.filter((item) => item.userId === userId).map(clone); }
   async getCapturedCardById(userId, cardId) {

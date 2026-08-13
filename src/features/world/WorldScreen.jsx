@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useActiveQuests, useCollectibles, useMarkNotificationRead, useMe, useNotifications } from '../quests/queries';
-import { deriveGold, deriveGems, getEnergy } from '../../lib/playerEconomy';
+import { coinBalance, deriveGems, getEnergy } from '../../lib/playerEconomy';
 import { derivePlayerPresentation } from '../../lib/playerPresentation';
 import { timeOfDayPhase } from '../../lib/worldTime';
 import { WorldCanvas, HOTSPOT_LOCATIONS, NEARBY_HOTSPOTS } from './WorldCanvas';
@@ -35,7 +35,7 @@ export function WorldScreen() {
     () => derivePlayerPresentation(me, activeQuests, [], collectibles || []),
     [me, activeQuests, collectibles],
   );
-  const gold = deriveGold(me?.totalXp);
+  const gold = coinBalance(me);
   const gems = deriveGems(collectibles);
   const energy = getEnergy();
   const unreadNotifications = useMemo(() => (notifications || []).filter((n) => !n.readAt), [notifications]);

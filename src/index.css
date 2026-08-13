@@ -752,6 +752,14 @@ body {
   background: #0c161a;
   cursor: pointer;
 }
+/* The topbar profile entry is a NavLink, so it needs link styling reset and an
+   active state the button variants get for free. */
+a.round-action { text-decoration: none; }
+a.round-action.active {
+  border-color: var(--quest-gold-bright);
+  background: rgba(217, 164, 65, 0.14);
+}
+.round-action > svg { width: 20px; height: 20px; fill: currentColor; }
 .mobile-bottom-dock { display: none; }
 
 .fantasy-page {
@@ -12337,3 +12345,337 @@ body, .app-shell {
 }
 
 /* DESKTOP CSS END */
+
+/* --- Community: feed, friends, map, share sheet --- */
+
+.post-author-block {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.post-author-block h4 {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #fff;
+}
+.post-author-block small {
+  color: var(--wild-text-dim);
+  font-size: 0.72rem;
+}
+
+/* Author avatars are initials until profile images exist server-side, so the
+   feed never fabricates a photo for a real person. */
+span.post-author-avatar {
+  display: grid;
+  place-items: center;
+  background: rgba(34, 197, 94, 0.14);
+  color: var(--wild-emerald);
+  font: 800 0.8rem/1 var(--font-ui, sans-serif);
+  letter-spacing: 0.02em;
+}
+
+.post-photo-placeholder {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(circle at 50% 35%, rgba(34, 197, 94, 0.16), transparent 70%),
+    linear-gradient(180deg, #0b1410, #060907);
+}
+
+.post-info-block h3 {
+  margin: 6px 0 2px;
+  font-size: 1rem;
+  color: #fff;
+}
+.post-location {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--wild-emerald);
+}
+.post-caption {
+  margin: 6px 0 0;
+  font-size: 0.84rem;
+  color: var(--quest-cream, #e8e4da);
+  line-height: 1.45;
+}
+.post-hashtags {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.75rem;
+  color: var(--wild-text-dim);
+}
+
+.post-engagement-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.post-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 6px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--wild-text-dim);
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.post-action > svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+.post-action.active {
+  border-color: var(--wild-gold-bright);
+  color: var(--wild-gold-bright);
+  background: rgba(251, 191, 36, 0.12);
+}
+.post-action[disabled] { opacity: 0.6; cursor: progress; }
+
+.post-comment-thread {
+  overflow: hidden;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+.post-comment { margin-bottom: 8px; }
+.post-comment strong {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--wild-emerald);
+}
+.post-comment p {
+  margin: 2px 0 0;
+  font-size: 0.82rem;
+  color: var(--quest-cream, #e8e4da);
+}
+.post-comment-form {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+.post-comment-form input {
+  flex: 1;
+  min-width: 0;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  font-size: 0.84rem;
+}
+.post-comment-form button {
+  min-height: 40px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--wild-emerald);
+  color: #04140b;
+  font-weight: 800;
+  cursor: pointer;
+}
+.post-comment-form button[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+.community-post-skeleton {
+  height: 320px;
+  border-radius: 18px;
+  background: linear-gradient(100deg, rgba(255,255,255,0.03) 30%, rgba(255,255,255,0.07) 50%, rgba(255,255,255,0.03) 70%);
+  background-size: 220% 100%;
+  animation: community-skeleton-sweep 1.4s ease-in-out infinite;
+}
+@keyframes community-skeleton-sweep {
+  from { background-position: 130% 0; }
+  to { background-position: -30% 0; }
+}
+
+.community-state-panel {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 56px 24px;
+  text-align: center;
+  color: var(--wild-text-dim);
+}
+.community-state-panel > svg {
+  width: 40px;
+  height: 40px;
+  fill: var(--wild-emerald);
+  opacity: 0.7;
+}
+.community-state-title {
+  margin: 4px 0 0;
+  color: #fff;
+  font-weight: 800;
+}
+.community-state-panel .continue-journey-btn { margin-top: 12px; }
+
+.community-state-note {
+  margin: 8px 0;
+  font-size: 0.82rem;
+  color: var(--wild-text-dim);
+}
+.community-state-note.error { color: #fca5a5; }
+
+.community-friend-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 80px;
+}
+.community-friend-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  background: rgba(10, 16, 12, 0.9);
+}
+.community-friend-meta { flex: 1; min-width: 0; }
+.community-friend-meta h3 {
+  margin: 0;
+  font-size: 0.92rem;
+  color: #fff;
+}
+.community-friend-meta small {
+  color: var(--wild-text-dim);
+  font-size: 0.74rem;
+}
+
+.community-map-panel { margin-bottom: 80px; }
+.community-map-canvas {
+  position: relative;
+  aspect-ratio: 2 / 1;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 30% 40%, rgba(34, 197, 94, 0.12), transparent 55%),
+    radial-gradient(circle at 70% 60%, rgba(14, 165, 233, 0.1), transparent 55%),
+    linear-gradient(180deg, #08120d, #050807);
+  overflow: hidden;
+}
+.community-map-marker {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  border-radius: 50%;
+  background: var(--wild-emerald);
+  box-shadow: 0 0 10px var(--wild-emerald-glow);
+}
+.community-map-legend {
+  display: grid;
+  gap: 6px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.community-map-legend li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  font-size: 0.8rem;
+}
+.community-map-legend strong { color: #fff; }
+.community-map-legend span { color: var(--wild-text-dim); }
+
+.community-share-sheet {
+  display: grid;
+  gap: 14px;
+  width: min(520px, 92vw);
+  max-height: 88vh;
+  overflow-y: auto;
+}
+.community-share-picker {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.community-share-picker legend {
+  padding: 0 0 8px;
+  font-size: 0.76rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--wild-text-dim);
+}
+.community-share-options {
+  display: grid;
+  gap: 8px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.community-share-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+}
+.community-share-option.selected {
+  border-color: var(--wild-emerald);
+  background: rgba(34, 197, 94, 0.1);
+}
+.community-share-rank {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  font-weight: 900;
+  font-size: 0.78rem;
+}
+.community-share-name {
+  flex: 1;
+  min-width: 0;
+  color: #fff;
+  font-size: 0.88rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.community-share-field { display: grid; gap: 6px; }
+.community-share-field > span {
+  font-size: 0.76rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--wild-text-dim);
+}
+.community-share-field textarea,
+.community-share-field input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  font: inherit;
+  font-size: 0.88rem;
+  resize: vertical;
+}
+.community-share-field small {
+  color: var(--wild-text-dim);
+  font-size: 0.72rem;
+}
+.community-share-actions {
+  display: flex;
+  gap: 10px;
+}
+.community-share-actions > button { flex: 1; }
+.community-share-actions > button[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+@media (prefers-reduced-motion: reduce) {
+  .community-post-skeleton { animation: none; }
+}

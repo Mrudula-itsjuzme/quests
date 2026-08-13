@@ -3,9 +3,13 @@ const ENERGY_MAX = 100;
 const ENERGY_COST_PER_QUEST = 10;
 const GEM_VALUE_BY_RARITY = { Common: 1, Uncommon: 2, Rare: 5, Epic: 15, Legendary: 40 };
 
-/** Gold is a deterministic view of XP, not a separate ledger: 1 gold per 5 XP earned. */
-export function deriveGold(totalXp = 0) {
-  return Math.floor((totalXp || 0) / 5);
+/**
+ * Coins are a server-authoritative balance from coin_ledger, surfaced as
+ * `me.coins`. This helper only supplies a safe display value while `me` is
+ * still loading or when the server predates the wallet.
+ */
+export function coinBalance(me) {
+  return Number(me?.coins ?? 0);
 }
 
 /** Gems are a count of rarity value already unlocked via collectibles. */

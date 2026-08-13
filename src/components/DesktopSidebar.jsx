@@ -2,7 +2,6 @@ import { NavLink } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Icon } from './Icon';
 import { playHover, playTap } from '../lib/useSoundEffects';
-import { useAuth } from '../features/auth/AuthContext';
 import { useMe } from '../features/quests/queries';
 
 const navItems = [
@@ -10,11 +9,12 @@ const navItems = [
   { to: '/app/quests', label: 'Quests', icon: 'scroll' },
   { to: '/app/collection', label: 'Collection', icon: 'book' },
   { to: '/app/community', label: 'Community', icon: 'shield' },
+  { to: '/app/rewards', label: 'Rewards', icon: 'chest' },
+  { to: '/app/profile', label: 'Profile', icon: 'user' },
 ];
 
 export function DesktopSidebar({ onOpenSettings, onLogout }) {
   const { data: me, isLoading, isError } = useMe();
-  const { devMode } = useAuth();
 
   const handleOpenCapture = () => {
     playTap();
@@ -74,8 +74,10 @@ export function DesktopSidebar({ onOpenSettings, onLogout }) {
               <strong>{me.totalXp.toLocaleString()}</strong>
               <span>XP</span>
             </div>
+            {/* level/tier come from the server's progression engine — never
+                recomputed here, so the banded XP curve stays authoritative. */}
             <div className="user-profile-meta">
-              <span>Level {Math.floor(me.totalXp / 1000) + 1}</span>
+              <span>{me.tier} · Level {me.level}</span>
             </div>
           </div>
         )}

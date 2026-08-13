@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { progressionEngine } from './progression-engine.js';
 
 export class PostgresQuestRepository {
   constructor(pool) {
@@ -312,6 +313,15 @@ export class PostgresQuestRepository {
         );
         await client.query('UPDATE quest_users SET total_xp = total_xp + $2, updated_at = NOW() WHERE id = $1', [card.userId, card.xpAwarded]);
       }
+      // Coins follow the same rule as XP: only credited once the capture is final.
+      if (created.status === 'final' && card.coinsAwarded > 0) {
+        await client.query(
+          `INSERT INTO coin_ledger (id, ledger_key, user_id, card_id, amount, reason)
+           VALUES ($1,$2,$3,$4,$5,'capture_reward')
+           ON CONFLICT (ledger_key) DO NOTHING`,
+          [randomUUID(), `capture:${created.id}`, card.userId, created.id, card.coinsAwarded],
+        );
+      }
       await client.query('COMMIT');
       return mapCapturedCard(created);
     } catch (error) {
@@ -369,6 +379,145 @@ export class PostgresQuestRepository {
   async hasGlobalSimilarCaptureImageHash(userId, hash, threshold = 0.98) {
     const { rows } = await this.pool.query('SELECT image_hash FROM captured_cards WHERE user_id <> $1 AND image_hash IS NOT NULL', [userId]);
     return rows.some((row) => hashSimilarity(row.image_hash, hash) >= threshold);
+  }
+  // --- Community ---
+  async createCommunityPost(post) {
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      // Sharing the same capture twice is a no-op that returns the original
+      // post, so a double-tap on Share can't create duplicate feed entries.
+      if (post.cardId) {
+        const existing = await client.query('SELECT id FROM community_posts WHERE card_id = $1', [post.cardId]);
+        if (existing.rows[0]) {
+          await client.query('COMMIT');
+          return { post: await this.getCommunityPost(post.userId, existing.rows[0].id), created: false };
+        }
+      }
+      const { rows } = await client.query(
+        `INSERT INTO community_posts (id, user_id, card_id, caption, hashtags, place_label, gps_lat, gps_lng, visibility)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id`,
+        [randomUUID(), post.userId, post.cardId || null, post.caption || '', JSON.stringify(post.hashtags || []),
+          post.placeLabel || null, post.gps?.lat ?? null, post.gps?.lng ?? null, post.visibility || 'public'],
+      );
+      await client.query('COMMIT');
+      return { post: await this.getCommunityPost(post.userId, rows[0].id), created: true };
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  async listCommunityPosts(viewerId, { scope = 'public', limit = 50 } = {}) {
+    const values = [viewerId, Math.min(Number(limit) || 50, 100)];
+    const scopeClause = scope === 'friends'
+      ? `AND p.user_id IN (
+           SELECT CASE WHEN requester_id = $1 THEN addressee_id ELSE requester_id END
+           FROM community_friendships
+           WHERE status = 'accepted' AND (requester_id = $1 OR addressee_id = $1)
+         )`
+      : '';
+    const { rows } = await this.pool.query(
+      `${COMMUNITY_POST_SELECT} WHERE p.visibility = 'public' ${scopeClause}
+       ORDER BY p.created_at DESC LIMIT $2`,
+      values,
+    );
+    return rows.map(mapCommunityPost);
+  }
+
+  async getCommunityPost(viewerId, postId) {
+    const { rows } = await this.pool.query(`${COMMUNITY_POST_SELECT} WHERE p.id = $2`, [viewerId, postId]);
+    return rows[0] ? mapCommunityPost(rows[0]) : null;
+  }
+
+  async setCommunityPostLike(userId, postId, liked) {
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      const post = await client.query('SELECT id FROM community_posts WHERE id = $1 FOR UPDATE', [postId]);
+      if (!post.rows[0]) { await client.query('ROLLBACK'); return null; }
+      // Counters are recomputed from the like rows rather than incremented, so
+      // repeated likes/unlikes stay consistent under concurrency.
+      if (liked) {
+        await client.query('INSERT INTO community_post_likes (post_id, user_id) VALUES ($1,$2) ON CONFLICT DO NOTHING', [postId, userId]);
+      } else {
+        await client.query('DELETE FROM community_post_likes WHERE post_id = $1 AND user_id = $2', [postId, userId]);
+      }
+      await client.query('UPDATE community_posts SET like_count = (SELECT COUNT(*) FROM community_post_likes WHERE post_id = $1), updated_at = NOW() WHERE id = $1', [postId]);
+      await client.query('COMMIT');
+      return this.getCommunityPost(userId, postId);
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  async createCommunityComment(userId, postId, body) {
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      const post = await client.query('SELECT id FROM community_posts WHERE id = $1 FOR UPDATE', [postId]);
+      if (!post.rows[0]) { await client.query('ROLLBACK'); return null; }
+      const { rows } = await client.query(
+        'INSERT INTO community_post_comments (id, post_id, user_id, body) VALUES ($1,$2,$3,$4) RETURNING *',
+        [randomUUID(), postId, userId, body],
+      );
+      await client.query('UPDATE community_posts SET comment_count = (SELECT COUNT(*) FROM community_post_comments WHERE post_id = $1), updated_at = NOW() WHERE id = $1', [postId]);
+      await client.query('COMMIT');
+      return mapCommunityComment({ ...rows[0], display_name: (await this.getUser(userId))?.displayName });
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  async listCommunityComments(postId) {
+    const { rows } = await this.pool.query(
+      `SELECT c.*, u.display_name FROM community_post_comments c
+       JOIN quest_users u ON u.id = c.user_id
+       WHERE c.post_id = $1 ORDER BY c.created_at ASC LIMIT 200`,
+      [postId],
+    );
+    return rows.map(mapCommunityComment);
+  }
+
+  async deleteCommunityPost(userId, postId) {
+    // Ownership is part of the predicate, so another user's post can never be
+    // deleted even if the id is guessed.
+    const { rowCount } = await this.pool.query('DELETE FROM community_posts WHERE id = $1 AND user_id = $2', [postId, userId]);
+    return rowCount > 0;
+  }
+
+  async listFriends(userId) {
+    const { rows } = await this.pool.query(
+      `SELECT f.status,
+              f.requester_id = $1 AS outgoing,
+              u.id, u.display_name, u.total_xp, u.streak_days
+       FROM community_friendships f
+       JOIN quest_users u ON u.id = CASE WHEN f.requester_id = $1 THEN f.addressee_id ELSE f.requester_id END
+       WHERE (f.requester_id = $1 OR f.addressee_id = $1) AND f.status <> 'blocked'
+       ORDER BY u.total_xp DESC LIMIT 200`,
+      [userId],
+    );
+    return rows.map((row) => ({
+      userId: row.id,
+      displayName: row.display_name,
+      totalXp: Number(row.total_xp),
+      streakDays: Number(row.streak_days),
+      status: row.status,
+      direction: row.outgoing ? 'outgoing' : 'incoming',
+    }));
+  }
+
+  async getCoinBalance(userId) {
+    const { rows } = await this.pool.query('SELECT COALESCE(SUM(amount), 0)::int AS balance FROM coin_ledger WHERE user_id = $1', [userId]);
+    return rows[0].balance;
   }
   async createFeedEntry(entry) {
     const { rows } = await this.pool.query(`INSERT INTO quest_feed_entries
@@ -459,6 +608,57 @@ export class PostgresQuestRepository {
       throw error;
     }
   }
+}
+
+// Joins the author and the shared capture so a feed row is renderable in one
+// query. `viewer_liked` is parameterised on $1 (the viewer).
+const COMMUNITY_POST_SELECT = `
+  SELECT p.*,
+         u.display_name, u.total_xp,
+         c.item_name, c.card_title, c.rarity_tier, c.rarity_grade, c.rarity_stars,
+         c.species_id, c.image_ref, c.captured_at,
+         EXISTS (SELECT 1 FROM community_post_likes l WHERE l.post_id = p.id AND l.user_id = $1) AS viewer_liked
+  FROM community_posts p
+  JOIN quest_users u ON u.id = p.user_id
+  LEFT JOIN captured_cards c ON c.id = p.card_id`;
+
+function mapCommunityPost(row) {
+  return {
+    id: row.id,
+    userId: row.user_id,
+    author: {
+      userId: row.user_id,
+      displayName: row.display_name,
+      totalXp: Number(row.total_xp),
+      rankTitle: progressionEngine.rankTitleForXp(Number(row.total_xp)),
+    },
+    cardId: row.card_id,
+    discovery: row.card_id
+      ? {
+        itemName: row.item_name,
+        cardTitle: row.card_title,
+        rarityTier: row.rarity_tier,
+        rarityGrade: row.rarity_grade,
+        rarityStars: row.rarity_stars == null ? null : Number(row.rarity_stars),
+        speciesId: row.species_id,
+        imageRef: row.image_ref,
+        capturedAt: row.captured_at,
+      }
+      : null,
+    caption: row.caption,
+    hashtags: row.hashtags || [],
+    placeLabel: row.place_label,
+    gps: row.gps_lat != null ? { lat: Number(row.gps_lat), lng: Number(row.gps_lng) } : null,
+    visibility: row.visibility,
+    likeCount: Number(row.like_count),
+    commentCount: Number(row.comment_count),
+    viewerLiked: Boolean(row.viewer_liked),
+    createdAt: row.created_at,
+  };
+}
+
+function mapCommunityComment(row) {
+  return { id: row.id, postId: row.post_id, userId: row.user_id, displayName: row.display_name, body: row.body, createdAt: row.created_at };
 }
 
 function mapUser(row) { return { id: row.id, displayName: row.display_name, timezone: row.timezone, totalXp: Number(row.total_xp), streakDays: Number(row.streak_days), lastStreakPeriod: row.last_streak_period, primaryPath: row.primary_path ?? null, reminderTime: row.reminder_time ? String(row.reminder_time).slice(0, 5) : null, motionPreference: row.motion_preference || 'system', onboardingCompletedAt: row.onboarding_completed_at ?? null, tourVersionSeen: Number(row.tour_version_seen || 0) }; }

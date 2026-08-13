@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMe, useCollectibles } from '../quests/queries';
-import { deriveGold } from '../../lib/playerEconomy';
+import { coinBalance } from '../../lib/playerEconomy';
 import { playTap } from '../../lib/useSoundEffects';
 import { SettingsModal } from '../../components/SettingsModal';
 
@@ -15,7 +15,7 @@ export function ProfilePage() {
   const totalCount = collection ? collection.length : 0;
   const sRankCount = collection ? collection.filter((c) => c.rarityTier === 'S' || c.rarity === 'S').length : 0;
   const totalXp = me?.totalXp || 0;
-  const totalCoins = deriveGold(totalXp);
+  const totalCoins = coinBalance(me);
   const currentStreak = me?.streakDays || 0;
 
   const unavailable = (message) => { playTap(); setNotice(message); };

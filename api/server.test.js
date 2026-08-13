@@ -370,7 +370,150 @@ describe('Quest API', () => {
     expect(second.status).toBe(201);
     expect(second.body.itemName).toBe(first.body.candidates[0].commonName);
   });
+
+  it('credits capture coins to a server-authoritative wallet balance', async () => {
+    const app = createApp({ config: testConfig(), visionProvider: highConfidenceVisionProvider() });
+    const before = await request(app).get('/api/v1/me');
+    expect(before.body.coins).toBe(0);
+    const captured = await mintCapture(app, 'coin-001');
+    expect(captured.body.coinsAwarded).toBeGreaterThan(0);
+    const after = await request(app).get('/api/v1/me');
+    expect(after.body.coins).toBe(captured.body.coinsAwarded);
+  });
+
+  it('does not credit coins for a provisional capture until it is verified', async () => {
+    const app = createApp({ config: testConfig(), visionProvider: highConfidenceVisionProvider() });
+    const captured = await request(app)
+      .post('/api/v1/captures')
+      .set('Idempotency-Key', 'coin-002')
+      .send({ imageBase64: PIXEL_PNG, liveness: { attested: false } });
+    expect(captured.body.status).toBe('provisional');
+    const me = await request(app).get('/api/v1/me');
+    expect(me.body.coins).toBe(0);
+  });
 });
+
+describe('Community API', () => {
+  it('shares a capture as a real post carrying the author rank and discovery', async () => {
+    const app = createApp({ config: testConfig(), visionProvider: highConfidenceVisionProvider() });
+    const card = await mintCapture(app, 'community-001');
+    const created = await request(app)
+      .post('/api/v1/community/posts')
+      .set('Idempotency-Key', 'community-post-001')
+      .send({ cardId: card.body.id, caption: 'Found near the lake', hashtags: ['birding'] });
+
+    expect(created.status).toBe(201);
+    expect(created.body.discovery.itemName).toBe('House Sparrow');
+    expect(created.body.author.rankTitle).toBe('Adventurer');
+    expect(created.body.hashtags).toEqual(['#birding']);
+    expect(created.body.likeCount).toBe(0);
+
+    const feed = await request(app).get('/api/v1/community/posts');
+    expect(feed.status).toBe(200);
+    expect(feed.body).toHaveLength(1);
+    expect(feed.body[0].id).toBe(created.body.id);
+  });
+
+  it('refuses to share a capture the caller does not own', async () => {
+    const repository = new MemoryQuestRepository({ definitions: questDefinitions });
+    const app = createApp({ config: testConfig(), repository, visionProvider: highConfidenceVisionProvider() });
+    await repository.ensureUser({ id: 'someone-else', displayName: 'Other', timezone: 'UTC' });
+    const foreign = await repository.createCapturedCard({ userId: 'someone-else', itemName: 'Red Fox', category: 'Fauna', cardTitle: 'Red Fox', rarityTier: 'B', rarityScore: 0.5, description: '', status: 'final' });
+
+    const response = await request(app)
+      .post('/api/v1/community/posts')
+      .set('Idempotency-Key', 'community-post-foreign')
+      .send({ cardId: foreign.id });
+    expect(response.status).toBe(404);
+    expect(response.body.error.code).toBe('capture_not_found');
+  });
+
+  it('never publishes a rejected capture', async () => {
+    const repository = new MemoryQuestRepository({ definitions: questDefinitions });
+    const app = createApp({ config: testConfig(), repository, visionProvider: highConfidenceVisionProvider() });
+    await repository.ensureUser({ id: '00000000-0000-4000-8000-000000000001', displayName: 'Local', timezone: 'UTC' });
+    const card = await repository.createCapturedCard({ userId: '00000000-0000-4000-8000-000000000001', itemName: 'Blurry Thing', category: 'Fauna', cardTitle: 'Blurry Thing', rarityTier: 'D', rarityScore: 0.1, description: '', status: 'rejected' });
+
+    const response = await request(app)
+      .post('/api/v1/community/posts')
+      .set('Idempotency-Key', 'community-post-rejected')
+      .send({ cardId: card.id });
+    expect(response.status).toBe(422);
+    expect(response.body.error.code).toBe('capture_not_shareable');
+  });
+
+  it('does not create duplicate posts when the same capture is shared twice', async () => {
+    const app = createApp({ config: testConfig(), visionProvider: highConfidenceVisionProvider() });
+    const card = await mintCapture(app, 'community-002');
+    const first = await request(app).post('/api/v1/community/posts').set('Idempotency-Key', 'community-dup-a').send({ cardId: card.body.id });
+    const second = await request(app).post('/api/v1/community/posts').set('Idempotency-Key', 'community-dup-b').send({ cardId: card.body.id });
+
+    expect(first.status).toBe(201);
+    expect(second.status).toBe(200);
+    expect(second.body.id).toBe(first.body.id);
+    const feed = await request(app).get('/api/v1/community/posts');
+    expect(feed.body).toHaveLength(1);
+  });
+
+  it('toggles likes idempotently and reports the viewer state', async () => {
+    const app = createApp({ config: testConfig(), visionProvider: highConfidenceVisionProvider() });
+    const card = await mintCapture(app, 'community-003');
+    const post = await request(app).post('/api/v1/community/posts').set('Idempotency-Key', 'like-post').send({ cardId: card.body.id });
+
+    const liked = await request(app).post(`/api/v1/community/posts/${post.body.id}/like`).send({ liked: true });
+    expect(liked.body.likeCount).toBe(1);
+    expect(liked.body.viewerLiked).toBe(true);
+
+    const likedAgain = await request(app).post(`/api/v1/community/posts/${post.body.id}/like`).send({ liked: true });
+    expect(likedAgain.body.likeCount).toBe(1);
+
+    const unliked = await request(app).post(`/api/v1/community/posts/${post.body.id}/like`).send({ liked: false });
+    expect(unliked.body.likeCount).toBe(0);
+    expect(unliked.body.viewerLiked).toBe(false);
+  });
+
+  it('records comments and reflects them in the post counter', async () => {
+    const app = createApp({ config: testConfig(), visionProvider: highConfidenceVisionProvider() });
+    const card = await mintCapture(app, 'community-004');
+    const post = await request(app).post('/api/v1/community/posts').set('Idempotency-Key', 'comment-post').send({ cardId: card.body.id });
+
+    const comment = await request(app).post(`/api/v1/community/posts/${post.body.id}/comments`).send({ body: 'Beautiful find!' });
+    expect(comment.status).toBe(201);
+    expect(comment.body.body).toBe('Beautiful find!');
+
+    const comments = await request(app).get(`/api/v1/community/posts/${post.body.id}/comments`);
+    expect(comments.body).toHaveLength(1);
+    const feed = await request(app).get('/api/v1/community/posts');
+    expect(feed.body[0].commentCount).toBe(1);
+  });
+
+  it('rejects invalid post payloads and unknown posts', async () => {
+    const app = createApp({ config: testConfig(), visionProvider: highConfidenceVisionProvider() });
+    const badCard = await request(app).post('/api/v1/community/posts').set('Idempotency-Key', 'community-bad-1').send({ cardId: 'not-a-uuid' });
+    expect(badCard.status).toBe(400);
+
+    const missingKey = await request(app).post('/api/v1/community/posts').send({ cardId: '11111111-1111-4111-8111-111111111111' });
+    expect(missingKey.status).toBe(400);
+    expect(missingKey.body.error.code).toBe('idempotency_key_required');
+
+    const unknownPost = await request(app).post('/api/v1/community/posts/11111111-1111-4111-8111-111111111111/like').send({ liked: true });
+    expect(unknownPost.status).toBe(404);
+  });
+
+  it('returns an empty friends list rather than fabricated explorers', async () => {
+    const app = createApp({ config: testConfig() });
+    const response = await request(app).get('/api/v1/community/friends');
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual([]);
+  });
+});
+
+function mintCapture(app, idempotencyKey) {
+  return request(app)
+    .post('/api/v1/captures')
+    .set('Idempotency-Key', idempotencyKey)
+    .send({ imageBase64: PIXEL_PNG, liveness: { attested: true, method: 'capture-input-environment', score: 0.7 } });
+}
 
 function highConfidenceVisionProvider() {
   return {

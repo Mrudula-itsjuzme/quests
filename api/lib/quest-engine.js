@@ -16,7 +16,10 @@ export class QuestEngine {
     const currentPeriod = dailyPeriod(this.providers.clock.now(), ensured.timezone);
     await this.repository.reconcileStreak(ensured.id, currentPeriod.key);
     const user = await this.repository.getUser(identity.id);
-    return { ...user, ...calculateProgression(user.totalXp) };
+    // Coins come from the ledger so every surface reads one authoritative
+    // balance instead of deriving its own from XP.
+    const coins = await this.repository.getCoinBalance(user.id);
+    return { ...user, ...calculateProgression(user.totalXp), coins };
   }
 
   async updateMe(identity, profile) {

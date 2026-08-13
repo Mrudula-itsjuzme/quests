@@ -17,6 +17,9 @@ import { DawnMoment, useDawnMoment } from './DawnMoment';
 import { useAndroidBackButton } from '../lib/useAndroidBackButton';
 import { DesktopSidebar } from './DesktopSidebar';
 
+// Capture stays the central shutter action rather than an ordinary destination.
+// Profile is reachable from the topbar avatar, and Rewards from Profile, so the
+// dock keeps four thumb-sized targets instead of crowding six onto a phone.
 const navItemsLeft = [
   { to: '/app', label: 'Map', icon: 'compass', end: true },
   { to: '/app/quests', label: 'Quests', icon: 'scroll' },
@@ -109,6 +112,15 @@ export function AppShell() {
                 <span>XP</span>
               </div>
             )}
+            <NavLink
+              to="/app/profile"
+              className={({ isActive }) => `round-action topbar-profile-link ${isActive ? 'active' : ''}`}
+              aria-label="Profile"
+              onClick={playTap}
+              onMouseEnter={playHover}
+            >
+              <Icon name="user" />
+            </NavLink>
             <MagneticButton
               type="button"
               className="round-action"

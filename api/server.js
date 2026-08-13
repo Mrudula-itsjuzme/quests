@@ -78,6 +78,17 @@ const captureCreateSchema = z.object({
   chosenCandidateIndex: z.number().int().min(0).max(2).optional(),
 }).strict();
 const captureRenameSchema = z.object({ cardTitle: z.string().trim().min(1).max(80) }).strict();
+const postIdSchema = z.string().uuid();
+const communityPostSchema = z.object({
+  cardId: z.string().uuid(),
+  caption: z.string().trim().max(500).optional(),
+  hashtags: z.array(z.string().trim().min(1).max(40).regex(/^#?[\p{L}\p{N}_]+$/u, 'invalid hashtag')).max(8).optional(),
+  placeLabel: z.string().trim().max(120).optional(),
+  visibility: z.enum(['public', 'friends']).optional(),
+}).strict();
+const communityLikeSchema = z.object({ liked: z.boolean() }).strict();
+const communityCommentSchema = z.object({ body: z.string().trim().min(1).max(1000) }).strict();
+const communityScopeSchema = z.enum(['public', 'friends']);
 const legacyQuestSchema = z.object({
   title: z.string().trim().min(1).max(160),
   summary: z.string().trim().max(2000).optional(),
@@ -284,6 +295,49 @@ export function createApp(options = {}) {
     if (!card) return res.status(404).json({ error: { code: 'capture_not_found', requestId: req.id } });
     res.json(card);
   }));
+  app.get('/api/v1/community/posts', asyncRoute(async (req, res) => {
+    const scope = req.query.scope == null || req.query.scope === '' ? 'public' : parse(communityScopeSchema, req.query.scope);
+    res.json(await repository.listCommunityPosts(req.identity.id, { scope, limit: req.query.limit }));
+  }));
+  app.post('/api/v1/community/posts', writeLimiter, asyncRoute(async (req, res) => {
+    const body = parse(communityPostSchema, req.body);
+    const idempotencyKey = requireIdempotency(req);
+    // Only the owner of a capture may share it, and rejected captures are never
+    // publishable — both checked server-side against the stored card.
+    const card = await repository.getCapturedCardById(req.identity.id, body.cardId);
+    if (!card) return res.status(404).json({ error: { code: 'capture_not_found', requestId: req.id } });
+    if (card.status === 'rejected') return res.status(422).json({ error: { code: 'capture_not_shareable', requestId: req.id } });
+
+    const result = await repository.runIdempotent(req.identity.id, 'create-community-post', idempotencyKey, async () => {
+      const { post, created } = await repository.createCommunityPost({
+        userId: req.identity.id,
+        cardId: card.id,
+        caption: body.caption || '',
+        hashtags: (body.hashtags || []).map((tag) => (tag.startsWith('#') ? tag : `#${tag}`)),
+        placeLabel: body.placeLabel || null,
+        gps: card.gps || null,
+        visibility: body.visibility || 'public',
+      });
+      return { post, created };
+    });
+    res.status(result.created ? 201 : 200).json(result.post);
+  }));
+  app.get('/api/v1/community/posts/:postId/comments', asyncRoute(async (req, res) => {
+    res.json(await repository.listCommunityComments(parse(postIdSchema, req.params.postId)));
+  }));
+  app.post('/api/v1/community/posts/:postId/comments', writeLimiter, asyncRoute(async (req, res) => {
+    const body = parse(communityCommentSchema, req.body);
+    const comment = await repository.createCommunityComment(req.identity.id, parse(postIdSchema, req.params.postId), body.body);
+    if (!comment) return res.status(404).json({ error: { code: 'post_not_found', requestId: req.id } });
+    res.status(201).json(comment);
+  }));
+  app.post('/api/v1/community/posts/:postId/like', writeLimiter, asyncRoute(async (req, res) => {
+    const body = parse(communityLikeSchema, req.body);
+    const post = await repository.setCommunityPostLike(req.identity.id, parse(postIdSchema, req.params.postId), body.liked);
+    if (!post) return res.status(404).json({ error: { code: 'post_not_found', requestId: req.id } });
+    res.json(post);
+  }));
+  app.get('/api/v1/community/friends', asyncRoute(async (req, res) => res.json(await repository.listFriends(req.identity.id))));
   app.get('/api/v1/feed', asyncRoute(async (req, res) => res.json(await engine.feed(req.identity))));
   app.get('/api/v1/leaderboard', asyncRoute(async (req, res) => res.json(await engine.leaderboard(req.identity))));
   app.get('/api/v1/rewards', asyncRoute(async (req, res) => res.json(await engine.rewards(req.identity))));

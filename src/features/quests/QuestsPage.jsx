@@ -4,7 +4,7 @@ import { QuestDetail } from './QuestDetail';
 import { playTap } from '../../lib/useSoundEffects';
 import { BottomSheet } from '../../components/motion/BottomSheet';
 import { QuestSuccessModal } from '../../components/motion/QuestSuccessModal';
-import { deriveGold } from '../../lib/playerEconomy';
+import { coinBalance } from '../../lib/playerEconomy';
 import {
   useActiveQuests,
   useGenerateDaily,
@@ -29,7 +29,7 @@ export function QuestsPage() {
   }, [activeQuery.data]);
 
   const me = meQuery.data;
-  const gold = deriveGold(me?.totalXp);
+  const gold = coinBalance(me);
 
   const visibleQuests = useMemo(
     () => quests.filter((q) => !tab || (q.cadence && q.cadence.toLowerCase() === tab.toLowerCase())),

@@ -8,6 +8,7 @@ export const GUEST_USER = {
   xpIntoLevel: 250,
   xpForCurrentLevel: 500,
   progressToNextLevel: 0.5,
+  coins: 1450,
   streakDays: 7,
   onboardingCompletedAt: new Date().toISOString(),
 };
@@ -158,6 +159,43 @@ export const GUEST_FEED = [
     questName: '100 Pushup Trial',
     xpEarned: 180,
     createdAt: new Date(Date.now() - 14400000).toISOString(),
+  },
+];
+
+// Guest-mode only. Signed-in sessions always read real posts from
+// /api/v1/community/posts and show an empty state when there are none.
+export const GUEST_COMMUNITY_POSTS = [
+  {
+    id: 'gp-1',
+    userId: 'u-101',
+    author: { userId: 'u-101', displayName: 'Lyra Moonweaver', totalXp: 24800, rankTitle: 'Pathfinder' },
+    cardId: 'gc-1',
+    discovery: { itemName: 'Malabar Trogon', cardTitle: 'Malabar Trogon', rarityTier: 'S', rarityGrade: 'S', rarityStars: 5, speciesId: 'malabar-trogon', imageRef: null, capturedAt: new Date(Date.now() - 5400000).toISOString() },
+    caption: 'Held still just long enough at first light.',
+    hashtags: ['#birding', '#westernghats'],
+    placeLabel: 'Silent Valley',
+    gps: { lat: 11.08, lng: 76.44 },
+    visibility: 'public',
+    likeCount: 42,
+    commentCount: 6,
+    viewerLiked: false,
+    createdAt: new Date(Date.now() - 5400000).toISOString(),
+  },
+  {
+    id: 'gp-2',
+    userId: 'u-102',
+    author: { userId: 'u-102', displayName: 'Theron Ironheart', totalXp: 11200, rankTitle: 'Guardian' },
+    cardId: 'gc-2',
+    discovery: { itemName: 'Indian Paradise Flycatcher', cardTitle: 'Indian Paradise Flycatcher', rarityTier: 'A', rarityGrade: 'A', rarityStars: 4, speciesId: 'paradise-flycatcher', imageRef: null, capturedAt: new Date(Date.now() - 18000000).toISOString() },
+    caption: 'Ribbon tail caught the light on the way past.',
+    hashtags: ['#wildrealm'],
+    placeLabel: 'Cauvery Bank',
+    gps: { lat: 12.42, lng: 77.18 },
+    visibility: 'public',
+    likeCount: 18,
+    commentCount: 2,
+    viewerLiked: true,
+    createdAt: new Date(Date.now() - 18000000).toISOString(),
   },
 ];
 

@@ -59,6 +59,7 @@ import {
   GUEST_REWARDS,
   GUEST_CAPTURES,
   GUEST_SPECIES,
+  GUEST_COMMUNITY_POSTS,
 } from './guestData';
 
 let guestCaptures = null;
@@ -69,27 +70,20 @@ async function guestDelay(data, ms = 450) {
 }
 
 export function createApiClient(getToken) {
-  const withFallback = async (fn, fallbackData) => {
-    try {
-      return await fn();
-    } catch (err) {
-      if (err?.code === 'network_unavailable' || err?.status === 0 || err?.code === 'guest_write_unavailable') {
-        return guestDelay(fallbackData, 100);
-      }
-      throw err;
-    }
-  };
-
+  // Guest mode is a real product mode backed by local fixtures. For every other
+  // session the server is authoritative: a failed request throws so the UI can
+  // render a real error state, rather than silently swapping in fixture data
+  // that would be indistinguishable from production content.
   return {
     getMe: async (signal) => {
       const token = await getToken();
       if (token === 'guest') return guestDelay(GUEST_USER, 200);
-      return withFallback(() => request('/me', { signal, token }), GUEST_USER);
+      return request('/me', { signal, token });
     },
     updateMe: async (patch) => {
       const token = await getToken();
       if (token === 'guest') return guestDelay({ ...GUEST_USER, ...patch }, 200);
-      return withFallback(() => request('/me', { method: 'PATCH', body: patch, token }), { ...GUEST_USER, ...patch });
+      return request('/me', { method: 'PATCH', body: patch, token });
     },
     getDefinitions: async (filters = {}, signal) => {
       const token = await getToken();
@@ -98,30 +92,27 @@ export function createApiClient(getToken) {
       if (filters.cadence) params.set('cadence', filters.cadence);
       if (filters.category) params.set('category', filters.category);
       const query = params.toString();
-      return withFallback(
-        () => request(`/quests/definitions${query ? `?${query}` : ''}`, { signal, token }),
-        GUEST_DEFINITIONS,
-      );
+      return request(`/quests/definitions${query ? `?${query}` : ''}`, { signal, token });
     },
     getActiveQuests: async (signal) => {
       const token = await getToken();
       if (token === 'guest') return guestDelay(GUEST_ACTIVE_QUESTS, 200);
-      return withFallback(() => request('/quests/active', { signal, token }), GUEST_ACTIVE_QUESTS);
+      return request('/quests/active', { signal, token });
     },
     getCollectibles: async (signal) => {
       const token = await getToken();
       if (token === 'guest') return guestDelay(GUEST_COLLECTIBLES, 200);
-      return withFallback(() => request('/collectibles', { signal, token }), GUEST_COLLECTIBLES);
+      return request('/collectibles', { signal, token });
     },
     getCaptures: async (signal) => {
       const token = await getToken();
       if (token === 'guest') return guestDelay(guestCaptures || GUEST_CAPTURES, 200);
-      return withFallback(() => request('/captures', { signal, token }), GUEST_CAPTURES);
+      return request('/captures', { signal, token });
     },
     getSpecies: async (signal) => {
       const token = await getToken();
       if (token === 'guest') return guestDelay(GUEST_SPECIES, 200);
-      return withFallback(() => request('/species', { signal, token }), GUEST_SPECIES);
+      return request('/species', { signal, token });
     },
     createCapture: async (bundle, idempotencyKey) => {
       const token = await getToken();
@@ -139,10 +130,7 @@ export function createApiClient(getToken) {
         guestCaptures = [card, ...(guestCaptures || GUEST_CAPTURES)];
         return guestDelay(card, 500);
       }
-      return withFallback(
-        () => request('/captures', { method: 'POST', body: bundle, idempotencyKey, token }),
-        GUEST_CAPTURES[0],
-      );
+      return request('/captures', { method: 'POST', body: bundle, idempotencyKey, token });
     },
     renameCapture: async (captureId, cardTitle) => {
       const token = await getToken();
@@ -150,76 +138,97 @@ export function createApiClient(getToken) {
         guestCaptures = (guestCaptures || GUEST_CAPTURES).map((item) => (item.id === captureId ? { ...item, cardTitle } : item));
         return guestDelay(guestCaptures.find((item) => item.id === captureId), 200);
       }
-      return withFallback(
-        () => request(`/captures/${captureId}`, { method: 'PATCH', body: { cardTitle }, token }),
-        GUEST_CAPTURES[0],
-      );
+      return request(`/captures/${captureId}`, { method: 'PATCH', body: { cardTitle }, token });
     },
     getQuestHistory: async (signal) => {
       const token = await getToken();
       if (token === 'guest') return guestDelay(GUEST_HISTORY, 200);
-      return withFallback(() => request('/quests/history', { signal, token }), GUEST_HISTORY);
+      return request('/quests/history', { signal, token });
     },
     generateDaily: async (idempotencyKey) => {
       const token = await getToken();
       if (token === 'guest') return guestDelay(GUEST_ACTIVE_QUESTS, 200);
-      return withFallback(() => request('/quests/generate-daily', { method: 'POST', idempotencyKey, token }), GUEST_ACTIVE_QUESTS);
+      return request('/quests/generate-daily', { method: 'POST', idempotencyKey, token });
     },
     generateWeekly: async (idempotencyKey) => {
       const token = await getToken();
       if (token === 'guest') return guestDelay(GUEST_ACTIVE_QUESTS, 200);
-      return withFallback(() => request('/quests/generate-weekly', { method: 'POST', idempotencyKey, token }), GUEST_ACTIVE_QUESTS);
+      return request('/quests/generate-weekly', { method: 'POST', idempotencyKey, token });
     },
     generateMonthly: async (idempotencyKey) => {
       const token = await getToken();
       if (token === 'guest') return guestDelay(GUEST_ACTIVE_QUESTS, 200);
-      return withFallback(() => request('/quests/generate-monthly', { method: 'POST', idempotencyKey, token }), GUEST_ACTIVE_QUESTS);
+      return request('/quests/generate-monthly', { method: 'POST', idempotencyKey, token });
     },
     postProgress: async (assignmentId, value, idempotencyKey) => {
       const token = await getToken();
       if (token === 'guest') return guestDelay(GUEST_ACTIVE_QUESTS[0], 200);
-      return withFallback(
-        () => request(`/quests/${assignmentId}/progress`, { method: 'POST', body: { value }, idempotencyKey, token }),
-        GUEST_ACTIVE_QUESTS[0],
-      );
+      return request(`/quests/${assignmentId}/progress`, { method: 'POST', body: { value }, idempotencyKey, token });
     },
     submitProof: async (assignmentId, payload, idempotencyKey) => {
       const token = await getToken();
       if (token === 'guest') return guestDelay(GUEST_ACTIVE_QUESTS[0], 200);
-      return withFallback(
-        () => request(`/quests/${assignmentId}/submissions`, { method: 'POST', body: payload, idempotencyKey, token }),
-        GUEST_ACTIVE_QUESTS[0],
-      );
+      return request(`/quests/${assignmentId}/submissions`, { method: 'POST', body: payload, idempotencyKey, token });
+    },
+    getCommunityPosts: async (scope = 'public', signal) => {
+      const token = await getToken();
+      if (token === 'guest') return guestDelay(GUEST_COMMUNITY_POSTS, 200);
+      return request(`/community/posts?scope=${encodeURIComponent(scope)}`, { signal, token });
+    },
+    createCommunityPost: async (payload, idempotencyKey) => {
+      const token = await getToken();
+      if (token === 'guest') throw new ApiError(403, 'guest_write_unavailable');
+      return request('/community/posts', { method: 'POST', body: payload, idempotencyKey, token });
+    },
+    setCommunityPostLike: async (postId, liked) => {
+      const token = await getToken();
+      if (token === 'guest') throw new ApiError(403, 'guest_write_unavailable');
+      return request(`/community/posts/${postId}/like`, { method: 'POST', body: { liked }, token });
+    },
+    getCommunityComments: async (postId, signal) => {
+      const token = await getToken();
+      if (token === 'guest') return guestDelay([], 150);
+      return request(`/community/posts/${postId}/comments`, { signal, token });
+    },
+    createCommunityComment: async (postId, body) => {
+      const token = await getToken();
+      if (token === 'guest') throw new ApiError(403, 'guest_write_unavailable');
+      return request(`/community/posts/${postId}/comments`, { method: 'POST', body: { body }, token });
+    },
+    getFriends: async (signal) => {
+      const token = await getToken();
+      if (token === 'guest') return guestDelay([], 150);
+      return request('/community/friends', { signal, token });
     },
     getFeed: async (signal) => {
       const token = await getToken();
       if (token === 'guest') return guestDelay(GUEST_FEED, 200);
-      return withFallback(() => request('/feed', { signal, token }), GUEST_FEED);
+      return request('/feed', { signal, token });
     },
     getLeaderboard: async (signal) => {
       const token = await getToken();
       if (token === 'guest') return guestDelay(GUEST_LEADERBOARD, 200);
-      return withFallback(() => request('/leaderboard', { signal, token }), GUEST_LEADERBOARD);
+      return request('/leaderboard', { signal, token });
     },
     getRewards: async (signal) => {
       const token = await getToken();
       if (token === 'guest') return guestDelay(GUEST_REWARDS, 200);
-      return withFallback(() => request('/rewards', { signal, token }), GUEST_REWARDS);
+      return request('/rewards', { signal, token });
     },
     claimRewards: async () => {
       const token = await getToken();
       if (token === 'guest') return guestDelay([{ level: 15 }], 200);
-      return withFallback(() => request('/rewards/claim', { method: 'POST', token }), [{ level: 15 }]);
+      return request('/rewards/claim', { method: 'POST', token });
     },
     getNotifications: async (signal) => {
       const token = await getToken();
       if (token === 'guest') return guestDelay([], 200);
-      return withFallback(() => request('/notifications', { signal, token }), []);
+      return request('/notifications', { signal, token });
     },
     markNotificationRead: async (notificationId) => {
       const token = await getToken();
       if (token === 'guest') return guestDelay(null, 100);
-      return withFallback(() => request(`/notifications/${notificationId}/read`, { method: 'POST', token }), null);
+      return request(`/notifications/${notificationId}/read`, { method: 'POST', token });
     },
   };
 }
