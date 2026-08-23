@@ -53,7 +53,7 @@ export function QuestsPage() {
       <div className="quest-user-topbar">
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div className="quest-user-avatar">
-            <img src="/assets/african-grey-parrot.png" alt="User Avatar" />
+            <img src="/logo-cat.png" alt="Wild Realm Guide" />
           </div>
           <div>
             <h3 style={{ fontSize: '0.95rem', margin: 0, fontWeight: '800' }}>{me?.displayName || 'Adventurer'}</h3>

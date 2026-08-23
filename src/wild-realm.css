@@ -1,308 +1,225 @@
 /* ==========================================================================
-   WILD REALM - CINEMATIC NATURE UI OVERRIDES
+   WILD REALM — CINEMATIC VISUAL OVERRIDES
+   RULE: This file may ONLY set colors, backgrounds, borders, shadows,
+   backdrop-filter, font-weight, letter-spacing, border-radius, and transitions.
+   It must NEVER touch: display, flex, grid, width, height, min-height,
+   max-height, padding, margin, position, top, left, right, bottom, z-index,
+   overflow, transform (on layout containers), or any box-model property
+   that affects how elements are sized or placed.
    ========================================================================== */
 
-/* 1. Global Reset & Overrides */
-body, .app-shell, .mobile-content-area-world {
-  background: var(--quest-ink-2) !important;
-  color: var(--quest-cream) !important;
-  font-family: var(--font-body) !important;
-}
-
+/* ── 1. Typography ──────────────────────────────────────────────────────── */
 h1, h2, h3, h4, h5, h6, .brand-lockup strong {
   font-family: var(--font-display) !important;
   letter-spacing: -0.02em;
 }
 
-/* 2. Glassmorphism HUD (Bottom Navigation) */
+/* ── 2. Glassmorphic Bottom Nav — visuals only ──────────────────────────── */
 .mobile-bottom-dock {
-  display: flex !important;
-  justify-content: space-around !important;
-  align-items: center !important;
-  position: fixed !important;
-  bottom: 24px !important;
-  left: 24px !important;
-  right: 24px !important;
-  height: 72px !important;
-  
-  /* Modern Glass Effect */
-  background: rgba(14, 24, 19, 0.75) !important;
-  backdrop-filter: blur(16px) saturate(1.2) !important;
-  -webkit-backdrop-filter: blur(16px) saturate(1.2) !important;
-  
-  border: 1px solid rgba(111, 191, 122, 0.15) !important;
-  border-top: 1px solid rgba(111, 191, 122, 0.25) !important;
-  border-radius: 36px !important;
-  
-  box-shadow: 
-    0 12px 32px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
-    
-  padding: 0 12px !important;
-  z-index: 1000 !important;
+  /* Position: inset from edges for the pill look */
+  left: 14px !important;
+  right: 14px !important;
+  bottom: max(14px, env(safe-area-inset-bottom, 14px)) !important;
+  /* prevent any inherited transform from shifting the dock */
+  transform: none !important;
+  /* Visuals */
+  background: rgba(10, 20, 16, 0.82) !important;
+  backdrop-filter: blur(20px) saturate(1.4) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.4) !important;
+  border: 1px solid rgba(111, 191, 122, 0.18) !important;
+  border-top: 1px solid rgba(111, 191, 122, 0.28) !important;
+  border-radius: 28px !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255,255,255,0.05) !important;
 }
 
 .dock-item {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 4px !important;
-  width: 56px !important;
-  height: 56px !important;
-  border-radius: 50% !important;
   color: var(--quest-muted) !important;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  border-radius: 18px !important;
   background: transparent !important;
   border: none !important;
-}
-
-.dock-item span {
-  display: none !important; /* Hide text for minimal HUD feel */
+  transition: color 0.25s ease, background 0.25s ease !important;
 }
 
 .dock-item svg {
-  width: 24px !important;
-  height: 24px !important;
-  opacity: 0.7 !important;
+  width: 22px !important;
+  height: 22px !important;
+}
+
+.dock-item span {
+  font-size: 0.68rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.04em !important;
 }
 
 .dock-item.active {
-  color: var(--quest-cream) !important;
+  color: var(--rarity-uncommon) !important;
+  background: rgba(111, 191, 122, 0.12) !important;
+  text-shadow: 0 0 12px rgba(111, 191, 122, 0.4) !important;
 }
 
-.dock-item.active svg {
-  opacity: 1 !important;
-  filter: drop-shadow(0 0 8px rgba(238, 242, 234, 0.5)) !important;
-}
-
-.dock-item .active-indicator {
-  display: none !important; /* Remove old parchment active indicator */
-}
-
-/* 3. Central Emerald Shutter Button */
-.dock-shutter-item {
-  position: relative !important;
-  transform: translateY(-24px) !important;
-  z-index: 1001 !important;
-}
-
+/* Central camera shutter */
 .dock-shutter-btn {
-  width: 76px !important;
-  height: 76px !important;
+  background: radial-gradient(circle at 35% 35%, #87df92, var(--rarity-uncommon)) !important;
+  border: 3px solid rgba(10, 20, 16, 0.9) !important;
   border-radius: 50% !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  
-  background: radial-gradient(circle at 30% 30%, #87df92, var(--rarity-uncommon)) !important;
-  border: 4px solid var(--quest-ink-2) !important;
-  box-shadow: 
-    0 8px 24px rgba(111, 191, 122, 0.4),
-    inset 0 2px 4px rgba(255, 255, 255, 0.4) !important;
-    
+  box-shadow: 0 6px 20px rgba(111, 191, 122, 0.45), inset 0 1px 3px rgba(255,255,255,0.3) !important;
   color: var(--quest-ink-2) !important;
-  cursor: pointer !important;
-  outline: none !important;
+  transition: box-shadow 0.2s ease, transform 0.15s ease !important;
+}
+.dock-shutter-btn:hover {
+  box-shadow: 0 8px 28px rgba(111, 191, 122, 0.6) !important;
 }
 
-.dock-shutter-btn svg {
-  width: 32px !important;
-  height: 32px !important;
-  fill: currentColor !important;
-  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2)) !important;
-}
-
-/* 4. Desktop Adjustments */
-@media (min-width: 900px) {
-  .mobile-bottom-dock {
-    display: none !important;
-  }
-}
-
-/* 5. Topbar HUD */
+/* ── 3. Topbar ──────────────────────────────────────────────────────────── */
 .topbar {
   background: transparent !important;
-  border: none !important;
-  padding: 16px 24px !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
-  mask-image: linear-gradient(to bottom, black 60%, transparent) !important;
+  border-bottom-color: rgba(111, 191, 122, 0.08) !important;
 }
 
 .brand-lockup strong {
-  font-size: 1.1rem !important;
-  letter-spacing: 0.1em !important;
+  font-size: 1.05rem !important;
+  letter-spacing: 0.08em !important;
   color: var(--quest-cream) !important;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.8) !important;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.6) !important;
 }
 
 .shell-xp {
-  background: rgba(14, 24, 19, 0.6) !important;
-  border: 1px solid rgba(217, 164, 65, 0.2) !important;
-  backdrop-filter: blur(8px) !important;
+  background: rgba(14, 24, 19, 0.7) !important;
+  border: 1px solid rgba(217, 164, 65, 0.22) !important;
   border-radius: var(--radius-pill) !important;
-  padding: 6px 12px !important;
 }
 
 .shell-xp strong {
   color: var(--quest-gold-bright) !important;
-  text-shadow: 0 0 12px rgba(217, 164, 65, 0.3) !important;
 }
 
 .round-action {
-  background: rgba(14, 24, 19, 0.6) !important;
+  background: rgba(14, 24, 19, 0.65) !important;
   border: 1px solid rgba(238, 242, 234, 0.1) !important;
   backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
   color: var(--quest-cream) !important;
 }
-
 .round-action:hover {
   background: rgba(238, 242, 234, 0.1) !important;
   border-color: rgba(238, 242, 234, 0.3) !important;
 }
 
-/* 6. Cinematic Capture Sequence (CaptureFlow) */
+/* ── 4. Capture Flow ────────────────────────────────────────────────────── */
 .capture-flow-overlay {
-  background: rgba(10, 20, 16, 0.95) !important;
+  background: rgba(10, 20, 16, 0.96) !important;
   backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
 }
 
 .capture-flow-panel {
-  background: rgba(19, 31, 25, 0.6) !important;
+  background: rgba(19, 31, 25, 0.7) !important;
   border: 1px solid rgba(111, 191, 122, 0.2) !important;
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.8) !important;
-  padding: 32px !important;
   border-radius: 16px !important;
-  text-align: center !important;
 }
 
 .cinematic-scanner {
-  position: relative !important;
-  width: 100% !important;
-  height: 250px !important;
-  background: rgba(0,0,0,0.4) !important;
-  border: none !important;
-  overflow: hidden !important;
-  margin-bottom: 24px !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+  border-radius: 8px !important;
 }
 
 .scanner-bracket {
-  position: absolute !important;
-  width: 24px !important;
-  height: 24px !important;
-  border: 2px solid var(--rarity-uncommon) !important;
+  border-color: var(--rarity-uncommon) !important;
 }
-.scanner-bracket.top-left { top: 0; left: 0; border-right: none; border-bottom: none; }
-.scanner-bracket.top-right { top: 0; right: 0; border-left: none; border-bottom: none; }
-.scanner-bracket.bottom-left { bottom: 0; left: 0; border-right: none; border-top: none; }
-.scanner-bracket.bottom-right { bottom: 0; right: 0; border-left: none; border-top: none; }
 
 .capture-scan-line {
-  position: absolute !important;
-  left: 0 !important;
-  right: 0 !important;
-  height: 4px !important;
   background: linear-gradient(to right, transparent, var(--rarity-uncommon), transparent) !important;
   box-shadow: 0 0 16px var(--rarity-uncommon), 0 0 32px var(--rarity-uncommon) !important;
 }
 
 .scanner-reticle {
-  position: absolute !important;
-  top: 50% !important;
-  left: 50% !important;
-  width: 48px !important;
-  height: 48px !important;
-  margin-top: -24px !important;
-  margin-left: -24px !important;
-  border: 1px dashed rgba(111, 191, 122, 0.6) !important;
-  border-radius: 50% !important;
+  border-color: rgba(111, 191, 122, 0.6) !important;
 }
 
 .scanner-hud {
-  position: absolute !important;
-  bottom: 8px !important;
-  left: 8px !important;
-  right: 8px !important;
-  display: flex !important;
-  justify-content: space-between !important;
-  font-family: monospace !important;
-  font-size: 0.7rem !important;
   color: var(--rarity-uncommon) !important;
-  opacity: 0.8 !important;
 }
 
 .scanner-text-pulse {
-  animation: pulse-text 1.5s infinite alternate !important;
   color: var(--quest-cream) !important;
   font-weight: 600 !important;
+  animation: pulse-text 1.5s infinite alternate !important;
 }
 
 @keyframes pulse-text {
   from { opacity: 0.6; }
-  to { opacity: 1; text-shadow: 0 0 8px rgba(238, 242, 234, 0.4); }
+  to   { opacity: 1; text-shadow: 0 0 8px rgba(238, 242, 234, 0.4); }
 }
 
-/* 7. General Buttons */
-.continue-journey-btn, .quest-feature-card button, .swipe-card-actions button {
-  background: var(--rarity-uncommon) !important;
-  color: var(--quest-ink) !important;
-  border: none !important;
-  box-shadow: 0 4px 16px rgba(111, 191, 122, 0.3) !important;
-  font-weight: 800 !important;
-  letter-spacing: 0.05em !important;
-  text-transform: uppercase !important;
-}
-
-.continue-journey-btn:active, .quest-feature-card button:active {
-  transform: scale(0.98) !important;
-  box-shadow: 0 2px 8px rgba(111, 191, 122, 0.2) !important;
-}
-
-/* 8. Map UI Overrides */
-.explore-search-bar {
-  background: rgba(10, 20, 16, 0.7) !important;
-  backdrop-filter: blur(12px) !important;
-  border-bottom: 1px solid rgba(111, 191, 122, 0.15) !important;
-}
-
+/* ── 5. Map / Explore Screen ────────────────────────────────────────────── */
 .explore-search-input-wrap {
-  background: rgba(255, 255, 255, 0.05) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  border-radius: 12px !important;
+  background: rgba(12, 20, 16, 0.88) !important;
+  border: 1px solid rgba(111, 191, 122, 0.2) !important;
+  border-radius: 999px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+}
+
+.explore-search-input {
+  background: transparent !important;
+  color: var(--quest-cream) !important;
+}
+
+.explore-search-input::placeholder {
+  color: var(--quest-muted) !important;
+}
+
+.explore-filter-btn {
+  color: var(--rarity-uncommon) !important;
 }
 
 .explore-tag {
   background: rgba(255, 255, 255, 0.05) !important;
   color: var(--quest-muted) !important;
   border-radius: 20px !important;
+  border: 1px solid transparent !important;
+  transition: all 0.2s ease !important;
 }
+
 .explore-tag.active {
   background: rgba(111, 191, 122, 0.15) !important;
   color: var(--rarity-uncommon) !important;
-  border: 1px solid rgba(111, 191, 122, 0.3) !important;
+  border-color: rgba(111, 191, 122, 0.3) !important;
 }
 
 .map-user-pulse {
   background: var(--rarity-uncommon) !important;
-  box-shadow: 0 0 24px var(--rarity-uncommon) !important;
+  box-shadow: 0 0 20px var(--rarity-uncommon) !important;
 }
 
-/* 9. Discovery Card Additions */
+.explore-bottom-sheet {
+  background: rgba(10, 20, 16, 0.92) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-top: 1px solid rgba(111, 191, 122, 0.15) !important;
+}
+
+.explore-hotspot-card {
+  border-radius: 16px !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4) !important;
+}
+
+/* ── 6. Discovery Card ──────────────────────────────────────────────────── */
 .discovery-card-modal {
-  background: rgba(14, 24, 19, 0.85) !important;
+  background: rgba(14, 24, 19, 0.9) !important;
   backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
   border: 1px solid rgba(111, 191, 122, 0.2) !important;
-  box-shadow: 
-    0 32px 80px rgba(0, 0, 0, 0.7),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255,255,255,0.08) !important;
   border-radius: 24px !important;
-  overflow: hidden !important;
 }
 
 .discovery-card-modal.rank-s {
   border-color: var(--rarity-legendary) !important;
-  box-shadow: 0 0 64px rgba(240, 196, 107, 0.3), inset 0 1px 0 rgba(255,255,255,0.2) !important;
+  box-shadow: 0 0 64px rgba(240, 196, 107, 0.25), 0 32px 80px rgba(0,0,0,0.7) !important;
 }
 
 .discovery-action-btns button {
@@ -319,112 +236,82 @@ h1, h2, h3, h4, h5, h6, .brand-lockup strong {
   border: none !important;
 }
 
-/* 10. Horizontal Layout for Explore Hotspots */
-.explore-bottom-sheet {
-  background: rgba(14, 24, 19, 0.9) !important;
-  backdrop-filter: blur(20px) !important;
-  border-top: 1px solid rgba(111, 191, 122, 0.15) !important;
-}
-
-.explore-hotspot-cards {
-  display: flex !important;
-  flex-direction: row !important;
-  overflow-x: auto !important;
-  gap: 16px !important;
-  padding: 16px 24px !important;
-  scroll-snap-type: x mandatory !important;
-}
-
-.explore-hotspot-card {
-  min-width: 260px !important;
-  scroll-snap-align: center !important;
-  border-radius: 16px !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4) !important;
-}
-
-/* 11. Quests Cinematic Styles */
-.quests-shell { padding-top: 16px !important; }
-.quest-user-topbar { 
+/* ── 7. Quests Page ─────────────────────────────────────────────────────── */
+.quest-user-topbar {
   background: rgba(14, 24, 19, 0.8) !important;
   backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
   border-radius: 16px !important;
-  padding: 16px !important;
   border: 1px solid rgba(111, 191, 122, 0.15) !important;
 }
-.quest-cadence-btn.active { color: var(--quest-cream) !important; }
-.quest-cadence-btn.active > div { background: rgba(111, 191, 122, 0.15) !important; border-color: rgba(111, 191, 122, 0.3) !important; }
+
+.quest-cadence-btn.active {
+  color: var(--quest-cream) !important;
+}
 
 .quest-item-card {
   background: rgba(19, 31, 25, 0.6) !important;
   border: 1px solid rgba(255, 255, 255, 0.05) !important;
   border-left: 4px solid var(--rarity-uncommon) !important;
   backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
   box-shadow: 0 8px 24px rgba(0,0,0,0.3) !important;
+  border-radius: 12px !important;
 }
+
+/* Photo-backed quest cards */
 .quest-item-card.with-photo {
-  position: relative !important;
-  overflow: hidden !important;
-  padding: 0 !important;
-  min-height: 120px !important;
-  display: flex !important;
-  align-items: flex-end !important;
+  border-left-color: transparent !important;
 }
 .quest-card-bg {
-  position: absolute !important;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background-size: cover !important;
-  background-position: center !important;
-  opacity: 0.6 !important;
-  z-index: 1 !important;
-  transition: opacity 0.3s ease !important;
-}
-.quest-item-card:hover .quest-card-bg {
-  opacity: 0.8 !important;
-}
-.quest-item-card::after {
-  content: '' !important;
-  position: absolute !important;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: linear-gradient(to top, rgba(10,20,16,1) 0%, rgba(10,20,16,0.1) 100%) !important;
-  z-index: 2 !important;
-  pointer-events: none !important;
-}
-.quest-card-content {
-  position: relative !important;
-  z-index: 3 !important;
-  width: 100% !important;
-  padding: 16px !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 12px !important;
+  border-radius: 12px !important;
 }
 .quest-item-card.completed {
   border-left-color: var(--quest-gold-bright) !important;
-  background: rgba(240, 196, 107, 0.05) !important;
+  background: rgba(240, 196, 107, 0.06) !important;
 }
+
 .quest-claim-btn {
   background: var(--rarity-uncommon) !important;
   color: var(--quest-ink) !important;
   border: none !important;
   box-shadow: 0 4px 16px rgba(111, 191, 122, 0.3) !important;
+  border-radius: 8px !important;
 }
 
-/* 12. Gallery/Collection Styles */
+.quest-reward-pill {
+  background: rgba(111, 191, 122, 0.12) !important;
+  color: var(--rarity-uncommon) !important;
+  border-radius: var(--radius-pill) !important;
+  border: 1px solid rgba(111, 191, 122, 0.2) !important;
+}
+
+/* ── 8. General Buttons ─────────────────────────────────────────────────── */
+.continue-journey-btn {
+  background: var(--rarity-uncommon) !important;
+  color: var(--quest-ink) !important;
+  border: none !important;
+  box-shadow: 0 4px 16px rgba(111, 191, 122, 0.3) !important;
+  font-weight: 800 !important;
+  border-radius: 10px !important;
+}
+
+/* ── 9. Gallery / Collection ────────────────────────────────────────────── */
 .library-photo-card {
   background: rgba(14, 24, 19, 0.8) !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4) !important;
 }
 .library-photo-card.rank-s {
-  border: 1px solid var(--quest-gold-bright) !important;
-  box-shadow: 0 12px 32px rgba(240, 196, 107, 0.15), inset 0 0 24px rgba(240, 196, 107, 0.1) !important;
+  border-color: var(--quest-gold-bright) !important;
+  box-shadow: 0 12px 32px rgba(240, 196, 107, 0.15), inset 0 0 24px rgba(240, 196, 107, 0.08) !important;
 }
 
-/* 13. Profile & Rewards Styles */
+/* ── 10. Profile & Rewards ──────────────────────────────────────────────── */
 .profile-hero-card, .ornate-panel {
-  background: rgba(19, 31, 25, 0.8) !important;
+  background: rgba(19, 31, 25, 0.85) !important;
   backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
   border: 1px solid rgba(111, 191, 122, 0.2) !important;
   box-shadow: 0 16px 48px rgba(0,0,0,0.5) !important;
   border-radius: 16px !important;
@@ -442,4 +329,168 @@ h1, h2, h3, h4, h5, h6, .brand-lockup strong {
 
 .eyebrow {
   color: var(--quest-gold-bright) !important;
+}
+
+/* ── 11. Map hotspot pins ───────────────────────────────────────────────── */
+.map-hotspot-thumb {
+  border: 2px solid rgba(111, 191, 122, 0.5) !important;
+  box-shadow: 0 0 12px rgba(111, 191, 122, 0.3) !important;
+  border-radius: 50% !important;
+}
+
+.map-hotspot-label {
+  background: rgba(10, 20, 16, 0.85) !important;
+  border: 1px solid rgba(111, 191, 122, 0.2) !important;
+  border-radius: 8px !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+
+/* ── 12. AR Camera Prompt ───────────────────────────────────────────────── */
+.capture-flow-prompt-ar {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 40px 24px calc(120px + env(safe-area-inset-bottom, 0px));
+  background: radial-gradient(circle at 50% 50%, transparent 20%, rgba(4, 9, 7, 0.95) 100%),
+              repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(34, 197, 94, 0.05) 41px),
+              repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(34, 197, 94, 0.05) 41px);
+  background-size: 100% 100%, 40px 40px, 40px 40px;
+}
+
+.ar-hud-overlay {
+  position: absolute;
+  inset: 32px;
+  pointer-events: none;
+}
+
+.ar-bracket {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(34, 197, 94, 0.6);
+  filter: drop-shadow(0 0 8px rgba(34, 197, 94, 0.5));
+}
+.ar-bracket.top-left { top: 0; left: 0; border-right: none; border-bottom: none; }
+.ar-bracket.top-right { top: 0; right: 0; border-left: none; border-bottom: none; }
+.ar-bracket.bottom-left { bottom: 0; left: 0; border-right: none; border-top: none; }
+.ar-bracket.bottom-right { bottom: 0; right: 0; border-left: none; border-top: none; }
+
+.ar-center-reticle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80px;
+  height: 80px;
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  animation: pulse-reticle 4s infinite ease-in-out;
+}
+@keyframes pulse-reticle {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+  50% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+}
+.ar-crosshair {
+  width: 12px;
+  height: 12px;
+  background: var(--quest-gold-bright);
+  border-radius: 50%;
+  box-shadow: 0 0 16px var(--quest-gold);
+}
+
+.ar-prompt-content {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ar-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: 999px;
+  color: #4ade80;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  margin-bottom: 16px;
+}
+.ar-blip {
+  width: 6px;
+  height: 6px;
+  background: #4ade80;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #4ade80;
+  animation: blink 1.5s infinite;
+}
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+.ar-title {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: var(--quest-cream);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin: 0 0 8px;
+  text-shadow: 0 4px 16px rgba(0,0,0,0.8);
+}
+.ar-subtitle {
+  font-size: 0.95rem;
+  color: var(--quest-muted);
+  max-width: 280px;
+  margin: 0 0 32px;
+  line-height: 1.5;
+}
+
+.ar-shutter-btn {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+.ar-shutter-ring {
+  position: absolute;
+  inset: 0;
+  border: 4px solid rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+.ar-shutter-inner {
+  position: relative;
+  z-index: 2;
+  width: 64px;
+  height: 64px;
+  background: var(--quest-gold-bright);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #000;
+  font-size: 1.5rem;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 8px 24px rgba(201, 154, 75, 0.4);
+}
+.ar-shutter-btn:active .ar-shutter-inner {
+  transform: scale(0.9);
+}
+.ar-shutter-btn:active .ar-shutter-ring {
+  transform: scale(1.1);
+  border-color: rgba(255, 255, 255, 0.8);
 }

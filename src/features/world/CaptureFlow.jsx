@@ -142,21 +142,41 @@ export function CaptureFlow({ onClose }) {
         {stage === 'prompt' && (
           <motion.div
             key="prompt"
-            className="capture-flow-panel"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
+            className="capture-flow-prompt-ar"
+            initial={{ opacity: 0, scale: 1.1 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.4, ease: 'easeOut' }}
           >
-            <span className="capture-flow-icon"><Icon name="camera" /></span>
-            <h2>Capture a moment</h2>
-            <p>Point at something real. The rarity engine will identify it and mint a card.</p>
-            <button
-              type="button"
-              className="continue-journey-btn"
-              onClick={() => { playTap(); inputRef.current?.click(); }}
-            >
-              Open Camera <span>→</span>
-            </button>
+            <div className="ar-hud-overlay">
+              <div className="ar-bracket top-left" />
+              <div className="ar-bracket top-right" />
+              <div className="ar-bracket bottom-left" />
+              <div className="ar-bracket bottom-right" />
+              <div className="ar-center-reticle">
+                <div className="ar-crosshair" />
+              </div>
+            </div>
+            
+            <div className="ar-prompt-content">
+              <div className="ar-status-badge">
+                <span className="ar-blip" /> SCANNER READY
+              </div>
+              <h2 className="ar-title">WILD ENCOUNTER</h2>
+              <p className="ar-subtitle">Aim at a real-world object. The rarity engine will identify it and mint a card.</p>
+              
+              <button
+                type="button"
+                className="ar-shutter-btn"
+                onClick={() => { playTap(); inputRef.current?.click(); }}
+              >
+                <div className="ar-shutter-inner">
+                  <Icon name="camera" />
+                </div>
+                <div className="ar-shutter-ring" />
+              </button>
+            </div>
+            
             <input
               ref={inputRef}
               type="file"
