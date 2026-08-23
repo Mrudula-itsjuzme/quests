@@ -22,6 +22,49 @@ describe('QuestEngine', () => {
     expect(calculateProgression(5_000)).toEqual(expect.objectContaining({ level: 21, tier: 'Silver', xpForCurrentLevel: 500 }));
   });
 
+  // Blueprint §17.3: six Explorer Tiers (Bronze -> Silver -> Gold -> Platinum
+  // -> Diamond -> Adamantium), each with sub-levels I-V. No "Master" and no
+  // 7th tier — §31 decision #1 rejects that explicitly.
+  it('derives the six-tier Explorer ladder with I-V sub-levels per blueprint §17.3', () => {
+    expect(calculateProgression(0)).toEqual(expect.objectContaining({ level: 1, tier: 'Bronze', subLevel: 'I' }));
+    expect(calculateProgression(5_000)).toEqual(expect.objectContaining({ level: 21, tier: 'Silver', subLevel: 'I' }));
+
+    // Level 28 -> Gold, and per the blueprint's own worked example ("Gold
+    // Explorer III"/"Gold II/III") this should land in Gold's middle band.
+    // xpForLevel(1..20)=250, (21..40)=500, so 20*250 completes levels 1-20
+    // (-> level 21), + 20*500 completes 21-40 (-> level 41). Landing exactly
+    // on level 28 needs 7 more completed levels at the Gold (41-60) rate,
+    // i.e. stop one level short of 41 with enough remainder to reach 28.
+    const toLevel21Xp = 20 * 250;
+    const toLevel28Xp = toLevel21Xp + 7 * 500;
+    const snapshot28 = calculateProgression(toLevel28Xp);
+    expect(snapshot28.level).toBe(28);
+    expect(snapshot28.tier).toBe('Silver');
+
+    const toLevel41Xp = toLevel21Xp + 20 * 500;
+    const toLevel48Xp = toLevel41Xp + 7 * 750;
+    const snapshot48 = calculateProgression(toLevel48Xp);
+    expect(snapshot48.level).toBe(48);
+    expect(snapshot48.tier).toBe('Gold');
+    expect(['II', 'III']).toContain(snapshot48.subLevel);
+    expect(snapshot48.tierLabel).toBe(`Gold Explorer ${snapshot48.subLevel}`);
+
+    const toLevel61Xp = toLevel41Xp + 20 * 750;
+    expect(calculateProgression(toLevel61Xp)).toEqual(expect.objectContaining({ level: 61, tier: 'Platinum', subLevel: 'I' }));
+
+    const toLevel81Xp = toLevel61Xp + 20 * 1000;
+    expect(calculateProgression(toLevel81Xp)).toEqual(expect.objectContaining({ level: 81, tier: 'Diamond', subLevel: 'I' }));
+
+    const toLevel101Xp = toLevel81Xp + 20 * 1500;
+    expect(calculateProgression(toLevel101Xp)).toEqual(expect.objectContaining({ level: 101, tier: 'Adamantium', subLevel: 'I' }));
+
+    // No tier name outside the canonical six ever appears.
+    const canonicalTiers = ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond', 'Adamantium'];
+    for (const xp of [0, 5_000, toLevel28Xp, toLevel48Xp, toLevel61Xp, toLevel81Xp, toLevel101Xp, toLevel101Xp + 50_000]) {
+      expect(canonicalTiers).toContain(calculateProgression(xp).tier);
+    }
+  });
+
   it('uses exact rarity XP defaults and timezone-safe cadence periods', () => {
     expect(rarityXp).toEqual({ Common: 25, Uncommon: 50, Rare: 100, Epic: 250, Legendary: 500 });
     expect(dailyPeriod(new Date('2026-03-08T07:30:00.000Z'), 'America/New_York')).toEqual(expect.objectContaining({ key: '2026-03-08' }));

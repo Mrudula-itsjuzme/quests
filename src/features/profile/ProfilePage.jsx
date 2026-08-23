@@ -53,7 +53,7 @@ export function ProfilePage() {
           <h2>{me?.displayName || 'Adventurer'}</h2>
           {me && (
             <>
-              <div className="profile-identity-title">🏆 {me.tier} {me.level}</div>
+              <div className="profile-identity-title">{me.tierLabel || `${me.tier} Explorer`}</div>
               <div className="profile-xp-row">
                 <span>Level {me.level}</span>
                 <span>{me.xpIntoLevel} / {me.xpForCurrentLevel} XP</span>

@@ -11,6 +11,8 @@ const mockMe = {
   totalXp: 300,
   level: 2,
   tier: 'Bronze',
+  subLevel: 'I',
+  tierLabel: 'Bronze Explorer I',
   xpIntoLevel: 50,
   xpForCurrentLevel: 250,
   xpToNextLevel: 200,
@@ -21,18 +23,18 @@ const mockMe = {
 
 const mockQuest = {
   id: '11111111-1111-4111-8111-111111111111',
-  title: 'Morning Mindfulness',
-  description: 'Complete a breathing ritual.',
+  title: 'Dawn Observation',
+  description: 'Spend a few quiet minutes observing the environment around you at dawn.',
   category: 'Mind',
   rarity: 'Rare',
   cadence: 'daily',
   status: 'active',
   verificationType: 'TEXT',
   progressValue: 0,
-  targetValue: 1,
-  unit: 'session',
+  targetValue: 80,
+  unit: 'words',
   xpReward: 120,
-  instructions: ['Sit quietly', 'Breathe for 10 minutes'],
+  instructions: ['Find a quiet spot', 'Record your observations'],
 };
 
 const mockCommunityPost = {
@@ -120,13 +122,13 @@ describe('App (development auth mode)', () => {
     renderApp('/app/quests');
 
     await screen.findByRole('heading', { name: /^quests$/i, hidden: true });
-    expect((await screen.findAllByText(/morning mindfulness/i)).length).toBeGreaterThan(0);
+    expect((await screen.findAllByText(/dawn observation/i)).length).toBeGreaterThan(0);
   });
 
   it('submits quest completion through the backend before showing completion feedback', async () => {
     renderApp('/app/quests');
 
-    await screen.findAllByText(/morning mindfulness/i);
+    await screen.findAllByText(/dawn observation/i);
     fireEvent.click(screen.getByRole('button', { name: /^view$/i }));
     fireEvent.change(await screen.findByLabelText(/write your reflection/i), { target: { value: 'A real reflection proof.' } });
     fireEvent.click(screen.getByRole('button', { name: /submit proof/i }));
@@ -138,7 +140,7 @@ describe('App (development auth mode)', () => {
         body: JSON.stringify({ text: 'A real reflection proof.' }),
       }),
     ));
-    expect(await screen.findByText(/morning mindfulness complete/i)).toBeInTheDocument();
+    expect(await screen.findByText(/dawn observation complete/i)).toBeInTheDocument();
   });
 
   it('exposes the five reference destinations and the community surface', async () => {
@@ -235,7 +237,7 @@ describe('App (development auth mode)', () => {
   it('renders profile progression from real account data', async () => {
     renderApp('/app/profile');
     expect(await screen.findByRole('heading', { name: /Local Adventurer/i })).toBeInTheDocument();
-    expect(screen.getByText(/Bronze 2/i)).toBeInTheDocument();
+    expect(screen.getByText(/Bronze Explorer I/i)).toBeInTheDocument();
   });
 
   it('shows the collection empty state when no collectibles are unlocked', async () => {

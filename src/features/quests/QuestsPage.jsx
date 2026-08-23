@@ -52,14 +52,14 @@ export function QuestsPage() {
       {/* Top User Bar */}
       <div className="quest-user-topbar">
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div className="quest-user-avatar">
-            <img src="/logo-cat.png" alt="Wild Realm Guide" />
+          <div className="quest-user-avatar" aria-hidden="true">
+            <span>{(me?.displayName || 'Adventurer').split(/\s+/).slice(0, 2).map((part) => part[0]?.toUpperCase() || '').join('')}</span>
           </div>
           <div>
             <h3 style={{ fontSize: '0.95rem', margin: 0, fontWeight: '800' }}>{me?.displayName || 'Adventurer'}</h3>
             {me && (
               <small style={{ color: 'var(--wild-emerald)', fontSize: '0.72rem', fontWeight: '700' }}>
-                {me.tier} {me.level} • {me.xpIntoLevel} / {me.xpForCurrentLevel} XP
+                {me.tierLabel || `${me.tier} Explorer`} • {me.xpIntoLevel} / {me.xpForCurrentLevel} XP
               </small>
             )}
           </div>

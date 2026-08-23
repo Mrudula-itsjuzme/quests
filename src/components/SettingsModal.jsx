@@ -110,7 +110,7 @@ export function SettingsModal({ onClose, user, onLogout }) {
         </div>
 
         <div className="settings-footer">
-          <p>HABBIT Journal Edition v1.4.0 — Crafting Mindful Progress</p>
+          <p>Wild Realm Field Journal v1.4.0 — Exploring the Natural World</p>
         </div>
       </motion.div>
     </motion.div>

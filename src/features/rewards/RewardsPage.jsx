@@ -52,12 +52,12 @@ export function RewardsPage() {
       ) : isRewardsError ? (
         <motion.section
           key="rewards-error"
-          className="ornate-panel error-state"
+          className="reward-panel error-state"
           role="alert"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
-          <h2>The reward vault is sealed</h2>
+          <h2>Rewards couldn't be reached</h2>
           <p>Please check the quest service and try again.</p>
         </motion.section>
       ) : (
@@ -100,7 +100,7 @@ function RewardsContent({
 
   return (
     <motion.main
-      className="rewards-reference fantasy-page"
+      className="rewards-reference"
       aria-label="Rewards"
       variants={staggerContainer(0.05, 0.04)}
       initial="hidden"
@@ -108,17 +108,19 @@ function RewardsContent({
       exit={{ opacity: 0, filter: 'blur(6px)', transition: { duration: 0.18 } }}
     >
       <motion.div variants={staggerItem} className="quests-header">
-        <h1>REWARDS & STORE</h1>
+        <h1>Rewards &amp; Store</h1>
       </motion.div>
 
-      <motion.section className="rewards-hero ornate-panel" variants={staggerItem}>
-        <img src="/rewards-season-chest.png" alt="" />
+      <motion.section className="rewards-hero reward-panel" variants={staggerItem}>
+        <div className="rewards-hero-chest" aria-hidden="true">
+          <Icon name="chest" />
+        </div>
         <div className="rewards-hero-copy">
-          <p className="eyebrow">◆ &nbsp; Season Chest &nbsp; ◆</p>
+          <p className="eyebrow">{me.tierLabel || `${me.tier} Explorer`}</p>
           <h1>
             {claimable.length
               ? `${claimable.length} reward${claimable.length === 1 ? '' : 's'} ready to claim.`
-              : 'Complete quests to fill the chest.'}
+              : 'Keep discovering to fill your next chest.'}
           </h1>
         </div>
         <div className="season-progress">
@@ -130,13 +132,12 @@ function RewardsContent({
               : `${Math.round(seasonProgress * 100)}% toward level ${me.level + 1}`}
           </span>
         </div>
-        <div className="character-dialogue"><Icon name="leaf" /><span>Every quest brings you closer to glory.</span></div>
       </motion.section>
 
       <motion.div className="rewards-panel-grid" variants={staggerItem}>
         <RewardPanel title="Reward Track" className="reward-track-panel">
           <div className="reward-level-shield"><strong><AnimatedCounter value={me.level} /></strong><span>Level</span></div>
-          <div><h3>{me.tier} Seeker</h3><div className="gold-progress"><motion.i initial={{ width: 0 }} animate={{ width: `${me.progressToNextLevel * 100}%` }} transition={{ type: 'spring', stiffness: 300, damping: 30 }} /></div><p><AnimatedCounter value={me.xpIntoLevel} /> / {me.xpForCurrentLevel.toLocaleString()} XP</p></div>
+          <div><h3>{me.tierLabel || `${me.tier} Explorer`}</h3><div className="gold-progress"><motion.i initial={{ width: 0 }} animate={{ width: `${me.progressToNextLevel * 100}%` }} transition={{ type: 'spring', stiffness: 300, damping: 30 }} /></div><p><AnimatedCounter value={me.xpIntoLevel} /> / {me.xpForCurrentLevel.toLocaleString()} XP</p></div>
           <span className="reward-banner"><Icon name="compass" /></span>
         </RewardPanel>
 
@@ -178,11 +179,14 @@ function RewardsContent({
           </p>
         </RewardPanel>
 
-        <RewardPanel title="Chest Collection" className="chest-panel">
+        <RewardPanel title="Discoveries by Grade" className="chest-panel">
           <div className="chest-row">
-            <motion.article whileHover={{ y: -3 }} onMouseEnter={playHover} transition={springConfig.tactile}><Icon name="chest" /><strong>{collection.filter((item) => item.rarity === 'Common').length}</strong><span>Bronze</span></motion.article>
-            <motion.article whileHover={{ y: -3 }} onMouseEnter={playHover} transition={springConfig.tactile}><Icon name="chest" /><strong>{collection.filter((item) => item.rarity === 'Rare').length}</strong><span>Silver</span></motion.article>
-            <motion.article whileHover={{ y: -3 }} onMouseEnter={playHover} transition={springConfig.tactile}><Icon name="chest" /><strong>{collection.filter((item) => ['Epic', 'Legendary'].includes(item.rarity)).length}</strong><span>Golden</span></motion.article>
+            {/* Blueprint §16.2 grade labels (D..S -> Common..Legendary), not
+                the Explorer Tier names — those are a different scale (§17.3)
+                and using Bronze/Silver/Gold here collided with them. */}
+            <motion.article whileHover={{ y: -3 }} onMouseEnter={playHover} transition={springConfig.tactile}><Icon name="chest" /><strong>{collection.filter((item) => ['Common', 'Uncommon'].includes(item.rarity)).length}</strong><span>Common &amp; Uncommon</span></motion.article>
+            <motion.article whileHover={{ y: -3 }} onMouseEnter={playHover} transition={springConfig.tactile}><Icon name="chest" /><strong>{collection.filter((item) => item.rarity === 'Rare').length}</strong><span>Rare</span></motion.article>
+            <motion.article whileHover={{ y: -3 }} onMouseEnter={playHover} transition={springConfig.tactile}><Icon name="chest" /><strong>{collection.filter((item) => ['Epic', 'Legendary'].includes(item.rarity)).length}</strong><span>Epic &amp; Legendary</span></motion.article>
           </div>
           <Link to="/app/collection" onClick={playTap}>View collection <span>›</span></Link>
         </RewardPanel>
@@ -248,8 +252,8 @@ function RewardsContent({
 
 function RewardPanel({ title, className, children }) {
   return (
-    <motion.section className={`ornate-panel reward-reference-panel ${className}`} whileHover={{ y: -2 }} onMouseEnter={playHover} transition={springConfig.tactile}>
-      <div className="section-title"><h2>◆ &nbsp; {title} &nbsp; ◆</h2></div>
+    <motion.section className={`reward-panel ${className}`} whileHover={{ y: -2 }} onMouseEnter={playHover} transition={springConfig.tactile}>
+      <div className="section-title"><h2>{title}</h2></div>
       {children}
     </motion.section>
   );

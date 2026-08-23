@@ -15,7 +15,7 @@ export function OnboardingPage() {
   const [timezone, setTimezone] = useState(detectedTimezone);
   const [primaryPath, setPrimaryPath] = useState('Mind');
 
-  if (isLoading) return <p role="status" className="fullscreen-status">Binding your journal scroll…</p>;
+  if (isLoading) return <p role="status" className="fullscreen-status">Preparing your field journal…</p>;
   if (me?.onboardingCompletedAt) return <Navigate to="/app" replace />;
 
   const onNextStep = (e) => {
@@ -121,8 +121,8 @@ export function OnboardingPage() {
                           />
                           <span className="path-option-icon"><Icon name={categoryIcon(path)} /></span>
                           <span>
-                            <strong>{path}</strong>
-                            <small>{path === 'Mind' ? 'Focus & reflection' : path === 'Body' ? 'Vitality & energy' : 'Curiosity & observation'}</small>
+                            <strong>{path === 'Mind' ? 'Nature Observation' : path === 'Body' ? 'Outdoor Movement' : path}</strong>
+                            <small>{path === 'Mind' ? 'Wildlife & landscape study' : path === 'Body' ? 'Hiking & exploration' : 'Curiosity & observation'}</small>
                           </span>
                         </label>
                       ))}

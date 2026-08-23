@@ -1,8 +1,12 @@
 export const GUEST_USER = {
   id: 'guest-wayfarer-777',
   displayName: 'Guest Wayfarer',
-  email: 'guest@habbit.local',
+  email: 'guest@wildrealm.local',
   tier: 'Gold',
+  // Blueprint §17.3 sub-level, matching the real progression engine's shape
+  // so guest mode renders the same tierLabel format as a signed-in account.
+  subLevel: 'III',
+  tierLabel: 'Gold Explorer III',
   level: 14,
   totalXp: 7250,
   xpIntoLevel: 250,
@@ -17,9 +21,9 @@ export const GUEST_ACTIVE_QUESTS = [
   {
     id: 'g-q1',
     definitionId: 'def-1',
-    title: 'Morning Sanctuary',
+    title: 'Quiet Watch',
     category: 'Mind',
-    description: 'Spend 10 minutes in silent reflection or meditation before checking notifications.',
+    description: 'Spend 10 minutes in silent observation of the wildlife around you before moving on.',
     progressValue: 1,
     targetValue: 1,
     unit: 'session',
@@ -30,9 +34,9 @@ export const GUEST_ACTIVE_QUESTS = [
   {
     id: 'g-q2',
     definitionId: 'def-2',
-    title: 'Hydration Ritual',
+    title: 'Trail Hydration',
     category: 'Body',
-    description: 'Drink 4 full glasses of spring or filtered water throughout the day.',
+    description: 'Drink 4 full glasses of water while covering ground on the trail today.',
     progressValue: 3,
     targetValue: 4,
     unit: 'glasses',
@@ -45,7 +49,7 @@ export const GUEST_ACTIVE_QUESTS = [
     definitionId: 'def-3',
     title: 'Digital Sunset',
     category: 'Mind',
-    description: 'Disconnect all screens 30 minutes before sleep to rest your mind.',
+    description: 'Disconnect all screens 30 minutes before sleep to let the day’s finds settle.',
     progressValue: 0,
     targetValue: 1,
     unit: 'night',
@@ -71,7 +75,7 @@ export const GUEST_ACTIVE_QUESTS = [
 export const GUEST_HISTORY = [
   {
     id: 'h-1',
-    title: 'Starlit Meditation',
+    title: 'Starlit Vigil',
     category: 'Mind',
     xpReward: 150,
     status: 'completed',
@@ -94,15 +98,15 @@ export const GUEST_COLLECTIBLES = [
     category: 'Mind',
     rarity: 'Rare',
     unlockedAt: new Date(Date.now() - 864000000).toISOString(),
-    caption: 'Awarded for completing morning meditation 5 days in a row.',
+    caption: 'Awarded for five straight dawn observations.',
   },
   {
     assetId: 'col-2',
-    title: 'Shield of Resilience',
+    title: 'Trailblazer’s Mark',
     category: 'Body',
     rarity: 'Epic',
     unlockedAt: new Date(Date.now() - 432000000).toISOString(),
-    caption: 'Forged after maintaining a 7-day wellness streak.',
+    caption: 'Earned after a 7-day trail streak.',
   },
   {
     assetId: 'col-3',
@@ -117,17 +121,17 @@ export const GUEST_COLLECTIBLES = [
 export const GUEST_DEFINITIONS = [
   {
     id: 'def-10',
-    title: 'Gratitude Reflection',
+    title: 'Field Notes',
     category: 'Mind',
-    description: 'Write down 3 things you are deeply thankful for today.',
+    description: 'Write down 3 things you noticed in the field today.',
     xpReward: 100,
     cadence: 'daily',
   },
   {
     id: 'def-11',
-    title: 'Core Strength Challenge',
+    title: 'Ridge Climb',
     category: 'Body',
-    description: 'Perform a 2-minute plank session with proper form.',
+    description: 'Cover elevation on a nearby trail or hill.',
     xpReward: 140,
     cadence: 'daily',
   },

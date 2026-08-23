@@ -325,12 +325,13 @@ export class MemoryQuestRepository {
   }
   async getCollectibles(userId) { return this.collectibles.filter((item) => item.userId === userId).map(clone); }
   async createCapturedCard(card) {
-    const value = { id: randomUUID(), status: 'final', capturedAt: new Date().toISOString(), serverReceivedAt: new Date().toISOString(), ...card };
+    const value = { id: randomUUID(), status: 'final', capturedAt: new Date().toISOString(), serverReceivedAt: new Date().toISOString(), humanVerified: false, ...card };
     this.capturedCards.unshift(value);
     // Provisional (pending human verification) captures don't credit XP until approved — blueprint §6/§21.
     if (value.status === 'final' && value.xpAwarded > 0) {
+      if (!this.users.has(value.userId)) await this.ensureUser({ id: value.userId });
       const user = this.users.get(value.userId);
-      if (user) user.totalXp += value.xpAwarded;
+      user.totalXp += value.xpAwarded;
     }
     // Coins follow the same rule as XP: only credited once the capture is final.
     if (value.status === 'final' && value.coinsAwarded > 0) {
@@ -357,6 +358,42 @@ export class MemoryQuestRepository {
     const item = this.capturedCards.find((entry) => entry.userId === userId && entry.id === cardId);
     if (!item) return null;
     Object.assign(item, patch);
+    return clone(item);
+  }
+  async getCapturedCardByIdAnyUser(cardId) {
+    const item = this.capturedCards.find((entry) => entry.id === cardId);
+    return item ? clone(item) : null;
+  }
+  async listCaptureReviewQueue() {
+    return this.capturedCards
+      .filter((item) => item.status === 'provisional')
+      .sort((a, b) => new Date(a.capturedAt) - new Date(b.capturedAt))
+      .map(clone);
+  }
+  async reviewCapturedCard(cardId, { decision, reviewerId, reason }) {
+    const item = this.capturedCards.find((entry) => entry.id === cardId);
+    if (!item) return null;
+    if (item.status !== 'provisional') return clone(item);
+
+    item.status = decision === 'approve' ? 'final' : 'rejected';
+    item.humanVerified = decision === 'approve';
+    item.reviewedAt = new Date().toISOString();
+    item.reviewedBy = reviewerId;
+    item.reviewReason = reason || null;
+
+    if (decision === 'approve') {
+      if (item.xpAwarded > 0) {
+        if (!this.users.has(item.userId)) await this.ensureUser({ id: item.userId });
+        const user = this.users.get(item.userId);
+        user.totalXp += item.xpAwarded;
+      }
+      if (item.coinsAwarded > 0) {
+        const ledgerKey = `capture:${item.id}`;
+        if (!this.coinLedger.some((entry) => entry.ledgerKey === ledgerKey)) {
+          this.coinLedger.push({ ledgerKey, userId: item.userId, cardId: item.id, amount: item.coinsAwarded, reason: 'capture_reward' });
+        }
+      }
+    }
     return clone(item);
   }
   async getLastCaptureLocation(userId) {

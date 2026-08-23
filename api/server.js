@@ -20,12 +20,15 @@ import { resolveVisionProvider, resolveCandidateSpecies, VisionClassificationErr
 import { antiCheatVerdict, GateVerdict } from './lib/anti-cheat.js';
 import { scoreDiscovery, DEFAULT_WEIGHTS, DEFAULT_GRADE_BANDS } from './lib/rarity-engine.js';
 import { speciesCatalog } from './lib/species-catalog.js';
+import { protectedGps } from './lib/geo-privacy.js';
 
 const PUBLIC_SPECIES_CATALOG = speciesCatalog
   .filter((entry) => entry.enabled)
   .map(({ id, commonName, scientificName, element, category, baseRarity, nocturnal, sensitive, seasonalityMonths, encyclopedia }) => ({
     id, commonName, scientificName, element, category, baseRarity, nocturnal, sensitive, seasonalityMonths, encyclopedia,
   }));
+
+const SPECIES_BY_ID = new Map(speciesCatalog.map((entry) => [entry.id, entry]));
 
 const CONFIDENCE_THRESHOLD = 0.70;
 
@@ -273,7 +276,7 @@ export function createApp(options = {}) {
         description: speciesMatch.encyclopedia || top.ecosystem || '',
         imageHash,
         status: gate.verdict === GateVerdict.PASS_WITH_REVIEW || rarity.humanReview ? 'provisional' : 'final',
-        gps: body.gps || null,
+        gps: protectedGps(body.gps || null, speciesMatch),
         heading: body.heading ?? null,
         capturedAt,
         serverReceivedAt,
@@ -330,6 +333,11 @@ export function createApp(options = {}) {
     if (!card) return res.status(404).json({ error: { code: 'capture_not_found', requestId: req.id } });
     if (card.status === 'rejected') return res.status(422).json({ error: { code: 'capture_not_shareable', requestId: req.id } });
 
+    // Sensitive species (poaching/stalking risk — blueprint §1/§10/§22/§27,
+    // CRITICAL) get their coordinates jittered to a coarse grid cell before
+    // the post is ever written, so the exact sighting location never lands
+    // in a client-facing table in the first place.
+    const species = card.speciesId ? SPECIES_BY_ID.get(card.speciesId) : null;
     const result = await repository.runIdempotent(req.identity.id, 'create-community-post', idempotencyKey, async () => {
       const { post, created } = await repository.createCommunityPost({
         userId: req.identity.id,
@@ -337,7 +345,7 @@ export function createApp(options = {}) {
         caption: body.caption || '',
         hashtags: (body.hashtags || []).map((tag) => (tag.startsWith('#') ? tag : `#${tag}`)),
         placeLabel: body.placeLabel || null,
-        gps: card.gps || null,
+        gps: protectedGps(card.gps || null, species),
         visibility: body.visibility || 'public',
       });
       return { post, created };
@@ -371,6 +379,26 @@ export function createApp(options = {}) {
     res.json(await engine.reviewSubmission(req.identity, parse(submissionIdSchema, req.params.submissionId), body.decision, body.reason));
   }));
   app.get('/api/v1/admin/submissions/review-queue', asyncRoute(async (req, res) => res.json(await engine.reviewQueue(req.identity))));
+  // Human verification for provisional captures — blueprint §21. A/S-grade
+  // and anti-cheat-flagged discoveries are minted as status='provisional'
+  // (see the /api/v1/captures handler above) and stay that way — pending,
+  // rewards withheld — until an admin approves or rejects them here.
+  app.get('/api/v1/admin/captures/review-queue', asyncRoute(async (req, res) => {
+    if (!req.identity.isAdmin) return res.status(403).json({ error: { code: 'admin_required', requestId: req.id } });
+    res.json(await repository.listCaptureReviewQueue());
+  }));
+  app.post('/api/v1/admin/captures/:captureId/review', writeLimiter, asyncRoute(async (req, res) => {
+    if (!req.identity.isAdmin) return res.status(403).json({ error: { code: 'admin_required', requestId: req.id } });
+    const cardId = parse(captureIdSchema, req.params.captureId);
+    const body = parse(reviewSchema, req.body);
+    const existing = await repository.getCapturedCardByIdAnyUser(cardId);
+    if (!existing) return res.status(404).json({ error: { code: 'capture_not_found', requestId: req.id } });
+    if (existing.status !== 'provisional') {
+      return res.status(409).json({ error: { code: 'capture_not_reviewable', reason: `status is '${existing.status}', not 'provisional'`, requestId: req.id } });
+    }
+    const reviewed = await repository.reviewCapturedCard(cardId, { decision: body.decision, reviewerId: req.identity.id, reason: body.reason || null });
+    res.json(reviewed);
+  }));
 
   app.get('/api/quests', asyncRoute(async (req, res) => {
     let active = await engine.active(req.identity);

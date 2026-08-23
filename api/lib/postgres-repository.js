@@ -344,6 +344,73 @@ export class PostgresQuestRepository {
     const { rows } = await this.pool.query('UPDATE captured_cards SET card_title = COALESCE($3, card_title), updated_at = NOW() WHERE user_id = $1 AND id = $2 RETURNING *', [userId, cardId, patch.cardTitle ?? null]);
     return rows[0] ? mapCapturedCard(rows[0]) : null;
   }
+  /** Any provisional capture, across all players — an admin queue, not scoped to one user. */
+  async getCapturedCardByIdAnyUser(cardId) {
+    const { rows } = await this.pool.query('SELECT * FROM captured_cards WHERE id = $1', [cardId]);
+    return rows[0] ? mapCapturedCard(rows[0]) : null;
+  }
+  async listCaptureReviewQueue() {
+    const { rows } = await this.pool.query("SELECT * FROM captured_cards WHERE status='provisional' ORDER BY captured_at ASC LIMIT 200");
+    return rows.map(mapCapturedCard);
+  }
+  /**
+   * Admin approve/reject for a provisional capture — blueprint §21. Approve
+   * finalizes the card and credits the XP/coins that were computed but
+   * withheld at capture time (createCapturedCard only credits when status is
+   * already 'final'); reject leaves them uncredited. Both are idempotent:
+   * re-reviewing an already-decided card is a no-op that returns its current
+   * state rather than erroring or double-crediting.
+   */
+  async reviewCapturedCard(cardId, { decision, reviewerId, reason }) {
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      const current = await client.query('SELECT * FROM captured_cards WHERE id = $1 FOR UPDATE', [cardId]);
+      if (!current.rows[0]) { await client.query('ROLLBACK'); return null; }
+      const card = current.rows[0];
+      if (card.status !== 'provisional') {
+        // Already decided — return as-is rather than re-applying a decision
+        // (prevents a double-credit if an admin double-clicks Approve).
+        await client.query('ROLLBACK');
+        return mapCapturedCard(card);
+      }
+
+      const nextStatus = decision === 'approve' ? 'final' : 'rejected';
+      const { rows } = await client.query(
+        `UPDATE captured_cards SET status = $2, human_verified = $3, reviewed_at = NOW(),
+           reviewed_by = $4, review_reason = $5, updated_at = NOW()
+         WHERE id = $1 RETURNING *`,
+        [cardId, nextStatus, decision === 'approve', reviewerId, reason || null],
+      );
+      const updated = rows[0];
+
+      if (decision === 'approve') {
+        if (Number(card.xp_awarded) > 0) {
+          await client.query(
+            'INSERT INTO capture_xp_ledger (id, card_id, user_id, amount) VALUES ($1,$2,$3,$4)',
+            [randomUUID(), cardId, card.user_id, card.xp_awarded],
+          );
+          await client.query('UPDATE quest_users SET total_xp = total_xp + $2, updated_at = NOW() WHERE id = $1', [card.user_id, card.xp_awarded]);
+        }
+        if (Number(card.coins_awarded) > 0) {
+          await client.query(
+            `INSERT INTO coin_ledger (id, ledger_key, user_id, card_id, amount, reason)
+             VALUES ($1,$2,$3,$4,$5,'capture_reward')
+             ON CONFLICT (ledger_key) DO NOTHING`,
+            [randomUUID(), `capture:${cardId}`, card.user_id, cardId, card.coins_awarded],
+          );
+        }
+      }
+
+      await client.query('COMMIT');
+      return mapCapturedCard(updated);
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
   async getLastCaptureLocation(userId) {
     const { rows } = await this.pool.query(
       `SELECT gps_lat, gps_lng, captured_at FROM captured_cards
@@ -727,10 +794,16 @@ function mapCapturedCard(row) {
     rarityGrade: row.rarity_grade,
     rarityStars: row.rarity_stars,
     rarityWeightSetVersion: row.rarity_weight_set_version,
-    // xpAwarded is credited to quest_users.total_xp when status is 'final' (see createCapturedCard).
-    // coinsAwarded is NOT yet credited anywhere — the coin ledger/wallet ships in Milestone 7.
+    // xpAwarded/coinsAwarded are credited (capture_xp_ledger / coin_ledger)
+    // once the capture reaches status 'final' — either immediately in
+    // createCapturedCard for a non-provisional grade, or later via
+    // reviewCapturedCard when an A/S-grade capture is approved (blueprint §21).
     xpAwarded: row.xp_awarded != null ? Number(row.xp_awarded) : 0,
     coinsAwarded: row.coins_awarded != null ? Number(row.coins_awarded) : 0,
+    humanVerified: Boolean(row.human_verified),
+    reviewedAt: row.reviewed_at ?? null,
+    reviewedBy: row.reviewed_by ?? null,
+    reviewReason: row.review_reason ?? null,
   };
 }
 function conflict(code) { const error = new Error(code); error.code = code; error.status = 409; return error; }
