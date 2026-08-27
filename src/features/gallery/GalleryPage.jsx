@@ -20,11 +20,12 @@ const ELEMENT_TABS = [
 const RARITY_ORDER = ['S', 'A', 'B', 'C', 'D'];
 
 const cardVariants = {
-  hidden: { opacity: 0, y: 12 },
+  hidden: { opacity: 0, y: 30, scale: 0.95 },
   visible: (i) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.05, duration: 0.22, ease: [0.16, 1, 0.3, 1] },
+    scale: 1,
+    transition: { delay: i * 0.06, duration: 0.5, ease: [0.16, 1, 0.3, 1] },
   }),
 };
 
@@ -148,10 +149,11 @@ export function GalleryPage() {
                   style={{
                     position: 'absolute',
                     inset: 0,
-                    background: 'var(--quest-surface)',
-                    borderRadius: '8px',
+                    background: 'rgba(245, 158, 11, 0.12)',
+                    borderRadius: '999px',
                     zIndex: -1,
-                    border: '1px solid rgba(255,255,255,0.06)'
+                    border: '1px solid rgba(245, 158, 11, 0.4)',
+                    boxShadow: '0 0 12px rgba(245, 158, 11, 0.2)'
                   }}
                 />
               )}
@@ -166,7 +168,7 @@ export function GalleryPage() {
       ) : displayList.length === 0 && activeTab !== 'all' ? (
         <motion.div
           initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-          style={{ textAlign: 'center', padding: '40px 0', color: 'var(--wild-text-dim)' }}
+          className="library-empty-state"
         >
           <p>You haven&apos;t discovered any {activeTab} species yet.</p>
           <motion.button

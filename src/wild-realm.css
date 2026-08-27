@@ -30,6 +30,7 @@ h1, h2, h3, h4, h5, h6, .brand-lockup strong {
   border-top: 1px solid rgba(111, 191, 122, 0.28) !important;
   border-radius: 28px !important;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255,255,255,0.05) !important;
+  align-items: center !important;
 }
 
 .dock-item {
@@ -37,12 +38,16 @@ h1, h2, h3, h4, h5, h6, .brand-lockup strong {
   border-radius: 18px !important;
   background: transparent !important;
   border: none !important;
-  transition: color 0.25s ease, background 0.25s ease !important;
+  box-shadow: none !important;
+  transition: color 0.25s ease, background 0.25s ease, text-shadow 0.25s ease !important;
+  padding: 8px 0 !important;
+  height: auto !important;
 }
 
 .dock-item svg {
   width: 22px !important;
   height: 22px !important;
+  margin-bottom: 2px !important;
 }
 
 .dock-item span {
@@ -54,6 +59,8 @@ h1, h2, h3, h4, h5, h6, .brand-lockup strong {
 .dock-item.active {
   color: var(--rarity-uncommon) !important;
   background: rgba(111, 191, 122, 0.12) !important;
+  border: none !important;
+  box-shadow: inset 0 -2px var(--rarity-uncommon) !important;
   text-shadow: 0 0 12px rgba(111, 191, 122, 0.4) !important;
 }
 
@@ -65,12 +72,59 @@ h1, h2, h3, h4, h5, h6, .brand-lockup strong {
   box-shadow: 0 6px 20px rgba(111, 191, 122, 0.45), inset 0 1px 3px rgba(255,255,255,0.3) !important;
   color: var(--quest-ink-2) !important;
   transition: box-shadow 0.2s ease, transform 0.15s ease !important;
+  position: relative;
+  z-index: 1;
 }
+
+.dock-shutter-btn::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  background: rgba(111, 191, 122, 0.4);
+  z-index: -1;
+  animation: shutter-pulse 2s infinite cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+@keyframes shutter-pulse {
+  0% { transform: scale(0.9); opacity: 1; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+
 .dock-shutter-btn:hover {
   box-shadow: 0 8px 28px rgba(111, 191, 122, 0.6) !important;
 }
 
-/* ── 3. Topbar ──────────────────────────────────────────────────────────── */
+/* ── 7. Global Layout & Spacing Fixes ── */
+.ptr-container, .library-shell, .guild-page, .quests-shell {
+  padding-bottom: calc(140px + env(safe-area-inset-bottom)) !important;
+  padding-top: calc(24px + env(safe-area-inset-top)) !important;
+  padding-left: 16px !important;
+  padding-right: 16px !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+/* Make headers large and modern */
+.library-header h1, .quest-user-topbar h3 {
+  font-size: 1.8rem !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.02em !important;
+}
+
+.library-header {
+  margin-bottom: 24px !important;
+}
+
+/* Fix dock spacing and positioning on mobile */
+@media (max-width: 780px) {
+  .app-shell {
+    padding: 0 !important;
+    height: 100dvh !important;
+    overflow: hidden !important;
+  }
+}
 .topbar {
   background: transparent !important;
   border-bottom-color: rgba(111, 191, 122, 0.08) !important;
@@ -126,11 +180,18 @@ h1, h2, h3, h4, h5, h6, .brand-lockup strong {
 
 .scanner-bracket {
   border-color: var(--rarity-uncommon) !important;
+  animation: bracket-breathe 2s infinite ease-in-out !important;
+}
+
+@keyframes bracket-breathe {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.05); opacity: 1; }
 }
 
 .capture-scan-line {
-  background: linear-gradient(to right, transparent, var(--rarity-uncommon), transparent) !important;
+  background: linear-gradient(to bottom, transparent, var(--rarity-uncommon) 50%, transparent) !important;
   box-shadow: 0 0 16px var(--rarity-uncommon), 0 0 32px var(--rarity-uncommon) !important;
+  height: 20px !important;
 }
 
 .scanner-reticle {
@@ -171,6 +232,15 @@ h1, h2, h3, h4, h5, h6, .brand-lockup strong {
   color: var(--quest-muted) !important;
 }
 
+.explore-search-input:focus-visible {
+  outline: none !important;
+}
+
+.explore-search-input-wrap:focus-within {
+  border-color: var(--rarity-uncommon) !important;
+  box-shadow: 0 0 16px rgba(111, 191, 122, 0.25) !important;
+}
+
 .explore-filter-btn {
   color: var(--rarity-uncommon) !important;
 }
@@ -202,9 +272,141 @@ h1, h2, h3, h4, h5, h6, .brand-lockup strong {
 }
 
 .explore-hotspot-card {
-  border-radius: 16px !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4) !important;
+  border-radius: 24px !important;
+  border: none !important;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1) !important;
+  background: rgba(14, 24, 19, 0.7) !important;
+  backdrop-filter: blur(20px) !important;
+}
+
+.library-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 80px 24px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 32px;
+  margin-top: 32px;
+}
+
+.library-empty-state p {
+  color: var(--quest-muted) !important;
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: 24px;
+}
+
+body {
+  background: radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.1), transparent 50rem), var(--quest-ink) !important;
+}
+
+/* ── Modern Card Overrides (Collection & Community) ── */
+
+.library-photo-card, .community-post-card {
+  border: none !important;
+  border-radius: 24px !important;
+  background: rgba(20, 28, 24, 0.6) !important;
+  backdrop-filter: blur(12px) !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06) !important;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease !important;
+}
+
+.library-photo-card:active, .community-post-card:active {
+  transform: scale(0.96) !important;
+}
+
+.library-card-img-wrap, .post-photo-wrap {
+  border-radius: 20px !important;
+  margin: 6px !important;
+  width: calc(100% - 12px) !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2) !important;
+}
+
+.library-card-badge, .post-rank-badge {
+  border-radius: 999px !important;
+  border: none !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+  backdrop-filter: blur(8px) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.1) !important;
+  padding: 4px 10px !important;
+  width: auto !important;
+  height: auto !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.04em !important;
+}
+
+.post-author-avatar {
+  border: 2px solid rgba(255,255,255,0.1) !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+}
+
+/* Make S-Rank cards pop with a soft glow instead of harsh borders */
+.library-photo-card.rank-s {
+  background: linear-gradient(145deg, rgba(240, 196, 107, 0.1), rgba(20, 28, 24, 0.6)) !important;
+  box-shadow: 0 8px 32px rgba(240, 196, 107, 0.15), inset 0 1px 0 rgba(240, 196, 107, 0.3) !important;
+}
+
+/* ── Modern Quests Page Overrides ── */
+
+.quest-cadence-tabs {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border-radius: 999px !important;
+  padding: 6px !important;
+  border: none !important;
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.5) !important;
+  margin: 16px 0 24px !important;
+}
+
+.quest-cadence-btn {
+  border-radius: 999px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.03em !important;
+  font-size: 0.75rem !important;
+  color: var(--quest-muted) !important;
+}
+
+.quest-cadence-btn.active {
+  color: #fff !important;
+  background: transparent !important;
+}
+
+.quest-item-card {
+  border-radius: 24px !important;
+  border: none !important;
+  background: rgba(20, 28, 24, 0.5) !important;
+  backdrop-filter: blur(12px) !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06) !important;
+  margin-bottom: 12px !important;
+  overflow: hidden !important;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease !important;
+}
+
+.quest-item-card:active {
+  transform: scale(0.96) !important;
+}
+
+.quest-card-bg {
+  opacity: 0.15 !important;
+  filter: saturate(0.8) contrast(1.2) !important;
+}
+
+.quest-item-title {
+  font-size: 1.1rem !important;
+  font-weight: 800 !important;
+  color: #fff !important;
+  margin-bottom: 4px !important;
+}
+
+.quest-reward-pill {
+  border-radius: 999px !important;
+  background: rgba(245, 158, 11, 0.15) !important;
+  color: var(--quest-gold-bright) !important;
+  padding: 4px 12px !important;
+  font-weight: 800 !important;
+  font-size: 0.75rem !important;
+  border: none !important;
 }
 
 /* ── 6. Discovery Card ──────────────────────────────────────────────────── */
@@ -218,8 +420,42 @@ h1, h2, h3, h4, h5, h6, .brand-lockup strong {
 }
 
 .discovery-card-modal.rank-s {
-  border-color: var(--rarity-legendary) !important;
+  border: none !important;
+  position: relative;
   box-shadow: 0 0 64px rgba(240, 196, 107, 0.25), 0 32px 80px rgba(0,0,0,0.7) !important;
+}
+
+.discovery-card-modal.rank-s::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 26px;
+  background: conic-gradient(from var(--border-angle), var(--rarity-legendary) 0%, transparent 40%, transparent 60%, var(--rarity-legendary) 100%);
+  z-index: -1;
+  animation: rotate-border 4s linear infinite;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+  padding: 2px;
+}
+
+.discovery-card-modal.rank-s .discovery-hero-frame {
+  animation: breathing-aura 3s infinite ease-in-out;
+}
+
+@keyframes breathing-aura {
+  0%, 100% { box-shadow: 0 0 20px rgba(240, 196, 107, 0.3); }
+  50% { box-shadow: 0 0 50px rgba(240, 196, 107, 0.6); }
+}
+
+@property --border-angle {
+  syntax: "<angle>";
+  inherits: true;
+  initial-value: 0turn;
+}
+@keyframes rotate-border {
+  to { --border-angle: 1turn; }
 }
 
 .discovery-action-btns button {
