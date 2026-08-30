@@ -45,6 +45,7 @@ export function CaptureFlow({ onClose }) {
   const [errorMessage, setErrorMessage] = useState('');
   const [pendingBundle, setPendingBundle] = useState(null);
   const [candidates, setCandidates] = useState([]);
+  const [previewUrl, setPreviewUrl] = useState('');
   // The viewfinder only runs while the player is composing a shot.
   const { videoRef, status: cameraStatus } = useCameraPreview(stage === 'prompt');
   const captureItem = useCaptureItem();
@@ -79,6 +80,7 @@ export function CaptureFlow({ onClose }) {
     setStage('scanning');
     setErrorMessage('');
     const [dataUrl, telemetry] = await Promise.all([fileToDataUrl(file), collectCaptureTelemetry(file)]);
+    setPreviewUrl(dataUrl);
     await submitCapture({
       captureId: crypto.randomUUID(),
       imageBase64: dataUrl,
@@ -231,34 +233,44 @@ export function CaptureFlow({ onClose }) {
         {stage === 'scanning' && (
           <motion.div
             key="scanning"
-            className="capture-flow-panel capture-scanning"
+            className="capture-scanning-stage"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <div className="capture-scan-frame cinematic-scanner">
-              <div className="scanner-bracket top-left"></div>
-              <div className="scanner-bracket top-right"></div>
-              <div className="scanner-bracket bottom-left"></div>
-              <div className="scanner-bracket bottom-right"></div>
-              
-              <motion.div
-                className="capture-scan-line"
-                animate={{ y: ['0%', '100%', '0%'] }}
-                transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
+            {/* The subject stays on screen — the scan happens over the photo,
+                not in an abstract panel, so the moment stays grounded. */}
+            {previewUrl && <img className="capture-scanning-photo" src={previewUrl} alt="" aria-hidden="true" />}
+            <div className="capture-viewfinder-vignette" aria-hidden="true" />
+
+            <div className="capture-reticle is-scanning" aria-hidden="true">
+              <span className="capture-bracket tl" />
+              <span className="capture-bracket tr" />
+              <span className="capture-bracket bl" />
+              <span className="capture-bracket br" />
+              <motion.span
+                className="capture-scan-sweep"
+                initial={{ top: '0%' }}
+                animate={{ top: ['0%', '100%', '0%'] }}
+                transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
               />
-              
-              <motion.div className="scanner-reticle"
-                animate={{ scale: [1, 1.1, 1], rotate: [0, 90] }}
-                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-              />
-              
-              <div className="scanner-hud">
-                <span className="hud-data">AI ANALYSIS: ACTIVE</span>
-                <span className="hud-data right">LOCKED</span>
-              </div>
             </div>
-            <p className="scanner-text-pulse">Identifying and scoring rarity…</p>
+
+            <div className="capture-scan-panel" role="status" aria-live="polite">
+              <span className="capture-scan-label">
+                <span className="capture-scan-blip" aria-hidden="true" />
+                Identifying subject
+              </span>
+              <p className="capture-scan-note">Checking the capture, then scoring its rarity.</p>
+              <span className="capture-scan-track" aria-hidden="true">
+                <motion.span
+                  className="capture-scan-fill"
+                  initial={{ scaleX: 0.05 }}
+                  animate={{ scaleX: [0.05, 0.72, 0.9] }}
+                  transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut' }}
+                />
+              </span>
+            </div>
           </motion.div>
         )}
 
@@ -315,6 +327,7 @@ export function CaptureFlow({ onClose }) {
             <DiscoveryCard
               card={card}
               species={species}
+              imageUrl={previewUrl}
               isNew
               onAddToLibrary={handleConfirm}
               onShare={handleShare}

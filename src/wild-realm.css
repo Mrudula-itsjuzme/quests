@@ -1032,11 +1032,269 @@ body {
 .capture-shutter:active .capture-shutter-ring { transform: scale(1.08); border-color: #8ff0ab; }
 .capture-shutter:focus-visible .capture-shutter-ring { border-color: #8ff0ab; outline: none; }
 
-/* The dock must not sit on top of the capture controls. */
-.capture-flow-overlay ~ .mobile-bottom-dock,
-body:has(.capture-viewfinder) .mobile-bottom-dock { display: none !important; }
+/* The dock must never sit on top of the capture experience, at any stage. */
+body:has(.capture-flow-overlay) .mobile-bottom-dock { display: none !important; }
 
 @media (prefers-reduced-motion: reduce) {
   .capture-reticle { animation: none; }
   .capture-viewfinder-video { transition: none; }
+}
+
+/* ---- Scanning stage: the scan happens over the captured photo ---- */
+.capture-scanning-stage {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  overflow: hidden;
+  background: #030b07;
+}
+.capture-scanning-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(0.92) brightness(0.82);
+}
+.capture-reticle.is-scanning {
+  place-self: center;
+  animation: none;
+  overflow: hidden;
+}
+/* One restrained sweep — not a strobing sci-fi grid. */
+.capture-scan-sweep {
+  position: absolute;
+  left: -6%;
+  width: 112%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(134, 239, 172, 0.95), transparent);
+  box-shadow: 0 0 18px rgba(52, 211, 133, 0.6);
+}
+
+.capture-scan-panel {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  gap: 9px;
+  margin: 0 var(--space-4) calc(var(--space-6) + env(safe-area-inset-bottom, 0px));
+  padding: var(--space-4);
+  border: 1px solid rgba(160, 220, 180, 0.16);
+  border-radius: 20px;
+  background: rgba(6, 18, 12, 0.72);
+  backdrop-filter: blur(18px) saturate(1.3);
+  -webkit-backdrop-filter: blur(18px) saturate(1.3);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.55);
+}
+.capture-scan-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #d7f2de;
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.005em;
+}
+.capture-scan-blip {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 10px rgba(52, 211, 133, 0.85);
+  animation: capture-blip 1.6s ease-in-out infinite;
+}
+@keyframes capture-blip { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+.capture-scan-note {
+  margin: 0;
+  color: rgba(214, 232, 219, 0.66);
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+.capture-scan-track {
+  position: relative;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+.capture-scan-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  transform-origin: left center;
+  background: linear-gradient(90deg, #22c55e, #86efac);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .capture-scan-sweep { display: none; }
+  .capture-scan-blip { animation: none; }
+}
+
+/* ==========================================================================
+   WILD REALM — DISCOVERY CARD (the emotional peak)
+   Mockup: photography-dominant hero with a rarity glow ring, then a compact
+   reward strip. Escalating rarity presentation — D/C subtle, S cinematic.
+   ========================================================================== */
+.discovery-card-modal {
+  --rarity-accent: var(--rarity-common);
+  --rarity-glow: rgba(148, 163, 184, 0.34);
+}
+.discovery-card-modal.rank-d { --rarity-accent: var(--rarity-common);    --rarity-glow: rgba(148, 163, 184, 0.30); }
+.discovery-card-modal.rank-c { --rarity-accent: var(--rarity-uncommon);  --rarity-glow: rgba(16, 185, 129, 0.34); }
+.discovery-card-modal.rank-b { --rarity-accent: var(--rarity-rare);      --rarity-glow: rgba(59, 130, 246, 0.40); }
+.discovery-card-modal.rank-a { --rarity-accent: var(--rarity-epic);      --rarity-glow: rgba(139, 92, 246, 0.48); }
+.discovery-card-modal.rank-s { --rarity-accent: var(--rarity-legendary); --rarity-glow: rgba(245, 158, 11, 0.58); }
+
+/* The capture overlay already owns a close affordance; the card's own header
+   close would stack a second X in the same corner. */
+.capture-flow-overlay:has(.discovery-card-modal) > .capture-flow-close { display: none; }
+
+/* ---- Hero: photography dominates ---- */
+.discovery-hero-frame {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  border-radius: 18px !important;
+  overflow: hidden;
+  background: #06120c;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--rarity-accent) 45%, transparent),
+    0 0 34px -6px var(--rarity-glow),
+    0 18px 40px rgba(0, 0, 0, 0.55);
+}
+.discovery-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+/* Grounds the subject and keeps the name legible over any photo. */
+.discovery-hero-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(72% 58% at 50% 42%, transparent 52%, rgba(3, 10, 6, 0.62) 100%);
+}
+
+/* ---- Title row ---- */
+.discovery-title-row { align-items: flex-start !important; gap: var(--space-3) !important; }
+.discovery-title-info h2 {
+  font-size: 1.45rem !important;
+  line-height: 1.15 !important;
+  letter-spacing: -0.02em !important;
+}
+.discovery-title-info em {
+  display: block;
+  margin-top: 2px;
+  color: rgba(203, 225, 210, 0.6);
+  font-size: 0.83rem;
+  font-style: italic;
+}
+
+/* ---- Reward strip: 2x2 on phones so nothing wraps mid-word ---- */
+.discovery-stat-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 1px !important;
+  overflow: hidden;
+  border: 1px solid var(--quest-line);
+  border-radius: 16px;
+  background: var(--quest-line);
+}
+.discovery-stat-box {
+  display: grid !important;
+  align-content: start;
+  gap: 3px !important;
+  min-width: 0;
+  padding: 11px 12px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: rgba(8, 20, 13, 0.92) !important;
+  text-align: left !important;
+}
+.discovery-stat-box small {
+  color: rgba(203, 225, 210, 0.52) !important;
+  font-size: 0.6rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.07em !important;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.discovery-stat-box strong {
+  font-size: 0.98rem !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  white-space: nowrap;
+}
+.discovery-stat-box .stat-sub {
+  font-size: 0.72rem !important;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+/* Rarity box carries the grade colour so the strip reads at a glance. */
+.discovery-stat-box:first-child strong { color: var(--rarity-accent) !important; }
+
+.chip-verified { color: #34d399 !important; }
+.chip-pending  { color: var(--quest-gold-bright) !important; }
+.chip-rejected { color: #f87171 !important; }
+
+/* ---- Metadata + description ---- */
+.discovery-description {
+  color: rgba(214, 232, 219, 0.72) !important;
+  font-size: 0.86rem !important;
+  line-height: 1.5 !important;
+}
+/* Weather is omitted when the lookup fails (blueprint 6), so the strip must
+   size to however many facts actually exist rather than reserving an empty
+   third column. */
+.discovery-env-strip-row {
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr)) !important;
+  gap: 1px !important;
+  padding: 0 !important;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--quest-line);
+}
+.env-box { background: rgba(8, 20, 13, 0.92); padding: 10px 12px !important; min-width: 0; }
+.env-box small {
+  color: rgba(203, 225, 210, 0.5) !important;
+  font-size: 0.58rem !important;
+  letter-spacing: 0.07em !important;
+}
+.env-box span { font-size: 0.82rem !important; }
+
+/* The hex badge + its caption already state the grade; the title-row repeat
+   was a third instance of the same word. */
+.discovery-title-row > .discovery-header-badge { display: none; }
+
+/* ---- Rarity hex badge ---- */
+.discovery-hex-badge-wrap { flex: 0 0 auto; text-align: center; }
+.discovery-hex-badge {
+  filter: drop-shadow(0 0 14px var(--rarity-glow));
+}
+.discovery-hex-badge-wrap small {
+  display: block;
+  margin-top: 4px;
+  color: var(--rarity-accent);
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+}
+
+/* ---- Escalating rarity atmosphere: only A/S get a living halo ---- */
+.discovery-card-modal.rank-a .discovery-hero-frame,
+.discovery-card-modal.rank-s .discovery-hero-frame {
+  animation: discovery-halo 3.6s ease-in-out infinite;
+}
+@keyframes discovery-halo {
+  0%, 100% { box-shadow: 0 0 0 1px color-mix(in srgb, var(--rarity-accent) 45%, transparent),
+                         0 0 30px -8px var(--rarity-glow), 0 18px 40px rgba(0,0,0,.55); }
+  50%      { box-shadow: 0 0 0 1px color-mix(in srgb, var(--rarity-accent) 70%, transparent),
+                         0 0 52px -4px var(--rarity-glow), 0 18px 40px rgba(0,0,0,.55); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .discovery-card-modal.rank-a .discovery-hero-frame,
+  .discovery-card-modal.rank-s .discovery-hero-frame { animation: none; }
 }
