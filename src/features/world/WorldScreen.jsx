@@ -11,6 +11,8 @@ import { WorldHud } from './WorldHud';
 import { pickWeather } from './WeatherLayer';
 import { playTap } from '../../lib/useSoundEffects';
 import { Icon } from '../../components/Icon';
+import { Geolocation } from '@capacitor/geolocation';
+import { Capacitor } from '@capacitor/core';
 
 const CATEGORIES = ['All', 'Hotspots', 'Parks', 'Waterfalls', 'Birding'];
 
@@ -52,15 +54,32 @@ export function WorldScreen() {
   // Distances are only shown when the browser actually grants a position;
   // a denied or unavailable fix simply omits them.
   useEffect(() => {
-    if (typeof navigator === 'undefined' || !navigator.geolocation) return undefined;
     let cancelled = false;
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        if (!cancelled) setLastKnownPosition({ lat: position.coords.latitude, lng: position.coords.longitude });
-      },
-      () => {},
-      { enableHighAccuracy: false, timeout: 8000, maximumAge: 300_000 },
-    );
+    const fetchLocation = async () => {
+      try {
+        if (Capacitor.isNativePlatform()) {
+          const permission = await Geolocation.checkPermissions();
+          if (permission.location !== 'granted') {
+            const request = await Geolocation.requestPermissions();
+            if (request.location !== 'granted') return;
+          }
+          const position = await Geolocation.getCurrentPosition({ enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 });
+          if (!cancelled) setLastKnownPosition({ lat: position.coords.latitude, lng: position.coords.longitude });
+        } else {
+          if (typeof navigator === 'undefined' || !navigator.geolocation) return;
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              if (!cancelled) setLastKnownPosition({ lat: position.coords.latitude, lng: position.coords.longitude });
+            },
+            () => {},
+            { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 },
+          );
+        }
+      } catch {
+        // location error, degrade gracefully
+      }
+    };
+    fetchLocation();
     return () => { cancelled = true; };
   }, []);
 
@@ -316,4 +335,3 @@ export function WorldScreen() {
     </motion.div>
   );
 }
-

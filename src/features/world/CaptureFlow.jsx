@@ -2,11 +2,13 @@ import { useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Icon } from '../../components/Icon';
-import { useCaptureItem, useRenameCapture, useShareDiscovery, useSpecies } from '../quests/queries';
+import { useAddCardToLibrary, useCaptureItem, useRenameCapture, useShareDiscovery, useSpecies } from '../quests/queries';
 import { playTap } from '../../lib/useSoundEffects';
 import { collectCaptureTelemetry } from '../../lib/captureTelemetry';
 import { useCameraPreview } from '../../lib/useCameraPreview';
 import { DiscoveryCard } from './DiscoveryCard';
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { Capacitor } from '@capacitor/core';
 
 function fileToDataUrl(file) {
   return new Promise((resolve, reject) => {
@@ -49,11 +51,13 @@ export function CaptureFlow({ onClose }) {
   // The viewfinder only runs while the player is composing a shot.
   const { videoRef, status: cameraStatus } = useCameraPreview(stage === 'prompt');
   const captureItem = useCaptureItem();
+  const addCardToLibrary = useAddCardToLibrary();
   const renameCapture = useRenameCapture();
   const shareDiscovery = useShareDiscovery();
   const { data: species } = useSpecies();
 
   const submitCapture = async (bundle) => {
+    if (captureItem.isPending) return; // Prevent duplicate submissions
     triggerHaptic([20, 40, 20]);
     try {
       const result = await captureItem.mutateAsync(bundle);
@@ -75,6 +79,7 @@ export function CaptureFlow({ onClose }) {
   };
 
   const handleFile = async (event) => {
+    if (captureItem.isPending) return;
     const file = event.target.files?.[0];
     if (!file) return;
     setStage('scanning');
@@ -92,6 +97,41 @@ export function CaptureFlow({ onClose }) {
     });
   };
 
+  const handleNativeCamera = async () => {
+    if (captureItem.isPending) return;
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const image = await Camera.getPhoto({
+          quality: 90,
+          allowEditing: false,
+          resultType: CameraResultType.Uri,
+          source: CameraSource.Camera,
+        });
+        if (image.webPath) {
+          setStage('scanning');
+          setErrorMessage('');
+          const response = await fetch(image.webPath);
+          const blob = await response.blob();
+          const file = new File([blob], 'capture.jpg', { type: 'image/jpeg' });
+          const [dataUrl, telemetry] = await Promise.all([fileToDataUrl(file), collectCaptureTelemetry(file)]);
+          await submitCapture({
+            captureId: crypto.randomUUID(),
+            imageBase64: dataUrl,
+            capturedAt: telemetry.capturedAt,
+            gps: telemetry.gps,
+            heading: telemetry.heading,
+            liveness: telemetry.liveness,
+            exif: telemetry.exif,
+          });
+        }
+      } catch {
+        // User likely cancelled the camera, do nothing to allow trying again
+      }
+    } else {
+      inputRef.current?.click();
+    }
+  };
+
   const handlePickCandidate = async (index) => {
     playTap();
     setStage('scanning');
@@ -105,6 +145,13 @@ export function CaptureFlow({ onClose }) {
         await renameCapture.mutateAsync({ captureId: card.id, cardTitle: name.trim() });
       } catch {
         // Card is already saved server-side under its original name; a failed rename isn't fatal to the capture.
+      }
+    }
+    if (card?.id) {
+      try {
+        await addCardToLibrary.mutateAsync(card.id);
+      } catch {
+        window.dispatchEvent(new CustomEvent('habbit-notice', { detail: 'Your discovery was saved, but Library confirmation failed. Try again from Collection.' }));
       }
     }
     onClose();
@@ -183,7 +230,6 @@ export function CaptureFlow({ onClose }) {
                 </button>
               </div>
             </div>
-
             <div className="capture-reticle" aria-hidden="true">
               <span className="capture-bracket tl" />
               <span className="capture-bracket tr" />
@@ -207,7 +253,7 @@ export function CaptureFlow({ onClose }) {
                   type="button"
                   className="capture-shutter"
                   aria-label="Capture photo"
-                  onClick={() => { playTap(); triggerHaptic([12]); inputRef.current?.click(); }}
+                  onClick={() => { playTap(); triggerHaptic([12]); handleNativeCamera(); }}
                 >
                   <span className="capture-shutter-ring" aria-hidden="true" />
                   <span className="capture-shutter-core" aria-hidden="true">
