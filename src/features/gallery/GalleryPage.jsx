@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useCaptures, useSpecies } from '../quests/queries';
 import { playTap } from '../../lib/useSoundEffects';
 import { DiscoveryCard } from '../world/DiscoveryCard';
+import { AuthImage } from '../../components/AuthImage';
 
 // Element identity is expressed with the design system's colour tokens rather
 // than image files; the four element photos these tiles used to reference were
@@ -276,12 +277,13 @@ export function GalleryPage() {
                     }}
                   >
                     <motion.div layoutId={`discovery-img-${cardId}`} className="library-card-img-wrap">
-                      {/* Capture photos aren't served back from the API, so the
-                          tile carries its element crest rather than a stand-in
-                          photo of a different animal. */}
-                      <div className={`library-card-crest element-${(speciesEntry?.element || 'Earth').toLowerCase()}`} aria-hidden="true">
-                        <span>{speciesEntry?.element || 'Wild'}</span>
-                      </div>
+                      {card.imageRef ? (
+                        <AuthImage src={card.imageRef} alt={card.itemName} className="library-card-img" useAuth={card.imageRef.includes('/captures/')} />
+                      ) : (
+                        <div className={`library-card-crest element-${(speciesEntry?.element || 'Earth').toLowerCase()}`} aria-hidden="true">
+                          <span>{speciesEntry?.element || 'Wild'}</span>
+                        </div>
+                      )}
                       <div className={`library-card-badge rank-badge-${rarity.toLowerCase()}`}>
                         {rarity}
                       </div>

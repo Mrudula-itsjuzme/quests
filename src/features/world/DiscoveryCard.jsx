@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { Icon } from '../../components/Icon';
+import { AuthImage } from '../../components/AuthImage';
 
 function useCountUp(targetValue, duration = 1200) {
   const [count, setCount] = useState(0);
@@ -124,7 +125,7 @@ export function DiscoveryCard({ card, species, imageUrl, isNew = false, onAddToL
       {/* Hero Image Frame with Holographic Overlay */}
       <motion.div layoutId={layoutIdPrefix ? `${layoutIdPrefix}img-${cardId}` : undefined} className="discovery-hero-frame">
         {cardImg ? (
-          <img className="discovery-hero-img" src={cardImg} alt={itemName} />
+          <AuthImage className="discovery-hero-img" src={cardImg} alt={itemName} useAuth={cardImg.includes('/captures/')} />
         ) : (
           // Capture photos are not served back from the API yet, so the hero
           // shows the rarity crest instead of an unrelated stock animal.

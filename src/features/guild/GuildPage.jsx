@@ -10,6 +10,7 @@ import {
 } from '../quests/queries';
 import { playTap } from '../../lib/useSoundEffects';
 import { CommunityShareSheet } from './CommunityShareSheet';
+import { AuthImage } from '../../components/AuthImage';
 
 const TABS = [
   { id: 'FEED', label: 'Feed' },
@@ -163,7 +164,7 @@ function CommunityFeed({ onShare }) {
           {post.discovery && (
             <div className={`post-photo-wrap rank-${(post.discovery.rarityGrade || post.discovery.rarityTier || 'd').toLowerCase()}`}>
               {post.discovery.imageRef ? (
-                <img className="post-photo-img" src={post.discovery.imageRef} alt={post.discovery.itemName} loading="lazy" decoding="async" />
+                <AuthImage className="post-photo-img" src={post.discovery.imageRef} alt={post.discovery.itemName} useAuth={post.discovery.imageRef.includes('/captures/')} />
               ) : (
                 // Capture images are not served publicly yet, so the card shows
                 // its rarity crest rather than a stand-in wildlife photo.
