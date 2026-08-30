@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useCaptures, useSpecies } from '../quests/queries';
 import { playTap } from '../../lib/useSoundEffects';
 import { DiscoveryCard } from '../world/DiscoveryCard';
+import { Icon } from '../../components/Icon';
 
 // Element identity is expressed with the design system's colour tokens rather
 // than image files; the four element photos these tiles used to reference were
@@ -90,7 +91,7 @@ export function GalleryPage() {
           aria-label="Search collection"
           whileTap={{ scale: 0.9 }}
         >
-          🔍
+          <Icon name="search" />
         </motion.button>
       </div>
 

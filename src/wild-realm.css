@@ -1298,3 +1298,154 @@ body:has(.capture-flow-overlay) .mobile-bottom-dock { display: none !important; 
   .discovery-card-modal.rank-a .discovery-hero-frame,
   .discovery-card-modal.rank-s .discovery-hero-frame { animation: none; }
 }
+
+/* ==========================================================================
+   WILD REALM — LIBRARY / COLLECTION
+   Mockup: a trophy case. Dense grid, rarity-coded borders and badges,
+   compact name/rank metadata. Not a feed of oversized cards.
+   ========================================================================== */
+
+/* Rarity is one language across the app; the grid reads it from the grade. */
+.rank-badge-d, .stars-d { --rarity-accent: var(--rarity-common); }
+.rank-badge-c, .stars-c { --rarity-accent: var(--rarity-uncommon); }
+.rank-badge-b, .stars-b { --rarity-accent: var(--rarity-rare); }
+.rank-badge-a, .stars-a { --rarity-accent: var(--rarity-epic); }
+.rank-badge-s, .stars-s { --rarity-accent: var(--rarity-legendary); }
+
+/* Three columns at phone width — a trophy case, not a feed. */
+.library-card-grid {
+  column-count: 3 !important;
+  column-gap: 9px !important;
+}
+@media (max-width: 359px) { .library-card-grid { column-count: 2 !important; } }
+@media (min-width: 700px) { .library-card-grid { column-count: 4 !important; } }
+@media (min-width: 1024px) { .library-card-grid { column-count: 5 !important; } }
+
+.library-photo-card {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  margin: 0 0 9px !important;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--rarity-accent, #94a3b8) 30%, transparent) !important;
+  border-radius: 14px !important;
+  background: rgba(9, 20, 13, 0.9) !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45) !important;
+  transition: transform 180ms var(--quest-ease), box-shadow 180ms var(--quest-ease),
+              border-color 180ms var(--quest-ease);
+  break-inside: avoid;
+}
+/* Higher grades earn a visible halo; D/C stay quiet. */
+.library-photo-card:has(.rank-badge-a),
+.library-photo-card:has(.rank-badge-s) {
+  box-shadow: 0 0 22px -6px color-mix(in srgb, var(--rarity-accent) 65%, transparent),
+              0 6px 18px rgba(0, 0, 0, 0.45) !important;
+}
+.library-photo-card:active { transform: scale(0.975); }
+
+.library-card-img-wrap {
+  position: relative;
+  aspect-ratio: 1 !important;
+  overflow: hidden;
+}
+
+/* Until capture media is served back, the crest IS the art — make it feel
+   deliberate (element-tinted field + wordmark) rather than an empty box. */
+.library-card-crest {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--element-tint, #2f6b4a) 42%, transparent), transparent 70%),
+    linear-gradient(180deg, rgba(12, 26, 18, 0.9), rgba(5, 13, 9, 0.95));
+}
+.library-card-crest span {
+  color: color-mix(in srgb, var(--element-tint, #6ee7a0) 82%, #ffffff);
+  font-size: 0.56rem !important;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+.library-card-crest.element-fire   { --element-tint: #f97316; }
+.library-card-crest.element-water  { --element-tint: #38bdf8; }
+.library-card-crest.element-grass  { --element-tint: #4ade80; }
+.library-card-crest.element-earth  { --element-tint: #a78bfa; }
+.library-card-crest.element-sky    { --element-tint: #67e8f9; }
+
+/* Corner rarity badge, coloured by grade (previously always gold). */
+.library-card-badge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  display: grid;
+  place-items: center;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 5px;
+  border: 1px solid color-mix(in srgb, var(--rarity-accent) 55%, transparent);
+  border-radius: 7px;
+  background: rgba(4, 12, 8, 0.82) !important;
+  backdrop-filter: blur(6px);
+  color: var(--rarity-accent) !important;
+  font-size: 0.62rem !important;
+  font-weight: 800 !important;
+  line-height: 1;
+}
+
+.library-card-info { display: grid !important; gap: 1px !important; padding: 6px 7px 7px !important; }
+.library-card-title {
+  margin: 0 !important;
+  overflow: hidden;
+  color: var(--quest-cream) !important;
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.library-card-sub {
+  margin: 1px 0 0 !important;
+  color: rgba(203, 225, 210, 0.5) !important;
+  font-size: 0.6rem !important;
+}
+.library-card-stars { font-size: 0.6rem !important; color: var(--rarity-accent) !important; letter-spacing: 0.02em; }
+.library-card-stars i { color: rgba(255, 255, 255, 0.16); font-style: normal; }
+
+/* The search affordance is an icon button, not an emoji glyph. */
+.library-search-btn svg { width: 17px; height: 17px; color: var(--quest-cream); }
+
+/* ---- Element tabs must scroll, never clip "Sky"/"Familiars" ---- */
+.library-element-tabs,
+.library-shell .element-tabs {
+  display: flex !important;
+  gap: 8px !important;
+  overflow-x: auto !important;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 2px;
+}
+.library-element-tabs::-webkit-scrollbar,
+.library-shell .element-tabs::-webkit-scrollbar { display: none; }
+.library-element-tabs > * ,
+.library-shell .element-tabs > * { flex: 0 0 auto !important; }
+
+/* ---- Sort control: match the dark system instead of a native select ---- */
+.library-shell select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 8px 30px 8px 12px !important;
+  border: 1px solid var(--quest-line) !important;
+  border-radius: 12px !important;
+  background-color: rgba(9, 20, 13, 0.9) !important;
+  background-image: linear-gradient(45deg, transparent 50%, rgba(203,225,210,.65) 50%),
+                    linear-gradient(135deg, rgba(203,225,210,.65) 50%, transparent 50%) !important;
+  background-position: right 13px center, right 8px center !important;
+  background-size: 5px 5px, 5px 5px !important;
+  background-repeat: no-repeat !important;
+  color: var(--quest-cream) !important;
+  font-family: inherit !important;
+  font-size: 0.8rem !important;
+  font-weight: 600 !important;
+}
