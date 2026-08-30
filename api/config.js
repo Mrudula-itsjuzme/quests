@@ -22,7 +22,7 @@ const schema = z.object({
   OIDC_AUDIENCE: z.string().min(1).optional(),
   OIDC_JWKS_URL: z.string().url().optional(),
   SUPABASE_URL: z.string().url().optional(),
-  CORS_ORIGINS: z.string().default('http://localhost:3000,capacitor://localhost'),
+  CORS_ORIGINS: z.string().default('http://localhost:3000,http://localhost:5173,capacitor://localhost'),
   TRUST_PROXY: z.coerce.number().int().min(0).max(2).default(0),
   RATE_LIMIT_WINDOW_MS: z.coerce.number().int().min(1000).default(60_000),
   RATE_LIMIT_AUTH: z.coerce.number().int().min(1).default(120),
