@@ -93,6 +93,23 @@ describe('configuration security', () => {
     })).toThrow(/HTTPS OIDC/);
   });
 
+  it('rejects wildcard production CORS and public proxy trust', () => {
+    const base = {
+      NODE_ENV: 'production',
+      DEV_AUTH_ENABLED: 'false',
+      DEV_ALLOW_LEGACY_MUTATIONS: 'false',
+      PROVIDER_MODE: 'disabled',
+      DATABASE_URL: 'postgres://quest_app:secret@db:5432/quests',
+      OIDC_ISSUER: 'https://identity.example.com',
+      OIDC_AUDIENCE: 'habbit-api',
+      VISION_PROVIDER: 'openrouter',
+      OPENROUTER_API_KEY: 'openrouter-key-value',
+    };
+    expect(() => loadConfig({ ...base, CORS_ORIGINS: '*' })).toThrow(/explicit production CORS/);
+    expect(() => loadConfig({ ...base, CORS_ORIGINS: 'http://app.example.com' })).toThrow(/HTTPS production CORS/);
+    expect(() => loadConfig({ ...base, CORS_ORIGINS: 'https://app.example.com', TRUST_PROXY: '2' })).toThrow(/TRUST_PROXY/);
+  });
+
   it('rejects invalid timezones and malformed numeric limits', () => {
     expect(() => loadConfig({ NODE_ENV: 'test', DEV_USER_TIMEZONE: 'Mars/Olympus' })).toThrow(/IANA timezone/);
     expect(() => loadConfig({ NODE_ENV: 'test', RATE_LIMIT_WRITES: '0' })).toThrow(/RATE_LIMIT_WRITES/);

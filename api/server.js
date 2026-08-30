@@ -21,6 +21,8 @@ import { antiCheatVerdict, GateVerdict } from './lib/anti-cheat.js';
 import { scoreDiscovery, DEFAULT_WEIGHTS, DEFAULT_GRADE_BANDS } from './lib/rarity-engine.js';
 import { speciesCatalog } from './lib/species-catalog.js';
 import { protectedGps } from './lib/geo-privacy.js';
+import { redactPublicPayload } from './lib/public-redaction.js';
+import { auditLog } from './lib/audit-log.js';
 
 const PUBLIC_SPECIES_CATALOG = speciesCatalog
   .filter((entry) => entry.enabled)
@@ -102,7 +104,9 @@ const communityPostSchema = z.object({
 }).strict();
 const communityLikeSchema = z.object({ liked: z.boolean() }).strict();
 const communityCommentSchema = z.object({ body: z.string().trim().min(1).max(1000) }).strict();
+const communityReportSchema = z.object({ reason: z.enum(['abuse', 'misinfo', 'private_info', 'unsafe_location', 'spam', 'other']), details: z.string().trim().max(1000).optional() }).strict();
 const communityScopeSchema = z.enum(['public', 'friends']);
+const deleteAccountSchema = z.object({ reason: z.string().trim().max(1000).optional() }).strict().optional();
 const legacyQuestSchema = z.object({
   title: z.string().trim().min(1).max(160),
   summary: z.string().trim().max(2000).optional(),
@@ -224,15 +228,16 @@ export function createApp(options = {}) {
       { capturedAt, gps: body.gps || null, heading: body.heading ?? null, liveness: body.liveness || null, exif: body.exif || null, imageHash },
       { repository, userId: req.identity.id, serverReceivedAt },
     );
-    if (gate.unimplementedDetectors.length && config.NODE_ENV !== 'test') {
-      console.warn(JSON.stringify({ level: 'warn', event: 'anti_cheat_unimplemented_detectors', requestId: req.id, detectors: gate.unimplementedDetectors }));
-    }
+    if (gate.unimplementedDetectors.length && config.NODE_ENV !== 'test') auditLog('anti_cheat_unimplemented_detectors', { level: 'warn', requestId: req.id, detectors: gate.unimplementedDetectors });
+    if (config.NODE_ENV !== 'test') auditLog('capture_anti_cheat_verdict', { requestId: req.id, userId: req.identity.id, verdict: gate.verdict, reason: gate.reason, gps: body.gps || null });
 
     if (gate.verdict === GateVerdict.REJECT) {
       return res.status(422).json({ error: { code: 'anti_cheat_rejected', reason: gate.reason, requestId: req.id } });
     }
 
     const result = await repository.runIdempotent(req.identity.id, 'create-capture', idempotencyKey, async () => {
+      const existingCapture = body.captureId ? await repository.getCapturedCardByCaptureId?.(req.identity.id, body.captureId) : null;
+      if (existingCapture) return { card: existingCapture };
       const identification = await visionProvider.identify(body.imageBase64);
       const top = identification.candidates[body.chosenCandidateIndex ?? 0] || identification.candidates[0];
 
@@ -291,23 +296,24 @@ export function createApp(options = {}) {
         xpAwarded: rarity.xp,
         coinsAwarded: rarity.coins,
       });
+      if (config.NODE_ENV !== 'test') auditLog('capture_minted', { requestId: req.id, userId: req.identity.id, captureId: card.id, status: card.status, rarityGrade: card.rarityGrade, gps: card.gps || null });
       return { card };
     });
 
     if (result.needsConfirmation) return res.status(200).json(result);
-    res.status(201).json(result.card);
+    res.status(201).json(redactPublicPayload(result.card));
   }));
-  app.get('/api/v1/captures', asyncRoute(async (req, res) => res.json(await repository.getCapturedCards(req.identity.id))));
+  app.get('/api/v1/captures', asyncRoute(async (req, res) => res.json(redactPublicPayload(await repository.getCapturedCards(req.identity.id)))));
   app.get('/api/v1/captures/:captureId', asyncRoute(async (req, res) => {
     const card = await repository.getCapturedCardById(req.identity.id, parse(captureIdSchema, req.params.captureId));
     if (!card) return res.status(404).json({ error: { code: 'capture_not_found', requestId: req.id } });
-    res.json(card);
+    res.json(redactPublicPayload(card));
   }));
   app.patch('/api/v1/captures/:captureId', writeLimiter, asyncRoute(async (req, res) => {
     const body = parse(captureRenameSchema, req.body);
     const card = await repository.updateCapturedCard(req.identity.id, parse(captureIdSchema, req.params.captureId), body);
     if (!card) return res.status(404).json({ error: { code: 'capture_not_found', requestId: req.id } });
-    res.json(card);
+    res.json(redactPublicPayload(card));
   }));
   app.get('/api/v1/world/hotspots', asyncRoute(async (req, res) => {
     const category = req.query.category == null || req.query.category === ''
@@ -322,7 +328,7 @@ export function createApp(options = {}) {
   }));
   app.get('/api/v1/community/posts', asyncRoute(async (req, res) => {
     const scope = req.query.scope == null || req.query.scope === '' ? 'public' : parse(communityScopeSchema, req.query.scope);
-    res.json(await repository.listCommunityPosts(req.identity.id, { scope, limit: req.query.limit }));
+    res.json(redactPublicPayload(await repository.listCommunityPosts(req.identity.id, { scope, limit: req.query.limit })));
   }));
   app.post('/api/v1/community/posts', writeLimiter, asyncRoute(async (req, res) => {
     const body = parse(communityPostSchema, req.body);
@@ -350,26 +356,34 @@ export function createApp(options = {}) {
       });
       return { post, created };
     });
-    res.status(result.created ? 201 : 200).json(result.post);
+    if (config.NODE_ENV !== 'test') auditLog('community_post_created', { requestId: req.id, userId: req.identity.id, postId: result.post.id, created: result.created, gps: result.post.gps || null });
+    res.status(result.created ? 201 : 200).json(redactPublicPayload(result.post));
   }));
   app.get('/api/v1/community/posts/:postId/comments', asyncRoute(async (req, res) => {
-    res.json(await repository.listCommunityComments(parse(postIdSchema, req.params.postId)));
+    res.json(redactPublicPayload(await repository.listCommunityComments(parse(postIdSchema, req.params.postId))));
   }));
   app.post('/api/v1/community/posts/:postId/comments', writeLimiter, asyncRoute(async (req, res) => {
     const body = parse(communityCommentSchema, req.body);
     const comment = await repository.createCommunityComment(req.identity.id, parse(postIdSchema, req.params.postId), body.body);
     if (!comment) return res.status(404).json({ error: { code: 'post_not_found', requestId: req.id } });
-    res.status(201).json(comment);
+    res.status(201).json(redactPublicPayload(comment));
   }));
   app.post('/api/v1/community/posts/:postId/like', writeLimiter, asyncRoute(async (req, res) => {
     const body = parse(communityLikeSchema, req.body);
     const post = await repository.setCommunityPostLike(req.identity.id, parse(postIdSchema, req.params.postId), body.liked);
     if (!post) return res.status(404).json({ error: { code: 'post_not_found', requestId: req.id } });
-    res.json(post);
+    res.json(redactPublicPayload(post));
   }));
-  app.get('/api/v1/community/friends', asyncRoute(async (req, res) => res.json(await repository.listFriends(req.identity.id))));
-  app.get('/api/v1/feed', asyncRoute(async (req, res) => res.json(await engine.feed(req.identity))));
-  app.get('/api/v1/leaderboard', asyncRoute(async (req, res) => res.json(await engine.leaderboard(req.identity))));
+  app.post('/api/v1/community/posts/:postId/report', writeLimiter, asyncRoute(async (req, res) => {
+    const body = parse(communityReportSchema, req.body);
+    const report = await repository.reportCommunityPost(req.identity.id, parse(postIdSchema, req.params.postId), body);
+    if (!report) return res.status(404).json({ error: { code: 'post_not_found', requestId: req.id } });
+    if (config.NODE_ENV !== 'test') auditLog('community_post_reported', { requestId: req.id, userId: req.identity.id, postId: report.postId, reason: report.reason });
+    res.status(report.created ? 201 : 200).json(redactPublicPayload(report));
+  }));
+  app.get('/api/v1/community/friends', asyncRoute(async (req, res) => res.json(redactPublicPayload(await repository.listFriends(req.identity.id)))));
+  app.get('/api/v1/feed', asyncRoute(async (req, res) => res.json(redactPublicPayload(await engine.feed(req.identity)))));
+  app.get('/api/v1/leaderboard', asyncRoute(async (req, res) => res.json(redactPublicPayload(await engine.leaderboard(req.identity)))));
   app.get('/api/v1/rewards', asyncRoute(async (req, res) => res.json(await engine.rewards(req.identity))));
   app.post('/api/v1/rewards/claim', writeLimiter, asyncRoute(async (req, res) => res.json(await engine.claimRewards(req.identity))));
   app.get('/api/v1/notifications', asyncRoute(async (req, res) => res.json(await engine.notifications(req.identity))));
@@ -397,7 +411,15 @@ export function createApp(options = {}) {
       return res.status(409).json({ error: { code: 'capture_not_reviewable', reason: `status is '${existing.status}', not 'provisional'`, requestId: req.id } });
     }
     const reviewed = await repository.reviewCapturedCard(cardId, { decision: body.decision, reviewerId: req.identity.id, reason: body.reason || null });
-    res.json(reviewed);
+    if (config.NODE_ENV !== 'test') auditLog('capture_review_decision', { requestId: req.id, reviewerId: req.identity.id, captureId: cardId, decision: body.decision });
+    res.json(redactPublicPayload(reviewed));
+  }));
+
+  app.post('/api/v1/me/delete-request', writeLimiter, asyncRoute(async (req, res) => {
+    const body = parse(deleteAccountSchema, req.body || {});
+    const result = await repository.requestAccountDeletion(req.identity.id, { reason: body?.reason || null });
+    if (config.NODE_ENV !== 'test') auditLog('account_deletion_requested', { requestId: req.id, userId: req.identity.id });
+    res.status(result.created ? 202 : 200).json(redactPublicPayload(result));
   }));
 
   app.get('/api/quests', asyncRoute(async (req, res) => {
@@ -436,7 +458,7 @@ export function createApp(options = {}) {
           : error instanceof VisionClassificationError ? error.code
             : status >= 500 ? 'internal_error'
               : error.code || error.message);
-    if (status >= 500 && config.NODE_ENV !== 'test') console.error(JSON.stringify({ level: 'error', event: 'request_failed', requestId: req.id, method: req.method, path: req.path, code }));
+    if (status >= 500 && config.NODE_ENV !== 'test') auditLog('request_failed', { level: 'error', requestId: req.id, method: req.method, path: req.path, code });
     res.status(status).json({ error: { code, requestId: req.id } });
   });
   return app;

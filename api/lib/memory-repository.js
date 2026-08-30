@@ -25,7 +25,9 @@ export class MemoryQuestRepository {
     this.communityPosts = [];
     this.communityLikes = [];
     this.communityComments = [];
+    this.communityReports = [];
     this.friendships = [];
+    this.accountDeletionRequests = [];
   }
 
   // --- World ---
@@ -126,6 +128,15 @@ export class MemoryQuestRepository {
     return this.communityComments.filter((item) => item.postId === postId).map(clone);
   }
 
+  async reportCommunityPost(userId, postId, { reason, details = '' }) {
+    if (!this.communityPosts.some((item) => item.id === postId)) return null;
+    const existing = this.communityReports.find((item) => item.postId === postId && item.userId === userId);
+    if (existing) return { ...clone(existing), created: false };
+    const value = { id: randomUUID(), postId, userId, reason, details, status: 'pending', createdAt: new Date().toISOString() };
+    this.communityReports.push(value);
+    return { ...clone(value), created: true };
+  }
+
   async deleteCommunityPost(userId, postId) {
     const index = this.communityPosts.findIndex((item) => item.id === postId && item.userId === userId);
     if (index === -1) return false;
@@ -166,6 +177,20 @@ export class MemoryQuestRepository {
     const updated = { ...current, ...patch };
     this.users.set(userId, updated);
     return clone(updated);
+  }
+
+  async requestAccountDeletion(userId, { reason = null } = {}) {
+    const current = this.users.get(userId);
+    if (!current) await this.ensureUser({ id: userId });
+    const existing = this.accountDeletionRequests.find((item) => item.userId === userId && item.status === 'pending');
+    if (existing) return { ...clone(existing), created: false };
+    const now = new Date().toISOString();
+    const value = { id: randomUUID(), userId, reason, status: 'pending', requestedAt: now, retentionUntil: null };
+    this.accountDeletionRequests.push(value);
+    const user = this.users.get(userId);
+    user.status = 'deletion_requested';
+    user.deletionRequestedAt = now;
+    return { ...clone(value), created: true };
   }
   async reconcileStreak(userId, currentPeriodKey) {
     const user = this.users.get(userId);
@@ -325,6 +350,11 @@ export class MemoryQuestRepository {
   }
   async getCollectibles(userId) { return this.collectibles.filter((item) => item.userId === userId).map(clone); }
   async createCapturedCard(card) {
+    if (card.captureId) {
+      const existing = this.capturedCards.find((entry) => entry.userId === card.userId && entry.captureId === card.captureId);
+      if (existing) return clone(existing);
+      if (this.capturedCards.some((entry) => entry.captureId === card.captureId)) throw conflict('duplicate_capture_id');
+    }
     const value = { id: randomUUID(), status: 'final', capturedAt: new Date().toISOString(), serverReceivedAt: new Date().toISOString(), humanVerified: false, ...card };
     this.capturedCards.unshift(value);
     // Provisional (pending human verification) captures don't credit XP until approved — blueprint §6/§21.

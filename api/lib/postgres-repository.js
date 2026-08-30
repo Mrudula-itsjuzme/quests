@@ -40,6 +40,31 @@ export class PostgresQuestRepository {
     );
     return rows[0] ? mapUser(rows[0]) : null;
   }
+  async requestAccountDeletion(userId, { reason = null } = {}) {
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      await client.query('SELECT id FROM quest_users WHERE id = $1 FOR UPDATE', [userId]);
+      const existing = await client.query("SELECT * FROM account_deletion_requests WHERE user_id = $1 AND status = 'pending'", [userId]);
+      if (existing.rows[0]) {
+        await client.query('COMMIT');
+        return { ...mapAccountDeletionRequest(existing.rows[0]), created: false };
+      }
+      const { rows } = await client.query(
+        `INSERT INTO account_deletion_requests (id, user_id, reason, status)
+         VALUES ($1,$2,$3,'pending') RETURNING *`,
+        [randomUUID(), userId, reason],
+      );
+      await client.query("UPDATE quest_users SET account_status = 'deletion_requested', deletion_requested_at = NOW(), updated_at = NOW() WHERE id = $1", [userId]);
+      await client.query('COMMIT');
+      return { ...mapAccountDeletionRequest(rows[0]), created: true };
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
   async reconcileStreak(userId, currentPeriodKey) {
     await this.pool.query(`UPDATE quest_users SET streak_days = 0, updated_at = NOW()
       WHERE id = $1 AND streak_days > 0
@@ -286,6 +311,15 @@ export class PostgresQuestRepository {
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
+      if (card.captureId) {
+        const existing = await client.query('SELECT * FROM captured_cards WHERE user_id = $1 AND capture_id = $2 FOR UPDATE', [card.userId, card.captureId]);
+        if (existing.rows[0]) {
+          await client.query('COMMIT');
+          return mapCapturedCard(existing.rows[0]);
+        }
+        const foreign = await client.query('SELECT 1 FROM captured_cards WHERE capture_id = $1 LIMIT 1', [card.captureId]);
+        if (foreign.rows[0]) throw conflict('duplicate_capture_id');
+      }
       const { rows } = await client.query(
         `INSERT INTO captured_cards
           (id, user_id, capture_id, item_name, category, card_title, rarity_tier, rarity_score, description, image_ref, image_hash,
@@ -574,6 +608,29 @@ export class PostgresQuestRepository {
     return rows.map(mapCommunityComment);
   }
 
+  async reportCommunityPost(userId, postId, { reason, details = '' }) {
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      const post = await client.query('SELECT id FROM community_posts WHERE id = $1 FOR UPDATE', [postId]);
+      if (!post.rows[0]) { await client.query('ROLLBACK'); return null; }
+      const { rows } = await client.query(
+        `INSERT INTO community_post_reports (id, post_id, user_id, reason, details)
+         VALUES ($1,$2,$3,$4,$5)
+         ON CONFLICT (post_id, user_id) DO UPDATE SET post_id = EXCLUDED.post_id
+         RETURNING *, (xmax = 0) AS inserted`,
+        [randomUUID(), postId, userId, reason, details],
+      );
+      await client.query('COMMIT');
+      return { ...mapCommunityReport(rows[0]), created: Boolean(rows[0].inserted) };
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
   async deleteCommunityPost(userId, postId) {
     // Ownership is part of the predicate, so another user's post can never be
     // deleted even if the id is guessed.
@@ -762,6 +819,8 @@ function mapWorldHotspot(row) {
 function mapCommunityComment(row) {
   return { id: row.id, postId: row.post_id, userId: row.user_id, displayName: row.display_name, body: row.body, createdAt: row.created_at };
 }
+function mapCommunityReport(row) { return { id: row.id, postId: row.post_id, userId: row.user_id, reason: row.reason, details: row.details || '', status: row.status, createdAt: row.created_at }; }
+function mapAccountDeletionRequest(row) { return { id: row.id, userId: row.user_id, reason: row.reason, status: row.status, requestedAt: row.requested_at, retentionUntil: row.retention_until }; }
 
 function mapUser(row) { return { id: row.id, displayName: row.display_name, timezone: row.timezone, totalXp: Number(row.total_xp), streakDays: Number(row.streak_days), lastStreakPeriod: row.last_streak_period, primaryPath: row.primary_path ?? null, reminderTime: row.reminder_time ? String(row.reminder_time).slice(0, 5) : null, motionPreference: row.motion_preference || 'system', onboardingCompletedAt: row.onboarding_completed_at ?? null, tourVersionSeen: Number(row.tour_version_seen || 0) }; }
 function mapDefinition(row) { return { id: row.id, title: row.title, description: row.description, category: row.category, rarity: row.rarity, cadence: row.cadence, verificationType: row.verification_type, subjectTag: row.subject_tag, targetValue: Number(row.target_value), unit: row.unit, cooldownDays: Number(row.cooldown_days), xpReward: Number(row.xp_reward), enabled: row.enabled, instructions: row.instructions || [] }; }
