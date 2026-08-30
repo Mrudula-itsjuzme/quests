@@ -7,6 +7,14 @@
 // native bundle can never reach this line with a relative base.
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
+export function normalizeTimezone(timezone) {
+  const value = typeof timezone === 'string' && timezone.trim() ? timezone.trim() : 'UTC';
+  const aliases = {
+    'Asia/Calcutta': 'Asia/Kolkata',
+  };
+  return aliases[value] || value;
+}
+
 export class ApiError extends Error {
   constructor(status, code, requestId, reason) {
     super(code || 'request_failed');
@@ -42,7 +50,15 @@ async function request(path, { method = 'GET', body, token, idempotencyKey, sign
       // against its own cache and always yields a complete response.
       cache: 'no-store',
     });
-  } catch {
+  } catch (error) {
+    if (typeof console !== 'undefined') {
+      console.error('Wild Realm API request failed', {
+        baseUrl: API_BASE_URL,
+        path,
+        method,
+        message: error?.message,
+      });
+    }
     throw new ApiError(0, 'network_unavailable');
   }
 

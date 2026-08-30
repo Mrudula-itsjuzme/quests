@@ -179,7 +179,7 @@ export class MemoryQuestRepository {
 
   async ensureUser(user) {
     const current = this.users.get(user.id) || { id: user.id, displayName: user.displayName || 'Adventurer', timezone: user.timezone || 'UTC', totalXp: 0, streakDays: 0, lastStreakPeriod: null, primaryPath: null, reminderTime: null, motionPreference: 'system', onboardingCompletedAt: null, tourVersionSeen: 0 };
-    this.users.set(user.id, { ...current, ...user, totalXp: current.totalXp, streakDays: current.streakDays, lastStreakPeriod: current.lastStreakPeriod });
+    this.users.set(user.id, current);
     return { ...this.users.get(user.id) };
   }
 

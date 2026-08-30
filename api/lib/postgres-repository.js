@@ -8,14 +8,13 @@ export class PostgresQuestRepository {
   }
 
   async ensureUser(user) {
-    const { rows } = await this.pool.query(
+    await this.pool.query(
       `INSERT INTO quest_users (id, display_name, timezone)
        VALUES ($1, $2, $3)
-       ON CONFLICT (id) DO UPDATE SET display_name = EXCLUDED.display_name, timezone = EXCLUDED.timezone, updated_at = NOW()
-       RETURNING *`,
+       ON CONFLICT (id) DO NOTHING`,
       [user.id, user.displayName || 'Adventurer', user.timezone || 'UTC'],
     );
-    return mapUser(rows[0]);
+    return this.getUser(user.id);
   }
   async getUser(userId) { const { rows } = await this.pool.query('SELECT * FROM quest_users WHERE id = $1', [userId]); return rows[0] ? mapUser(rows[0]) : null; }
   async listUsers() { const { rows } = await this.pool.query('SELECT * FROM quest_users ORDER BY id'); return rows.map(mapUser); }

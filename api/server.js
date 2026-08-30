@@ -34,6 +34,22 @@ const SPECIES_BY_ID = new Map(speciesCatalog.map((entry) => [entry.id, entry]));
 
 const CONFIDENCE_THRESHOLD = 0.70;
 
+function normalizeTimezone(timezone) {
+  const aliases = {
+    'Asia/Calcutta': 'Asia/Kolkata',
+  };
+  return aliases[timezone] || timezone;
+}
+
+function isValidTimezone(value) {
+  try {
+    new Intl.DateTimeFormat('en', { timeZone: normalizeTimezone(value) });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 const idempotencySchema = z.string().min(8).max(160).regex(/^[A-Za-z0-9._:-]+$/);
 const assignmentIdSchema = z.string().uuid();
 const notificationIdSchema = z.string().uuid();
@@ -42,7 +58,7 @@ const reviewSchema = z.object({ decision: z.enum(['approve', 'reject']), reason:
 const progressSchema = z.object({ value: z.coerce.number().finite().min(0).max(10_000_000) }).strict();
 const profileSchema = z.object({
   displayName: z.string().trim().min(1).max(120).optional(),
-  timezone: z.string().min(1).max(80).refine((value) => { try { new Intl.DateTimeFormat('en', { timeZone: value }); return true; } catch { return false; } }, 'must be an IANA timezone').optional(),
+  timezone: z.string().min(1).max(80).refine(isValidTimezone, 'must be an IANA timezone').transform(normalizeTimezone).optional(),
   primaryPath: z.enum(['Mind', 'Body', 'Discovery']).nullable().optional(),
   reminderTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).nullable().optional(),
   motionPreference: z.enum(['system', 'full', 'reduced']).optional(),

@@ -9,7 +9,9 @@ describe('configuration security', () => {
       DEV_ALLOW_LEGACY_MUTATIONS: false,
       PROVIDER_MODE: 'disabled',
       listenHost: '127.0.0.1',
+      REQUEST_BODY_LIMIT: '8mb',
     }));
+    expect(config.corsOrigins).toContain('capacitor://localhost');
   });
 
   it('rejects development authentication, local providers, and ephemeral storage in production', () => {

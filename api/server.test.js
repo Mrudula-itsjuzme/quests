@@ -142,6 +142,22 @@ describe('Quest API', () => {
     }));
   });
 
+  it('normalizes legacy Android timezone aliases during onboarding', async () => {
+    const app = createApp({ config: testConfig() });
+    const updated = await request(app).patch('/api/v1/me').send({
+      displayName: 'Ari',
+      timezone: 'Asia/Calcutta',
+      primaryPath: 'Mind',
+      onboardingCompleted: true,
+    });
+    expect(updated.status).toBe(200);
+    expect(updated.body.timezone).toBe('Asia/Kolkata');
+    expect(updated.body.onboardingCompletedAt).toBeTruthy();
+    const persisted = await request(app).get('/api/v1/me');
+    expect(persisted.body.displayName).toBe('Ari');
+    expect(persisted.body.timezone).toBe('Asia/Kolkata');
+  });
+
   it('rejects malformed profile updates', async () => {
     const app = createApp({ config: testConfig() });
     const response = await request(app).patch('/api/v1/me').send({ timezone: 'Mars/Olympus', reminderTime: '29:99' });

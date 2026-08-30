@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
+import { Capacitor } from '@capacitor/core';
+import { Camera } from '@capacitor/camera';
 
 /**
  * Live rear-camera preview for the Capture screen.
@@ -33,6 +35,18 @@ export function useCameraPreview(active = true) {
     }
 
     const start = async () => {
+      if (Capacitor.isNativePlatform()) {
+        try {
+          const permission = await Camera.checkPermissions();
+          if (!cancelled) {
+            setStatus(permission.camera === 'granted' ? 'live' : 'unavailable');
+          }
+        } catch {
+          if (!cancelled) setStatus('unavailable');
+        }
+        return;
+      }
+
       const media = typeof navigator !== 'undefined' ? navigator.mediaDevices : null;
       if (!media?.getUserMedia) {
         setStatus('unavailable');

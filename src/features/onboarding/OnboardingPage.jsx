@@ -4,8 +4,9 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Icon, categoryIcon } from '../../components/Icon';
 import { useMe, useUpdateMe } from '../quests/queries';
 import { playHover, playSuccess, playTap } from '../../lib/useSoundEffects';
+import { normalizeTimezone } from '../../lib/api';
 
-const detectedTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+const detectedTimezone = normalizeTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone);
 
 export function OnboardingPage() {
   const { data: me, isLoading } = useMe();
@@ -34,7 +35,7 @@ export function OnboardingPage() {
     playSuccess();
     await updateMe.mutateAsync({
       displayName: displayName.trim() || undefined,
-      timezone,
+      timezone: normalizeTimezone(timezone),
       primaryPath,
       onboardingCompleted: true,
     });
