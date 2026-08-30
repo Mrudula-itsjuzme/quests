@@ -4,6 +4,7 @@ import { useCaptures, useSpecies } from '../quests/queries';
 import { playTap } from '../../lib/useSoundEffects';
 import { DiscoveryCard } from '../world/DiscoveryCard';
 import { Icon } from '../../components/Icon';
+import { appleEase, duration } from '../../components/motion/MotionVariants';
 
 // Element identity is expressed with the design system's colour tokens rather
 // than image files; the four element photos these tiles used to reference were
@@ -23,13 +24,16 @@ const ELEMENT_TABS = [
 // Highest grade first, matching the rarity engine's S–D scale.
 const RARITY_ORDER = ['S', 'A', 'B', 'C', 'D'];
 
+// Browsing the library is an ordinary action, not a reveal: the grid settles
+// quickly and the stagger is capped so a large collection never trickles in.
+// (Was delay i*0.06 with a 0.5s duration — tile 6 finished at ~800ms.)
 const cardVariants = {
-  hidden: { opacity: 0, y: 30, scale: 0.95 },
+  hidden: { opacity: 0, y: 8, scale: 0.985 },
   visible: (i) => ({
     opacity: 1,
     y: 0,
     scale: 1,
-    transition: { delay: i * 0.06, duration: 0.5, ease: [0.16, 1, 0.3, 1] },
+    transition: { delay: Math.min(i, 8) * 0.022, duration: duration.standard, ease: appleEase },
   }),
 };
 

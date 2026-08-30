@@ -1747,3 +1747,26 @@ body:has(.capture-flow-overlay) .mobile-bottom-dock { display: none !important; 
 /* Map controls stack below the filter row rather than on top of it. */
 .map-control-btn.map-control-layers { top: 172px !important; }
 .map-control-btn.map-control-locate { top: 224px !important; }
+
+/* ==========================================================================
+   WILD REALM — MOTION SYSTEM (second pass)
+   One timing scale shared by CSS and framer-motion (MotionVariants.js):
+     micro 120ms   — press / hover / icon response, must feel immediate
+     quick 180ms   — small state changes
+     standard 240ms— tabs, cards, sheets, route content
+     hero 700ms    — earned, cinematic beats only
+   ========================================================================== */
+
+/* A lazy route used to mount an EMPTY div, so every tab change flashed a
+   blank screen before the incoming screen painted. Holding the ground colour
+   keeps the shell continuous instead. */
+.route-suspense-fallback {
+  min-height: 60vh;
+  background: transparent;
+}
+
+/* Route stage keeps its own compositing layer so the incoming screen does not
+   force a repaint of the dock/ambience behind it. */
+.journal-page-transition {
+  will-change: opacity, transform;
+}
