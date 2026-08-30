@@ -3,7 +3,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useCaptures, useSpecies } from '../quests/queries';
 import { playTap } from '../../lib/useSoundEffects';
 import { DiscoveryCard } from '../world/DiscoveryCard';
-import { AuthImage } from '../../components/AuthImage';
 import { Icon } from '../../components/Icon';
 import { CaptureImage } from '../../components/CaptureImage';
 import { appleEase, duration } from '../../components/motion/MotionVariants';

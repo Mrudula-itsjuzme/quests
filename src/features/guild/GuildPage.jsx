@@ -11,7 +11,6 @@ import {
 } from '../quests/queries';
 import { playTap } from '../../lib/useSoundEffects';
 import { CommunityShareSheet } from './CommunityShareSheet';
-import { AuthImage } from '../../components/AuthImage';
 
 const TABS = [
   { id: 'FEED', label: 'Feed' },

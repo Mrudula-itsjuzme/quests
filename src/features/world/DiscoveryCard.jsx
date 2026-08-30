@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { Icon } from '../../components/Icon';
-import { AuthImage } from '../../components/AuthImage';
 import { CaptureImage } from '../../components/CaptureImage';
 
 function useCountUp(targetValue, duration = 1200) {
