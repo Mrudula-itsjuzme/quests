@@ -849,3 +849,194 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .dock-shutter-btn::after { animation: none !important; opacity: 0 !important; }
 }
+
+/* ==========================================================================
+   WILD REALM — CAPTURE VIEWFINDER (hero screen)
+   The camera is the ENVIRONMENT: full-bleed video, dark vignette for
+   readability, minimal chrome floating on top. Never inside a card.
+   ========================================================================== */
+.capture-viewfinder {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 80% at 50% 12%, #16301f 0%, #081a10 45%, #030b07 100%);
+}
+
+.capture-viewfinder-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;                 /* hidden until a real stream attaches */
+  transition: opacity 420ms var(--quest-ease);
+}
+.capture-viewfinder-video.is-live { opacity: 1; }
+
+/* Keeps white text legible over any scene, and focuses the eye centre-frame. */
+.capture-viewfinder-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(3, 10, 6, 0.78) 0%, rgba(3, 10, 6, 0) 24%,
+                            rgba(3, 10, 6, 0) 56%, rgba(3, 10, 6, 0.88) 100%),
+    radial-gradient(78% 58% at 50% 46%, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, 0.55) 100%);
+}
+
+/* ---- Top chrome: location/live cue + flash ---- */
+.capture-viewfinder-top {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: calc(var(--space-4) + env(safe-area-inset-top, 0px)) var(--space-4) 0;
+}
+
+.capture-locus,
+.capture-chip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid rgba(160, 220, 180, 0.16);
+  border-radius: 999px;
+  background: rgba(6, 18, 12, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: rgba(233, 245, 236, 0.9);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+.capture-chip-btn { padding: 0; width: 34px; justify-content: center; cursor: pointer; }
+.capture-locus svg,
+.capture-chip-btn svg { width: 15px; height: 15px; color: #6ee7a0; }
+
+.capture-top-actions { display: flex; align-items: center; gap: 8px; }
+/* The stage-level close button is redundant while the viewfinder shows its own. */
+.capture-flow-overlay:has(.capture-viewfinder) > .capture-flow-close { display: none; }
+/* Close glyph is a rotated plus; cancel the parent rotation for a true X. */
+.capture-top-actions .capture-chip-btn:last-child svg { transform: rotate(45deg); }
+
+/* ---- Centre framing brackets ---- */
+.capture-reticle {
+  position: relative;
+  z-index: 2;
+  place-self: center;
+  width: min(58vw, 215px);
+  aspect-ratio: 1;
+  animation: capture-breathe 5s ease-in-out infinite;
+}
+.capture-bracket {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border: 2px solid rgba(190, 240, 205, 0.72);
+}
+.capture-bracket.tl { top: 0; left: 0; border-right: 0; border-bottom: 0; border-radius: 6px 0 0 0; }
+.capture-bracket.tr { top: 0; right: 0; border-left: 0; border-bottom: 0; border-radius: 0 6px 0 0; }
+.capture-bracket.bl { bottom: 0; left: 0; border-right: 0; border-top: 0; border-radius: 0 0 0 6px; }
+.capture-bracket.br { bottom: 0; right: 0; border-left: 0; border-top: 0; border-radius: 0 0 6px 0; }
+
+@keyframes capture-breathe {
+  0%, 100% { transform: scale(1);    opacity: 0.85; }
+  50%      { transform: scale(1.035); opacity: 1; }
+}
+
+/* ---- Bottom chrome: hint + controls ---- */
+.capture-viewfinder-bottom {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  justify-items: center;
+  gap: var(--space-4);
+  padding: 0 var(--space-4) calc(var(--space-7) + env(safe-area-inset-bottom, 0px));
+}
+
+.capture-hint {
+  margin: 0;
+  max-width: 26ch;
+  color: rgba(226, 240, 229, 0.72);
+  font-size: 0.84rem;
+  line-height: 1.35;
+  text-align: center;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.65);
+}
+
+.capture-controls {
+  display: grid;
+  grid-template-columns: 52px 1fr 52px;
+  align-items: center;
+  justify-items: center;
+  width: min(100%, 330px);
+}
+
+.capture-side-btn {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 1px solid rgba(160, 220, 180, 0.18);
+  border-radius: 16px;
+  background: rgba(8, 22, 14, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: rgba(226, 240, 229, 0.85);
+  cursor: pointer;
+  transition: transform 140ms var(--quest-ease), background 180ms var(--quest-ease);
+}
+.capture-side-btn svg { width: 19px; height: 19px; }
+.capture-side-btn:active { transform: scale(0.92); }
+.capture-side-btn.is-placeholder { border-color: transparent; background: none; cursor: default; }
+
+/* The leaf-in-reticle shutter — green, never a Pokéball, never gold. */
+.capture-shutter {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 82px;
+  height: 82px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.capture-shutter-ring {
+  position: absolute;
+  inset: 0;
+  border: 3px solid rgba(226, 245, 232, 0.85);
+  border-radius: 50%;
+  transition: transform 160ms var(--quest-ease), border-color 160ms var(--quest-ease);
+}
+.capture-shutter-core {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 36% 30%, #8ff0ab, #22c55e 58%, #15803d);
+  color: #04140c;
+  box-shadow: 0 0 26px rgba(52, 211, 133, 0.45), inset 0 1px 2px rgba(255, 255, 255, 0.35);
+  transition: transform 160ms var(--quest-ease);
+}
+.capture-shutter-core svg { width: 30px; height: 30px; }
+
+/* Tactile compression on press. */
+.capture-shutter:active .capture-shutter-core { transform: scale(0.9); }
+.capture-shutter:active .capture-shutter-ring { transform: scale(1.08); border-color: #8ff0ab; }
+.capture-shutter:focus-visible .capture-shutter-ring { border-color: #8ff0ab; outline: none; }
+
+/* The dock must not sit on top of the capture controls. */
+.capture-flow-overlay ~ .mobile-bottom-dock,
+body:has(.capture-viewfinder) .mobile-bottom-dock { display: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .capture-reticle { animation: none; }
+  .capture-viewfinder-video { transition: none; }
+}

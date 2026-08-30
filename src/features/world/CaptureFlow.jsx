@@ -5,6 +5,7 @@ import { Icon } from '../../components/Icon';
 import { useCaptureItem, useRenameCapture, useShareDiscovery, useSpecies } from '../quests/queries';
 import { playTap } from '../../lib/useSoundEffects';
 import { collectCaptureTelemetry } from '../../lib/captureTelemetry';
+import { useCameraPreview } from '../../lib/useCameraPreview';
 import { DiscoveryCard } from './DiscoveryCard';
 
 function fileToDataUrl(file) {
@@ -44,6 +45,8 @@ export function CaptureFlow({ onClose }) {
   const [errorMessage, setErrorMessage] = useState('');
   const [pendingBundle, setPendingBundle] = useState(null);
   const [candidates, setCandidates] = useState([]);
+  // The viewfinder only runs while the player is composing a shot.
+  const { videoRef, status: cameraStatus } = useCameraPreview(stage === 'prompt');
   const captureItem = useCaptureItem();
   const renameCapture = useRenameCapture();
   const shareDiscovery = useShareDiscovery();
@@ -142,41 +145,78 @@ export function CaptureFlow({ onClose }) {
         {stage === 'prompt' && (
           <motion.div
             key="prompt"
-            className="capture-flow-prompt-ar"
-            initial={{ opacity: 0, scale: 1.1 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.4, ease: 'easeOut' }}
+            className="capture-viewfinder"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, scale: 1.02 }}
+            transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div className="ar-hud-overlay">
-              <div className="ar-bracket top-left" />
-              <div className="ar-bracket top-right" />
-              <div className="ar-bracket bottom-left" />
-              <div className="ar-bracket bottom-right" />
-              <div className="ar-center-reticle">
-                <div className="ar-crosshair" />
+            {/* The camera IS the environment — full-bleed, never inside a card. */}
+            <video
+              ref={videoRef}
+              className={`capture-viewfinder-video${cameraStatus === 'live' ? ' is-live' : ''}`}
+              playsInline
+              muted
+              autoPlay
+              aria-hidden="true"
+            />
+            <div className="capture-viewfinder-vignette" aria-hidden="true" />
+
+            <div className="capture-viewfinder-top">
+              <div className="capture-locus">
+                <Icon name="compass" />
+                <span>{cameraStatus === 'live' ? 'Live' : 'Camera off'}</span>
+              </div>
+              <div className="capture-top-actions">
+                <button type="button" className="capture-chip-btn" aria-label="Toggle flash">
+                  <Icon name="bolt" />
+                </button>
+                <button
+                  type="button"
+                  className="capture-chip-btn"
+                  aria-label="Close capture"
+                  onClick={() => { playTap(); onClose(); }}
+                >
+                  <Icon name="plus" />
+                </button>
               </div>
             </div>
-            
-            <div className="ar-prompt-content">
-              <div className="ar-status-badge">
-                <span className="ar-blip" /> SCANNER READY
-              </div>
-              <h2 className="ar-title">WILD ENCOUNTER</h2>
-              <p className="ar-subtitle">Aim at a real-world object. The rarity engine will identify it and mint a card.</p>
-              
-              <button
-                type="button"
-                className="ar-shutter-btn"
-                onClick={() => { playTap(); inputRef.current?.click(); }}
-              >
-                <div className="ar-shutter-inner">
-                  <Icon name="camera" />
-                </div>
-                <div className="ar-shutter-ring" />
-              </button>
+
+            <div className="capture-reticle" aria-hidden="true">
+              <span className="capture-bracket tl" />
+              <span className="capture-bracket tr" />
+              <span className="capture-bracket bl" />
+              <span className="capture-bracket br" />
             </div>
-            
+
+            <div className="capture-viewfinder-bottom">
+              <p className="capture-hint">Aim at a living subject and capture it live.</p>
+              <div className="capture-controls">
+                <button
+                  type="button"
+                  className="capture-side-btn"
+                  aria-label="Open your library"
+                  onClick={() => { playTap(); onClose(); }}
+                >
+                  <Icon name="book" />
+                </button>
+
+                <button
+                  type="button"
+                  className="capture-shutter"
+                  aria-label="Capture photo"
+                  onClick={() => { playTap(); triggerHaptic([12]); inputRef.current?.click(); }}
+                >
+                  <span className="capture-shutter-ring" aria-hidden="true" />
+                  <span className="capture-shutter-core" aria-hidden="true">
+                    <Icon name="leaf" />
+                  </span>
+                </button>
+
+                <span className="capture-side-btn is-placeholder" aria-hidden="true" />
+              </div>
+            </div>
+
             <input
               ref={inputRef}
               type="file"
