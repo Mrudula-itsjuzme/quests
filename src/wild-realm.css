@@ -2028,8 +2028,12 @@ button[aria-disabled="true"] {
 }
 .quest-reward-pill.is-coin svg { width: 11px; height: 11px; }
 
-/* The shared capture image fills each host frame. */
-.discovery-hero-image { position: absolute; inset: 0; }
+/* The shared capture image fills each host frame. Both hosts must establish
+   a containing block, or the absolutely-positioned image escapes and covers
+   the whole card (the community post wrap was position:static). */
+.discovery-hero-frame,
+.post-photo-wrap { position: relative; }
+.discovery-hero-image,
 .post-photo-image { position: absolute; inset: 0; }
 
 /* The rarity badge must stay above the photograph: .capture-image-photo sits
