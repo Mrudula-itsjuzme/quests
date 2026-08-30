@@ -1449,3 +1449,119 @@ body:has(.capture-flow-overlay) .mobile-bottom-dock { display: none !important; 
   font-size: 0.8rem !important;
   font-weight: 600 !important;
 }
+
+/* ==========================================================================
+   WILD REALM — QUESTS
+   Mockup: compact identity header, then several quest rows visible at once
+   (thumbnail · title · progress · reward · action). Not giant vertical cards.
+   ========================================================================== */
+
+/* ---- Compact identity header ---- */
+.quest-user-topbar {
+  display: grid !important;
+  grid-template-columns: auto 1fr auto !important;
+  align-items: center !important;
+  gap: var(--space-3) !important;
+  padding: 11px 13px !important;
+  border-radius: 18px !important;
+}
+.quest-user-topbar h3 {
+  margin: 0 !important;
+  overflow: hidden;
+  font-size: 1.02rem !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  letter-spacing: -0.01em !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;               /* the name wrapped to two lines before */
+}
+.quest-user-topbar .quest-topbar-sub,
+.quest-user-topbar p { font-size: 0.74rem !important; margin: 1px 0 0 !important; }
+
+/* ---- Quest rows ---- */
+.quest-item-card {
+  position: relative;
+  margin-bottom: 9px !important;
+  padding: 0 !important;
+  border: 1px solid var(--quest-line) !important;
+  border-radius: 16px !important;
+  background: rgba(9, 20, 13, 0.9) !important;
+  overflow: hidden;
+  transition: border-color 180ms var(--quest-ease), transform 140ms var(--quest-ease);
+}
+.quest-item-card:active { transform: scale(0.99); }
+/* The full-bleed stock photo behind every row is gone. */
+.quest-item-card .quest-card-bg { display: none !important; }
+
+.quest-card-content {
+  display: grid !important;
+  grid-template-columns: 42px 1fr auto !important;
+  align-items: center !important;
+  gap: var(--space-3) !important;
+  padding: 11px 12px !important;
+}
+
+.quest-row-thumb {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid color-mix(in srgb, var(--cat-tint, #34d399) 30%, transparent);
+  border-radius: 13px;
+  background: radial-gradient(120% 100% at 50% 0%, color-mix(in srgb, var(--cat-tint, #34d399) 26%, transparent), rgba(6,16,11,.9));
+  color: var(--cat-tint, #34d399);
+}
+.quest-row-thumb svg { width: 19px; height: 19px; }
+.quest-row-thumb.category-mind      { --cat-tint: #818cf8; }
+.quest-row-thumb.category-body      { --cat-tint: #34d399; }
+.quest-row-thumb.category-discovery { --cat-tint: #fbbf24; }
+
+.quest-row-main { min-width: 0; display: grid; gap: 5px; }
+.quest-item-title {
+  margin: 0 !important;
+  overflow: hidden;
+  font-size: 0.86rem !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;   /* ALL-CAPS forced long titles to wrap */
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.quest-row-meta { display: flex; align-items: center; gap: 8px; }
+.quest-progress-num { font-size: 0.68rem !important; color: rgba(203,225,210,.55) !important; }
+.quest-reward-pill {
+  padding: 2px 7px !important;
+  border: 1px solid rgba(52, 211, 133, 0.28) !important;
+  border-radius: 999px !important;
+  color: #6ee7a0 !important;
+  font-size: 0.62rem !important;
+  font-weight: 700 !important;
+}
+
+/* Progress track sits under the meta line, easing on change. */
+.quest-row-main .progress-wrap.compact { margin: 0; }
+.quest-row-main .progress-bar {
+  height: 3px !important;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08) !important;
+  overflow: hidden;
+}
+.quest-row-main .progress-bar > div {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #22c55e, #86efac) !important;
+}
+
+/* Action stays a thumb target without dominating the row. */
+.quest-item-card .quest-claim-btn,
+.quest-item-card .quest-card-content > button {
+  min-height: 34px !important;
+  padding: 0 14px !important;
+  border-radius: 11px !important;
+  font-size: 0.78rem !important;
+  font-weight: 700 !important;
+}
+
+/* Completed rows read as done without shouting. */
+.quest-item-card.completed { border-color: rgba(245, 158, 11, 0.35) !important; }
