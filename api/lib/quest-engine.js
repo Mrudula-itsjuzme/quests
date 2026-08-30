@@ -332,7 +332,7 @@ export class QuestEngine {
 }
 
 function assignmentFrom(definition, userId, period, now) {
-  return { userId, definitionId: definition.id, title: definition.title, description: definition.description, category: definition.category, rarity: definition.rarity, cadence: definition.cadence, verificationType: definition.verificationType, subjectTag: definition.subjectTag, targetValue: definition.targetValue, unit: definition.unit, xpReward: definition.xpReward, instructions: definition.instructions, periodKey: period.key, assignedAt: now.toISOString(), startsAt: period.startsAt.toISOString(), expiresAt: period.expiresAt.toISOString() };
+  return { userId, definitionId: definition.id, title: definition.title, description: definition.description, category: definition.category, rarity: definition.rarity, cadence: definition.cadence, verificationType: definition.verificationType, subjectTag: definition.subjectTag, targetValue: definition.targetValue, unit: definition.unit, xpReward: definition.xpReward, coinReward: definition.coinReward ?? 0, instructions: definition.instructions, periodKey: period.key, assignedAt: now.toISOString(), startsAt: period.startsAt.toISOString(), expiresAt: period.expiresAt.toISOString() };
 }
 
 function selectWithCooldown(pool, recent, now, weights, random) {

@@ -76,7 +76,9 @@ export async function impossibleTravelDetector(bundle, { repository, userId }) {
   if (!lastCapture?.gps || !lastCapture.capturedAt) return pass('impossible_travel');
 
   const distanceM = haversineMeters(lastCapture.gps, bundle.gps);
-  const elapsedS = Math.max(1, (new Date(bundle.capturedAt).getTime() - new Date(lastCapture.capturedAt).getTime()) / 1000);
+  const elapsedS = (new Date(bundle.capturedAt).getTime() - new Date(lastCapture.capturedAt).getTime()) / 1000;
+  if (elapsedS <= 0) return flag('impossible_travel', 'negative_or_zero_elapsed_time');
+
   const speedMps = distanceM / elapsedS;
   if (speedMps > MAX_HUMAN_SPEED_MPS) return reject('impossible_travel', 'velocity_exceeds_human_possible');
   return pass('impossible_travel');

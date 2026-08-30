@@ -94,6 +94,26 @@ describe('antiCheatVerdict', () => {
     expect(result.reason).toBe('velocity_exceeds_human_possible');
   });
 
+  it('flags impossible travel when timestamps are out of order or identical', async () => {
+    const repository = new MemoryQuestRepository();
+    await repository.createCapturedCard({
+      userId,
+      itemName: 'x',
+      category: 'Discovery',
+      cardTitle: 'x',
+      rarityTier: 'Bronze',
+      rarityScore: 0.1,
+      gps: { lat: 12.9, lng: 77.6 },
+      capturedAt: '2026-07-13T09:59:55.000Z',
+    });
+    const result = await antiCheatVerdict(
+      bundle({ gps: { lat: 12.9, lng: 77.6 }, capturedAt: '2026-07-13T09:59:50.000Z' }), // Out of order
+      context({ repository }),
+    );
+    expect(result.verdict).toBe(GateVerdict.PASS_WITH_REVIEW);
+    expect(result.reason).toBe('negative_or_zero_elapsed_time');
+  });
+
   it('passes when no prior capture location exists to compare against', async () => {
     const result = await antiCheatVerdict(bundle(), context());
     expect(result.verdict).toBe(GateVerdict.PASS);

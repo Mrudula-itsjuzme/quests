@@ -11,6 +11,7 @@ export class MemoryQuestRepository {
     this.ledger = [];
     this.collectibles = [];
     this.capturedCards = [];
+    this.captureMedia = new Map();
     this.idempotency = new Map();
     this.imageHashes = new Set();
     this.bonusPeriods = new Set();
@@ -60,6 +61,9 @@ export class MemoryQuestRepository {
       createdAt: new Date().toISOString(),
     };
     this.communityPosts.unshift(value);
+    if (value.cardId && this.captureMedia.has(value.cardId)) {
+      this.captureMedia.get(value.cardId).publicSafe = true;
+    }
     return { post: await this.getCommunityPost(post.userId, value.id), created: true };
   }
 
@@ -97,7 +101,7 @@ export class MemoryQuestRepository {
           rarityGrade: card.rarityGrade ?? null,
           rarityStars: card.rarityStars ?? null,
           speciesId: card.speciesId ?? null,
-          imageRef: card.imageRef ?? null,
+          imageRef: card.status === 'final' && this.captureMedia.has(card.id) ? `/api/v1/community/posts/${item.id}/media` : card.imageRef ?? null,
           capturedAt: card.capturedAt,
         }
         : null,
@@ -133,6 +137,16 @@ export class MemoryQuestRepository {
     this.communityLikes = this.communityLikes.filter((like) => like.postId !== postId);
     this.communityComments = this.communityComments.filter((comment) => comment.postId !== postId);
     return true;
+  }
+
+  async getCommunityPostMedia(postId) {
+    const post = this.communityPosts.find((entry) => entry.id === postId && entry.visibility === 'public');
+    if (!post?.cardId) return null;
+    const card = this.capturedCards.find((entry) => entry.id === post.cardId);
+    if (!card || card.status !== 'final') return null;
+    const media = this.captureMedia.get(card.id);
+    if (!media?.publicSafe) return null;
+    return clone(media);
   }
 
   async listFriends(userId) {
@@ -326,7 +340,22 @@ export class MemoryQuestRepository {
   async getCollectibles(userId) { return this.collectibles.filter((item) => item.userId === userId).map(clone); }
   async createCapturedCard(card) {
     const value = { id: randomUUID(), status: 'final', capturedAt: new Date().toISOString(), serverReceivedAt: new Date().toISOString(), humanVerified: false, ...card };
+    if (!value.imageRef && (value.mediaData || value.storageRef)) value.imageRef = `/api/v1/captures/${value.id}/media`;
     this.capturedCards.unshift(value);
+    if (value.mediaData || value.storageRef) {
+      this.captureMedia.set(value.id, {
+        cardId: value.id,
+        userId: value.userId,
+        contentType: value.mediaContentType || 'image/jpeg',
+        mediaData: value.mediaData || null,
+        storageRef: value.storageRef || null,
+        publicSafe: value.status === 'final',
+      });
+    }
+    delete value.mediaData;
+    delete value.mediaContentType;
+    delete value.storageRef;
+    delete value.imageBase64;
     // Provisional (pending human verification) captures don't credit XP until approved — blueprint §6/§21.
     if (value.status === 'final' && value.xpAwarded > 0) {
       if (!this.users.has(value.userId)) await this.ensureUser({ id: value.userId });
@@ -349,6 +378,12 @@ export class MemoryQuestRepository {
   async getCapturedCardById(userId, cardId) {
     const item = this.capturedCards.find((entry) => entry.userId === userId && entry.id === cardId);
     return item ? clone(item) : null;
+  }
+  async getCapturedCardMedia(userId, cardId) {
+    const card = this.capturedCards.find((entry) => entry.userId === userId && entry.id === cardId);
+    if (!card) return null;
+    const media = this.captureMedia.get(cardId);
+    return media ? clone(media) : null;
   }
   async getCapturedCardByCaptureId(userId, captureId) {
     const item = this.capturedCards.find((entry) => entry.userId === userId && entry.captureId === captureId);
@@ -380,6 +415,8 @@ export class MemoryQuestRepository {
     item.reviewedAt = new Date().toISOString();
     item.reviewedBy = reviewerId;
     item.reviewReason = reason || null;
+    const media = this.captureMedia.get(cardId);
+    if (media) media.publicSafe = decision === 'approve';
 
     if (decision === 'approve') {
       if (item.xpAwarded > 0) {

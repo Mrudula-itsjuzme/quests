@@ -882,6 +882,122 @@ function mintCapture(app, idempotencyKey) {
     .send({ imageBase64: PIXEL_PNG, liveness: { attested: true, method: 'capture-input-environment', score: 0.7 } });
 }
 
+describe('Media Contract', () => {
+  it('does not dump raw base64 bytes in normal card JSON and imageRef points to API', async () => {
+    const app = createApp({ config: testConfig(), visionProvider: highConfidenceVisionProvider() });
+    const captured = await mintCapture(app, 'media-test-1');
+    expect(captured.status).toBe(201);
+    expect(captured.body.mediaData).toBeUndefined();
+    expect(captured.body.imageBase64).toBeUndefined();
+    expect(captured.body.imageRef).toBe(`/api/v1/captures/${captured.body.id}/media`);
+  });
+
+  it('allows owner to retrieve private capture media', async () => {
+    const app = createApp({ config: testConfig(), visionProvider: highConfidenceVisionProvider() });
+    const captured = await mintCapture(app, 'media-test-2');
+    const response = await request(app).get(captured.body.imageRef);
+    expect(response.status).toBe(200);
+    expect(response.headers['content-type']).toBe('image/png');
+    expect(response.headers['cache-control']).toBe('public, max-age=300');
+  });
+
+  it('provisional capture media remains private and owner can access it', async () => {
+    const app = createApp({ config: testConfig(), visionProvider: highConfidenceVisionProvider() });
+    const captured = await request(app)
+      .post('/api/v1/captures')
+      .set('Idempotency-Key', 'media-test-3')
+      .send({ imageBase64: PIXEL_PNG, liveness: { attested: false } });
+    expect(captured.body.status).toBe('provisional');
+    const response = await request(app).get(captured.body.imageRef);
+    expect(response.status).toBe(200);
+    expect(response.headers['cache-control']).toBe('private, no-store');
+  });
+
+  it('unauthorized user cannot retrieve another users private media', async () => {
+    const { publicKey, privateKey } = await generateKeyPair('RS256');
+    const jwk = await exportJWK(publicKey);
+    jwk.kid = 'test-key';
+    jwk.alg = 'RS256';
+    const authJwks = createLocalJWKSet({ keys: [jwk] });
+    const config = testConfig({ DEV_AUTH_ENABLED: 'false', OIDC_ISSUER: 'https://identity.example.com', OIDC_AUDIENCE: 'habbit-api' });
+    const app = createApp({ config, authJwks, visionProvider: highConfidenceVisionProvider() });
+
+    const userA = await signedToken(privateKey, { issuer: 'https://identity.example.com', audience: 'habbit-api' });
+    const userB = await new SignJWT({ name: 'Tester B', zoneinfo: 'UTC' })
+      .setProtectedHeader({ alg: 'RS256', kid: 'test-key' })
+      .setSubject('user-b')
+      .setIssuer('https://identity.example.com')
+      .setAudience('habbit-api')
+      .setIssuedAt()
+      .setExpirationTime('5m')
+      .sign(privateKey);
+
+    const captured = await request(app)
+      .post('/api/v1/captures')
+      .set('Authorization', `Bearer ${userA}`)
+      .set('Idempotency-Key', 'media-test-4')
+      .send({ imageBase64: PIXEL_PNG, liveness: { attested: true, method: 'capture-input-environment', score: 0.7 } });
+
+    expect(captured.status).toBe(201);
+
+    const response = await request(app)
+      .get(captured.body.imageRef)
+      .set('Authorization', `Bearer ${userB}`);
+    expect(response.status).toBe(404);
+  });
+
+  it('final Community post can access public-safe media', async () => {
+    const app = createApp({ config: testConfig(), visionProvider: highConfidenceVisionProvider() });
+    const captured = await mintCapture(app, 'media-test-5');
+    const post = await request(app)
+      .post('/api/v1/community/posts')
+      .set('Idempotency-Key', 'media-test-post-5')
+      .send({ cardId: captured.body.id, caption: 'Look!' });
+    expect(post.status).toBe(201);
+
+    const response = await request(app).get(`/api/v1/community/posts/${post.body.id}/media`);
+    expect(response.status).toBe(200);
+    expect(response.headers['cache-control']).toBe('public, max-age=300');
+  });
+
+  it('provisional capture cannot expose public Community media', async () => {
+    const repository = new MemoryQuestRepository({ definitions: questDefinitions });
+    const app = createApp({ config: testConfig(), repository, visionProvider: highConfidenceVisionProvider() });
+    const captured = await request(app)
+      .post('/api/v1/captures')
+      .set('Idempotency-Key', 'media-test-6')
+      .send({ imageBase64: PIXEL_PNG, liveness: { attested: false } });
+
+    await repository.ensureUser({ id: testConfig().DEV_USER_ID, displayName: 'Local Adventurer', timezone: 'UTC' });
+    const post = await repository.createCommunityPost({ userId: testConfig().DEV_USER_ID, cardId: captured.body.id, visibility: 'public' });
+
+    const response = await request(app).get(`/api/v1/community/posts/${post.post.id}/media`);
+    expect(response.status).toBe(404);
+  });
+
+  it('rejected capture cannot expose public Community media', async () => {
+    const repository = new MemoryQuestRepository({ definitions: questDefinitions });
+    const app = createApp({ config: testConfig(), repository, visionProvider: highConfidenceVisionProvider() });
+    const captured = await request(app)
+      .post('/api/v1/captures')
+      .set('Idempotency-Key', 'media-test-7')
+      .send({ imageBase64: PIXEL_PNG, liveness: { attested: false } });
+
+    await repository.reviewCapturedCard(captured.body.id, { decision: 'reject', reviewerId: 'admin' });
+    await repository.ensureUser({ id: testConfig().DEV_USER_ID, displayName: 'Local Adventurer', timezone: 'UTC' });
+    const post = await repository.createCommunityPost({ userId: testConfig().DEV_USER_ID, cardId: captured.body.id, visibility: 'public' });
+
+    const response = await request(app).get(`/api/v1/community/posts/${post.post.id}/media`);
+    expect(response.status).toBe(404);
+  });
+
+  it('replayed/guessed IDs cannot reveal media', async () => {
+    const app = createApp({ config: testConfig(), visionProvider: highConfidenceVisionProvider() });
+    const response = await request(app).get('/api/v1/captures/11111111-1111-4111-8111-111111111111/media');
+    expect(response.status).toBe(404);
+  });
+});
+
 function highConfidenceVisionProvider() {
   return {
     identify: async () => ({

@@ -286,6 +286,8 @@ export class PostgresQuestRepository {
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
+      const cardId = randomUUID();
+      const imageRef = card.imageRef || ((card.mediaData || card.storageRef) ? `/api/v1/captures/${cardId}/media` : null);
       const { rows } = await client.query(
         `INSERT INTO captured_cards
           (id, user_id, capture_id, item_name, category, card_title, rarity_tier, rarity_score, description, image_ref, image_hash,
@@ -293,10 +295,10 @@ export class PostgresQuestRepository {
            anti_cheat_verdict, anti_cheat_reason, anti_cheat_detail, reject_reason,
            species_id, confidence, rarity_grade, rarity_stars, rarity_weight_set_version, rarity_factor_breakdown, xp_awarded, coins_awarded)
          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31)
-         RETURNING *`,
+        RETURNING *`,
         [
-          randomUUID(), card.userId, card.captureId || null, card.itemName, card.category, card.cardTitle, card.rarityTier, card.rarityScore,
-          card.description, card.imageRef || null, card.imageHash || null,
+          cardId, card.userId, card.captureId || null, card.itemName, card.category, card.cardTitle, card.rarityTier, card.rarityScore,
+          card.description, imageRef, card.imageHash || null,
           card.status || 'final', card.gps?.lat ?? null, card.gps?.lng ?? null, card.gps?.accuracyM ?? null, card.gps?.altitude ?? null,
           card.heading ?? null, card.capturedAt || new Date(), card.serverReceivedAt || new Date(),
           card.antiCheatVerdict || null, card.antiCheatReason || null, JSON.stringify(card.antiCheatDetail || []), card.rejectReason || null,
@@ -305,6 +307,19 @@ export class PostgresQuestRepository {
         ],
       );
       const created = rows[0];
+      if (card.mediaData || card.storageRef) {
+        await client.query(
+          `INSERT INTO capture_media (card_id, user_id, content_type, media_data, storage_ref, public_safe)
+           VALUES ($1,$2,$3,$4,$5,$6)
+           ON CONFLICT (card_id) DO UPDATE SET
+             content_type = EXCLUDED.content_type,
+             media_data = EXCLUDED.media_data,
+             storage_ref = EXCLUDED.storage_ref,
+             public_safe = EXCLUDED.public_safe,
+             updated_at = NOW()`,
+          [created.id, card.userId, card.mediaContentType || 'image/jpeg', card.mediaData || null, card.storageRef || null, created.status === 'final'],
+        );
+      }
       // Provisional (pending human verification) captures don't credit XP until approved — blueprint §6/§21.
       if (created.status === 'final' && card.xpAwarded > 0) {
         await client.query(
@@ -335,6 +350,15 @@ export class PostgresQuestRepository {
   async getCapturedCardById(userId, cardId) {
     const { rows } = await this.pool.query('SELECT * FROM captured_cards WHERE user_id = $1 AND id = $2', [userId, cardId]);
     return rows[0] ? mapCapturedCard(rows[0]) : null;
+  }
+  async getCapturedCardMedia(userId, cardId) {
+    const { rows } = await this.pool.query(
+      `SELECT m.* FROM capture_media m
+       JOIN captured_cards c ON c.id = m.card_id
+       WHERE m.user_id = $1 AND m.card_id = $2 AND c.user_id = $1`,
+      [userId, cardId],
+    );
+    return rows[0] ? mapCaptureMedia(rows[0]) : null;
   }
   async getCapturedCardByCaptureId(userId, captureId) {
     const { rows } = await this.pool.query('SELECT * FROM captured_cards WHERE user_id = $1 AND capture_id = $2', [userId, captureId]);
@@ -383,6 +407,7 @@ export class PostgresQuestRepository {
         [cardId, nextStatus, decision === 'approve', reviewerId, reason || null],
       );
       const updated = rows[0];
+      await client.query('UPDATE capture_media SET public_safe = $2, updated_at = NOW() WHERE card_id = $1', [cardId, decision === 'approve']);
 
       if (decision === 'approve') {
         if (Number(card.xp_awarded) > 0) {
@@ -487,6 +512,7 @@ export class PostgresQuestRepository {
         [randomUUID(), post.userId, post.cardId || null, post.caption || '', JSON.stringify(post.hashtags || []),
           post.placeLabel || null, post.gps?.lat ?? null, post.gps?.lng ?? null, post.visibility || 'public'],
       );
+      if (post.cardId) await client.query('UPDATE capture_media SET public_safe = TRUE, updated_at = NOW() WHERE card_id = $1', [post.cardId]);
       await client.query('COMMIT');
       return { post: await this.getCommunityPost(post.userId, rows[0].id), created: true };
     } catch (error) {
@@ -517,6 +543,16 @@ export class PostgresQuestRepository {
   async getCommunityPost(viewerId, postId) {
     const { rows } = await this.pool.query(`${COMMUNITY_POST_SELECT} WHERE p.id = $2`, [viewerId, postId]);
     return rows[0] ? mapCommunityPost(rows[0]) : null;
+  }
+  async getCommunityPostMedia(postId) {
+    const { rows } = await this.pool.query(
+      `SELECT m.* FROM community_posts p
+       JOIN captured_cards c ON c.id = p.card_id
+       JOIN capture_media m ON m.card_id = c.id
+       WHERE p.id = $1 AND p.visibility = 'public' AND c.status = 'final' AND m.public_safe = TRUE`,
+      [postId],
+    );
+    return rows[0] ? mapCaptureMedia(rows[0]) : null;
   }
 
   async setCommunityPostLike(userId, postId, liked) {
@@ -728,7 +764,7 @@ function mapCommunityPost(row) {
         rarityGrade: row.rarity_grade,
         rarityStars: row.rarity_stars == null ? null : Number(row.rarity_stars),
         speciesId: row.species_id,
-        imageRef: row.image_ref,
+        imageRef: row.image_ref ? `/api/v1/community/posts/${row.id}/media` : null,
         capturedAt: row.captured_at,
       }
       : null,
@@ -741,6 +777,17 @@ function mapCommunityPost(row) {
     commentCount: Number(row.comment_count),
     viewerLiked: Boolean(row.viewer_liked),
     createdAt: row.created_at,
+  };
+}
+
+function mapCaptureMedia(row) {
+  return {
+    cardId: row.card_id,
+    userId: row.user_id,
+    contentType: row.content_type,
+    mediaData: row.media_data,
+    storageRef: row.storage_ref,
+    publicSafe: row.public_safe,
   };
 }
 

@@ -218,6 +218,7 @@ export function createApp(options = {}) {
     const idempotencyKey = requireIdempotency(req);
     const serverReceivedAt = new Date();
     const imageHash = createHash('sha256').update(body.imageBase64).digest('hex');
+    const mediaContentType = parseImageDataUrl(body.imageBase64).contentType;
     const capturedAt = body.capturedAt || serverReceivedAt.toISOString();
 
     const gate = await antiCheatVerdict(
@@ -274,6 +275,8 @@ export function createApp(options = {}) {
         rarityTier: rarity.grade,
         rarityScore: rarity.score / 100,
         description: speciesMatch.encyclopedia || top.ecosystem || '',
+        mediaData: body.imageBase64,
+        mediaContentType,
         imageHash,
         status: gate.verdict === GateVerdict.PASS_WITH_REVIEW || rarity.humanReview ? 'provisional' : 'final',
         gps: protectedGps(body.gps || null, speciesMatch),
@@ -298,6 +301,11 @@ export function createApp(options = {}) {
     res.status(201).json(result.card);
   }));
   app.get('/api/v1/captures', asyncRoute(async (req, res) => res.json(await repository.getCapturedCards(req.identity.id))));
+  app.get('/api/v1/captures/:captureId/media', asyncRoute(async (req, res) => {
+    const media = await repository.getCapturedCardMedia(req.identity.id, parse(captureIdSchema, req.params.captureId));
+    if (!media) return res.status(404).json({ error: { code: 'capture_media_not_found', requestId: req.id } });
+    sendCaptureMedia(res, media);
+  }));
   app.get('/api/v1/captures/:captureId', asyncRoute(async (req, res) => {
     const card = await repository.getCapturedCardById(req.identity.id, parse(captureIdSchema, req.params.captureId));
     if (!card) return res.status(404).json({ error: { code: 'capture_not_found', requestId: req.id } });
@@ -365,6 +373,11 @@ export function createApp(options = {}) {
   }));
   app.get('/api/v1/community/posts/:postId/comments', asyncRoute(async (req, res) => {
     res.json(await repository.listCommunityComments(parse(postIdSchema, req.params.postId)));
+  }));
+  app.get('/api/v1/community/posts/:postId/media', asyncRoute(async (req, res) => {
+    const media = await repository.getCommunityPostMedia(parse(postIdSchema, req.params.postId));
+    if (!media) return res.status(404).json({ error: { code: 'community_media_not_found', requestId: req.id } });
+    sendCaptureMedia(res, media);
   }));
   app.post('/api/v1/community/posts/:postId/comments', writeLimiter, asyncRoute(async (req, res) => {
     const body = parse(communityCommentSchema, req.body);
@@ -502,8 +515,26 @@ function requireIdempotency(req) {
 function requireLegacyDevelopment(config) { if (config.NODE_ENV === 'production' || !config.DEV_ALLOW_LEGACY_MUTATIONS) { const error = new Error('legacy_mutation_disabled'); error.code = 'legacy_mutation_disabled'; error.status = 403; throw error; } }
 function optionalEnum(value, allowed) { if (value == null || value === '') return undefined; if (!allowed.includes(value)) { const error = new Error('invalid_filter'); error.code = 'invalid_filter'; error.status = 400; throw error; } return value; }
 function safeRequestId(value) { return typeof value === 'string' && /^[A-Za-z0-9._:-]{8,100}$/.test(value) ? value : randomUUID(); }
+function parseImageDataUrl(value) {
+  const match = /^data:(image\/(?:png|jpe?g|webp));base64,([A-Za-z0-9+/=]+)$/.exec(value || '');
+  if (!match) return { contentType: 'image/jpeg', base64: null };
+  return { contentType: match[1] === 'image/jpg' ? 'image/jpeg' : match[1], base64: match[2] };
+}
+function sendCaptureMedia(res, media) {
+  if (media.storageRef) {
+    const url = new URL(media.storageRef);
+    if (url.protocol !== 'https:') throw Object.assign(new Error('invalid_media_reference'), { status: 500 });
+    res.setHeader('Cache-Control', media.publicSafe ? 'public, max-age=300' : 'private, no-store');
+    return res.redirect(302, url.toString());
+  }
+  const parsed = parseImageDataUrl(media.mediaData);
+  if (!parsed.base64) throw Object.assign(new Error('invalid_media_reference'), { status: 500 });
+  res.setHeader('Content-Type', parsed.contentType);
+  res.setHeader('Cache-Control', media.publicSafe ? 'public, max-age=300' : 'private, no-store');
+  return res.send(Buffer.from(parsed.base64, 'base64'));
+}
 function asyncRoute(handler) { return (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next); }
-function mapLegacyQuest(item) { return { id: item.id, title: item.title, summary: item.description, detail: item.description, category: item.category === 'Weekly' ? 'Discovery' : item.category, rarity: item.rarity, xp: item.xpReward, status: legacyStatus(item.status), progress: item.targetValue ? item.progressValue / item.targetValue : 0, target: `${item.progressValue}/${item.targetValue} ${item.unit}`, instructions: item.instructions, proofType: item.verificationType.toLowerCase(), cadence: item.cadence }; }
+function mapLegacyQuest(item) { return { id: item.id, title: item.title, summary: item.description, detail: item.description, category: item.category === 'Weekly' ? 'Discovery' : item.category, rarity: item.rarity, xp: item.xpReward, coinReward: item.coinReward ?? 0, status: legacyStatus(item.status), progress: item.targetValue ? item.progressValue / item.targetValue : 0, target: `${item.progressValue}/${item.targetValue} ${item.unit}`, instructions: item.instructions, proofType: item.verificationType.toLowerCase(), cadence: item.cadence }; }
 function legacyStatus(status) { return status === 'completed' ? 'Completed' : status === 'pending_verification' ? 'Awaiting Proof' : status === 'active' || status === 'rejected' ? 'In Progress' : 'Not Started'; }
 
 // --- Vercel Serverless Entry Point ---
