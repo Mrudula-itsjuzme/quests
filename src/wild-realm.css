@@ -1668,3 +1668,82 @@ body:has(.capture-flow-overlay) .mobile-bottom-dock { display: none !important; 
   color: rgba(203, 225, 210, 0.55) !important;
 }
 .profile-stats-grid .profile-stat-card strong { font-size: 1.15rem !important; line-height: 1.1 !important; }
+
+/* ==========================================================================
+   WILD REALM — EXPLORE MAP
+   Mockup: dark natural map, circular hotspot markers, layered controls that
+   never sit on top of the filter row.
+   ========================================================================== */
+
+/* Filters scroll horizontally and stop short of the stacked map controls,
+   which previously covered "Birding". */
+.explore-category-tags {
+  display: flex !important;
+  gap: 8px !important;
+  /* Clear the stacked map controls, which overlap this row and hid "Birding". */
+  padding-right: 52px !important;
+  overflow-x: auto !important;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.explore-category-tags::-webkit-scrollbar { display: none; }
+.explore-category-tags > .explore-tag { flex: 0 0 auto !important; }
+
+.explore-tag {
+  min-height: 32px !important;
+  padding: 0 14px !important;
+  border: 1px solid rgba(160, 220, 180, 0.16) !important;
+  border-radius: 999px !important;
+  background: rgba(6, 18, 12, 0.62) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: rgba(226, 240, 229, 0.72) !important;
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+}
+.explore-tag.active {
+  border-color: rgba(52, 211, 133, 0.55) !important;
+  background: rgba(16, 55, 34, 0.85) !important;
+  color: #6ee7a0 !important;
+}
+
+/* Cool the warm wood texture toward the mockup's dark-natural map. */
+.explore-map-terrain {
+  filter: saturate(0.5) hue-rotate(-14deg) brightness(0.6) contrast(1.1);
+}
+
+/* Marker labels stay legible over the terrain without restyling the pin
+   itself (the pin element is a positioned wrapper, not the visible disc). */
+.map-hotspot-label {
+  padding: 2px 7px !important;
+  border-radius: 999px !important;
+  background: rgba(4, 12, 8, 0.82) !important;
+  backdrop-filter: blur(8px);
+  font-size: 0.62rem !important;
+  font-weight: 700 !important;
+  white-space: nowrap;
+}
+
+/* Hotspot cards carry their place + distance instead of an empty dark box. */
+.explore-hotspot-card {
+  min-width: 0 !important;
+  border: 1px solid var(--quest-line) !important;
+  border-radius: 16px !important;
+  background: rgba(9, 20, 13, 0.9) !important;
+}
+.explore-hotspot-card h4,
+.explore-hotspot-card .explore-hotspot-name {
+  font-size: 0.82rem !important;
+  line-height: 1.25 !important;
+  text-transform: none !important;
+}
+.explore-hotspot-chip {
+  padding: 2px 8px !important;
+  border-radius: 999px !important;
+  font-size: 0.6rem !important;
+  font-weight: 700 !important;
+}
+
+/* Map controls stack below the filter row rather than on top of it. */
+.map-control-btn.map-control-layers { top: 172px !important; }
+.map-control-btn.map-control-locate { top: 224px !important; }
