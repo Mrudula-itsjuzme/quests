@@ -109,7 +109,7 @@ export function AppShell() {
             whileTap={{ scale: 0.97 }}
             onMouseEnter={playHover}
           >
-            <span className="brand-mark" aria-hidden="true">🌿</span>
+            <span className="brand-mark" aria-hidden="true"><Icon name="leaf" /></span>
             <div>
               <strong>WILD REALM</strong>
             </div>

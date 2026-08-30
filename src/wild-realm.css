@@ -2039,3 +2039,17 @@ button[aria-disabled="true"] {
 /* The rarity badge must stay above the photograph: .capture-image-photo sits
    at z-index 1 to cover its crest, which was painting over the badge. */
 .library-card-badge { z-index: 2; }
+
+/* The brand mark is the system's leaf icon, not an emoji glyph (emoji render
+   differently per platform and never match the palette). */
+.brand-mark {
+  display: inline-grid;
+  place-items: center;
+  color: #6ee7a0;
+}
+.brand-mark svg { width: 18px; height: 18px; }
+
+/* One card radius across the system: post cards were 18px and profile menu
+   rows 12px against a 16px standard everywhere else. */
+.community-post-card { border-radius: 16px !important; }
+.profile-menu-list { border-radius: 16px !important; }
