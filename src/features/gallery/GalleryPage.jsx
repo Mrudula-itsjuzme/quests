@@ -15,6 +15,9 @@ const ELEMENT_TABS = [
   { id: 'Grass', label: 'Grass' },
   { id: 'Earth', label: 'Earth' },
   { id: 'Sky', label: 'Sky' },
+  // Familiars is the fauna bucket and cross-cuts elements (blueprint 2/8):
+  // a bird is both a Familiar and Sky.
+  { id: 'familiars', label: 'Familiars' },
 ];
 
 // Highest grade first, matching the rarity engine's S–D scale.
@@ -53,7 +56,9 @@ export function GalleryPage() {
     const speciesById = new Map((species || []).map((s) => [s.id, s]));
     const filtered = activeTab === 'all'
       ? collection
-      : collection.filter((c) => (speciesById.get(c.speciesId)?.element || 'Earth') === activeTab);
+      : activeTab === 'familiars'
+        ? collection.filter((c) => (speciesById.get(c.speciesId)?.category || c.category) === 'Fauna')
+        : collection.filter((c) => (speciesById.get(c.speciesId)?.element || 'Earth') === activeTab);
 
     const byRarity = (card) => RARITY_ORDER.indexOf((card.rarityGrade || card.rarityTier || 'D').toUpperCase());
     return [...filtered].sort((left, right) => {
@@ -171,7 +176,7 @@ export function GalleryPage() {
           initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
           className="library-empty-state"
         >
-          <p>You haven&apos;t discovered any {activeTab} species yet.</p>
+          <p>You haven&apos;t discovered any {activeTab === 'familiars' ? 'Familiar' : activeTab} species yet.</p>
           <motion.button
             type="button"
             className="continue-journey-btn"
