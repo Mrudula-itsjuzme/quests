@@ -730,3 +730,122 @@ body {
   transform: scale(1.1);
   border-color: rgba(255, 255, 255, 0.8);
 }
+
+/* ==========================================================================
+   WILD REALM — CANONICAL BOTTOM DOCK
+   Mockup target: compact dark pill, understated inactive icons, luminous
+   active state, strong raised centre Capture affordance.
+   The dock is FIVE equal columns; the centre column hosts the raised FAB.
+   Earlier rules used repeat(6, 1fr) for five children, which starved the
+   outer labels ("Collection"/"Community") and made them collide.
+   ========================================================================== */
+@media (max-width: 900px) {
+  .mobile-bottom-dock {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    align-items: end !important;
+    justify-content: stretch !important;
+    gap: 2px !important;
+    min-height: 66px !important;
+    padding: 8px 6px calc(8px + env(safe-area-inset-bottom, 0px)) !important;
+
+    background: linear-gradient(180deg, rgba(9, 22, 15, 0.86), rgba(4, 12, 8, 0.96)) !important;
+    backdrop-filter: blur(22px) saturate(1.35) !important;
+    -webkit-backdrop-filter: blur(22px) saturate(1.35) !important;
+    border: 1px solid rgba(120, 200, 140, 0.14) !important;
+    border-radius: 26px !important;
+    box-shadow:
+      0 14px 40px rgba(0, 0, 0, 0.6),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+    overflow: visible !important;
+  }
+
+  /* Each destination is one column; label never overflows its cell. */
+  .mobile-bottom-dock a,
+  .mobile-bottom-dock .dock-item {
+    display: grid !important;
+    grid-template-rows: auto auto !important;
+    place-items: center !important;
+    gap: 3px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 46px !important;
+    padding: 5px 0 !important;
+    border: none !important;
+    border-radius: 14px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: rgba(203, 225, 210, 0.52) !important;
+    font-family: var(--font-body, inherit) !important;
+    font-size: 0.56rem !important;
+    font-weight: 600 !important;
+    letter-spacing: -0.01em !important;
+    text-transform: none !important;
+    transition: color 180ms var(--quest-ease), background 180ms var(--quest-ease) !important;
+  }
+
+  .mobile-bottom-dock a > span,
+  .mobile-bottom-dock .dock-item > span {
+    display: block !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    line-height: 1.1 !important;
+  }
+
+  .mobile-bottom-dock a svg,
+  .mobile-bottom-dock .dock-item svg {
+    width: 21px !important;
+    height: 21px !important;
+    margin: 0 !important;
+  }
+
+  /* Active: luminous green, no boxy border — light, not a chip. */
+  .mobile-bottom-dock a.active,
+  .mobile-bottom-dock .dock-item.active {
+    color: #6ee7a0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+  .mobile-bottom-dock a.active svg,
+  .mobile-bottom-dock .dock-item.active svg {
+    filter: drop-shadow(0 0 9px rgba(110, 231, 160, 0.55)) !important;
+  }
+
+  /* Centre Capture FAB owns the middle column and lifts above the bar. */
+  .dock-shutter-item {
+    margin: 0 !important;
+    align-self: center !important;
+  }
+  .dock-shutter-btn {
+    width: 56px !important;
+    height: 56px !important;
+    margin-top: -30px !important;
+    border: 3px solid rgba(5, 14, 9, 0.92) !important;
+    background: radial-gradient(circle at 36% 32%, #8ff0ab, #22c55e 58%, #15803d) !important;
+    color: #04140c !important;
+    box-shadow:
+      0 0 26px rgba(52, 211, 133, 0.42),
+      0 10px 20px rgba(0, 0, 0, 0.55) !important;
+  }
+  .dock-shutter-btn svg { width: 25px !important; height: 25px !important; }
+
+  /* One calm pulse ring, not a constant strobe. */
+  .dock-shutter-btn::after {
+    animation-duration: 3.2s !important;
+    background: rgba(52, 211, 133, 0.3) !important;
+  }
+}
+
+/* Narrow phones (≤360px): drop to icon-only rather than clipping words. */
+@media (max-width: 360px) {
+  .mobile-bottom-dock a > span,
+  .mobile-bottom-dock .dock-item > span { font-size: 0.55rem !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dock-shutter-btn::after { animation: none !important; opacity: 0 !important; }
+}
