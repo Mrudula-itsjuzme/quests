@@ -303,6 +303,16 @@ export function createApp(options = {}) {
     if (!card) return res.status(404).json({ error: { code: 'capture_not_found', requestId: req.id } });
     res.json(card);
   }));
+  app.post('/api/v1/cards/:captureId/add', writeLimiter, asyncRoute(async (req, res) => {
+    requireIdempotency(req);
+    const card = await repository.getCapturedCardById(req.identity.id, parse(captureIdSchema, req.params.captureId));
+    if (!card) return res.status(404).json({ error: { code: 'capture_not_found', requestId: req.id } });
+    if (card.status === 'rejected') return res.status(422).json({ error: { code: 'card_not_addable', reason: 'rejected', requestId: req.id } });
+    // Captures are already persisted as Library cards by the server-authoritative
+    // mint step. This endpoint gives the Discovery Card's Add action an
+    // idempotent contract without re-crediting rewards or duplicating cards.
+    res.json({ ...card, libraryStatus: card.status === 'provisional' ? 'pending_verification' : 'added' });
+  }));
   app.patch('/api/v1/captures/:captureId', writeLimiter, asyncRoute(async (req, res) => {
     const body = parse(captureRenameSchema, req.body);
     const card = await repository.updateCapturedCard(req.identity.id, parse(captureIdSchema, req.params.captureId), body);
@@ -332,6 +342,7 @@ export function createApp(options = {}) {
     const card = await repository.getCapturedCardById(req.identity.id, body.cardId);
     if (!card) return res.status(404).json({ error: { code: 'capture_not_found', requestId: req.id } });
     if (card.status === 'rejected') return res.status(422).json({ error: { code: 'capture_not_shareable', requestId: req.id } });
+    if (card.status === 'provisional') return res.status(422).json({ error: { code: 'capture_not_shareable', reason: 'pending_verification', requestId: req.id } });
 
     // Sensitive species (poaching/stalking risk — blueprint §1/§10/§22/§27,
     // CRITICAL) get their coordinates jittered to a coarse grid cell before

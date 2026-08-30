@@ -149,6 +149,11 @@ export function createApiClient(getToken) {
       }
       return request('/captures', { method: 'POST', body: bundle, idempotencyKey, token });
     },
+    addCardToLibrary: async (captureId, idempotencyKey) => {
+      const token = await getToken();
+      if (token === 'guest') return guestDelay((guestCaptures || GUEST_CAPTURES).find((item) => item.id === captureId), 200);
+      return request(`/cards/${captureId}/add`, { method: 'POST', idempotencyKey, token });
+    },
     renameCapture: async (captureId, cardTitle) => {
       const token = await getToken();
       if (token === 'guest') {

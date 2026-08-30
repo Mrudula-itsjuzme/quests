@@ -50,6 +50,15 @@ export function useCaptureItem() {
   });
 }
 
+export function useAddCardToLibrary() {
+  const api = useApiClient();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (captureId) => api.addCardToLibrary(captureId, newIdempotencyKey()),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['captures'] }),
+  });
+}
+
 export function useRenameCapture() {
   const api = useApiClient();
   const queryClient = useQueryClient();

@@ -323,6 +323,35 @@ describe('Quest API', () => {
     expect(fetched.body.id).toBe(created.body.id);
   });
 
+  it('adds a minted card to the library idempotently without re-crediting rewards', async () => {
+    const app = createApp({ config: testConfig(), visionProvider: highConfidenceVisionProvider() });
+    const captured = await request(app)
+      .post('/api/v1/captures')
+      .set('Idempotency-Key', 'capture-add-001')
+      .send({ imageBase64: PIXEL_PNG, liveness: { attested: true, method: 'capture-input-environment', score: 0.7 } });
+    expect(captured.status).toBe(201);
+    const before = await request(app).get('/api/v1/me');
+
+    const added = await request(app)
+      .post(`/api/v1/cards/${captured.body.id}/add`)
+      .set('Idempotency-Key', 'card-add-001')
+      .send({});
+    const replay = await request(app)
+      .post(`/api/v1/cards/${captured.body.id}/add`)
+      .set('Idempotency-Key', 'card-add-002')
+      .send({});
+    const after = await request(app).get('/api/v1/me');
+    const library = await request(app).get('/api/v1/captures');
+
+    expect(added.status).toBe(200);
+    expect(replay.status).toBe(200);
+    expect(added.body.libraryStatus).toBe('added');
+    expect(replay.body.id).toBe(captured.body.id);
+    expect(after.body.totalXp).toBe(before.body.totalXp);
+    expect(after.body.coins).toBe(before.body.coins);
+    expect(library.body.filter((item) => item.id === captured.body.id)).toHaveLength(1);
+  });
+
   it('actually credits the capture XP reward to the player total, not just the card', async () => {
     const app = createApp({ config: testConfig(), visionProvider: highConfidenceVisionProvider() });
     const before = await request(app).get('/api/v1/me');
@@ -550,6 +579,23 @@ describe('Community API', () => {
       .send({ cardId: card.id });
     expect(response.status).toBe(422);
     expect(response.body.error.code).toBe('capture_not_shareable');
+  });
+
+  it('does not publish a provisional capture before human verification', async () => {
+    const app = createApp({ config: testConfig(), visionProvider: highConfidenceVisionProvider() });
+    const captured = await request(app)
+      .post('/api/v1/captures')
+      .set('Idempotency-Key', 'community-post-provisional-capture')
+      .send({ imageBase64: PIXEL_PNG, liveness: { attested: false } });
+    expect(captured.body.status).toBe('provisional');
+
+    const response = await request(app)
+      .post('/api/v1/community/posts')
+      .set('Idempotency-Key', 'community-post-provisional')
+      .send({ cardId: captured.body.id });
+    expect(response.status).toBe(422);
+    expect(response.body.error.code).toBe('capture_not_shareable');
+    expect(response.body.error.reason).toBe('pending_verification');
   });
 
   it('does not create duplicate posts when the same capture is shared twice', async () => {
