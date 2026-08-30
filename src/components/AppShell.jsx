@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from '../features/auth/AuthContext';
@@ -16,6 +16,10 @@ import { WorldAmbience } from './WorldAmbience';
 import { DawnMoment, useDawnMoment } from './DawnMoment';
 import { useAndroidBackButton } from '../lib/useAndroidBackButton';
 import { DesktopSidebar } from './DesktopSidebar';
+
+// Capture is the core verb of the product, so the shell owns the flow: the
+// centre FAB must work from every destination, not only the world route.
+const CaptureFlow = lazy(() => import('../features/world/CaptureFlow').then((m) => ({ default: m.CaptureFlow })));
 
 // Capture stays the central shutter action rather than an ordinary destination.
 // Profile is reachable from the topbar avatar, and Rewards from Profile, so the
@@ -38,13 +42,14 @@ export function AppShell() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const [levelUp, setLevelUp] = useState(null);
+  const [captureOpen, setCaptureOpen] = useState(false);
   const { visible: dawnVisible, dismiss: dismissDawn } = useDawnMoment();
 
   const isWorldRoute = location.pathname === '/app';
 
   const handleOpenCapture = () => {
     playTap();
-    window.dispatchEvent(new CustomEvent('wild-realm-open-capture'));
+    setCaptureOpen(true);
   };
 
   useEffect(() => {
@@ -57,6 +62,8 @@ export function AppShell() {
       playLevelUp();
     };
     const onOpenSettings = () => setSettingsOpen(true);
+    const onOpenCapture = () => setCaptureOpen(true);
+    window.addEventListener('wild-realm-open-capture', onOpenCapture);
     window.addEventListener('habbit-notice', onNotice);
     window.addEventListener('habbit-level-up', onLevelUp);
     window.addEventListener('habbit-open-settings', onOpenSettings);
@@ -64,16 +71,18 @@ export function AppShell() {
       window.removeEventListener('habbit-notice', onNotice);
       window.removeEventListener('habbit-level-up', onLevelUp);
       window.removeEventListener('habbit-open-settings', onOpenSettings);
+      window.removeEventListener('wild-realm-open-capture', onOpenCapture);
     };
   }, []);
 
   const handleHardwareBack = useCallback(() => {
+    if (captureOpen) { setCaptureOpen(false); return true; }
     if (logoutDialogOpen) { setLogoutDialogOpen(false); return true; }
     if (settingsOpen) { setSettingsOpen(false); return true; }
     if (notice) { setNotice(''); return true; }
     if (levelUp) { setLevelUp(null); return true; }
     return false;
-  }, [logoutDialogOpen, settingsOpen, notice, levelUp]);
+  }, [captureOpen, logoutDialogOpen, settingsOpen, notice, levelUp]);
 
   useAndroidBackButton(handleHardwareBack);
 
@@ -221,6 +230,14 @@ export function AppShell() {
               ×
             </button>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {captureOpen && (
+          <Suspense fallback={null}>
+            <CaptureFlow onClose={() => setCaptureOpen(false)} />
+          </Suspense>
         )}
       </AnimatePresence>
 
