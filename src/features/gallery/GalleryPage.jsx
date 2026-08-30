@@ -94,7 +94,7 @@ export function GalleryPage() {
     <main className="library-shell">
       {/* Compact Header */}
       <div className="library-header">
-        <h1>MY LIBRARY</h1>
+        <h1>My Library</h1>
         <motion.button
           type="button"
           className="library-search-btn"
@@ -179,8 +179,12 @@ export function GalleryPage() {
       ) : displayList.length === 0 && activeTab !== 'all' ? (
         <motion.div
           initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-          className="library-empty-state"
+          className="intentional-empty-state"
         >
+          <div className="empty-icon-wrapper">
+            <Icon name={activeTab === 'Water' ? 'droplet' : activeTab === 'Fire' ? 'flame' : (activeTab === 'Grass' || activeTab === 'Earth') ? 'leaf' : (activeTab === 'Sky' || activeTab === 'familiars') ? 'feather' : 'compass'} />
+          </div>
+          <h3>No discoveries found</h3>
           <p>You haven&apos;t discovered any {activeTab === 'familiars' ? 'Familiar' : activeTab} species yet.</p>
           <motion.button
             type="button"
@@ -195,10 +199,13 @@ export function GalleryPage() {
       ) : activeTab === 'all' && collection.length === 0 ? (
         <motion.div
           initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-          style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--wild-text-dim)' }}
+          className="intentional-empty-state"
         >
-          <p style={{ fontSize: '1rem', color: '#fff', fontWeight: 700 }}>Your collection starts here.</p>
-          <p style={{ marginTop: '4px' }}>Capture your first discovery to begin filling the library.</p>
+          <div className="empty-icon-wrapper">
+            <Icon name="chest" />
+          </div>
+          <h3>Your collection starts here</h3>
+          <p>Capture your first discovery to begin filling the library.</p>
           <motion.button
             type="button"
             className="continue-journey-btn"
@@ -232,7 +239,7 @@ export function GalleryPage() {
               >
                 <div className="library-element-tile-body">
                   <h3>{cat.label}</h3>
-                  <span>{cat.count}/{cat.total} discovered · {cat.percent}%</span>
+                  <span>{cat.count}/{cat.total} · {cat.percent}%</span>
                   <div className="library-element-progress" role="progressbar" aria-valuenow={cat.percent} aria-valuemin={0} aria-valuemax={100} aria-label={`${cat.label} completion`}>
                     <i style={{ width: `${cat.percent}%` }} />
                   </div>

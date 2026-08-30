@@ -29,6 +29,9 @@ export function Icon({ name }) {
       {name === 'gem' && <path d="M6 3h12l3 5-9 13L3 8l3-5Zm.9 2 1.4 3h7.4l1.4-3H6.9ZM7 10l4.2 8.4L6.6 10H7Zm10 0h.4l-4.6 8.4L17 10Z" />}
       {name === 'camera' && <path d="M9 4h6l1.2 2H19a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h2.8L9 4Zm3 5.5a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm0 2a2 2 0 1 1 0 4 2 2 0 0 1 0-4Z" />}
       {name === 'archive' && <path d="M3 4h18v4H3V4Zm1 5h16v11H4V9Zm5 3v2h6v-2H9Z" />}
+      {name === 'alert-triangle' && <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0zM12 9v4m0 4h.01" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />}
+      {name === 'wifi-off' && <path d="M1 1l22 22M16.72 11.06A10.94 10.94 0 0119 12.5M5 12.5a10.94 10.94 0 015.83-2.84M8.5 16.5a5 5 0 017 0M21.3 7.84A17.9 17.9 0 0012 5M12 20h.01" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />}
+      {name === 'refresh-cw' && <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />}
     </svg>
   );
 }

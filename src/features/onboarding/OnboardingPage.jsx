@@ -4,9 +4,9 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Icon, categoryIcon } from '../../components/Icon';
 import { useMe, useUpdateMe } from '../quests/queries';
 import { playHover, playSuccess, playTap } from '../../lib/useSoundEffects';
-import { normalizeTimezone } from '../../lib/api';
+import { FullScreenStatus } from '../auth/ProtectedRoute';
 
-const detectedTimezone = normalizeTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone);
+const detectedTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
 
 export function OnboardingPage() {
   const { data: me, isLoading } = useMe();
@@ -16,7 +16,15 @@ export function OnboardingPage() {
   const [timezone, setTimezone] = useState(detectedTimezone);
   const [primaryPath, setPrimaryPath] = useState('Mind');
 
-  if (isLoading) return <p role="status" className="fullscreen-status">Preparing your field journal…</p>;
+  if (isLoading) {
+    return (
+      <FullScreenStatus
+        type="loading"
+        title="Journal Initialization"
+        text="Preparing your field journal and sanctuary database..."
+      />
+    );
+  }
   if (me?.onboardingCompletedAt) return <Navigate to="/app" replace />;
 
   const onNextStep = (e) => {
@@ -35,7 +43,7 @@ export function OnboardingPage() {
     playSuccess();
     await updateMe.mutateAsync({
       displayName: displayName.trim() || undefined,
-      timezone: normalizeTimezone(timezone),
+      timezone,
       primaryPath,
       onboardingCompleted: true,
     });

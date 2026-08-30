@@ -1,0 +1,847 @@
+/* ==========================================================================
+   WILD REALM — PRODUCT DESIGN SYSTEM
+   Loaded last. This file owns the mobile-native design language:
+   type scale, spacing rhythm, button variants, surfaces, empty states.
+
+   Principles enforced here:
+   - One type scale. Screens do not invent font sizes.
+   - One spacing vocabulary (4/8/12/16/24/32).
+   - Buttons have explicit variants; actionable never reads as disabled.
+   - Surfaces use elevation, not outlines. Borders are earned, not default.
+   - Designed for 360–412px phones first.
+   ========================================================================== */
+
+:root {
+  /* ---- Mobile-native type scale ------------------------------------------
+     Ramps are tight because a 390px phone is the primary target. The old
+     scale topped out at 3.75rem, which forced 2-line hero wraps on device. */
+  --t-display: 1.75rem;   /* rare — true hero moments only */
+  --t-title: 1.375rem;    /* page title */
+  --t-section: 1.0625rem; /* section heading */
+  --t-body: 0.9375rem;    /* body copy */
+  --t-meta: 0.8125rem;    /* secondary / metadata */
+  --t-label: 0.6875rem;   /* uppercase eyebrow / label */
+
+  --lh-tight: 1.2;
+  --lh-snug: 1.35;
+  --lh-body: 1.5;
+
+  /* ---- Spacing vocabulary (the only values new work should use) ---- */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-6: 24px;
+  --s-8: 32px;
+
+  /* ---- Surface elevation ramp (replaces outline-soup) ---- */
+  --surface-0: #07110c;                      /* app ground */
+  --surface-1: rgba(255, 255, 255, 0.035);   /* card */
+  --surface-2: rgba(255, 255, 255, 0.06);    /* raised card / control */
+  --surface-3: rgba(255, 255, 255, 0.09);    /* sheet / modal */
+  --hairline: rgba(255, 255, 255, 0.08);     /* separator, not a box */
+
+  /* ---- Text contrast ramp (old --quest-muted #94A3B8 was too dim) ---- */
+  --ink-1: #F4F7F5;                    /* primary */
+  --ink-2: rgba(233, 241, 236, 0.72);  /* secondary — readable */
+  --ink-3: rgba(233, 241, 236, 0.52);  /* tertiary / metadata */
+
+  /* ---- Accent roles ----
+     GREEN = interaction/success/active nav. GOLD = rarity/prestige.
+     Never both on the same element. */
+  --accent: #23C87E;
+  --accent-press: #1BA968;
+  --accent-ink: #04150C;
+  --prestige: #E8B54F;
+
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);
+  --dur: 200ms;
+}
+
+/* ==========================================================================
+   1. TYPOGRAPHY — stop screens from inventing sizes
+   ========================================================================== */
+
+.onboarding-card h1,
+.library-header h1,
+.guild-page h1,
+.quests-shell h1 {
+  font-size: var(--t-title);
+  line-height: var(--lh-tight);
+  letter-spacing: -0.01em;
+  font-weight: 700;
+  color: var(--ink-1);
+  max-width: none;        /* kill the 11ch clamp that forced 2-line wraps */
+  text-wrap: balance;
+}
+
+/* Supporting copy: readable, and narrow enough to not run the full bezel. */
+.onboarding-card > p,
+.empty-state p,
+.wr-empty p {
+  font-size: var(--t-body);
+  line-height: var(--lh-body);
+  color: var(--ink-2);
+  max-width: 34ch;
+}
+
+/* Uppercase eyebrows/labels share one treatment. */
+.onboarding-chapter small,
+.auth-field label,
+.library-metric-strip span,
+.eyebrow {
+  font-size: var(--t-label);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+/* Secondary text everywhere gets the readable ramp, not the dim grey. */
+.field-hint,
+.quest-item-card small,
+.library-photo-card small {
+  color: var(--ink-3);
+  font-size: var(--t-meta);
+  line-height: var(--lh-snug);
+}
+
+/* ==========================================================================
+   2. BUTTON SYSTEM
+   Variants are unmistakable. Actionable never looks disabled; disabled
+   never looks actionable.
+
+   NOTE: a solid background-color sits UNDER every gradient. The Android
+   WebView drops gradient layers on elements that also transition box-model
+   properties, which is why these CTAs rendered flat grey on device while
+   looking correct in Chrome.
+   ========================================================================== */
+
+.celestial-onboarding .auth-submit,
+.auth-premium .auth-submit,
+.wr-btn-primary {
+  min-height: 50px;
+  padding: 0 var(--s-6);
+  border: 0;
+  border-radius: 14px;
+  background-color: var(--accent);                       /* device fallback */
+  background-image: linear-gradient(180deg, #2FD98C, #17B06C);
+  color: var(--accent-ink);
+  font-size: var(--t-body);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  box-shadow: 0 6px 18px rgba(20, 160, 100, 0.28);
+  /* Only paint properties transition — never width/min-height/border-radius,
+     which is what broke gradient compositing on device. */
+  transition: filter var(--dur) var(--ease-out),
+              box-shadow var(--dur) var(--ease-out),
+              transform var(--dur) var(--ease-out);
+  /* Label and trailing icon must never collide ("Path Focus◉"). */
+  gap: var(--s-2);
+}
+
+.celestial-onboarding .auth-submit svg,
+.wr-btn-primary svg {
+  flex: 0 0 auto;
+  width: 17px;
+  height: 17px;
+}
+
+.celestial-onboarding .auth-submit:active:not(:disabled),
+.wr-btn-primary:active:not(:disabled) {
+  transform: translateY(1px);
+  filter: brightness(0.96);
+}
+
+/* Onboarding CTA is the prestige moment — gold, but still solid-backed. */
+.celestial-onboarding .auth-submit {
+  background-color: #D9A038;
+  background-image: linear-gradient(180deg, #F0C368, #C98B27);
+  color: #1A0E02;
+  box-shadow: 0 6px 18px rgba(197, 137, 33, 0.26);
+}
+
+/* SECONDARY — visible surface, no shouting. */
+.wr-btn-secondary {
+  min-height: 48px;
+  padding: 0 var(--s-5, 20px);
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  background: var(--surface-2);
+  color: var(--ink-1);
+  font-size: var(--t-body);
+  font-weight: 600;
+}
+
+/* TERTIARY / Back — recedes, but stays clearly tappable. */
+.celestial-onboarding .ghost-action,
+.wr-btn-tertiary {
+  min-height: 48px;
+  padding: 0 var(--s-4);
+  border: 0;
+  background: transparent;
+  color: var(--ink-2);
+  font-size: var(--t-body);
+  font-weight: 600;
+}
+.celestial-onboarding .ghost-action:active {
+  color: var(--ink-1);
+}
+
+/* DESTRUCTIVE */
+.wr-btn-destructive {
+  min-height: 48px;
+  border: 0;
+  border-radius: 12px;
+  background-color: #C4382F;
+  color: #fff;
+  font-weight: 700;
+}
+
+/* DISABLED — unmistakable, and only ever from a real disabled attribute. */
+button:disabled,
+button[aria-disabled="true"],
+.wr-btn-primary:disabled {
+  background-image: none !important;
+  background-color: rgba(255, 255, 255, 0.07) !important;
+  color: rgba(255, 255, 255, 0.34) !important;
+  box-shadow: none !important;
+  border-color: transparent !important;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* ==========================================================================
+   3. ONBOARDING COMPOSITION
+   Keep the portal artwork and the chapter concept. Compress the hero,
+   tighten the header, kill the dead space below the fold.
+   ========================================================================== */
+
+@media (max-width: 780px) {
+  /* Steps carry little content, so a too-short hero strands the CTA above a
+     black void. Give the portal artwork a generous, deliberate share of the
+     screen (~30%) and the remaining space composes as one full screen. */
+  .onboarding-experience {
+    grid-template-rows: 30svh 1fr;
+  }
+  .onboarding-visual { min-height: 0; }
+  .onboarding-orbit { width: 62px; height: 62px; }
+  .onboarding-orbit svg { width: 28px; height: 28px; }
+
+  .onboarding-visual > p {
+    left: var(--s-4);
+    bottom: var(--s-3);
+    font-size: var(--t-meta);
+    color: var(--ink-2);
+  }
+
+  /* The card previously collapsed to its content height at the top of a 1fr
+     row, leaving ~700px of black void under the CTA. Let it own the column and
+     push the action to the bottom, so every step is one full, composed screen. */
+  .onboarding-card {
+    align-self: stretch;
+    gap: var(--s-4);
+    padding: var(--s-6) var(--s-4) calc(var(--s-6) + env(safe-area-inset-bottom));
+    min-height: 0;
+    /* chapter row hugs; the step wrapper takes the remaining height so the
+       CTA can sit at the bottom instead of floating above a black void. */
+    grid-template-rows: auto 1fr;
+  }
+
+  /* A phone onboarding step reads best as: content block at top, action at
+     bottom, and ONE deliberate gap between them — not content, void, action.
+     Capping the gap keeps short steps from stranding the CTA off alone. */
+  .celestial-onboarding .onboarding-form > .auth-submit,
+  .celestial-onboarding .onboarding-form > .step-nav-actions {
+    margin-top: auto;
+    padding-top: var(--s-8);
+  }
+
+  /* The animating step wrapper is the real flex context for each step. */
+  .onboarding-card > div:not(.onboarding-chapter) {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .celestial-onboarding .onboarding-form {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+  }
+
+  /* Primary action sits at the bottom of the step, not mid-void. */
+  .celestial-onboarding .onboarding-form > .auth-submit,
+  .celestial-onboarding .onboarding-form > .step-nav-actions {
+    margin-top: auto;
+  }
+
+  /* Chapter marker: compact row, not a badge + stacked block. */
+  .onboarding-chapter { gap: var(--s-3); }
+  .onboarding-chapter > span {
+    width: 34px;
+    height: 34px;
+    border-color: rgba(232, 181, 79, 0.35);
+    color: var(--prestige);
+    font-size: var(--t-meta);
+  }
+  .onboarding-chapter strong {
+    font-size: var(--t-body);
+    font-weight: 600;
+    color: var(--ink-1);
+  }
+
+  .onboarding-card h1 { margin: var(--s-1) 0 0; }
+  .onboarding-card > p { margin: 0; }
+
+  .celestial-onboarding .onboarding-form { gap: var(--s-4); }
+  .celestial-onboarding .onboarding-form input:not([type="radio"]) {
+    min-height: 48px;
+    border-radius: 12px;
+    border: 1px solid var(--hairline);
+    background: var(--surface-1);
+    font-size: var(--t-body);
+    color: var(--ink-1);
+  }
+
+  /* Path options: full-width rows, no cramped 3-up grid. */
+  .celestial-onboarding .path-options {
+    grid-template-columns: 1fr;
+    gap: var(--s-2);
+  }
+  /* Three competing .path-option rules exist upstream; this one is scoped
+     tightly enough to win without !important. */
+  .celestial-onboarding .path-options .path-option {
+    min-height: 60px;
+    padding: var(--s-3) var(--s-4);
+    border: 1px solid transparent;
+    border-radius: 12px;
+    background: var(--surface-1);
+    box-shadow: none;
+  }
+  .celestial-onboarding .path-options .path-option.selected {
+    border-color: rgba(232, 181, 79, 0.5);
+    background: rgba(232, 181, 79, 0.08);
+    box-shadow: none;
+  }
+  .celestial-onboarding .path-option strong {
+    font-size: var(--t-body);
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--ink-1);
+  }
+  .celestial-onboarding .path-option small {
+    font-size: var(--t-meta);
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--ink-3);
+  }
+
+  /* CTA row: Continue dominant, Back clearly secondary. */
+  .step-nav-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+    margin-top: var(--s-2);
+  }
+  .step-nav-actions .ghost-action { flex: 0 0 auto; }
+  .step-nav-actions .auth-submit { flex: 1 1 auto; margin-top: 0; }
+}
+
+/* ==========================================================================
+   4. SURFACES — reduce outline soup
+   Cards earn a background, not a rectangle outline.
+   ========================================================================== */
+
+@media (max-width: 780px) {
+  .quest-item-card,
+  .library-metric-strip,
+  .explore-hotspot-card,
+  .post-card {
+    border: 0;
+    border-radius: 14px;
+    background: var(--surface-1);
+    box-shadow: none;
+  }
+
+  /* Chip rows: only the active chip gets weight. */
+  .explore-filter-btn,
+  .library-tab-btn,
+  .quest-cadence-tabs button {
+    border: 0;
+    background: var(--surface-1);
+    color: var(--ink-2);
+    font-size: var(--t-meta);
+    font-weight: 600;
+    padding: 8px 14px;
+  }
+  .explore-filter-btn.active,
+  .library-tab-btn.active,
+  .quest-cadence-tabs button.active {
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+
+  /* Scrolling chip rows were clipped flush at the bezel, so the last chip read
+     as a broken "Ea..." label. Bleed the row to the screen edges and fade the
+     tail, which makes the horizontal scroll an intentional affordance. */
+  .library-element-tabs,
+  .explore-filter-row {
+    margin-left: calc(var(--s-4) * -1);
+    margin-right: calc(var(--s-4) * -1);
+    padding-left: var(--s-4);
+    padding-right: var(--s-4);
+    -webkit-mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 28px), transparent 100%);
+            mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 28px), transparent 100%);
+  }
+
+  /* Page titles: the override layer forced 1.8rem, which shouted on a phone. */
+  .library-header h1,
+  .quest-user-topbar h3 {
+    font-size: var(--t-title);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .library-header { margin-bottom: var(--s-4); }
+
+  /* Element tiles were wrapping "0/1 discovered · 0%" onto three lines. */
+  /* The tile rail is `column-count: 2`, but Framer's `layout` prop makes the
+     tiles participate as absolutely-positioned items, so they collapsed into
+     narrow ~103px columns and every label wrapped onto three lines.
+     An explicit 2-up grid gives each tile real width. */
+  .library-card-grid {
+    column-count: auto;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--s-3);
+  }
+
+  .library-element-tile {
+    min-height: 108px;
+    padding: 0;
+    border: 0;
+    border-radius: 14px;
+  }
+  .library-element-tile-body h3,
+  .library-element-tile-body strong {
+    margin: 0;
+    font-size: var(--t-body);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--ink-1);
+  }
+  /* "0/1 discovered · 0%" was wrapping onto three lines inside the tile. */
+  .library-element-tile-body > span {
+    display: block;
+    font-size: var(--t-label);
+    line-height: var(--lh-snug);
+    letter-spacing: 0;
+    color: var(--ink-3);
+    text-wrap: balance;
+  }
+  .library-element-progress { margin-top: var(--s-2); }
+
+  /* Quest rows: title leads, meta supports, action is compact — not three
+     competing heavy elements. */
+  .quest-item-card { padding: var(--s-3); }
+  .quest-item-title { font-size: var(--t-body); font-weight: 600; }
+  .quest-row-meta { gap: var(--s-2); }
+  .quest-progress-num { font-size: var(--t-meta); color: var(--ink-3); }
+  .quest-reward-pill {
+    font-size: var(--t-label);
+    font-weight: 700;
+    padding: 3px 8px;
+    border: 0;
+    background: var(--surface-2);
+    color: var(--ink-2);
+  }
+  /* "View" was as loud as a primary CTA on every row. */
+  .quest-claim-btn.glass {
+    min-height: 36px;
+    padding: 0 var(--s-3);
+    border: 0;
+    border-radius: 10px;
+    background: var(--surface-2);
+    color: var(--ink-1);
+    font-size: var(--t-meta);
+    font-weight: 600;
+    box-shadow: none;
+  }
+
+  /* Profile/tier card: one compact identity row, no mid-word XP wrap. */
+  .quest-user-topbar {
+    align-items: center;
+    gap: var(--s-3);
+    padding: var(--s-3);
+    border: 0;
+    border-radius: 14px;
+    background: var(--surface-1);
+  }
+  .quest-user-topbar h3 { font-size: var(--t-section); }
+  .quest-user-topbar p,
+  .quest-user-topbar small {
+    font-size: var(--t-meta);
+    color: var(--ink-3);
+  }
+
+  /* Metric strip: numbers lead, labels support. */
+  .library-stats-bar,
+  .library-metric-strip {
+    border: 0;
+    background: var(--surface-1);
+    border-radius: 14px;
+    padding: var(--s-3) var(--s-2);
+  }
+}
+
+/* ==========================================================================
+   4b. MAP — dark, cartographic, exploratory
+   The terrain itself is fixed in index.css (it was a remote stock photo of
+   wood planks). This tightens the chrome that sits on top of it.
+   ========================================================================== */
+
+@media (max-width: 780px) {
+  /* Search: a control, not a hero banner. It was tall enough to clip its own
+     placeholder and the settings glyph sat in a hard-edged box. */
+  .explore-search-input-wrap {
+    gap: var(--s-2);
+    padding: 0 var(--s-3);
+    min-height: 42px;
+    border: 1px solid var(--hairline);
+    background: rgba(7, 17, 13, 0.9);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+  }
+  .explore-search-input {
+    font-size: var(--t-body);
+    text-overflow: ellipsis;
+  }
+  .explore-search-input::placeholder { color: var(--ink-3); }
+  .explore-filter-btn {
+    flex: 0 0 auto;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--ink-2);
+  }
+
+  /* The world HUD sat at 108px, directly under the search bar, so the avatar
+     and the XP/gold pills collided with the filter chip row. Drop it below
+     the whole search + chips stack. */
+  .world-hud {
+    top: calc(160px + env(safe-area-inset-top, 0px));
+    padding: var(--s-1) var(--s-2);
+    border: 0;
+    background: rgba(7, 17, 13, 0.82);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  }
+  .world-hud-left { left: var(--s-4); }
+  .world-hud-right { right: var(--s-4); }
+
+  /* Map controls: one grouped stack, not scattered outlined circles. */
+  .map-control-btn {
+    width: 38px;
+    height: 38px;
+    border: 0;
+    background: rgba(7, 17, 13, 0.88);
+    color: var(--ink-1);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+  }
+  .map-control-layers { top: 74px; }
+  .map-control-locate { top: 118px; }
+
+  /* Hotspot cards were clipped by the dock; give the rail real clearance
+     and let the peeking third card read as an intentional scroll cue. */
+  .explore-hotspot-cards {
+    gap: var(--s-3);
+    padding-bottom: var(--s-2);
+  }
+  .explore-hotspot-card {
+    border: 0;
+    border-radius: 14px;
+    background: var(--surface-1);
+  }
+  .explore-hotspot-card h4,
+  .explore-hotspot-card strong { font-size: var(--t-body); font-weight: 600; }
+  .explore-hotspot-card small,
+  .explore-hotspot-card p { font-size: var(--t-meta); color: var(--ink-3); }
+}
+
+/* ==========================================================================
+   5. EMPTY STATES — one language everywhere
+   icon → concise title → one supporting line → one action.
+   Vertically centered in the available space, never a black void.
+   ========================================================================== */
+
+.wr-empty,
+.community-state-panel,
+.intentional-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-3);
+  padding: var(--s-8) var(--s-6);
+  min-height: 44vh;
+  text-align: center;
+}
+
+/* A bare floating glyph reads as unfinished. Give every empty-state icon the
+   same contained treatment so the composition looks deliberate. */
+.community-state-panel > svg,
+.intentional-empty-state .empty-icon-wrapper {
+  box-sizing: content-box;
+  width: 26px;
+  height: 26px;
+  padding: 15px;
+  border-radius: 18px;
+  background: var(--surface-2);
+  fill: var(--accent);
+  color: var(--accent);
+  opacity: 1;
+}
+
+.community-state-title,
+.intentional-empty-state h3 {
+  margin: var(--s-1) 0 0;
+  font-size: var(--t-section);
+  font-weight: 700;
+  color: var(--ink-1);
+}
+
+.community-state-panel > p:not(.community-state-title),
+.intentional-empty-state p {
+  margin: 0;
+  max-width: 30ch;
+  font-size: var(--t-body);
+  line-height: var(--lh-body);
+  color: var(--ink-2);
+}
+
+.community-state-panel .continue-journey-btn {
+  margin-top: var(--s-3);
+  min-width: 190px;
+}
+
+.wr-empty-icon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  background: var(--surface-2);
+  color: var(--accent);
+  margin-bottom: var(--s-1);
+}
+.wr-empty-icon svg { width: 26px; height: 26px; }
+
+.wr-empty h3,
+.wr-empty strong {
+  margin: 0;
+  font-size: var(--t-section);
+  font-weight: 700;
+  color: var(--ink-1);
+}
+
+.wr-empty p {
+  margin: 0;
+  max-width: 30ch;
+}
+
+.wr-empty .wr-btn-primary,
+.wr-empty > button {
+  margin-top: var(--s-2);
+  min-width: 190px;
+}
+
+/* ==========================================================================
+   5b. MODALS — native bottom-sheet feel, not a box floating in a void
+   ========================================================================== */
+
+@media (max-width: 780px) {
+  /* The backdrop is a fixed, full-screen layer at z-index 200. Anchoring the
+     sheet to the bottom of THAT layer (rather than position:fixed, which
+     escapes it) keeps the sheet above the bottom dock. */
+  .modal-backdrop:has(.community-share-sheet) {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .community-share-sheet {
+    position: relative;
+    left: auto;
+    right: auto;
+    top: auto;
+    bottom: auto;
+    width: 100%;
+    max-width: none;
+    max-height: 88svh;
+    overflow-y: auto;
+    transform: none;
+    margin: 0;
+    border: 0;
+    border-radius: 20px 20px 0 0;
+    background: #0B1712;
+    padding: var(--s-3) var(--s-4) calc(var(--s-4) + env(safe-area-inset-bottom));
+    box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.6);
+  }
+
+  /* Grab handle — the standard signal that a sheet is dismissible. */
+  .community-share-sheet::before {
+    content: "";
+    display: block;
+    width: 36px;
+    height: 4px;
+    margin: 0 auto var(--s-3);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+  }
+
+  /* Title was a shouting gold display line; a sheet title is a section head. */
+  .community-share-sheet .section-title,
+  .community-share-sheet .section-title > * {
+    font-size: var(--t-section);
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--ink-1);
+  }
+
+  .community-share-actions {
+    gap: var(--s-2);
+    margin-top: var(--s-4);
+  }
+  .community-share-actions > button { min-height: 48px; border-radius: 12px; }
+
+  /* The rarity chip ran straight into the title ("BronzeSteepwater Sage"). */
+  .community-share-option {
+    gap: var(--s-3);
+    padding: var(--s-3);
+    border: 0;
+    border-radius: 12px;
+    background: var(--surface-1);
+  }
+  .community-share-rank {
+    flex: 0 0 auto;
+    margin-right: var(--s-1);
+    font-size: var(--t-label);
+  }
+  .community-share-name { font-size: var(--t-body); }
+
+}
+
+/* The dock is z-index 999 and lives in .mobile-content-area, while modals
+   portal to <body> at z-index 200 — so the dock floated over every open sheet.
+   Modals are the topmost layer, so they own the top of the stack. */
+.modal-backdrop { z-index: 1000; }
+
+/* Belt and braces: the dock is inert while a sheet is mounted, so a tap can
+   never land on navigation hidden behind the sheet. */
+body:has(.modal-backdrop) .mobile-bottom-dock {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* A 0.5-opacity green button still reads as "green button". Disabled must be
+   unmistakably inert — this is the modal's most common state. */
+.community-share-actions > button[disabled],
+.discovery-btn-primary[disabled] {
+  opacity: 1;
+  background-image: none;
+  background-color: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.34);
+  box-shadow: none;
+  border-color: transparent;
+}
+
+/* ==========================================================================
+   5c. CAPTURE — a deliberate system state, not an unfinished screen
+   ========================================================================== */
+
+@media (max-width: 780px) {
+  /* Top chrome: compact status + actions on one line. */
+  .capture-locus,
+  .capture-chip-btn {
+    min-height: 34px;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--ink-1);
+    font-size: var(--t-meta);
+    font-weight: 600;
+  }
+  .capture-chip-btn { width: 34px; }
+
+  /* The reticle spanned most of the frame, which made an empty preview read
+     as a broken screen. A tighter square reads as a targeting aid. */
+  .capture-reticle {
+    width: min(62vw, 250px);
+    height: min(62vw, 250px);
+  }
+  .capture-bracket {
+    width: 22px;
+    height: 22px;
+    border-color: rgba(255, 255, 255, 0.85);
+    border-width: 2px;
+  }
+
+  .capture-hint {
+    font-size: var(--t-meta);
+    color: var(--ink-2);
+    max-width: 28ch;
+    margin-inline: auto;
+  }
+
+  /* "Camera off" should look like a stated system state, so give the dead
+     viewfinder a deliberate ground rather than an empty black rectangle. */
+  .capture-viewfinder:not(:has(.is-live)) {
+    background:
+      radial-gradient(ellipse at 50% 45%, rgba(35, 200, 126, 0.07), transparent 60%),
+      linear-gradient(180deg, #0A1A14, #050D0A);
+  }
+
+  /* The compose FAB is fixed above the dock, so anything that can scroll
+     underneath it needs clearance — otherwise it lands on top of the
+     empty-state copy and the last row of the list. */
+  /* The FAB is position:fixed, but an animated ancestor creates a containing
+     block, so it resolved against that box and landed mid-screen on top of the
+     empty-state copy. Anchoring it to the page shell puts it back above the
+     dock, where a compose action belongs. */
+  .guild-page { position: relative; }
+  .community-fab-btn {
+    position: absolute;
+    top: auto;
+    bottom: var(--s-4);
+    right: var(--s-4);
+  }
+
+  .community-state-panel { padding-bottom: calc(var(--s-8) + 56px); }
+  .community-friend-list,
+  .community-map-panel,
+  .community-feed-stream { padding-bottom: calc(var(--s-6) + 56px); }
+}
+
+/* ==========================================================================
+   6. MOBILE SAFE SPACING
+   ========================================================================== */
+
+@media (max-width: 780px) {
+  .ptr-container,
+  .library-shell,
+  .guild-page,
+  .quests-shell {
+    padding-left: var(--s-4);
+    padding-right: var(--s-4);
+    padding-top: calc(var(--s-3) + env(safe-area-inset-top));
+    /* dock height + breathing room */
+    padding-bottom: calc(108px + env(safe-area-inset-bottom));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .celestial-onboarding .auth-submit,
+  .wr-btn-primary { transition: none; }
+}

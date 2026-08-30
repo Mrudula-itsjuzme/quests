@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { WeatherLayer } from './WeatherLayer';
+import { Icon, categoryIcon } from '../../components/Icon';
 
 export function WorldCanvas({ phase, weather, hotspots = [], onSelectHotspot }) {
   return (
@@ -22,10 +23,11 @@ export function WorldCanvas({ phase, weather, hotspots = [], onSelectHotspot }) 
           whileHover={{ scale: 1.15, y: -4 }}
           onClick={() => onSelectHotspot?.(pin)}
         >
-          {/* Capture clusters show their best rarity grade; curated places
-              show a category initial so both read as map pins. */}
+          {/* Capture clusters show their best rarity grade; curated places show
+              a category icon. Bare initials ("H", "W", "B") read as placeholder
+              art on a map, so curated pins use the shared icon family instead. */}
           <div className={pin.grade ? `map-hotspot-thumb rank-hex-${pin.grade.toLowerCase()}` : 'map-hotspot-thumb map-hotspot-curated'}>
-            {pin.grade || (pin.category ? pin.category[0] : '·')}
+            {pin.grade || <Icon name={categoryIcon(pin.category)} />}
           </div>
           <div className="map-hotspot-label">
             <span>{pin.title}</span>

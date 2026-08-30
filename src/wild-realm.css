@@ -98,24 +98,14 @@ h1, h2, h3, h4, h5, h6, .brand-lockup strong {
 
 /* ── 7. Global Layout & Spacing Fixes ── */
 .ptr-container, .library-shell, .guild-page, .quests-shell {
-  padding-bottom: calc(140px + env(safe-area-inset-bottom)) !important;
-  padding-top: calc(24px + env(safe-area-inset-top)) !important;
-  padding-left: 16px !important;
-  padding-right: 16px !important;
+  /* padding handled by design-system.css so the scale stays in one place */
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch !important;
 }
 
 /* Make headers large and modern */
-.library-header h1, .quest-user-topbar h3 {
-  font-size: 1.8rem !important;
-  font-weight: 800 !important;
-  letter-spacing: -0.02em !important;
-}
-
-.library-header {
-  margin-bottom: 24px !important;
-}
+/* Page-title sizing now lives in design-system.css (mobile type scale).
+   The former 1.8rem/800 override shouted on a 390px phone. */
 
 /* Fix dock spacing and positioning on mobile */
 @media (max-width: 780px) {
@@ -507,19 +497,29 @@ body {
   background: rgba(240, 196, 107, 0.06) !important;
 }
 
+/* A per-row "View" is a SECONDARY action. It previously used full-strength
+   accent green, so every row competed with the screen's primary CTA.
+   Claim (the real reward action) keeps the accent; View recedes. */
 .quest-claim-btn {
+  border: none !important;
+  border-radius: 10px !important;
+}
+.quest-claim-btn:not(.glass) {
   background: var(--rarity-uncommon) !important;
   color: var(--quest-ink) !important;
-  border: none !important;
   box-shadow: 0 4px 16px rgba(111, 191, 122, 0.3) !important;
-  border-radius: 8px !important;
+}
+.quest-claim-btn.glass {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: #F4F7F5 !important;
+  box-shadow: none !important;
 }
 
 .quest-reward-pill {
-  background: rgba(111, 191, 122, 0.12) !important;
-  color: var(--rarity-uncommon) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: rgba(233, 241, 236, 0.72) !important;
   border-radius: var(--radius-pill) !important;
-  border: 1px solid rgba(111, 191, 122, 0.2) !important;
+  border: 0 !important;
 }
 
 /* ── 8. General Buttons ─────────────────────────────────────────────────── */
@@ -1571,10 +1571,11 @@ body:has(.capture-flow-overlay) .mobile-bottom-dock { display: none !important; 
    Mockup: photography-dominant feed, quiet chrome, compact identity row.
    ========================================================================== */
 
-/* Compose sits clear of the dock and reads as secondary to the Capture FAB. */
+/* Compose sits clear of the dock and reads as secondary to the Capture FAB.
+   Offsets live in design-system.css: the FAB is position:fixed but an animated
+   ancestor forms a containing block, so it is anchored to .guild-page instead
+   and a hardcoded 96px bottom offset landed it in the middle of the screen. */
 .community-fab-btn {
-  bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important;
-  right: 16px !important;
   width: 46px !important;
   height: 46px !important;
   border: 1px solid rgba(52, 211, 133, 0.5) !important;
@@ -1708,9 +1709,8 @@ body:has(.capture-flow-overlay) .mobile-bottom-dock { display: none !important; 
 }
 
 /* Cool the warm wood texture toward the mockup's dark-natural map. */
-.explore-map-terrain {
-  filter: saturate(0.5) hue-rotate(-14deg) brightness(0.6) contrast(1.1);
-}
+/* The terrain is now a self-contained cartographic surface, so the
+   hue-rotate/desaturate correction for the old photo is no longer needed. */
 
 /* Marker labels stay legible over the terrain without restyling the pin
    itself (the pin element is a positioned wrapper, not the visible disc). */

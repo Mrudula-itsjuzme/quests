@@ -110,8 +110,12 @@ export function QuestsPage() {
         {activeQuery.isLoading ? (
           <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--wild-text-dim)' }}>Loading quests...</div>
         ) : visibleQuests.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--wild-text-dim)' }}>
-            <p>No {tab} quests yet.</p>
+          <div className="intentional-empty-state">
+            <div className="empty-icon-wrapper">
+              <Icon name="scroll" />
+            </div>
+            <h3>No {tab} quests yet</h3>
+            <p>Embark on your journey by generating new challenges.</p>
             <motion.button
               type="button"
               className="continue-journey-btn"
