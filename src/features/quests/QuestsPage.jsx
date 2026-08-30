@@ -92,10 +92,11 @@ export function QuestsPage() {
                   style={{
                     position: 'absolute',
                     inset: 0,
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    borderRadius: '999px',
+                    background: 'rgba(232, 181, 79, 0.06)',
+                    border: '1px solid rgba(232, 181, 79, 0.25)',
+                    borderRadius: '12px',
                     zIndex: -1,
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                    boxShadow: '0 4px 12px rgba(232, 181, 79, 0.08)'
                   }}
                 />
               )}
