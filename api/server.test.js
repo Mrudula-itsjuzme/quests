@@ -1,5 +1,8 @@
 // @vitest-environment node
 import request from 'supertest';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { createApp } from './server.js';
 import { loadConfig } from './config.js';
 import { createLocalJWKSet, exportJWK, generateKeyPair, SignJWT } from 'jose';
@@ -1008,7 +1011,8 @@ function highConfidenceVisionProvider() {
   };
 }
 
-const PIXEL_PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const PIXEL_PNG = 'data:image/png;base64,' + fs.readFileSync(path.join(__dirname, '../public/icon-192.png')).toString('base64');
 
 function signedToken(privateKey, { issuer, audience }) {
   return new SignJWT({ name: 'Tester', zoneinfo: 'UTC' })
