@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { CaptureImage } from '../../components/CaptureImage';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Icon } from '../../components/Icon';
 import {
@@ -163,10 +164,15 @@ function CommunityFeed({ onShare }) {
           {post.discovery && (
             <div className={`post-photo-wrap rank-${(post.discovery.rarityGrade || post.discovery.rarityTier || 'd').toLowerCase()}`}>
               {post.discovery.imageRef ? (
-                <img className="post-photo-img" src={post.discovery.imageRef} alt={post.discovery.itemName} loading="lazy" decoding="async" />
+                <CaptureImage
+                  imageRef={post.discovery.imageRef}
+                  alt={post.discovery.itemName}
+                  element={post.discovery.element}
+                  className="post-photo-image"
+                />
               ) : (
-                // Capture images are not served publicly yet, so the card shows
-                // its rarity crest rather than a stand-in wildlife photo.
+                // A post whose discovery has no stored media (provisional, or
+                // media not retained) keeps the rarity crest instead.
                 <div className="post-photo-placeholder">
                   <span className={`post-rarity-crest rank-hex-${(post.discovery.rarityGrade || 'd').toLowerCase()}`}>
                     {post.discovery.rarityGrade || post.discovery.rarityTier || '—'}

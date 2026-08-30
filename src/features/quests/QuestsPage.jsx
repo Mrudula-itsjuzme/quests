@@ -66,8 +66,9 @@ export function QuestsPage() {
             )}
           </div>
         </div>
-        <div className="quest-coin-badge">
-          🪙 <span>{gold.toLocaleString()}</span>
+        <div className="quest-coin-badge" aria-label={`${gold} coins`}>
+          <Icon name="coin" />
+          <span>{gold.toLocaleString()}</span>
         </div>
       </div>
 
@@ -147,6 +148,11 @@ export function QuestsPage() {
                     <div className="quest-row-meta">
                       <span className="quest-progress-num">{quest.progressValue}/{quest.targetValue} {quest.unit}</span>
                       <span className="quest-reward-pill">XP {quest.xpReward}</span>
+                      {quest.coinReward > 0 && (
+                        <span className="quest-reward-pill is-coin">
+                          <Icon name="coin" /> {quest.coinReward}
+                        </span>
+                      )}
                     </div>
                     <ProgressBar value={questProgressRatio(quest)} compact />
                   </div>

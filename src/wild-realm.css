@@ -1899,3 +1899,139 @@ button[aria-disabled="true"] {
     transform var(--duration-instant) var(--quest-ease) !important;
 }
 .explore-sheet-see-all:active { transform: scale(0.96); background: rgba(52, 211, 133, 0.1) !important; }
+
+/* ==========================================================================
+   WILD REALM — CAPTURE FAB
+   The most important control. Alive, not desperate: a slow low-amplitude
+   breath rather than a repeating alarm ring, and real depth on press.
+   ========================================================================== */
+.dock-shutter-btn {
+  transition:
+    transform var(--duration-instant) var(--quest-ease),
+    box-shadow var(--duration-quick) var(--quest-ease) !important;
+}
+
+/* Ring never reaches full opacity and expands less, so it reads as a halo
+   breathing rather than a radar ping demanding attention. */
+.dock-shutter-btn::after {
+  animation: shutter-breathe 4.2s var(--quest-ease) infinite !important;
+  background: rgba(52, 211, 133, 0.26) !important;
+}
+@keyframes shutter-breathe {
+  0%, 100% { transform: scale(0.94); opacity: 0; }
+  45%      { transform: scale(1.16); opacity: 0.5; }
+}
+
+/* Press: the button sinks, and the halo tightens with it. */
+.dock-shutter-btn:active {
+  transform: scale(0.92) !important;
+  box-shadow:
+    0 0 16px rgba(52, 211, 133, 0.5),
+    0 4px 10px rgba(0, 0, 0, 0.6) !important;
+}
+.dock-shutter-btn:active::after { animation: none !important; opacity: 0 !important; }
+
+.dock-shutter-btn:focus-visible {
+  outline: 2px solid rgba(226, 245, 232, 0.9);
+  outline-offset: 3px;
+}
+
+/* Waiting on a GPS fix or otherwise unavailable: calm, obviously inert. */
+.dock-shutter-btn[disabled],
+.dock-shutter-btn[aria-disabled="true"] {
+  filter: saturate(0.35) brightness(0.7);
+}
+.dock-shutter-btn[disabled]::after,
+.dock-shutter-btn[aria-disabled="true"]::after { animation: none !important; opacity: 0 !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .dock-shutter-btn::after { animation: none !important; opacity: 0 !important; }
+  .dock-shutter-btn:active { transform: none !important; }
+}
+
+/* ==========================================================================
+   WILD REALM — CAPTURE PHOTOGRAPHY
+   One treatment shared by the Discovery Card hero, Library tiles and the
+   Community feed. The element crest is the loading ground AND the fallback,
+   so a photo resolving in is a cross-fade rather than a pop.
+   ========================================================================== */
+.capture-image {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #06120c;
+}
+
+.capture-image-crest {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--element-tint, #2f6b4a) 42%, transparent), transparent 70%),
+    linear-gradient(180deg, rgba(12, 26, 18, 0.9), rgba(5, 13, 9, 0.95));
+  transition: opacity var(--duration-considered) var(--quest-ease);
+}
+.capture-image-crest span {
+  color: color-mix(in srgb, var(--element-tint, #6ee7a0) 82%, #ffffff);
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+.capture-image-crest.element-fire  { --element-tint: #f97316; }
+.capture-image-crest.element-water { --element-tint: #38bdf8; }
+.capture-image-crest.element-grass { --element-tint: #4ade80; }
+.capture-image-crest.element-earth { --element-tint: #a78bfa; }
+.capture-image-crest.element-sky   { --element-tint: #67e8f9; }
+
+.capture-image-photo {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;          /* photography fills its frame, never letterboxed */
+  object-position: center;
+  opacity: 0;
+  transform: scale(1.015);    /* settles to 1 as it resolves — a breath, not a zoom */
+  transition:
+    opacity var(--duration-considered) var(--quest-ease),
+    transform var(--duration-deliberate) var(--quest-ease);
+}
+.capture-image[data-state="loaded"] .capture-image-photo { opacity: 1; transform: scale(1); }
+/* Once the photo is up the crest is redundant; fading it avoids any edge halo. */
+.capture-image[data-state="loaded"] .capture-image-crest { opacity: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .capture-image-photo { transform: none; transition: opacity var(--duration-quick) linear; }
+  .capture-image[data-state="loaded"] .capture-image-photo { transform: none; }
+}
+
+/* Wallet balance is real ledger data; the coin glyph is an icon, not an emoji. */
+.quest-coin-badge {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 5px;
+}
+.quest-coin-badge svg { width: 15px; height: 15px; color: var(--quest-gold-bright); }
+
+/* Coin reward pill only appears when a quest actually grants coins. */
+.quest-reward-pill.is-coin {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-color: rgba(245, 158, 11, 0.3) !important;
+  color: var(--quest-gold-bright) !important;
+}
+.quest-reward-pill.is-coin svg { width: 11px; height: 11px; }
+
+/* The shared capture image fills each host frame. */
+.discovery-hero-image { position: absolute; inset: 0; }
+.post-photo-image { position: absolute; inset: 0; }
+
+/* The rarity badge must stay above the photograph: .capture-image-photo sits
+   at z-index 1 to cover its crest, which was painting over the badge. */
+.library-card-badge { z-index: 2; }

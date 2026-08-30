@@ -4,6 +4,7 @@ import { useCaptures, useSpecies } from '../quests/queries';
 import { playTap } from '../../lib/useSoundEffects';
 import { DiscoveryCard } from '../world/DiscoveryCard';
 import { Icon } from '../../components/Icon';
+import { CaptureImage } from '../../components/CaptureImage';
 import { appleEase, duration } from '../../components/motion/MotionVariants';
 
 // Element identity is expressed with the design system's colour tokens rather
@@ -286,12 +287,13 @@ export function GalleryPage() {
                     }}
                   >
                     <motion.div layoutId={`discovery-img-${cardId}`} className="library-card-img-wrap">
-                      {/* Capture photos aren't served back from the API, so the
-                          tile carries its element crest rather than a stand-in
-                          photo of a different animal. */}
-                      <div className={`library-card-crest element-${(speciesEntry?.element || 'Earth').toLowerCase()}`} aria-hidden="true">
-                        <span>{speciesEntry?.element || 'Wild'}</span>
-                      </div>
+                      {/* Real capture photography when the API has media for
+                          this card; the element crest stands in otherwise. */}
+                      <CaptureImage
+                        imageRef={card.imageRef}
+                        alt={card.itemName}
+                        element={speciesEntry?.element}
+                      />
                       <div className={`library-card-badge rank-badge-${rarity.toLowerCase()}`}>
                         {rarity}
                       </div>
