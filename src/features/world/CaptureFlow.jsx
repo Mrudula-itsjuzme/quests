@@ -53,6 +53,7 @@ export function CaptureFlow({ onClose }) {
   const { data: species } = useSpecies();
 
   const submitCapture = async (bundle) => {
+    if (captureItem.isPending) return; // Prevent duplicate submissions
     triggerHaptic([20, 40, 20]);
     try {
       const result = await captureItem.mutateAsync(bundle);
@@ -74,6 +75,7 @@ export function CaptureFlow({ onClose }) {
   };
 
   const handleFile = async (event) => {
+    if (captureItem.isPending) return;
     const file = event.target.files?.[0];
     if (!file) return;
     setStage('scanning');
@@ -91,6 +93,7 @@ export function CaptureFlow({ onClose }) {
   };
 
   const handleNativeCamera = async () => {
+    if (captureItem.isPending) return;
     if (Capacitor.isNativePlatform()) {
       try {
         const image = await Camera.getPhoto({
