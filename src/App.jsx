@@ -1,5 +1,7 @@
 import React, { Suspense } from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes, useNavigate, useLocation } from 'react-router-dom';
+import { App as CapApp } from '@capacitor/app';
+import { Capacitor } from '@capacitor/core';
 import { MotionConfig } from 'framer-motion';
 import { AppShell } from './components/AppShell';
 import { AuthProvider } from './features/auth/AuthContext';
@@ -20,6 +22,36 @@ const RewardsPage = React.lazy(() => import('./features/rewards/RewardsPage').th
 
 function App() {
   const motionReduced = useMotionReducedPreference();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  React.useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+    const listener = CapApp.addListener('backButton', () => {
+      // 1. Close open modals/sheets
+      const closeButtons = document.querySelectorAll(
+        '[role="dialog"] button[aria-label="Close"], .capture-flow-close, button[aria-label="Close location details"], .notification-popover button[aria-label="Close notifications"]'
+      );
+      if (closeButtons.length > 0) {
+        closeButtons[closeButtons.length - 1].click();
+        return;
+      }
+
+      // 2. Navigate back if not on a root tab
+      const rootPaths = ['/', '/sign-in', '/sign-up', '/app', '/app/quests', '/app/community', '/app/rewards', '/app/collection', '/app/profile'];
+      if (!rootPaths.includes(location.pathname)) {
+        navigate(-1);
+        return;
+      }
+
+      // 3. Otherwise exit
+      CapApp.exitApp();
+    });
+    return () => {
+      listener.then(l => l.remove());
+    };
+  }, [location, navigate]);
+
   return (
     <MotionConfig reducedMotion={motionReduced ? 'always' : 'user'}>
       <AuthProvider>
