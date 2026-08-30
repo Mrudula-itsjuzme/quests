@@ -1770,3 +1770,132 @@ body:has(.capture-flow-overlay) .mobile-bottom-dock { display: none !important; 
 .journal-page-transition {
   will-change: opacity, transform;
 }
+
+/* ==========================================================================
+   WILD REALM — INTERACTION SYSTEM (press / focus / disabled)
+   Audit found tabs, filter chips, profile rows and element tiles snapping
+   with no transition at all. One vocabulary, applied once.
+   ========================================================================== */
+
+/* Segmented controls: Daily/Weekly/Monthly, Feed/Friends/Map, library tabs.
+   Weight and colour ease; the control answers the thumb immediately. */
+.quest-cadence-tabs button,
+.community-tabs-bar button,
+.library-tab-btn,
+.explore-tag,
+.profile-menu-item,
+.profile-menu-list a,
+.profile-menu-list button,
+.library-element-tile,
+.map-control-btn,
+.explore-filter-btn,
+.quest-claim-btn,
+.community-fab-btn,
+.badges-panel a, .badges-panel button,
+.loot-panel a, .loot-panel button,
+.claim-panel a, .claim-panel button,
+.chest-panel a, .chest-panel button,
+.current-rank-panel a, .current-rank-panel button,
+.rewards-link-row {
+  transition:
+    color var(--duration-quick) var(--quest-ease),
+    background-color var(--duration-quick) var(--quest-ease),
+    border-color var(--duration-quick) var(--quest-ease),
+    transform var(--duration-instant) var(--quest-ease) !important;
+}
+
+/* Press compression is small and immediate — physical, not cartoonish. */
+.quest-cadence-tabs button:active,
+.community-tabs-bar button:active,
+.library-tab-btn:active,
+.explore-tag:active,
+.map-control-btn:active,
+.explore-filter-btn:active,
+.quest-claim-btn:active,
+.community-fab-btn:active,
+.badges-panel a:active, .badges-panel button:active,
+.loot-panel a:active, .loot-panel button:active,
+.claim-panel a:active, .claim-panel button:active,
+.chest-panel a:active, .chest-panel button:active,
+.current-rank-panel a:active, .current-rank-panel button:active,
+.rewards-link-row:active { transform: scale(0.97); }
+
+/* Rows compress less than chips: larger surfaces should move less. */
+.profile-menu-item:active,
+.profile-menu-list a:active,
+.profile-menu-list button:active,
+.library-element-tile:active { transform: scale(0.988); }
+
+/* Element tiles and cards get a touch of depth on press rather than a hover
+   lift that mobile never sees. */
+.library-element-tile { will-change: transform; }
+
+/* Engagement actions were 32px tall — under the comfortable thumb target. */
+.post-action {
+  min-height: 36px !important;
+  transition:
+    color var(--duration-quick) var(--quest-ease),
+    background-color var(--duration-quick) var(--quest-ease),
+    border-color var(--duration-quick) var(--quest-ease),
+    transform var(--duration-instant) var(--quest-ease) !important;
+}
+.post-action:active { transform: scale(0.94); }
+
+/* A single visible focus ring for keyboard users across the system. */
+.quest-cadence-tabs button:focus-visible,
+.community-tabs-bar button:focus-visible,
+.library-tab-btn:focus-visible,
+.explore-tag:focus-visible,
+.post-action:focus-visible,
+.profile-menu-item:focus-visible,
+.dock-item:focus-visible,
+.library-photo-card:focus-visible,
+.quest-item-card:focus-visible {
+  outline: 2px solid rgba(110, 231, 160, 0.75);
+  outline-offset: 2px;
+  border-radius: 12px;
+}
+
+/* Disabled reads as unavailable, never as merely dim. */
+button[disabled],
+button[aria-disabled="true"] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* A non-interactive "See all" affordance still reads as tappable. */
+.explore-see-all,
+[class*="see-all"] { cursor: pointer; }
+
+@media (prefers-reduced-motion: reduce) {
+  .quest-cadence-tabs button:active,
+  .community-tabs-bar button:active,
+  .library-tab-btn:active,
+  .explore-tag:active,
+  .post-action:active,
+  .profile-menu-item:active,
+  .library-element-tile:active,
+  .map-control-btn:active,
+  .explore-filter-btn:active,
+  .quest-claim-btn:active,
+  .community-fab-btn:active,
+  .rewards-link-row:active { transform: none; }
+}
+
+/* "See all" rendered as an unstyled grey block; it is a quiet text action. */
+.explore-sheet-see-all {
+  padding: 6px 10px !important;
+  border: 1px solid transparent !important;
+  border-radius: 10px !important;
+  background: transparent !important;
+  color: #6ee7a0 !important;
+  font-size: 0.78rem !important;
+  font-weight: 700 !important;
+  cursor: pointer;
+  transition:
+    color var(--duration-quick) var(--quest-ease),
+    background-color var(--duration-quick) var(--quest-ease),
+    transform var(--duration-instant) var(--quest-ease) !important;
+}
+.explore-sheet-see-all:active { transform: scale(0.96); background: rgba(52, 211, 133, 0.1) !important; }
