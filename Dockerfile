@@ -1,4 +1,4 @@
-FROM node:20-alpine AS build
+FROM node:22-alpine AS build
 
 WORKDIR /app
 
@@ -17,7 +17,7 @@ ENV VITE_API_BASE_URL=$VITE_API_BASE_URL \
 
 RUN npm run build && npm prune --omit=dev
 
-FROM node:20-alpine AS runtime
+FROM node:22-alpine AS runtime
 
 ENV NODE_ENV=production
 WORKDIR /app

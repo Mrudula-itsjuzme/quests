@@ -289,6 +289,59 @@ describe('Quest API', () => {
     expect(response.body.itemName).toBe('House Sparrow');
   });
 
+  it('redacts public capture GPS metadata while preserving coarse coordinates', async () => {
+    const app = createApp({ config: testConfig(), visionProvider: highConfidenceVisionProvider() });
+    const response = await request(app)
+      .post('/api/v1/captures')
+      .set('Idempotency-Key', 'capture-redact-001')
+      .send({
+        imageBase64: PIXEL_PNG,
+        gps: { lat: 12.9, lng: 77.6, accuracyM: 12, altitude: 920 },
+        liveness: { attested: true, method: 'capture-input-environment', score: 0.7 },
+      });
+    expect(response.status).toBe(201);
+    expect(response.body.gps).toEqual({ lat: 12.9, lng: 77.6, obfuscated: false });
+    expect(JSON.stringify(response.body)).not.toContain('accuracyM');
+    expect(JSON.stringify(response.body)).not.toContain('altitude');
+  });
+
+  it('replays a client captureId without minting duplicate rewards even with a new idempotency key', async () => {
+    const app = createApp({ config: testConfig(), visionProvider: highConfidenceVisionProvider() });
+    const captureId = '22222222-2222-4222-8222-222222222222';
+    const first = await request(app)
+      .post('/api/v1/captures')
+      .set('Idempotency-Key', 'capture-id-replay-001')
+      .send({ captureId, imageBase64: PIXEL_PNG, liveness: { attested: true, method: 'capture-input-environment', score: 0.7 } });
+    const second = await request(app)
+      .post('/api/v1/captures')
+      .set('Idempotency-Key', 'capture-id-replay-002')
+      .send({ captureId, imageBase64: PIXEL_PNG, liveness: { attested: true, method: 'capture-input-environment', score: 0.7 } });
+    const me = await request(app).get('/api/v1/me');
+    const captures = await request(app).get('/api/v1/captures');
+
+    expect(first.status).toBe(201);
+    expect(second.status).toBe(201);
+    expect(second.body.id).toBe(first.body.id);
+    expect(captures.body).toHaveLength(1);
+    expect(me.body.totalXp).toBe(first.body.xpAwarded);
+    expect(me.body.coins).toBe(first.body.coinsAwarded);
+  });
+
+  it('does not let a second user reuse another user captureId to retrieve or mint across accounts', async () => {
+    const repository = new MemoryQuestRepository({ definitions: questDefinitions });
+    const app = createApp({ config: testConfig(), repository, visionProvider: highConfidenceVisionProvider() });
+    const captureId = '33333333-3333-4333-8333-333333333333';
+    await repository.ensureUser({ id: 'someone-else', displayName: 'Other', timezone: 'UTC' });
+    await repository.createCapturedCard({ userId: 'someone-else', captureId, itemName: 'Red Fox', category: 'Fauna', cardTitle: 'Red Fox', rarityTier: 'B', rarityScore: 0.5, description: '', status: 'final' });
+
+    const response = await request(app)
+      .post('/api/v1/captures')
+      .set('Idempotency-Key', 'capture-id-foreign-001')
+      .send({ captureId, imageBase64: PIXEL_PNG, liveness: { attested: true, method: 'capture-input-environment', score: 0.7 } });
+    expect(response.status).toBe(409);
+    expect(response.body.error.code).toBe('duplicate_capture_id');
+  });
+
   it('marks a capture provisional when a single anti-cheat flag is raised', async () => {
     const app = createApp({ config: testConfig(), visionProvider: highConfidenceVisionProvider() });
     const response = await request(app)
@@ -531,6 +584,8 @@ describe('Community API', () => {
     // ...but should still land in the same coarse neighborhood (within one grid cell).
     expect(Math.abs(shared.body.gps.lat - exactGps.lat)).toBeLessThan(0.02);
     expect(Math.abs(shared.body.gps.lng - exactGps.lng)).toBeLessThan(0.02);
+    expect(shared.body.gps).not.toHaveProperty('accuracyM');
+    expect(shared.body.gps).not.toHaveProperty('altitude');
   });
 
   it('shares a capture as a real post carrying the author rank and discovery', async () => {
@@ -643,6 +698,24 @@ describe('Community API', () => {
     expect(feed.body[0].commentCount).toBe(1);
   });
 
+  it('accepts one report per viewer and keeps the report queue server-side', async () => {
+    const app = createApp({ config: testConfig(), visionProvider: highConfidenceVisionProvider() });
+    const card = await mintCapture(app, 'community-report-001');
+    const post = await request(app).post('/api/v1/community/posts').set('Idempotency-Key', 'report-post').send({ cardId: card.body.id });
+
+    const first = await request(app)
+      .post(`/api/v1/community/posts/${post.body.id}/report`)
+      .send({ reason: 'unsafe_location', details: 'This looks too precise.' });
+    const second = await request(app)
+      .post(`/api/v1/community/posts/${post.body.id}/report`)
+      .send({ reason: 'unsafe_location' });
+
+    expect(first.status).toBe(201);
+    expect(first.body).toEqual(expect.objectContaining({ postId: post.body.id, reason: 'unsafe_location', status: 'pending', created: true }));
+    expect(second.status).toBe(200);
+    expect(second.body.created).toBe(false);
+  });
+
   it('rejects invalid post payloads and unknown posts', async () => {
     const app = createApp({ config: testConfig(), visionProvider: highConfidenceVisionProvider() });
     const badCard = await request(app).post('/api/v1/community/posts').set('Idempotency-Key', 'community-bad-1').send({ cardId: 'not-a-uuid' });
@@ -661,6 +734,30 @@ describe('Community API', () => {
     const response = await request(app).get('/api/v1/community/friends');
     expect(response.status).toBe(200);
     expect(response.body).toEqual([]);
+  });
+});
+
+describe('Account Data Rights API', () => {
+  it('records an authenticated account deletion request idempotently', async () => {
+    const app = createApp({ config: testConfig() });
+    const first = await request(app)
+      .post('/api/v1/me/delete-request')
+      .send({ reason: 'I want my account removed.' });
+    const second = await request(app)
+      .post('/api/v1/me/delete-request')
+      .send({});
+
+    expect(first.status).toBe(202);
+    expect(first.body).toEqual(expect.objectContaining({ userId: '00000000-0000-4000-8000-000000000001', status: 'pending', created: true }));
+    expect(second.status).toBe(200);
+    expect(second.body.id).toBe(first.body.id);
+    expect(second.body.created).toBe(false);
+  });
+
+  it('requires authentication for deletion requests when dev auth is disabled', async () => {
+    const app = createApp({ config: testConfig({ DEV_AUTH_ENABLED: 'false' }) });
+    const response = await request(app).post('/api/v1/me/delete-request').send({});
+    expect(response.status).toBe(401);
   });
 });
 

@@ -24,7 +24,7 @@ suite('PostgreSQL quest repository', () => {
   });
 
   beforeEach(async () => {
-    await pool.query('TRUNCATE quest_idempotency_keys, quest_xp_ledger, quest_submissions, collectible_unlocks, quest_daily_states, quest_generation_runs, quest_assignments, coin_ledger, community_post_likes, community_post_comments, community_posts, community_friendships, quest_users CASCADE');
+    await pool.query('TRUNCATE quest_idempotency_keys, quest_xp_ledger, quest_submissions, collectible_unlocks, quest_daily_states, quest_generation_runs, quest_assignments, coin_ledger, community_post_reports, community_post_likes, community_post_comments, community_posts, community_friendships, account_deletion_requests, quest_users CASCADE');
   });
 
   afterAll(async () => { await pool?.end(); });
@@ -303,6 +303,36 @@ suite('PostgreSQL quest repository', () => {
       expect(await repository.getCommunityPost(identity.id, post.id)).not.toBeNull();
 
       expect(await repository.deleteCommunityPost(identity.id, post.id)).toBe(true);
+    });
+
+    it('stores one report per user for a community post', async () => {
+      await repository.ensureUser(identity);
+      const card = await repository.createCapturedCard({
+        userId: identity.id, itemName: 'Palm Squirrel', category: 'Fauna', cardTitle: 'Palm Squirrel',
+        rarityTier: 'D', rarityScore: 0.1, description: '', status: 'final',
+      });
+      const { post } = await repository.createCommunityPost({ userId: identity.id, cardId: card.id });
+
+      const first = await repository.reportCommunityPost(identity.id, post.id, { reason: 'unsafe_location', details: 'Too exact.' });
+      const second = await repository.reportCommunityPost(identity.id, post.id, { reason: 'unsafe_location' });
+
+      expect(first.created).toBe(true);
+      expect(second.created).toBe(false);
+      expect((await pool.query('SELECT COUNT(*)::int AS count FROM community_post_reports')).rows[0].count).toBe(1);
+    });
+  });
+
+  describe('account deletion requests', () => {
+    it('records one pending deletion request per user', async () => {
+      await repository.ensureUser(identity);
+      const first = await repository.requestAccountDeletion(identity.id, { reason: 'Leaving.' });
+      const second = await repository.requestAccountDeletion(identity.id, {});
+
+      expect(first.created).toBe(true);
+      expect(second.created).toBe(false);
+      expect(second.id).toBe(first.id);
+      const user = await pool.query('SELECT account_status FROM quest_users WHERE id = $1', [identity.id]);
+      expect(user.rows[0].account_status).toBe('deletion_requested');
     });
   });
 });

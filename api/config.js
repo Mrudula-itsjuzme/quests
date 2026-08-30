@@ -86,6 +86,16 @@ export function loadConfig(env = process.env, options = {}) {
     if (config.PROVIDER_MODE === 'http' && (!config.QUEST_AI_VERIFY_URL || !config.QUEST_PROVIDER_SECRET)) {
       throw new Error('Production requires configured HTTP quest providers (QUEST_AI_VERIFY_URL and QUEST_PROVIDER_SECRET).');
     }
+    if (!config.corsOrigins.length || config.corsOrigins.includes('*')) {
+      throw new Error('Production requires explicit production CORS origins.');
+    }
+    const insecureCors = config.corsOrigins.some((origin) => new URL(origin).protocol !== 'https:');
+    if (insecureCors) {
+      throw new Error('Production requires HTTPS production CORS origins.');
+    }
+    if (config.TRUST_PROXY > 1) {
+      throw new Error('Production TRUST_PROXY must be scoped to the known edge proxy hop.');
+    }
     if (config.VISION_PROVIDER === 'stub' && !config.ALLOW_STUB_VISION_IN_PRODUCTION) {
       throw new Error('Production requires a real VISION_PROVIDER (stub identification would mint fake species for every capture). Set VISION_PROVIDER=openrouter and OPENROUTER_API_KEY, or set ALLOW_STUB_VISION_IN_PRODUCTION=true for demo deployments.');
     }
