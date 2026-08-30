@@ -5,6 +5,7 @@ import { Icon } from '../../components/Icon';
 import { useCaptureItem, useRenameCapture, useShareDiscovery, useSpecies } from '../quests/queries';
 import { playTap } from '../../lib/useSoundEffects';
 import { collectCaptureTelemetry } from '../../lib/captureTelemetry';
+import { useCameraPreview } from '../../lib/useCameraPreview';
 import { DiscoveryCard } from './DiscoveryCard';
 
 function fileToDataUrl(file) {
@@ -44,6 +45,9 @@ export function CaptureFlow({ onClose }) {
   const [errorMessage, setErrorMessage] = useState('');
   const [pendingBundle, setPendingBundle] = useState(null);
   const [candidates, setCandidates] = useState([]);
+  const [previewUrl, setPreviewUrl] = useState('');
+  // The viewfinder only runs while the player is composing a shot.
+  const { videoRef, status: cameraStatus } = useCameraPreview(stage === 'prompt');
   const captureItem = useCaptureItem();
   const renameCapture = useRenameCapture();
   const shareDiscovery = useShareDiscovery();
@@ -76,6 +80,7 @@ export function CaptureFlow({ onClose }) {
     setStage('scanning');
     setErrorMessage('');
     const [dataUrl, telemetry] = await Promise.all([fileToDataUrl(file), collectCaptureTelemetry(file)]);
+    setPreviewUrl(dataUrl);
     await submitCapture({
       captureId: crypto.randomUUID(),
       imageBase64: dataUrl,
@@ -142,41 +147,78 @@ export function CaptureFlow({ onClose }) {
         {stage === 'prompt' && (
           <motion.div
             key="prompt"
-            className="capture-flow-prompt-ar"
-            initial={{ opacity: 0, scale: 1.1 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.4, ease: 'easeOut' }}
+            className="capture-viewfinder"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, scale: 1.02 }}
+            transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div className="ar-hud-overlay">
-              <div className="ar-bracket top-left" />
-              <div className="ar-bracket top-right" />
-              <div className="ar-bracket bottom-left" />
-              <div className="ar-bracket bottom-right" />
-              <div className="ar-center-reticle">
-                <div className="ar-crosshair" />
+            {/* The camera IS the environment — full-bleed, never inside a card. */}
+            <video
+              ref={videoRef}
+              className={`capture-viewfinder-video${cameraStatus === 'live' ? ' is-live' : ''}`}
+              playsInline
+              muted
+              autoPlay
+              aria-hidden="true"
+            />
+            <div className="capture-viewfinder-vignette" aria-hidden="true" />
+
+            <div className="capture-viewfinder-top">
+              <div className="capture-locus">
+                <Icon name="compass" />
+                <span>{cameraStatus === 'live' ? 'Live' : 'Camera off'}</span>
+              </div>
+              <div className="capture-top-actions">
+                <button type="button" className="capture-chip-btn" aria-label="Toggle flash">
+                  <Icon name="bolt" />
+                </button>
+                <button
+                  type="button"
+                  className="capture-chip-btn"
+                  aria-label="Close capture"
+                  onClick={() => { playTap(); onClose(); }}
+                >
+                  <Icon name="plus" />
+                </button>
               </div>
             </div>
-            
-            <div className="ar-prompt-content">
-              <div className="ar-status-badge">
-                <span className="ar-blip" /> SCANNER READY
-              </div>
-              <h2 className="ar-title">WILD ENCOUNTER</h2>
-              <p className="ar-subtitle">Aim at a real-world object. The rarity engine will identify it and mint a card.</p>
-              
-              <button
-                type="button"
-                className="ar-shutter-btn"
-                onClick={() => { playTap(); inputRef.current?.click(); }}
-              >
-                <div className="ar-shutter-inner">
-                  <Icon name="camera" />
-                </div>
-                <div className="ar-shutter-ring" />
-              </button>
+
+            <div className="capture-reticle" aria-hidden="true">
+              <span className="capture-bracket tl" />
+              <span className="capture-bracket tr" />
+              <span className="capture-bracket bl" />
+              <span className="capture-bracket br" />
             </div>
-            
+
+            <div className="capture-viewfinder-bottom">
+              <p className="capture-hint">Aim at a living subject and capture it live.</p>
+              <div className="capture-controls">
+                <button
+                  type="button"
+                  className="capture-side-btn"
+                  aria-label="Open your library"
+                  onClick={() => { playTap(); onClose(); }}
+                >
+                  <Icon name="book" />
+                </button>
+
+                <button
+                  type="button"
+                  className="capture-shutter"
+                  aria-label="Capture photo"
+                  onClick={() => { playTap(); triggerHaptic([12]); inputRef.current?.click(); }}
+                >
+                  <span className="capture-shutter-ring" aria-hidden="true" />
+                  <span className="capture-shutter-core" aria-hidden="true">
+                    <Icon name="leaf" />
+                  </span>
+                </button>
+
+                <span className="capture-side-btn is-placeholder" aria-hidden="true" />
+              </div>
+            </div>
+
             <input
               ref={inputRef}
               type="file"
@@ -191,34 +233,44 @@ export function CaptureFlow({ onClose }) {
         {stage === 'scanning' && (
           <motion.div
             key="scanning"
-            className="capture-flow-panel capture-scanning"
+            className="capture-scanning-stage"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <div className="capture-scan-frame cinematic-scanner">
-              <div className="scanner-bracket top-left"></div>
-              <div className="scanner-bracket top-right"></div>
-              <div className="scanner-bracket bottom-left"></div>
-              <div className="scanner-bracket bottom-right"></div>
-              
-              <motion.div
-                className="capture-scan-line"
-                animate={{ y: ['0%', '100%', '0%'] }}
-                transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
+            {/* The subject stays on screen — the scan happens over the photo,
+                not in an abstract panel, so the moment stays grounded. */}
+            {previewUrl && <img className="capture-scanning-photo" src={previewUrl} alt="" aria-hidden="true" />}
+            <div className="capture-viewfinder-vignette" aria-hidden="true" />
+
+            <div className="capture-reticle is-scanning" aria-hidden="true">
+              <span className="capture-bracket tl" />
+              <span className="capture-bracket tr" />
+              <span className="capture-bracket bl" />
+              <span className="capture-bracket br" />
+              <motion.span
+                className="capture-scan-sweep"
+                initial={{ top: '0%' }}
+                animate={{ top: ['0%', '100%', '0%'] }}
+                transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
               />
-              
-              <motion.div className="scanner-reticle"
-                animate={{ scale: [1, 1.1, 1], rotate: [0, 90] }}
-                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-              />
-              
-              <div className="scanner-hud">
-                <span className="hud-data">AI ANALYSIS: ACTIVE</span>
-                <span className="hud-data right">LOCKED</span>
-              </div>
             </div>
-            <p className="scanner-text-pulse">Identifying and scoring rarity…</p>
+
+            <div className="capture-scan-panel" role="status" aria-live="polite">
+              <span className="capture-scan-label">
+                <span className="capture-scan-blip" aria-hidden="true" />
+                Identifying subject
+              </span>
+              <p className="capture-scan-note">Checking the capture, then scoring its rarity.</p>
+              <span className="capture-scan-track" aria-hidden="true">
+                <motion.span
+                  className="capture-scan-fill"
+                  initial={{ scaleX: 0.05 }}
+                  animate={{ scaleX: [0.05, 0.72, 0.9] }}
+                  transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut' }}
+                />
+              </span>
+            </div>
           </motion.div>
         )}
 
@@ -275,6 +327,7 @@ export function CaptureFlow({ onClose }) {
             <DiscoveryCard
               card={card}
               species={species}
+              imageUrl={previewUrl}
               isNew
               onAddToLibrary={handleConfirm}
               onShare={handleShare}

@@ -5,6 +5,23 @@
  */
 
 export const appleEase = [0.16, 1, 0.3, 1];
+export const exitEase = [0.4, 0, 1, 1];
+
+/**
+ * Canonical timing scale (seconds, for framer-motion). Mirrors the
+ * --duration-* custom properties in index.css so motion authored in JS and in
+ * CSS lands on the same values.
+ *   micro    — press/hover/icon response, must feel immediate
+ *   standard — tabs, cards, sheets, route content
+ *   hero     — discovery reveal and other earned, cinematic beats
+ */
+export const duration = {
+  micro: 0.12,
+  quick: 0.18,
+  standard: 0.24,
+  considered: 0.42,
+  hero: 0.7,
+};
 export const linearEase = [0.22, 1, 0.36, 1];
 
 export const springConfig = {
@@ -85,34 +102,23 @@ export const calmFade = {
   },
 };
 
+/**
+ * Root-destination transition. Deliberately cheap and quick: root navigation
+ * should feel instant, so this animates transform/opacity only (an animated
+ * `filter: blur()` here cost a full-screen repaint on every tab change) and
+ * exits faster than it enters so the incoming screen is never kept waiting.
+ */
 export const journalPageTurn = {
-  initial: {
-    opacity: 0,
-    y: 8,
-    scale: 0.99,
-    filter: 'blur(3px)',
-  },
+  initial: { opacity: 0, y: 6 },
   animate: {
     opacity: 1,
     y: 0,
-    scale: 1,
-    filter: 'blur(0px)',
-    transition: {
-      type: 'spring',
-      stiffness: 300,
-      damping: 30,
-      mass: 1,
-    },
+    transition: { duration: 0.2, ease: appleEase },
   },
   exit: {
     opacity: 0,
-    y: -4,
-    scale: 0.99,
-    filter: 'blur(3px)',
-    transition: {
-      duration: 0.22,
-      ease: [0.4, 0, 1, 1],
-    },
+    y: -3,
+    transition: { duration: 0.1, ease: [0.4, 0, 1, 1] },
   },
 };
 

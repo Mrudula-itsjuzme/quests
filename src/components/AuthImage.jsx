@@ -22,7 +22,7 @@ export function getAbsoluteImageUrl(imageRef) {
   return imageRef;
 }
 
-export function AuthImage({ src, alt, className, useAuth: requiresAuth = false }) {
+export function AuthImage({ src, alt, className, useAuth: requiresAuth = false, ...props }) {
   const [objectUrl, setObjectUrl] = useState(null);
   const { getToken } = useAuth();
 
@@ -72,5 +72,5 @@ export function AuthImage({ src, alt, className, useAuth: requiresAuth = false }
   }, [src, requiresAuth, getToken]);
 
   if (!objectUrl) return <div className={`image-placeholder ${className || ''}`} />;
-  return <img src={objectUrl} alt={alt} className={className} />;
+  return <img src={objectUrl} alt={alt} className={className} {...props} />;
 }

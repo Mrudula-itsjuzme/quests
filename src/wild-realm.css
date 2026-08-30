@@ -730,3 +730,1326 @@ body {
   transform: scale(1.1);
   border-color: rgba(255, 255, 255, 0.8);
 }
+
+/* ==========================================================================
+   WILD REALM — CANONICAL BOTTOM DOCK
+   Mockup target: compact dark pill, understated inactive icons, luminous
+   active state, strong raised centre Capture affordance.
+   The dock is FIVE equal columns; the centre column hosts the raised FAB.
+   Earlier rules used repeat(6, 1fr) for five children, which starved the
+   outer labels ("Collection"/"Community") and made them collide.
+   ========================================================================== */
+@media (max-width: 900px) {
+  .mobile-bottom-dock {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    align-items: end !important;
+    justify-content: stretch !important;
+    gap: 2px !important;
+    min-height: 66px !important;
+    padding: 8px 6px calc(8px + env(safe-area-inset-bottom, 0px)) !important;
+
+    background: linear-gradient(180deg, rgba(9, 22, 15, 0.86), rgba(4, 12, 8, 0.96)) !important;
+    backdrop-filter: blur(22px) saturate(1.35) !important;
+    -webkit-backdrop-filter: blur(22px) saturate(1.35) !important;
+    border: 1px solid rgba(120, 200, 140, 0.14) !important;
+    border-radius: 26px !important;
+    box-shadow:
+      0 14px 40px rgba(0, 0, 0, 0.6),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+    overflow: visible !important;
+  }
+
+  /* Each destination is one column; label never overflows its cell. */
+  .mobile-bottom-dock a,
+  .mobile-bottom-dock .dock-item {
+    display: grid !important;
+    grid-template-rows: auto auto !important;
+    place-items: center !important;
+    gap: 3px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 46px !important;
+    padding: 5px 0 !important;
+    border: none !important;
+    border-radius: 14px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: rgba(203, 225, 210, 0.52) !important;
+    font-family: var(--font-body, inherit) !important;
+    font-size: 0.56rem !important;
+    font-weight: 600 !important;
+    letter-spacing: -0.01em !important;
+    text-transform: none !important;
+    transition: color 180ms var(--quest-ease), background 180ms var(--quest-ease) !important;
+  }
+
+  .mobile-bottom-dock a > span,
+  .mobile-bottom-dock .dock-item > span {
+    display: block !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    line-height: 1.1 !important;
+  }
+
+  .mobile-bottom-dock a svg,
+  .mobile-bottom-dock .dock-item svg {
+    width: 21px !important;
+    height: 21px !important;
+    margin: 0 !important;
+  }
+
+  /* Active: luminous green, no boxy border — light, not a chip. */
+  .mobile-bottom-dock a.active,
+  .mobile-bottom-dock .dock-item.active {
+    color: #6ee7a0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+  .mobile-bottom-dock a.active svg,
+  .mobile-bottom-dock .dock-item.active svg {
+    filter: drop-shadow(0 0 9px rgba(110, 231, 160, 0.55)) !important;
+  }
+
+  /* Centre Capture FAB owns the middle column and lifts above the bar. */
+  .dock-shutter-item {
+    margin: 0 !important;
+    align-self: center !important;
+  }
+  .dock-shutter-btn {
+    width: 56px !important;
+    height: 56px !important;
+    margin-top: -30px !important;
+    border: 3px solid rgba(5, 14, 9, 0.92) !important;
+    background: radial-gradient(circle at 36% 32%, #8ff0ab, #22c55e 58%, #15803d) !important;
+    color: #04140c !important;
+    box-shadow:
+      0 0 26px rgba(52, 211, 133, 0.42),
+      0 10px 20px rgba(0, 0, 0, 0.55) !important;
+  }
+  .dock-shutter-btn svg { width: 25px !important; height: 25px !important; }
+
+  /* One calm pulse ring, not a constant strobe. */
+  .dock-shutter-btn::after {
+    animation-duration: 3.2s !important;
+    background: rgba(52, 211, 133, 0.3) !important;
+  }
+}
+
+/* Narrow phones (≤360px): drop to icon-only rather than clipping words. */
+@media (max-width: 360px) {
+  .mobile-bottom-dock a > span,
+  .mobile-bottom-dock .dock-item > span { font-size: 0.55rem !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dock-shutter-btn::after { animation: none !important; opacity: 0 !important; }
+}
+
+/* ==========================================================================
+   WILD REALM — CAPTURE VIEWFINDER (hero screen)
+   The camera is the ENVIRONMENT: full-bleed video, dark vignette for
+   readability, minimal chrome floating on top. Never inside a card.
+   ========================================================================== */
+.capture-viewfinder {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 80% at 50% 12%, #16301f 0%, #081a10 45%, #030b07 100%);
+}
+
+.capture-viewfinder-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;                 /* hidden until a real stream attaches */
+  transition: opacity 420ms var(--quest-ease);
+}
+.capture-viewfinder-video.is-live { opacity: 1; }
+
+/* Keeps white text legible over any scene, and focuses the eye centre-frame. */
+.capture-viewfinder-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(3, 10, 6, 0.78) 0%, rgba(3, 10, 6, 0) 24%,
+                            rgba(3, 10, 6, 0) 56%, rgba(3, 10, 6, 0.88) 100%),
+    radial-gradient(78% 58% at 50% 46%, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, 0.55) 100%);
+}
+
+/* ---- Top chrome: location/live cue + flash ---- */
+.capture-viewfinder-top {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: calc(var(--space-4) + env(safe-area-inset-top, 0px)) var(--space-4) 0;
+}
+
+.capture-locus,
+.capture-chip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid rgba(160, 220, 180, 0.16);
+  border-radius: 999px;
+  background: rgba(6, 18, 12, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: rgba(233, 245, 236, 0.9);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+.capture-chip-btn { padding: 0; width: 34px; justify-content: center; cursor: pointer; }
+.capture-locus svg,
+.capture-chip-btn svg { width: 15px; height: 15px; color: #6ee7a0; }
+
+.capture-top-actions { display: flex; align-items: center; gap: 8px; }
+/* The stage-level close button is redundant while the viewfinder shows its own. */
+.capture-flow-overlay:has(.capture-viewfinder) > .capture-flow-close { display: none; }
+/* Close glyph is a rotated plus; cancel the parent rotation for a true X. */
+.capture-top-actions .capture-chip-btn:last-child svg { transform: rotate(45deg); }
+
+/* ---- Centre framing brackets ---- */
+.capture-reticle {
+  position: relative;
+  z-index: 2;
+  place-self: center;
+  width: min(58vw, 215px);
+  aspect-ratio: 1;
+  animation: capture-breathe 5s ease-in-out infinite;
+}
+.capture-bracket {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border: 2px solid rgba(190, 240, 205, 0.72);
+}
+.capture-bracket.tl { top: 0; left: 0; border-right: 0; border-bottom: 0; border-radius: 6px 0 0 0; }
+.capture-bracket.tr { top: 0; right: 0; border-left: 0; border-bottom: 0; border-radius: 0 6px 0 0; }
+.capture-bracket.bl { bottom: 0; left: 0; border-right: 0; border-top: 0; border-radius: 0 0 0 6px; }
+.capture-bracket.br { bottom: 0; right: 0; border-left: 0; border-top: 0; border-radius: 0 0 6px 0; }
+
+@keyframes capture-breathe {
+  0%, 100% { transform: scale(1);    opacity: 0.85; }
+  50%      { transform: scale(1.035); opacity: 1; }
+}
+
+/* ---- Bottom chrome: hint + controls ---- */
+.capture-viewfinder-bottom {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  justify-items: center;
+  gap: var(--space-4);
+  padding: 0 var(--space-4) calc(var(--space-7) + env(safe-area-inset-bottom, 0px));
+}
+
+.capture-hint {
+  margin: 0;
+  max-width: 26ch;
+  color: rgba(226, 240, 229, 0.72);
+  font-size: 0.84rem;
+  line-height: 1.35;
+  text-align: center;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.65);
+}
+
+.capture-controls {
+  display: grid;
+  grid-template-columns: 52px 1fr 52px;
+  align-items: center;
+  justify-items: center;
+  width: min(100%, 330px);
+}
+
+.capture-side-btn {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 1px solid rgba(160, 220, 180, 0.18);
+  border-radius: 16px;
+  background: rgba(8, 22, 14, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: rgba(226, 240, 229, 0.85);
+  cursor: pointer;
+  transition: transform 140ms var(--quest-ease), background 180ms var(--quest-ease);
+}
+.capture-side-btn svg { width: 19px; height: 19px; }
+.capture-side-btn:active { transform: scale(0.92); }
+.capture-side-btn.is-placeholder { border-color: transparent; background: none; cursor: default; }
+
+/* The leaf-in-reticle shutter — green, never a Pokéball, never gold. */
+.capture-shutter {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 82px;
+  height: 82px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.capture-shutter-ring {
+  position: absolute;
+  inset: 0;
+  border: 3px solid rgba(226, 245, 232, 0.85);
+  border-radius: 50%;
+  transition: transform 160ms var(--quest-ease), border-color 160ms var(--quest-ease);
+}
+.capture-shutter-core {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 36% 30%, #8ff0ab, #22c55e 58%, #15803d);
+  color: #04140c;
+  box-shadow: 0 0 26px rgba(52, 211, 133, 0.45), inset 0 1px 2px rgba(255, 255, 255, 0.35);
+  transition: transform 160ms var(--quest-ease);
+}
+.capture-shutter-core svg { width: 30px; height: 30px; }
+
+/* Tactile compression on press. */
+.capture-shutter:active .capture-shutter-core { transform: scale(0.9); }
+.capture-shutter:active .capture-shutter-ring { transform: scale(1.08); border-color: #8ff0ab; }
+.capture-shutter:focus-visible .capture-shutter-ring { border-color: #8ff0ab; outline: none; }
+
+/* The dock must never sit on top of the capture experience, at any stage. */
+body:has(.capture-flow-overlay) .mobile-bottom-dock { display: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .capture-reticle { animation: none; }
+  .capture-viewfinder-video { transition: none; }
+}
+
+/* ---- Scanning stage: the scan happens over the captured photo ---- */
+.capture-scanning-stage {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  overflow: hidden;
+  background: #030b07;
+}
+.capture-scanning-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(0.92) brightness(0.82);
+}
+.capture-reticle.is-scanning {
+  place-self: center;
+  animation: none;
+  overflow: hidden;
+}
+/* One restrained sweep — not a strobing sci-fi grid. */
+.capture-scan-sweep {
+  position: absolute;
+  left: -6%;
+  width: 112%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(134, 239, 172, 0.95), transparent);
+  box-shadow: 0 0 18px rgba(52, 211, 133, 0.6);
+}
+
+.capture-scan-panel {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  gap: 9px;
+  margin: 0 var(--space-4) calc(var(--space-6) + env(safe-area-inset-bottom, 0px));
+  padding: var(--space-4);
+  border: 1px solid rgba(160, 220, 180, 0.16);
+  border-radius: 20px;
+  background: rgba(6, 18, 12, 0.72);
+  backdrop-filter: blur(18px) saturate(1.3);
+  -webkit-backdrop-filter: blur(18px) saturate(1.3);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.55);
+}
+.capture-scan-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #d7f2de;
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.005em;
+}
+.capture-scan-blip {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 10px rgba(52, 211, 133, 0.85);
+  animation: capture-blip 1.6s ease-in-out infinite;
+}
+@keyframes capture-blip { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+.capture-scan-note {
+  margin: 0;
+  color: rgba(214, 232, 219, 0.66);
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+.capture-scan-track {
+  position: relative;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+.capture-scan-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  transform-origin: left center;
+  background: linear-gradient(90deg, #22c55e, #86efac);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .capture-scan-sweep { display: none; }
+  .capture-scan-blip { animation: none; }
+}
+
+/* ==========================================================================
+   WILD REALM — DISCOVERY CARD (the emotional peak)
+   Mockup: photography-dominant hero with a rarity glow ring, then a compact
+   reward strip. Escalating rarity presentation — D/C subtle, S cinematic.
+   ========================================================================== */
+.discovery-card-modal {
+  --rarity-accent: var(--rarity-common);
+  --rarity-glow: rgba(148, 163, 184, 0.34);
+}
+.discovery-card-modal.rank-d { --rarity-accent: var(--rarity-common);    --rarity-glow: rgba(148, 163, 184, 0.30); }
+.discovery-card-modal.rank-c { --rarity-accent: var(--rarity-uncommon);  --rarity-glow: rgba(16, 185, 129, 0.34); }
+.discovery-card-modal.rank-b { --rarity-accent: var(--rarity-rare);      --rarity-glow: rgba(59, 130, 246, 0.40); }
+.discovery-card-modal.rank-a { --rarity-accent: var(--rarity-epic);      --rarity-glow: rgba(139, 92, 246, 0.48); }
+.discovery-card-modal.rank-s { --rarity-accent: var(--rarity-legendary); --rarity-glow: rgba(245, 158, 11, 0.58); }
+
+/* The capture overlay already owns a close affordance; the card's own header
+   close would stack a second X in the same corner. */
+.capture-flow-overlay:has(.discovery-card-modal) > .capture-flow-close { display: none; }
+
+/* ---- Hero: photography dominates ---- */
+.discovery-hero-frame {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  border-radius: 18px !important;
+  overflow: hidden;
+  background: #06120c;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--rarity-accent) 45%, transparent),
+    0 0 34px -6px var(--rarity-glow),
+    0 18px 40px rgba(0, 0, 0, 0.55);
+}
+.discovery-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+/* Grounds the subject and keeps the name legible over any photo. */
+.discovery-hero-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(72% 58% at 50% 42%, transparent 52%, rgba(3, 10, 6, 0.62) 100%);
+}
+
+/* ---- Title row ---- */
+.discovery-title-row { align-items: flex-start !important; gap: var(--space-3) !important; }
+.discovery-title-info h2 {
+  font-size: 1.45rem !important;
+  line-height: 1.15 !important;
+  letter-spacing: -0.02em !important;
+}
+.discovery-title-info em {
+  display: block;
+  margin-top: 2px;
+  color: rgba(203, 225, 210, 0.6);
+  font-size: 0.83rem;
+  font-style: italic;
+}
+
+/* ---- Reward strip: 2x2 on phones so nothing wraps mid-word ---- */
+.discovery-stat-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 1px !important;
+  overflow: hidden;
+  border: 1px solid var(--quest-line);
+  border-radius: 16px;
+  background: var(--quest-line);
+}
+.discovery-stat-box {
+  display: grid !important;
+  align-content: start;
+  gap: 3px !important;
+  min-width: 0;
+  padding: 11px 12px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: rgba(8, 20, 13, 0.92) !important;
+  text-align: left !important;
+}
+.discovery-stat-box small {
+  color: rgba(203, 225, 210, 0.52) !important;
+  font-size: 0.6rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.07em !important;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.discovery-stat-box strong {
+  font-size: 0.98rem !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  white-space: nowrap;
+}
+.discovery-stat-box .stat-sub {
+  font-size: 0.72rem !important;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+/* Rarity box carries the grade colour so the strip reads at a glance. */
+.discovery-stat-box:first-child strong { color: var(--rarity-accent) !important; }
+
+.chip-verified { color: #34d399 !important; }
+.chip-pending  { color: var(--quest-gold-bright) !important; }
+.chip-rejected { color: #f87171 !important; }
+
+/* ---- Metadata + description ---- */
+.discovery-description {
+  color: rgba(214, 232, 219, 0.72) !important;
+  font-size: 0.86rem !important;
+  line-height: 1.5 !important;
+}
+/* Weather is omitted when the lookup fails (blueprint 6), so the strip must
+   size to however many facts actually exist rather than reserving an empty
+   third column. */
+.discovery-env-strip-row {
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr)) !important;
+  gap: 1px !important;
+  padding: 0 !important;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--quest-line);
+}
+.env-box { background: rgba(8, 20, 13, 0.92); padding: 10px 12px !important; min-width: 0; }
+.env-box small {
+  color: rgba(203, 225, 210, 0.5) !important;
+  font-size: 0.58rem !important;
+  letter-spacing: 0.07em !important;
+}
+.env-box span { font-size: 0.82rem !important; }
+
+/* The hex badge + its caption already state the grade; the title-row repeat
+   was a third instance of the same word. */
+.discovery-title-row > .discovery-header-badge { display: none; }
+
+/* ---- Rarity hex badge ---- */
+.discovery-hex-badge-wrap { flex: 0 0 auto; text-align: center; }
+.discovery-hex-badge {
+  filter: drop-shadow(0 0 14px var(--rarity-glow));
+}
+.discovery-hex-badge-wrap small {
+  display: block;
+  margin-top: 4px;
+  color: var(--rarity-accent);
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+}
+
+/* ---- Escalating rarity atmosphere: only A/S get a living halo ---- */
+.discovery-card-modal.rank-a .discovery-hero-frame,
+.discovery-card-modal.rank-s .discovery-hero-frame {
+  animation: discovery-halo 3.6s ease-in-out infinite;
+}
+@keyframes discovery-halo {
+  0%, 100% { box-shadow: 0 0 0 1px color-mix(in srgb, var(--rarity-accent) 45%, transparent),
+                         0 0 30px -8px var(--rarity-glow), 0 18px 40px rgba(0,0,0,.55); }
+  50%      { box-shadow: 0 0 0 1px color-mix(in srgb, var(--rarity-accent) 70%, transparent),
+                         0 0 52px -4px var(--rarity-glow), 0 18px 40px rgba(0,0,0,.55); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .discovery-card-modal.rank-a .discovery-hero-frame,
+  .discovery-card-modal.rank-s .discovery-hero-frame { animation: none; }
+}
+
+/* ==========================================================================
+   WILD REALM — LIBRARY / COLLECTION
+   Mockup: a trophy case. Dense grid, rarity-coded borders and badges,
+   compact name/rank metadata. Not a feed of oversized cards.
+   ========================================================================== */
+
+/* Rarity is one language across the app; the grid reads it from the grade. */
+.rank-badge-d, .stars-d { --rarity-accent: var(--rarity-common); }
+.rank-badge-c, .stars-c { --rarity-accent: var(--rarity-uncommon); }
+.rank-badge-b, .stars-b { --rarity-accent: var(--rarity-rare); }
+.rank-badge-a, .stars-a { --rarity-accent: var(--rarity-epic); }
+.rank-badge-s, .stars-s { --rarity-accent: var(--rarity-legendary); }
+
+/* Three columns at phone width — a trophy case, not a feed. */
+.library-card-grid {
+  column-count: 3 !important;
+  column-gap: 9px !important;
+}
+@media (max-width: 359px) { .library-card-grid { column-count: 2 !important; } }
+@media (min-width: 700px) { .library-card-grid { column-count: 4 !important; } }
+@media (min-width: 1024px) { .library-card-grid { column-count: 5 !important; } }
+
+.library-photo-card {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  margin: 0 0 9px !important;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--rarity-accent, #94a3b8) 30%, transparent) !important;
+  border-radius: 14px !important;
+  background: rgba(9, 20, 13, 0.9) !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45) !important;
+  transition: transform 180ms var(--quest-ease), box-shadow 180ms var(--quest-ease),
+              border-color 180ms var(--quest-ease);
+  break-inside: avoid;
+}
+/* Higher grades earn a visible halo; D/C stay quiet. */
+.library-photo-card:has(.rank-badge-a),
+.library-photo-card:has(.rank-badge-s) {
+  box-shadow: 0 0 22px -6px color-mix(in srgb, var(--rarity-accent) 65%, transparent),
+              0 6px 18px rgba(0, 0, 0, 0.45) !important;
+}
+.library-photo-card:active { transform: scale(0.975); }
+
+.library-card-img-wrap {
+  position: relative;
+  aspect-ratio: 1 !important;
+  overflow: hidden;
+}
+
+/* Until capture media is served back, the crest IS the art — make it feel
+   deliberate (element-tinted field + wordmark) rather than an empty box. */
+.library-card-crest {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--element-tint, #2f6b4a) 42%, transparent), transparent 70%),
+    linear-gradient(180deg, rgba(12, 26, 18, 0.9), rgba(5, 13, 9, 0.95));
+}
+.library-card-crest span {
+  color: color-mix(in srgb, var(--element-tint, #6ee7a0) 82%, #ffffff);
+  font-size: 0.56rem !important;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+.library-card-crest.element-fire   { --element-tint: #f97316; }
+.library-card-crest.element-water  { --element-tint: #38bdf8; }
+.library-card-crest.element-grass  { --element-tint: #4ade80; }
+.library-card-crest.element-earth  { --element-tint: #a78bfa; }
+.library-card-crest.element-sky    { --element-tint: #67e8f9; }
+
+/* Corner rarity badge, coloured by grade (previously always gold). */
+.library-card-badge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  display: grid;
+  place-items: center;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 5px;
+  border: 1px solid color-mix(in srgb, var(--rarity-accent) 55%, transparent);
+  border-radius: 7px;
+  background: rgba(4, 12, 8, 0.82) !important;
+  backdrop-filter: blur(6px);
+  color: var(--rarity-accent) !important;
+  font-size: 0.62rem !important;
+  font-weight: 800 !important;
+  line-height: 1;
+}
+
+.library-card-info { display: grid !important; gap: 1px !important; padding: 6px 7px 7px !important; }
+.library-card-title {
+  margin: 0 !important;
+  overflow: hidden;
+  color: var(--quest-cream) !important;
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.library-card-sub {
+  margin: 1px 0 0 !important;
+  color: rgba(203, 225, 210, 0.5) !important;
+  font-size: 0.6rem !important;
+}
+.library-card-stars { font-size: 0.6rem !important; color: var(--rarity-accent) !important; letter-spacing: 0.02em; }
+.library-card-stars i { color: rgba(255, 255, 255, 0.16); font-style: normal; }
+
+/* The search affordance is an icon button, not an emoji glyph. */
+.library-search-btn svg { width: 17px; height: 17px; color: var(--quest-cream); }
+
+/* ---- Element tabs must scroll, never clip "Sky"/"Familiars" ---- */
+.library-element-tabs,
+.library-shell .element-tabs {
+  display: flex !important;
+  gap: 8px !important;
+  overflow-x: auto !important;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 2px;
+}
+.library-element-tabs::-webkit-scrollbar,
+.library-shell .element-tabs::-webkit-scrollbar { display: none; }
+.library-element-tabs > * ,
+.library-shell .element-tabs > * { flex: 0 0 auto !important; }
+
+/* ---- Sort control: match the dark system instead of a native select ---- */
+.library-shell select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 8px 30px 8px 12px !important;
+  border: 1px solid var(--quest-line) !important;
+  border-radius: 12px !important;
+  background-color: rgba(9, 20, 13, 0.9) !important;
+  background-image: linear-gradient(45deg, transparent 50%, rgba(203,225,210,.65) 50%),
+                    linear-gradient(135deg, rgba(203,225,210,.65) 50%, transparent 50%) !important;
+  background-position: right 13px center, right 8px center !important;
+  background-size: 5px 5px, 5px 5px !important;
+  background-repeat: no-repeat !important;
+  color: var(--quest-cream) !important;
+  font-family: inherit !important;
+  font-size: 0.8rem !important;
+  font-weight: 600 !important;
+}
+
+/* ==========================================================================
+   WILD REALM — QUESTS
+   Mockup: compact identity header, then several quest rows visible at once
+   (thumbnail · title · progress · reward · action). Not giant vertical cards.
+   ========================================================================== */
+
+/* ---- Compact identity header ---- */
+.quest-user-topbar {
+  display: grid !important;
+  grid-template-columns: auto 1fr auto !important;
+  align-items: center !important;
+  gap: var(--space-3) !important;
+  padding: 11px 13px !important;
+  border-radius: 18px !important;
+}
+.quest-user-topbar h3 {
+  margin: 0 !important;
+  overflow: hidden;
+  font-size: 1.02rem !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  letter-spacing: -0.01em !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;               /* the name wrapped to two lines before */
+}
+.quest-user-topbar .quest-topbar-sub,
+.quest-user-topbar p { font-size: 0.74rem !important; margin: 1px 0 0 !important; }
+
+/* ---- Quest rows ---- */
+.quest-item-card {
+  position: relative;
+  margin-bottom: 9px !important;
+  padding: 0 !important;
+  border: 1px solid var(--quest-line) !important;
+  border-radius: 16px !important;
+  background: rgba(9, 20, 13, 0.9) !important;
+  overflow: hidden;
+  transition: border-color 180ms var(--quest-ease), transform 140ms var(--quest-ease);
+}
+.quest-item-card:active { transform: scale(0.99); }
+/* The full-bleed stock photo behind every row is gone. */
+.quest-item-card .quest-card-bg { display: none !important; }
+
+.quest-card-content {
+  display: grid !important;
+  grid-template-columns: 42px 1fr auto !important;
+  align-items: center !important;
+  gap: var(--space-3) !important;
+  padding: 11px 12px !important;
+}
+
+.quest-row-thumb {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid color-mix(in srgb, var(--cat-tint, #34d399) 30%, transparent);
+  border-radius: 13px;
+  background: radial-gradient(120% 100% at 50% 0%, color-mix(in srgb, var(--cat-tint, #34d399) 26%, transparent), rgba(6,16,11,.9));
+  color: var(--cat-tint, #34d399);
+}
+.quest-row-thumb svg { width: 19px; height: 19px; }
+.quest-row-thumb.category-mind      { --cat-tint: #818cf8; }
+.quest-row-thumb.category-body      { --cat-tint: #34d399; }
+.quest-row-thumb.category-discovery { --cat-tint: #fbbf24; }
+
+.quest-row-main { min-width: 0; display: grid; gap: 5px; }
+.quest-item-title {
+  margin: 0 !important;
+  overflow: hidden;
+  font-size: 0.86rem !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;   /* ALL-CAPS forced long titles to wrap */
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.quest-row-meta { display: flex; align-items: center; gap: 8px; }
+.quest-progress-num { font-size: 0.68rem !important; color: rgba(203,225,210,.55) !important; }
+.quest-reward-pill {
+  padding: 2px 7px !important;
+  border: 1px solid rgba(52, 211, 133, 0.28) !important;
+  border-radius: 999px !important;
+  color: #6ee7a0 !important;
+  font-size: 0.62rem !important;
+  font-weight: 700 !important;
+}
+
+/* Progress track sits under the meta line, easing on change. */
+.quest-row-main .progress-wrap.compact { margin: 0; }
+.quest-row-main .progress-bar {
+  height: 3px !important;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08) !important;
+  overflow: hidden;
+}
+.quest-row-main .progress-bar > div {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #22c55e, #86efac) !important;
+}
+
+/* Action stays a thumb target without dominating the row. */
+.quest-item-card .quest-claim-btn,
+.quest-item-card .quest-card-content > button {
+  min-height: 34px !important;
+  padding: 0 14px !important;
+  border-radius: 11px !important;
+  font-size: 0.78rem !important;
+  font-weight: 700 !important;
+}
+
+/* Completed rows read as done without shouting. */
+.quest-item-card.completed { border-color: rgba(245, 158, 11, 0.35) !important; }
+
+/* ==========================================================================
+   WILD REALM — COMMUNITY
+   Mockup: photography-dominant feed, quiet chrome, compact identity row.
+   ========================================================================== */
+
+/* Compose sits clear of the dock and reads as secondary to the Capture FAB. */
+.community-fab-btn {
+  bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important;
+  right: 16px !important;
+  width: 46px !important;
+  height: 46px !important;
+  border: 1px solid rgba(52, 211, 133, 0.5) !important;
+  background: rgba(9, 24, 15, 0.92) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: #6ee7a0 !important;
+  font-size: 1.4rem !important;
+  font-weight: 700 !important;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* ---- Post card: the discovery should dominate, not the chrome ---- */
+.community-post-card {
+  margin-bottom: 12px !important;
+  padding: 0 !important;
+  border: 1px solid var(--quest-line) !important;
+  border-radius: 18px !important;
+  background: rgba(9, 20, 13, 0.9) !important;
+  overflow: hidden;
+}
+
+.post-author-block {
+  display: grid !important;
+  grid-template-columns: auto 1fr auto !important;
+  align-items: center !important;
+  gap: 9px !important;
+  padding: 10px 12px !important;
+}
+.post-author-avatar {
+  width: 32px !important;
+  height: 32px !important;
+  font-size: 0.68rem !important;
+}
+.post-author-block strong,
+.post-author-block .post-author-name {
+  font-size: 0.82rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;   /* ALL-CAPS names shouted over the photo */
+}
+.post-author-block time,
+.post-author-block .post-time { font-size: 0.68rem !important; color: rgba(203,225,210,.45) !important; }
+
+/* Media block runs edge to edge — photography first. */
+.community-post-card .post-media,
+.community-post-card .post-image-wrap {
+  margin: 0 !important;
+  border-radius: 0 !important;
+  aspect-ratio: 4 / 3;
+}
+
+.post-caption { padding: 10px 12px 0 !important; font-size: 0.88rem !important; }
+.post-engagement-actions {
+  gap: 8px !important;
+  padding: 10px 12px 12px !important;
+}
+.post-action {
+  min-height: 32px !important;
+  padding: 0 11px !important;
+  border-radius: 10px !important;
+  font-size: 0.74rem !important;
+}
+
+/* ---- Tabs: quieter than a solid green pill ---- */
+.community-tabs-bar { gap: 4px !important; }
+
+/* ==========================================================================
+   WILD REALM — PROFILE
+   ========================================================================== */
+/* "XP Earned" wrapped onto two lines and pushed its tile taller than the
+   others; the row now sizes evenly and keeps each label on one line. */
+.profile-stats-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  align-items: stretch !important;
+}
+.profile-stats-grid > .profile-stat-card {
+  display: grid !important;
+  align-content: center;
+  gap: 3px !important;
+  min-width: 0;
+  padding: 12px 8px !important;
+  text-align: center;
+}
+.profile-stats-grid .profile-stat-card small {
+  font-size: 0.58rem !important;
+  letter-spacing: 0.06em !important;
+  white-space: nowrap;
+  color: rgba(203, 225, 210, 0.55) !important;
+}
+.profile-stats-grid .profile-stat-card strong { font-size: 1.15rem !important; line-height: 1.1 !important; }
+
+/* ==========================================================================
+   WILD REALM — EXPLORE MAP
+   Mockup: dark natural map, circular hotspot markers, layered controls that
+   never sit on top of the filter row.
+   ========================================================================== */
+
+/* Filters scroll horizontally and stop short of the stacked map controls,
+   which previously covered "Birding". */
+.explore-category-tags {
+  display: flex !important;
+  gap: 8px !important;
+  /* Clear the stacked map controls, which overlap this row and hid "Birding". */
+  padding-right: 52px !important;
+  overflow-x: auto !important;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.explore-category-tags::-webkit-scrollbar { display: none; }
+.explore-category-tags > .explore-tag { flex: 0 0 auto !important; }
+
+.explore-tag {
+  min-height: 32px !important;
+  padding: 0 14px !important;
+  border: 1px solid rgba(160, 220, 180, 0.16) !important;
+  border-radius: 999px !important;
+  background: rgba(6, 18, 12, 0.62) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: rgba(226, 240, 229, 0.72) !important;
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+}
+.explore-tag.active {
+  border-color: rgba(52, 211, 133, 0.55) !important;
+  background: rgba(16, 55, 34, 0.85) !important;
+  color: #6ee7a0 !important;
+}
+
+/* Cool the warm wood texture toward the mockup's dark-natural map. */
+.explore-map-terrain {
+  filter: saturate(0.5) hue-rotate(-14deg) brightness(0.6) contrast(1.1);
+}
+
+/* Marker labels stay legible over the terrain without restyling the pin
+   itself (the pin element is a positioned wrapper, not the visible disc). */
+.map-hotspot-label {
+  padding: 2px 7px !important;
+  border-radius: 999px !important;
+  background: rgba(4, 12, 8, 0.82) !important;
+  backdrop-filter: blur(8px);
+  font-size: 0.62rem !important;
+  font-weight: 700 !important;
+  white-space: nowrap;
+}
+
+/* Hotspot cards carry their place + distance instead of an empty dark box. */
+.explore-hotspot-card {
+  min-width: 0 !important;
+  border: 1px solid var(--quest-line) !important;
+  border-radius: 16px !important;
+  background: rgba(9, 20, 13, 0.9) !important;
+}
+.explore-hotspot-card h4,
+.explore-hotspot-card .explore-hotspot-name {
+  font-size: 0.82rem !important;
+  line-height: 1.25 !important;
+  text-transform: none !important;
+}
+.explore-hotspot-chip {
+  padding: 2px 8px !important;
+  border-radius: 999px !important;
+  font-size: 0.6rem !important;
+  font-weight: 700 !important;
+}
+
+/* Map controls stack below the filter row rather than on top of it. */
+.map-control-btn.map-control-layers { top: 172px !important; }
+.map-control-btn.map-control-locate { top: 224px !important; }
+
+/* ==========================================================================
+   WILD REALM — MOTION SYSTEM (second pass)
+   One timing scale shared by CSS and framer-motion (MotionVariants.js):
+     micro 120ms   — press / hover / icon response, must feel immediate
+     quick 180ms   — small state changes
+     standard 240ms— tabs, cards, sheets, route content
+     hero 700ms    — earned, cinematic beats only
+   ========================================================================== */
+
+/* A lazy route used to mount an EMPTY div, so every tab change flashed a
+   blank screen before the incoming screen painted. Holding the ground colour
+   keeps the shell continuous instead. */
+.route-suspense-fallback {
+  min-height: 60vh;
+  background: transparent;
+}
+
+/* Route stage keeps its own compositing layer so the incoming screen does not
+   force a repaint of the dock/ambience behind it. */
+.journal-page-transition {
+  will-change: opacity, transform;
+}
+
+/* ==========================================================================
+   WILD REALM — INTERACTION SYSTEM (press / focus / disabled)
+   Audit found tabs, filter chips, profile rows and element tiles snapping
+   with no transition at all. One vocabulary, applied once.
+   ========================================================================== */
+
+/* Segmented controls: Daily/Weekly/Monthly, Feed/Friends/Map, library tabs.
+   Weight and colour ease; the control answers the thumb immediately. */
+.quest-cadence-tabs button,
+.community-tabs-bar button,
+.library-tab-btn,
+.explore-tag,
+.profile-menu-item,
+.profile-menu-list a,
+.profile-menu-list button,
+.library-element-tile,
+.map-control-btn,
+.explore-filter-btn,
+.quest-claim-btn,
+.community-fab-btn,
+.badges-panel a, .badges-panel button,
+.loot-panel a, .loot-panel button,
+.claim-panel a, .claim-panel button,
+.chest-panel a, .chest-panel button,
+.current-rank-panel a, .current-rank-panel button,
+.rewards-link-row {
+  transition:
+    color var(--duration-quick) var(--quest-ease),
+    background-color var(--duration-quick) var(--quest-ease),
+    border-color var(--duration-quick) var(--quest-ease),
+    transform var(--duration-instant) var(--quest-ease) !important;
+}
+
+/* Press compression is small and immediate — physical, not cartoonish. */
+.quest-cadence-tabs button:active,
+.community-tabs-bar button:active,
+.library-tab-btn:active,
+.explore-tag:active,
+.map-control-btn:active,
+.explore-filter-btn:active,
+.quest-claim-btn:active,
+.community-fab-btn:active,
+.badges-panel a:active, .badges-panel button:active,
+.loot-panel a:active, .loot-panel button:active,
+.claim-panel a:active, .claim-panel button:active,
+.chest-panel a:active, .chest-panel button:active,
+.current-rank-panel a:active, .current-rank-panel button:active,
+.rewards-link-row:active { transform: scale(0.97); }
+
+/* Rows compress less than chips: larger surfaces should move less. */
+.profile-menu-item:active,
+.profile-menu-list a:active,
+.profile-menu-list button:active,
+.library-element-tile:active { transform: scale(0.988); }
+
+/* Element tiles and cards get a touch of depth on press rather than a hover
+   lift that mobile never sees. */
+.library-element-tile { will-change: transform; }
+
+/* Engagement actions were 32px tall — under the comfortable thumb target. */
+.post-action {
+  min-height: 36px !important;
+  transition:
+    color var(--duration-quick) var(--quest-ease),
+    background-color var(--duration-quick) var(--quest-ease),
+    border-color var(--duration-quick) var(--quest-ease),
+    transform var(--duration-instant) var(--quest-ease) !important;
+}
+.post-action:active { transform: scale(0.94); }
+
+/* A single visible focus ring for keyboard users across the system. */
+.quest-cadence-tabs button:focus-visible,
+.community-tabs-bar button:focus-visible,
+.library-tab-btn:focus-visible,
+.explore-tag:focus-visible,
+.post-action:focus-visible,
+.profile-menu-item:focus-visible,
+.dock-item:focus-visible,
+.library-photo-card:focus-visible,
+.quest-item-card:focus-visible {
+  outline: 2px solid rgba(110, 231, 160, 0.75);
+  outline-offset: 2px;
+  border-radius: 12px;
+}
+
+/* Disabled reads as unavailable, never as merely dim. */
+button[disabled],
+button[aria-disabled="true"] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* A non-interactive "See all" affordance still reads as tappable. */
+.explore-see-all,
+[class*="see-all"] { cursor: pointer; }
+
+@media (prefers-reduced-motion: reduce) {
+  .quest-cadence-tabs button:active,
+  .community-tabs-bar button:active,
+  .library-tab-btn:active,
+  .explore-tag:active,
+  .post-action:active,
+  .profile-menu-item:active,
+  .library-element-tile:active,
+  .map-control-btn:active,
+  .explore-filter-btn:active,
+  .quest-claim-btn:active,
+  .community-fab-btn:active,
+  .rewards-link-row:active { transform: none; }
+}
+
+/* "See all" rendered as an unstyled grey block; it is a quiet text action. */
+.explore-sheet-see-all {
+  padding: 6px 10px !important;
+  border: 1px solid transparent !important;
+  border-radius: 10px !important;
+  background: transparent !important;
+  color: #6ee7a0 !important;
+  font-size: 0.78rem !important;
+  font-weight: 700 !important;
+  cursor: pointer;
+  transition:
+    color var(--duration-quick) var(--quest-ease),
+    background-color var(--duration-quick) var(--quest-ease),
+    transform var(--duration-instant) var(--quest-ease) !important;
+}
+.explore-sheet-see-all:active { transform: scale(0.96); background: rgba(52, 211, 133, 0.1) !important; }
+
+/* ==========================================================================
+   WILD REALM — CAPTURE FAB
+   The most important control. Alive, not desperate: a slow low-amplitude
+   breath rather than a repeating alarm ring, and real depth on press.
+   ========================================================================== */
+.dock-shutter-btn {
+  transition:
+    transform var(--duration-instant) var(--quest-ease),
+    box-shadow var(--duration-quick) var(--quest-ease) !important;
+}
+
+/* Ring never reaches full opacity and expands less, so it reads as a halo
+   breathing rather than a radar ping demanding attention. */
+.dock-shutter-btn::after {
+  animation: shutter-breathe 4.2s var(--quest-ease) infinite !important;
+  background: rgba(52, 211, 133, 0.26) !important;
+}
+@keyframes shutter-breathe {
+  0%, 100% { transform: scale(0.94); opacity: 0; }
+  45%      { transform: scale(1.16); opacity: 0.5; }
+}
+
+/* Press: the button sinks, and the halo tightens with it. */
+.dock-shutter-btn:active {
+  transform: scale(0.92) !important;
+  box-shadow:
+    0 0 16px rgba(52, 211, 133, 0.5),
+    0 4px 10px rgba(0, 0, 0, 0.6) !important;
+}
+.dock-shutter-btn:active::after { animation: none !important; opacity: 0 !important; }
+
+.dock-shutter-btn:focus-visible {
+  outline: 2px solid rgba(226, 245, 232, 0.9);
+  outline-offset: 3px;
+}
+
+/* Waiting on a GPS fix or otherwise unavailable: calm, obviously inert. */
+.dock-shutter-btn[disabled],
+.dock-shutter-btn[aria-disabled="true"] {
+  filter: saturate(0.35) brightness(0.7);
+}
+.dock-shutter-btn[disabled]::after,
+.dock-shutter-btn[aria-disabled="true"]::after { animation: none !important; opacity: 0 !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .dock-shutter-btn::after { animation: none !important; opacity: 0 !important; }
+  .dock-shutter-btn:active { transform: none !important; }
+}
+
+/* ==========================================================================
+   WILD REALM — CAPTURE PHOTOGRAPHY
+   One treatment shared by the Discovery Card hero, Library tiles and the
+   Community feed. The element crest is the loading ground AND the fallback,
+   so a photo resolving in is a cross-fade rather than a pop.
+   ========================================================================== */
+.capture-image {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #06120c;
+}
+
+.capture-image-crest {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--element-tint, #2f6b4a) 42%, transparent), transparent 70%),
+    linear-gradient(180deg, rgba(12, 26, 18, 0.9), rgba(5, 13, 9, 0.95));
+  transition: opacity var(--duration-considered) var(--quest-ease);
+}
+.capture-image-crest span {
+  color: color-mix(in srgb, var(--element-tint, #6ee7a0) 82%, #ffffff);
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+.capture-image-crest.element-fire  { --element-tint: #f97316; }
+.capture-image-crest.element-water { --element-tint: #38bdf8; }
+.capture-image-crest.element-grass { --element-tint: #4ade80; }
+.capture-image-crest.element-earth { --element-tint: #a78bfa; }
+.capture-image-crest.element-sky   { --element-tint: #67e8f9; }
+
+.capture-image-photo {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;          /* photography fills its frame, never letterboxed */
+  object-position: center;
+  opacity: 0;
+  transform: scale(1.015);    /* settles to 1 as it resolves — a breath, not a zoom */
+  transition:
+    opacity var(--duration-considered) var(--quest-ease),
+    transform var(--duration-deliberate) var(--quest-ease);
+}
+.capture-image[data-state="loaded"] .capture-image-photo { opacity: 1; transform: scale(1); }
+/* Once the photo is up the crest is redundant; fading it avoids any edge halo. */
+.capture-image[data-state="loaded"] .capture-image-crest { opacity: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .capture-image-photo { transform: none; transition: opacity var(--duration-quick) linear; }
+  .capture-image[data-state="loaded"] .capture-image-photo { transform: none; }
+}
+
+/* Wallet balance is real ledger data; the coin glyph is an icon, not an emoji. */
+.quest-coin-badge {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 5px;
+}
+.quest-coin-badge svg { width: 15px; height: 15px; color: var(--quest-gold-bright); }
+
+/* Coin reward pill only appears when a quest actually grants coins. */
+.quest-reward-pill.is-coin {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-color: rgba(245, 158, 11, 0.3) !important;
+  color: var(--quest-gold-bright) !important;
+}
+.quest-reward-pill.is-coin svg { width: 11px; height: 11px; }
+
+/* The shared capture image fills each host frame. Both hosts must establish
+   a containing block, or the absolutely-positioned image escapes and covers
+   the whole card (the community post wrap was position:static). */
+.discovery-hero-frame,
+.post-photo-wrap { position: relative; }
+.discovery-hero-image,
+.post-photo-image { position: absolute; inset: 0; }
+
+/* The rarity badge must stay above the photograph: .capture-image-photo sits
+   at z-index 1 to cover its crest, which was painting over the badge. */
+.library-card-badge { z-index: 2; }
+
+/* The brand mark is the system's leaf icon, not an emoji glyph (emoji render
+   differently per platform and never match the palette). */
+.brand-mark {
+  display: inline-grid;
+  place-items: center;
+  color: #6ee7a0;
+}
+.brand-mark svg { width: 18px; height: 18px; }
+
+/* One card radius across the system: post cards were 18px and profile menu
+   rows 12px against a 16px standard everywhere else. */
+.community-post-card { border-radius: 16px !important; }
+.profile-menu-list { border-radius: 16px !important; }

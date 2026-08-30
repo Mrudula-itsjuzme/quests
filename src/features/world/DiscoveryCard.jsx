@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { Icon } from '../../components/Icon';
 import { AuthImage } from '../../components/AuthImage';
+import { CaptureImage } from '../../components/CaptureImage';
 
 function useCountUp(targetValue, duration = 1200) {
   const [count, setCount] = useState(0);
@@ -33,7 +34,10 @@ export function DiscoveryCard({ card, species, imageUrl, isNew = false, onAddToL
   const speciesEntry = species?.find((entry) => entry.id === cardData.speciesId) || null;
   const itemName = cardData.itemName || cardData.cardTitle || cardData.title || 'Discovered Creature';
   const scientificName = cardData.scientificName || speciesEntry?.scientificName || null;
-  const cardImg = imageUrl || cardData.imageUrl || cardData.imageRef || null;
+  // The API serves photography as `imageRef` (a same-origin media URL); raw
+  // base64 is no longer part of the contract. `imageUrl` stays as an explicit
+  // caller override for the freshly-captured frame before the card is saved.
+  const cardImg = cardData.imageRef || imageUrl || cardData.imageUrl || null;
   const rawXp = cardData.xpAwarded ?? cardData.xpEarned ?? cardData.xp ?? 0;
   const animatedXp = useCountUp(rawXp, 1000);
   const coins = cardData.coinsAwarded ?? 0;
@@ -125,10 +129,17 @@ export function DiscoveryCard({ card, species, imageUrl, isNew = false, onAddToL
       {/* Hero Image Frame with Holographic Overlay */}
       <motion.div layoutId={layoutIdPrefix ? `${layoutIdPrefix}img-${cardId}` : undefined} className="discovery-hero-frame">
         {cardImg ? (
-          <AuthImage className="discovery-hero-img" src={cardImg} alt={itemName} useAuth={cardImg.includes('/captures/')} />
+          <CaptureImage
+            imageRef={cardImg}
+            alt={itemName}
+            element={elementCategory}
+            className="discovery-hero-image"
+            eager
+            useAuth={cardImg?.includes('/captures/')}
+          />
         ) : (
-          // Capture photos are not served back from the API yet, so the hero
-          // shows the rarity crest instead of an unrelated stock animal.
+          // No stored media for this capture: the rarity crest stands in
+          // rather than an unrelated stock animal.
           <div className={`discovery-hero-fallback rank-hex-${rarityTier.toLowerCase()}`} role="img" aria-label={`${itemName}, ${gradeLabel} rank`}>
             <span>{rarityTier}</span>
           </div>

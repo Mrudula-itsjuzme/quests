@@ -4,6 +4,9 @@ import { useCaptures, useSpecies } from '../quests/queries';
 import { playTap } from '../../lib/useSoundEffects';
 import { DiscoveryCard } from '../world/DiscoveryCard';
 import { AuthImage } from '../../components/AuthImage';
+import { Icon } from '../../components/Icon';
+import { CaptureImage } from '../../components/CaptureImage';
+import { appleEase, duration } from '../../components/motion/MotionVariants';
 
 // Element identity is expressed with the design system's colour tokens rather
 // than image files; the four element photos these tiles used to reference were
@@ -15,18 +18,24 @@ const ELEMENT_TABS = [
   { id: 'Grass', label: 'Grass' },
   { id: 'Earth', label: 'Earth' },
   { id: 'Sky', label: 'Sky' },
+  // Familiars is the fauna bucket and cross-cuts elements (blueprint 2/8):
+  // a bird is both a Familiar and Sky.
+  { id: 'familiars', label: 'Familiars' },
 ];
 
 // Highest grade first, matching the rarity engine's S–D scale.
 const RARITY_ORDER = ['S', 'A', 'B', 'C', 'D'];
 
+// Browsing the library is an ordinary action, not a reveal: the grid settles
+// quickly and the stagger is capped so a large collection never trickles in.
+// (Was delay i*0.06 with a 0.5s duration — tile 6 finished at ~800ms.)
 const cardVariants = {
-  hidden: { opacity: 0, y: 30, scale: 0.95 },
+  hidden: { opacity: 0, y: 8, scale: 0.985 },
   visible: (i) => ({
     opacity: 1,
     y: 0,
     scale: 1,
-    transition: { delay: i * 0.06, duration: 0.5, ease: [0.16, 1, 0.3, 1] },
+    transition: { delay: Math.min(i, 8) * 0.022, duration: duration.standard, ease: appleEase },
   }),
 };
 
@@ -53,7 +62,9 @@ export function GalleryPage() {
     const speciesById = new Map((species || []).map((s) => [s.id, s]));
     const filtered = activeTab === 'all'
       ? collection
-      : collection.filter((c) => (speciesById.get(c.speciesId)?.element || 'Earth') === activeTab);
+      : activeTab === 'familiars'
+        ? collection.filter((c) => (speciesById.get(c.speciesId)?.category || c.category) === 'Fauna')
+        : collection.filter((c) => (speciesById.get(c.speciesId)?.element || 'Earth') === activeTab);
 
     const byRarity = (card) => RARITY_ORDER.indexOf((card.rarityGrade || card.rarityTier || 'D').toUpperCase());
     return [...filtered].sort((left, right) => {
@@ -91,7 +102,7 @@ export function GalleryPage() {
           aria-label="Search collection"
           whileTap={{ scale: 0.9 }}
         >
-          🔍
+          <Icon name="search" />
         </motion.button>
       </div>
 
@@ -171,7 +182,7 @@ export function GalleryPage() {
           initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
           className="library-empty-state"
         >
-          <p>You haven&apos;t discovered any {activeTab} species yet.</p>
+          <p>You haven&apos;t discovered any {activeTab === 'familiars' ? 'Familiar' : activeTab} species yet.</p>
           <motion.button
             type="button"
             className="continue-journey-btn"
@@ -277,13 +288,14 @@ export function GalleryPage() {
                     }}
                   >
                     <motion.div layoutId={`discovery-img-${cardId}`} className="library-card-img-wrap">
-                      {card.imageRef ? (
-                        <AuthImage src={card.imageRef} alt={card.itemName} className="library-card-img" useAuth={card.imageRef.includes('/captures/')} />
-                      ) : (
-                        <div className={`library-card-crest element-${(speciesEntry?.element || 'Earth').toLowerCase()}`} aria-hidden="true">
-                          <span>{speciesEntry?.element || 'Wild'}</span>
-                        </div>
-                      )}
+                      {/* Real capture photography when the API has media for
+                          this card; the element crest stands in otherwise. */}
+                      <CaptureImage
+                        imageRef={card.imageRef}
+                        alt={card.itemName}
+                        element={speciesEntry?.element}
+                        useAuth={card.imageRef?.includes('/captures/')}
+                      />
                       <div className={`library-card-badge rank-badge-${rarity.toLowerCase()}`}>
                         {rarity}
                       </div>

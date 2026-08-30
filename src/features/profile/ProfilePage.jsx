@@ -26,7 +26,7 @@ export function ProfilePage() {
 
   const MENU_ITEMS = [
     { id: 'rewards', label: 'Rewards & Store', icon: 'chest', to: '/app/rewards' },
-    { id: 'collection', label: 'Collection', icon: 'book', to: '/app/collection' },
+    { id: 'collection', label: 'Library', icon: 'book', to: '/app/collection' },
     { id: 'community', label: 'Community', icon: 'shield', to: '/app/community' },
     { id: 'settings', label: 'Settings', icon: 'gear', action: () => setSettingsOpen(true) },
     { id: 'help', label: 'Help & Support', icon: 'feather', action: () => unavailable('Help & support is not connected yet.') },

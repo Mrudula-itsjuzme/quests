@@ -8,7 +8,6 @@ import { timeOfDayPhase } from '../../lib/worldTime';
 import { buildDiscoveryHotspots, mapCuratedHotspots, mergeHotspots } from '../../lib/discoveryHotspots';
 import { WorldCanvas } from './WorldCanvas';
 import { WorldHud } from './WorldHud';
-import { CaptureFlow } from './CaptureFlow';
 import { pickWeather } from './WeatherLayer';
 import { playTap } from '../../lib/useSoundEffects';
 import { Icon } from '../../components/Icon';
@@ -32,7 +31,6 @@ export function WorldScreen() {
   const navigate = useNavigate();
   const [lastKnownPosition, setLastKnownPosition] = useState(null);
 
-  const [captureOpen, setCaptureOpen] = useState(false);
   const [selectedTag, setSelectedTag] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -50,14 +48,6 @@ export function WorldScreen() {
   const gems = deriveGems(collectibles);
   const energy = getEnergy();
   const unreadNotifications = useMemo(() => (notifications || []).filter((n) => !n.readAt), [notifications]);
-
-  useEffect(() => {
-    const handleOpenCaptureEvent = () => {
-      setCaptureOpen(true);
-    };
-    window.addEventListener('wild-realm-open-capture', handleOpenCaptureEvent);
-    return () => window.removeEventListener('wild-realm-open-capture', handleOpenCaptureEvent);
-  }, []);
 
   // Distances are only shown when the browser actually grants a position;
   // a denied or unavailable fix simply omits them.
@@ -312,7 +302,7 @@ export function WorldScreen() {
               <button
                 type="button"
                 className="continue-journey-btn"
-                onClick={() => { playTap(); setSelectedHotspot(null); setCaptureOpen(true); }}
+                onClick={() => { playTap(); setSelectedHotspot(null); window.dispatchEvent(new CustomEvent('wild-realm-open-capture')); }}
               >
                 Capture here <span>→</span>
               </button>
@@ -322,7 +312,6 @@ export function WorldScreen() {
       </AnimatePresence>
 
       <AnimatePresence>
-        {captureOpen && <CaptureFlow onClose={() => setCaptureOpen(false)} />}
       </AnimatePresence>
     </motion.div>
   );

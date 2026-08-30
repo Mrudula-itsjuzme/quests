@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { QuestDetail } from './QuestDetail';
+import { ProgressBar, questProgressRatio } from './QuestCard';
+import { Icon, categoryIcon } from '../../components/Icon';
 import { playTap } from '../../lib/useSoundEffects';
 import { BottomSheet } from '../../components/motion/BottomSheet';
 import { QuestSuccessModal } from '../../components/motion/QuestSuccessModal';
@@ -64,8 +66,9 @@ export function QuestsPage() {
             )}
           </div>
         </div>
-        <div className="quest-coin-badge">
-          🪙 <span>{gold.toLocaleString()}</span>
+        <div className="quest-coin-badge" aria-label={`${gold} coins`}>
+          <Icon name="coin" />
+          <span>{gold.toLocaleString()}</span>
         </div>
       </div>
 
@@ -134,17 +137,24 @@ export function QuestsPage() {
                 whileHover={{ scale: 1.01 }}
                 onClick={() => { playTap(); setSelectedId(quest.id); }}
               >
-                <div 
-                  className="quest-card-bg"
-                  style={{ backgroundImage: `url(https://images.unsplash.com/photo-${quest.id.length % 3 === 0 ? '1472214103451-9374bd1c798e' : quest.id.length % 3 === 1 ? '1511497584788-876760111969' : '1501862700950-18382cd114a8'}?auto=format&fit=crop&w=600&q=80)` }}
-                />
                 <div className="quest-card-content">
-                  <div style={{ flex: 1 }}>
+                  {/* A category crest, not a stock landscape: the previous rows
+                      pulled unrelated Unsplash photos keyed off id length. */}
+                  <div className={`quest-row-thumb category-${(quest.category || 'Discovery').toLowerCase()}`} aria-hidden="true">
+                    <Icon name={categoryIcon(quest.category)} />
+                  </div>
+                  <div className="quest-row-main">
                     <h4 className="quest-item-title">{quest.title}</h4>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '4px' }}>
+                    <div className="quest-row-meta">
                       <span className="quest-progress-num">{quest.progressValue}/{quest.targetValue} {quest.unit}</span>
                       <span className="quest-reward-pill">XP {quest.xpReward}</span>
+                      {quest.coinReward > 0 && (
+                        <span className="quest-reward-pill is-coin">
+                          <Icon name="coin" /> {quest.coinReward}
+                        </span>
+                      )}
                     </div>
+                    <ProgressBar value={questProgressRatio(quest)} compact />
                   </div>
 
                   <AnimatePresence mode="wait">
