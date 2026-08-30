@@ -1565,3 +1565,106 @@ body:has(.capture-flow-overlay) .mobile-bottom-dock { display: none !important; 
 
 /* Completed rows read as done without shouting. */
 .quest-item-card.completed { border-color: rgba(245, 158, 11, 0.35) !important; }
+
+/* ==========================================================================
+   WILD REALM — COMMUNITY
+   Mockup: photography-dominant feed, quiet chrome, compact identity row.
+   ========================================================================== */
+
+/* Compose sits clear of the dock and reads as secondary to the Capture FAB. */
+.community-fab-btn {
+  bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important;
+  right: 16px !important;
+  width: 46px !important;
+  height: 46px !important;
+  border: 1px solid rgba(52, 211, 133, 0.5) !important;
+  background: rgba(9, 24, 15, 0.92) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: #6ee7a0 !important;
+  font-size: 1.4rem !important;
+  font-weight: 700 !important;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* ---- Post card: the discovery should dominate, not the chrome ---- */
+.community-post-card {
+  margin-bottom: 12px !important;
+  padding: 0 !important;
+  border: 1px solid var(--quest-line) !important;
+  border-radius: 18px !important;
+  background: rgba(9, 20, 13, 0.9) !important;
+  overflow: hidden;
+}
+
+.post-author-block {
+  display: grid !important;
+  grid-template-columns: auto 1fr auto !important;
+  align-items: center !important;
+  gap: 9px !important;
+  padding: 10px 12px !important;
+}
+.post-author-avatar {
+  width: 32px !important;
+  height: 32px !important;
+  font-size: 0.68rem !important;
+}
+.post-author-block strong,
+.post-author-block .post-author-name {
+  font-size: 0.82rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;   /* ALL-CAPS names shouted over the photo */
+}
+.post-author-block time,
+.post-author-block .post-time { font-size: 0.68rem !important; color: rgba(203,225,210,.45) !important; }
+
+/* Media block runs edge to edge — photography first. */
+.community-post-card .post-media,
+.community-post-card .post-image-wrap {
+  margin: 0 !important;
+  border-radius: 0 !important;
+  aspect-ratio: 4 / 3;
+}
+
+.post-caption { padding: 10px 12px 0 !important; font-size: 0.88rem !important; }
+.post-engagement-actions {
+  gap: 8px !important;
+  padding: 10px 12px 12px !important;
+}
+.post-action {
+  min-height: 32px !important;
+  padding: 0 11px !important;
+  border-radius: 10px !important;
+  font-size: 0.74rem !important;
+}
+
+/* ---- Tabs: quieter than a solid green pill ---- */
+.community-tabs-bar { gap: 4px !important; }
+
+/* ==========================================================================
+   WILD REALM — PROFILE
+   ========================================================================== */
+/* "XP Earned" wrapped onto two lines and pushed its tile taller than the
+   others; the row now sizes evenly and keeps each label on one line. */
+.profile-stats-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  align-items: stretch !important;
+}
+.profile-stats-grid > .profile-stat-card {
+  display: grid !important;
+  align-content: center;
+  gap: 3px !important;
+  min-width: 0;
+  padding: 12px 8px !important;
+  text-align: center;
+}
+.profile-stats-grid .profile-stat-card small {
+  font-size: 0.58rem !important;
+  letter-spacing: 0.06em !important;
+  white-space: nowrap;
+  color: rgba(203, 225, 210, 0.55) !important;
+}
+.profile-stats-grid .profile-stat-card strong { font-size: 1.15rem !important; line-height: 1.1 !important; }
