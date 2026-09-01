@@ -23,6 +23,7 @@ import { speciesCatalog } from './lib/species-catalog.js';
 import { protectedGps } from './lib/geo-privacy.js';
 import { redactPublicPayload } from './lib/public-redaction.js';
 import { auditLog } from './lib/audit-log.js';
+import clientMetrics from 'prom-client';
 
 const PUBLIC_SPECIES_CATALOG = speciesCatalog
   .filter((entry) => entry.enabled)
@@ -204,6 +205,19 @@ export function createApp(options = {}) {
   app.use('/api', authLimiter);
   app.use('/api', authenticate);
   app.use('/api', readLimiter);
+  // Prometheus metrics (disabled in test by default)
+  if (config.NODE_ENV !== 'test') {
+    const collectDefaultMetrics = clientMetrics.collectDefaultMetrics;
+    collectDefaultMetrics({ timeout: 5000 });
+    app.get('/metrics', async (_req, res) => {
+      try {
+        res.set('Content-Type', clientMetrics.register.contentType);
+        res.end(await clientMetrics.register.metrics());
+      } catch (err) {
+        res.status(500).end(err.message);
+      }
+    });
+  }
   app.get('/api/v1/me', asyncRoute(async (req, res) => res.json(await engine.getMe(req.identity))));
   app.patch('/api/v1/me', writeLimiter, asyncRoute(async (req, res) => res.json(await engine.updateMe(req.identity, parse(profileSchema, req.body)))));
   app.get('/api/v1/quests/definitions', asyncRoute(async (req, res) => sendCachedJson(req, res, await engine.definitions(req.identity, {
