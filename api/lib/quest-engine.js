@@ -3,6 +3,19 @@ import { discoveryWeights, monthlyWeights, weeklyWeights } from './quest-definit
 import { cadenceStrategies, createVerificationStrategies } from './strategies.js';
 import { calculateProgression, progressionEngine } from './progression-engine.js';
 
+const DAILY_DECK_CATEGORIES = Object.freeze([
+  'Discovery',
+  'Discovery',
+  'Discovery',
+  'Discovery',
+  'Body',
+  'Body',
+  'Body',
+  'Mind',
+  'Mind',
+  'Mind',
+]);
+
 export class QuestEngine {
   constructor({ repository, providers, random = Math.random }) {
     this.repository = repository;
@@ -65,12 +78,18 @@ export class QuestEngine {
         select: async (transaction) => {
           const recent = await transaction.recentAssignments(user.id, 'daily', new Date(now.getTime() - 90 * 86400000));
           const selected = [];
-          for (const category of cadenceStrategies.daily.categories) {
+          for (const category of DAILY_DECK_CATEGORIES) {
             const definitions = await transaction.listDefinitions({ cadence: 'daily', category });
             const pool = this.providers.capabilities?.health === false
               ? definitions.filter((definition) => definition.verificationType !== 'AUTO')
               : definitions;
-            selected.push(selectWithCooldown(pool, recent, now, category === 'Discovery' ? discoveryWeights : null, this.random));
+            selected.push(selectWithCooldown(
+              pool.filter((definition) => !selected.some((item) => item.id === definition.id)),
+              recent,
+              now,
+              category === 'Discovery' ? discoveryWeights : null,
+              this.random,
+            ));
           }
           return selected.map((definition) => assignmentFrom(definition, user.id, period, now));
         },

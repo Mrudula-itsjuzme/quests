@@ -78,8 +78,11 @@ describe('QuestEngine', () => {
     const daily = await engine.generateDaily(identity, 'daily-key-001');
     const replay = await engine.generateDaily(identity, 'daily-key-001');
     const weekly = await engine.generateWeekly(identity, 'weekly-key-001');
-    expect(daily).toHaveLength(3);
-    expect(new Set(daily.map((item) => item.category))).toEqual(new Set(['Mind', 'Body', 'Discovery']));
+    expect(daily).toHaveLength(10);
+    expect(daily.filter((item) => item.category === 'Discovery')).toHaveLength(4);
+    expect(daily.filter((item) => item.category === 'Body')).toHaveLength(3);
+    expect(daily.filter((item) => item.category === 'Mind')).toHaveLength(3);
+    expect(new Set(daily.map((item) => item.definitionId)).size).toBe(10);
     expect(replay).toEqual(daily);
     expect(weekly.verificationType).toBe('PHOTO');
     expect(weekly.cadence).toBe('weekly');
@@ -151,10 +154,14 @@ describe('QuestEngine', () => {
   it('resets a broken streak and advances consecutive local days', async () => {
     const { engine, setNow } = harness();
     const first = await engine.generateDaily(identity, 'daily-key-001');
-    await Promise.all(first.map((assignment) => engine.completeLegacy(identity, assignment.id)));
+    for (const assignment of first) {
+      await engine.completeLegacy(identity, assignment.id);
+    }
     setNow('2026-07-14T10:00:00.000Z');
     const second = await engine.generateDaily(identity, 'daily-key-002');
-    await Promise.all(second.map((assignment) => engine.completeLegacy(identity, assignment.id)));
+    for (const assignment of second) {
+      await engine.completeLegacy(identity, assignment.id);
+    }
     expect((await engine.getMe(identity)).streakDays).toBe(2);
 
     setNow('2026-07-16T10:00:00.000Z');
@@ -179,7 +186,7 @@ describe('QuestEngine', () => {
     await engine.generateDaily(identity, 'daily-key-001');
     setNow('2026-07-14T00:01:00.000Z');
     expect(await engine.active(identity)).toEqual([]);
-    expect(await engine.history(identity)).toHaveLength(3);
+    expect(await engine.history(identity)).toHaveLength(10);
   });
 
   it('rejects duplicate photo proof and supports safe local verification', async () => {

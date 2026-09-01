@@ -83,7 +83,10 @@ export function loadConfig(env = process.env, options = {}) {
     if (insecureOidc) {
       throw new Error('Production requires HTTPS OIDC endpoints.');
     }
-    if (config.PROVIDER_MODE === 'http' && (!config.QUEST_AI_VERIFY_URL || !config.QUEST_PROVIDER_SECRET)) {
+    if (config.PROVIDER_MODE !== 'http') {
+      throw new Error('Production requires PROVIDER_MODE=http so quest proof verification is backed by an external verifier.');
+    }
+    if (!config.QUEST_AI_VERIFY_URL || !config.QUEST_PROVIDER_SECRET) {
       throw new Error('Production requires configured HTTP quest providers (QUEST_AI_VERIFY_URL and QUEST_PROVIDER_SECRET).');
     }
     if (!config.corsOrigins.length || config.corsOrigins.includes('*')) {

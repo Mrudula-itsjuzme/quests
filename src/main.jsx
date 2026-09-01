@@ -13,6 +13,7 @@ import '@fontsource/manrope/700.css';
 import './index.css';
 import './wild-realm.css';
 import './design-system.css';
+import './community-final.css';
 
 // Hide the inline splash as soon as React hydrates
 if (typeof window !== 'undefined' && window.__hideSplash) {

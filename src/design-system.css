@@ -1247,6 +1247,223 @@ body:has(.modal-backdrop) .mobile-bottom-dock {
   }
 }
 
+/* FINAL EOF COMMUNITY PASS: Snap-like dark social surface. */
+@media (max-width: 780px) {
+  html[data-wild-theme='dark'] body .app-shell .guild-page {
+    min-height: 100dvh !important;
+    padding: calc(30px + env(safe-area-inset-top, 0px)) 20px calc(150px + env(safe-area-inset-bottom, 0px)) !important;
+    background:
+      radial-gradient(circle at 18% 4%, rgba(38, 222, 142, 0.18), transparent 34%),
+      radial-gradient(circle at 92% 0%, rgba(255, 123, 112, 0.14), transparent 32%),
+      linear-gradient(180deg, #07130f 0%, #030605 76%) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-tabs-bar {
+    position: sticky !important;
+    top: calc(12px + env(safe-area-inset-top, 0px)) !important;
+    z-index: 20 !important;
+    width: min(100%, 294px) !important;
+    height: 48px !important;
+    margin: 0 0 28px !important;
+    padding: 4px !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 4px !important;
+    border-radius: 999px !important;
+    background: rgba(3, 5, 4, 0.78) !important;
+    border: 1px solid rgba(255, 248, 235, 0.15) !important;
+    box-shadow: 0 16px 44px rgba(0, 0, 0, 0.34) !important;
+    backdrop-filter: blur(22px) saturate(1.2) !important;
+    -webkit-backdrop-filter: blur(22px) saturate(1.2) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-tab-btn,
+  html[data-wild-theme='dark'] body .app-shell .community-tabs-bar button {
+    min-width: 0 !important;
+    min-height: 40px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 999px !important;
+    background: transparent !important;
+    color: rgba(255, 248, 235, 0.58) !important;
+    font-size: 0.86rem !important;
+    font-weight: 850 !important;
+    letter-spacing: 0 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-tab-btn.active,
+  html[data-wild-theme='dark'] body .app-shell .community-tabs-bar button.active {
+    background: #ff7b70 !important;
+    color: #130b08 !important;
+    box-shadow: 0 10px 24px rgba(255, 123, 112, 0.25) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-chats-screen {
+    display: grid !important;
+    gap: 18px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-chats-hero {
+    display: flex !important;
+    align-items: flex-end !important;
+    justify-content: space-between !important;
+    gap: 18px !important;
+    min-height: 176px !important;
+    padding: 24px !important;
+    border-radius: 30px !important;
+    border: 1px solid rgba(255, 248, 235, 0.13) !important;
+    background:
+      linear-gradient(90deg, rgba(5, 7, 6, 0.86), rgba(5, 7, 6, 0.2)),
+      url('/assets/verdant-explorer-banner.png') center / cover no-repeat !important;
+    box-shadow: 0 24px 58px rgba(0, 0, 0, 0.38) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-chats-kicker {
+    display: inline-flex !important;
+    width: max-content !important;
+    margin-bottom: 10px !important;
+    padding: 7px 10px !important;
+    border-radius: 999px !important;
+    background: rgba(255, 248, 235, 0.13) !important;
+    color: rgba(255, 248, 235, 0.78) !important;
+    font-size: 0.68rem !important;
+    font-weight: 850 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-chats-hero h2 {
+    max-width: 9ch !important;
+    margin: 0 !important;
+    color: #fff8eb !important;
+    font-size: clamp(2.2rem, 9vw, 3.25rem) !important;
+    line-height: 0.94 !important;
+    letter-spacing: 0 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-chats-hero p {
+    max-width: 17rem !important;
+    margin: 12px 0 0 !important;
+    color: rgba(255, 248, 235, 0.76) !important;
+    font-size: 0.98rem !important;
+    line-height: 1.35 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-hero-camera {
+    flex: 0 0 56px !important;
+    width: 56px !important;
+    height: 56px !important;
+    display: grid !important;
+    place-items: center !important;
+    border: 0 !important;
+    border-radius: 20px !important;
+    background: #2ed68b !important;
+    color: #04100a !important;
+    box-shadow: 0 18px 34px rgba(46, 214, 139, 0.28) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-story-rail {
+    display: flex !important;
+    gap: 14px !important;
+    overflow-x: auto !important;
+    padding: 2px 0 6px !important;
+    scrollbar-width: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-story-rail::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-story-chip {
+    flex: 0 0 76px !important;
+    display: grid !important;
+    justify-items: center !important;
+    gap: 8px !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: rgba(255, 248, 235, 0.82) !important;
+    font-size: 0.78rem !important;
+    font-weight: 800 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-story-chip .post-author-avatar {
+    width: 58px !important;
+    height: 58px !important;
+    border-radius: 22px !important;
+    background: linear-gradient(135deg, #2ed68b, #ff7b70) !important;
+    color: #04100a !important;
+    box-shadow: 0 0 0 4px rgba(255, 248, 235, 0.1), 0 16px 32px rgba(0, 0, 0, 0.35) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-friend-list {
+    display: grid !important;
+    gap: 12px !important;
+    margin-top: 0 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-friend-card {
+    display: grid !important;
+    grid-template-columns: 52px 1fr 42px !important;
+    align-items: center !important;
+    gap: 12px !important;
+    min-height: 84px !important;
+    padding: 14px !important;
+    border-radius: 24px !important;
+    background: rgba(255, 248, 235, 0.075) !important;
+    border: 1px solid rgba(255, 248, 235, 0.12) !important;
+    color: #fff8eb !important;
+    box-shadow: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-friend-card > .post-author-avatar {
+    width: 50px !important;
+    height: 50px !important;
+    border-radius: 18px !important;
+    background: rgba(46, 214, 139, 0.16) !important;
+    color: #8ff0bd !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-friend-meta h3 {
+    margin: 0 !important;
+    color: #fff8eb !important;
+    font-size: 1rem !important;
+    line-height: 1.12 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-friend-meta small {
+    display: block !important;
+    margin-top: 4px !important;
+    color: rgba(255, 248, 235, 0.55) !important;
+    font-size: 0.76rem !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-friend-meta p {
+    margin: 6px 0 0 !important;
+    color: rgba(255, 248, 235, 0.74) !important;
+    font-size: 0.82rem !important;
+    line-height: 1.25 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-chat-action {
+    width: 42px !important;
+    height: 42px !important;
+    display: grid !important;
+    place-items: center !important;
+    border: 1px solid rgba(255, 248, 235, 0.12) !important;
+    border-radius: 16px !important;
+    background: rgba(255, 248, 235, 0.09) !important;
+    color: #fff8eb !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-fab-btn {
+    right: 22px !important;
+    bottom: calc(94px + env(safe-area-inset-bottom, 0px)) !important;
+    width: 54px !important;
+    height: 54px !important;
+    border-radius: 20px !important;
+  }
+}
+
 /* Dark-only product lock: final cascade owner for the Snapchat-style flow. */
 :root,
 :root[data-wild-theme='dark'],
@@ -1848,6 +2065,235 @@ body,
 @keyframes wr-pulse-dot {
   0%, 100% { transform: scale(0.86); box-shadow: 0 0 0 0 rgba(46, 227, 145, 0.34); }
   50% { transform: scale(1); box-shadow: 0 0 0 10px rgba(46, 227, 145, 0); }
+}
+
+/* Phone bugfix lock: kill leftover light cards and keep primary content above the dock. */
+@media (max-width: 780px) {
+  .gallery-v2-shell,
+  .guild-page,
+  .quests-shell {
+    padding-inline: 20px !important;
+    padding-bottom: calc(156px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  .gallery-v2-tabs,
+  .category-filter-scroll {
+    padding-bottom: 2px !important;
+  }
+
+  .gallery-v2-tab,
+  .category-pill,
+  .community-tab-btn,
+  .quest-cadence-btn {
+    background: rgba(255, 248, 235, 0.1) !important;
+    border: 1px solid rgba(255, 248, 235, 0.13) !important;
+    color: rgba(255, 248, 235, 0.76) !important;
+  }
+
+  .gallery-v2-tab.active,
+  .category-pill.active {
+    background: linear-gradient(135deg, #33df91, #f0ce70) !important;
+    color: #05100b !important;
+  }
+
+  .community-tab-btn.active,
+  .quest-cadence-btn.active {
+    background: #ff7b70 !important;
+    color: #070706 !important;
+  }
+
+  .community-tab-btn.active span,
+  .quest-cadence-btn.active span,
+  .community-tabs-bar button.active span {
+    color: #070706 !important;
+  }
+
+  .quest-cadence-btn > div[style],
+  .quest-cadence-btn.active > div[style] {
+    background: transparent !important;
+    box-shadow: none !important;
+    display: none !important;
+  }
+
+  .quest-cadence-btn > span[style],
+  .quest-cadence-btn.active > span[style] {
+    display: inline !important;
+    opacity: 1 !important;
+  }
+
+  .quest-coin-badge,
+  .shell-xp {
+    background: rgba(255, 248, 235, 0.1) !important;
+    border: 1px solid rgba(255, 248, 235, 0.15) !important;
+    color: #fff8eb !important;
+  }
+
+  .quest-coin-badge span,
+  .quest-coin-badge strong,
+  .shell-xp span,
+  .shell-xp strong {
+    color: #fff8eb !important;
+  }
+
+  .community-friend-card,
+  .community-post-card,
+  .post-info-block {
+    background: rgba(255, 248, 235, 0.08) !important;
+    border: 1px solid rgba(255, 248, 235, 0.13) !important;
+    color: #fff8eb !important;
+    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.3) !important;
+  }
+
+  .community-friend-card h3,
+  .community-friend-card small,
+  .community-friend-meta h3,
+  .community-friend-meta small {
+    color: #fff8eb !important;
+  }
+
+  .community-friend-card small,
+  .community-friend-meta small {
+    opacity: 0.68 !important;
+  }
+
+  .library-loop-empty {
+    min-height: 430px !important;
+    margin-top: 22px !important;
+    margin-bottom: 34px !important;
+    padding: 24px 22px 28px !important;
+  }
+
+  .library-loop-empty h3 {
+    max-width: 11ch !important;
+    margin-top: 10px !important;
+    font-size: clamp(2.25rem, 8.7vw, 3.1rem) !important;
+    line-height: 0.96 !important;
+  }
+
+  .library-loop-empty p {
+    max-width: 18rem !important;
+    margin-top: 14px !important;
+    font-size: 1rem !important;
+    line-height: 1.34 !important;
+  }
+
+  .gallery-empty-icon {
+    width: 48px !important;
+    height: 48px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .library-loop-kicker {
+    padding: 7px 10px !important;
+    font-size: 0.66rem !important;
+  }
+
+  .library-loop-rail,
+  .retention-loop-rail {
+    margin-top: 16px !important;
+    gap: 7px !important;
+  }
+
+  .library-loop-rail span,
+  .retention-loop-rail span {
+    min-height: 60px !important;
+    padding: 10px 8px !important;
+  }
+
+  .gallery-empty-cta {
+    width: min(100%, 260px) !important;
+    min-height: 52px !important;
+    margin-top: 16px !important;
+    margin-bottom: 0 !important;
+  }
+
+  .mobile-bottom-dock {
+    height: 66px !important;
+    border-radius: 24px !important;
+  }
+
+  .dock-shutter-btn {
+    width: 58px !important;
+    height: 58px !important;
+  }
+}
+
+/* Specificity override for older theme experiments with html/body selectors. */
+@media (max-width: 780px) {
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-tabs button.gallery-v2-tab,
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-tabs .gallery-v2-tab,
+  html[data-wild-theme='dark'] body .app-shell .category-pill,
+  html[data-wild-theme='dark'] body .app-shell .community-friend-card,
+  html[data-wild-theme='dark'] body .app-shell .community-post-card,
+  html[data-wild-theme='dark'] body .app-shell .quest-coin-badge {
+    background: rgba(255, 248, 235, 0.1) !important;
+    border: 1px solid rgba(255, 248, 235, 0.14) !important;
+    color: #fff8eb !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-tabs button.gallery-v2-tab.active,
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-tabs .gallery-v2-tab.active {
+    background: #2ed68b !important;
+    color: #04100a !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-tab span,
+  html[data-wild-theme='dark'] body .app-shell .community-friend-card *,
+  html[data-wild-theme='dark'] body .app-shell .community-post-card *,
+  html[data-wild-theme='dark'] body .app-shell .quest-coin-badge * {
+    color: inherit !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-stat {
+    background: rgba(255, 248, 235, 0.08) !important;
+    border: 1px solid rgba(255, 248, 235, 0.13) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-stat strong {
+    color: #2ee391 !important;
+    opacity: 1 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-stat small {
+    color: rgba(255, 248, 235, 0.72) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-cadence-btn.active > span[style] {
+    color: #070706 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .library-loop-empty {
+    min-height: 388px !important;
+    max-height: none !important;
+    padding: 20px 20px 96px !important;
+    margin-bottom: 72px !important;
+    background:
+      linear-gradient(90deg, rgba(5, 7, 6, 0.9), rgba(5, 7, 6, 0.5) 58%, rgba(5, 7, 6, 0.82)),
+      linear-gradient(180deg, rgba(5, 7, 6, 0.24), rgba(5, 7, 6, 0.7)),
+      url('/assets/verdant-explorer-banner.png') center / cover no-repeat !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .library-loop-empty h3 {
+    max-width: 12ch !important;
+    font-size: clamp(2rem, 7.8vw, 2.75rem) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .library-loop-empty p {
+    font-size: 0.94rem !important;
+    line-height: 1.32 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .library-loop-empty .retention-loop-rail {
+    display: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .library-loop-empty .gallery-empty-cta {
+    position: absolute !important;
+    right: 20px !important;
+    bottom: 28px !important;
+    left: 20px !important;
+    width: auto !important;
+  }
 }
 
 /* Dark-only Snapchat flow lock: this is the final visual authority. */

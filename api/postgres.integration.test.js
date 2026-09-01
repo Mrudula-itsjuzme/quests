@@ -34,13 +34,16 @@ suite('PostgreSQL quest repository', () => {
       engine.generateDaily(identity, 'integration-daily-001'),
       engine.generateDaily(identity, 'integration-daily-002'),
     ]);
-    expect(first).toHaveLength(3);
-    expect(second).toHaveLength(3);
+    expect(first).toHaveLength(10);
+    expect(second).toHaveLength(10);
     const active = await engine.active(identity);
-    expect(active).toHaveLength(3);
-    expect(new Set(active.map((item) => item.category))).toEqual(new Set(['Mind', 'Body', 'Discovery']));
+    expect(active).toHaveLength(10);
+    expect(active.filter((item) => item.category === 'Discovery')).toHaveLength(4);
+    expect(active.filter((item) => item.category === 'Body')).toHaveLength(3);
+    expect(active.filter((item) => item.category === 'Mind')).toHaveLength(3);
+    expect(new Set(active.map((item) => item.definitionId)).size).toBe(10);
     const runs = await pool.query("SELECT status, assignment_count FROM quest_generation_runs WHERE user_id = $1 AND cadence = 'daily'", [identity.id]);
-    expect(runs.rows).toEqual([{ status: 'completed', assignment_count: 3 }]);
+    expect(runs.rows).toEqual([{ status: 'completed', assignment_count: 10 }]);
   });
 
   it('credits an assignment only once under replay', async () => {

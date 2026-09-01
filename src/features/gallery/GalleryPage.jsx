@@ -149,32 +149,31 @@ export function GalleryPage() {
           {[0,1,2,3].map((i) => <div key={i} className="gallery-v2-skeleton" />)}
         </div>
       ) : displayList.length === 0 ? (
-        <div className="gallery-v2-empty library-loop-empty">
-          <div className="gallery-empty-icon">📷</div>
-          <span className="sr-only">Your collection starts here.</span>
-          <span className="library-loop-kicker">Collection loop</span>
-          <h3>
-            {collection.length === 0
-              ? 'Open Camera to start your Library.'
-              : `No ${activeTab === 'familiars' ? 'Fauna' : activeTab} finds yet.`}
-          </h3>
-          <p>
-            {collection.length === 0
-              ? 'Snap a real-world find, let AI rank it, add notes, then save the card here.'
-              : 'Use Camera to capture a verified find for this category.'}
-          </p>
-          <div className="retention-loop-rail library-loop-rail" aria-label="Library loop">
-            <span><strong>1</strong> Snap</span>
-            <span><strong>2</strong> Classify</span>
-            <span><strong>3</strong> Save</span>
+        <div className="library-start-card">
+          <div className="library-empty-media" aria-hidden="true">
+            <div className="gallery-empty-icon"><Icon name="camera" /></div>
           </div>
-          <button
-            type="button"
-            className="gallery-empty-cta"
-            onClick={() => { playTap(); window.dispatchEvent(new CustomEvent('wild-realm-open-capture')); }}
-          >
-            Open Camera →
-          </button>
+          <div className="library-start-panel">
+            <span className="sr-only">Your collection starts here.</span>
+            <span className="library-loop-kicker">Collection loop</span>
+            <h3>
+              {collection.length === 0
+                ? 'Start your Library.'
+                : `No ${activeTab === 'familiars' ? 'Fauna' : activeTab} finds yet.`}
+            </h3>
+            <p>
+              {collection.length === 0
+                ? 'Snap, rank, note, and save a real-world find.'
+                : 'Use Camera to capture a verified find for this category.'}
+            </p>
+            <button
+              type="button"
+              className="library-start-cta"
+              onClick={() => { playTap(); window.dispatchEvent(new CustomEvent('wild-realm-open-capture')); }}
+            >
+              Open Camera
+            </button>
+          </div>
         </div>
       ) : (
         /* ── Instagram-style photo grid ── */

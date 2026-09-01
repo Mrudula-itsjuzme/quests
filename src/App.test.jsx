@@ -146,13 +146,14 @@ describe('App (development auth mode)', () => {
   it('exposes the five reference destinations and the community surface', async () => {
     renderApp('/app/community');
     expect(await screen.findByRole('heading', { name: /^community$/i, hidden: true })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: /^feed$/i })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: /^friends$/i })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: /^map$/i })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /^chats$/i })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /^realm$/i })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /^places$/i })).toBeInTheDocument();
   });
 
   it('shows a real community empty state instead of a coming-soon placeholder', async () => {
     renderApp('/app/community');
+    fireEvent.click(await screen.findByRole('tab', { name: /^realm$/i }));
     expect(await screen.findByText(/no discoveries shared yet/i)).toBeInTheDocument();
     expect(screen.queryByText(/coming soon/i)).not.toBeInTheDocument();
     // Sharing must be an available action, not an aria-disabled stub. Both the
@@ -169,6 +170,7 @@ describe('App (development auth mode)', () => {
       return jsonResponse([]);
     });
     renderApp('/app/community');
+    fireEvent.click(await screen.findByRole('tab', { name: /^realm$/i }));
     expect(await screen.findByText(/Malabar Trogon/i)).toBeInTheDocument();
     expect(screen.getByText(/Silent Valley/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /like this discovery/i })).toBeInTheDocument();
@@ -181,6 +183,7 @@ describe('App (development auth mode)', () => {
       return jsonResponse([]);
     });
     renderApp('/app/community');
+    fireEvent.click(await screen.findByRole('tab', { name: /^realm$/i }));
     // 5xx responses are retried with backoff before the query settles as an
     // error, so this needs longer than the default 1s findBy timeout.
     expect(await screen.findByRole('alert', {}, { timeout: 10_000 })).toHaveTextContent(/couldn’t reach the community service/i);

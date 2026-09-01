@@ -70,15 +70,17 @@ export function GuildPage() {
         {tab === 'MAP' && <CommunityMap />}
       </div>
 
-      <motion.button
-        type="button"
-        className="community-fab-btn"
-        aria-label="Share a discovery"
-        whileTap={{ scale: 0.9 }}
-        onClick={() => { playTap(); setShareOpen(true); }}
-      >
-        +
-      </motion.button>
+      {tab === 'FEED' && (
+        <motion.button
+          type="button"
+          className="community-fab-btn"
+          aria-label="Share a discovery"
+          whileTap={{ scale: 0.9 }}
+          onClick={() => { playTap(); setShareOpen(true); }}
+        >
+          +
+        </motion.button>
+      )}
 
       <AnimatePresence>
         {shareOpen && (
@@ -330,19 +332,53 @@ function FriendsPanel() {
   }
 
   return (
-    <div className="community-friend-list">
+    <div className="community-chats-screen">
+      <section className="community-chats-hero" aria-label="Trail chats">
+        <div>
+          <span className="community-chats-kicker">Trail chats</span>
+          <h2>Plan the next snap.</h2>
+          <p>Message friends, build streak plans, then jump back into Camera.</p>
+        </div>
+        <button
+          type="button"
+          className="community-hero-camera"
+          aria-label="Open Camera Capture"
+          onClick={() => {
+            playTap();
+            window.dispatchEvent(new CustomEvent('wild-realm-open-capture'));
+          }}
+        >
+          <Icon name="camera" />
+        </button>
+      </section>
+
+      <div className="community-story-rail" aria-label="Friends">
+        {friends.map((friend) => (
+          <button key={friend.userId} type="button" className="community-story-chip" onClick={playTap}>
+            <span className="post-author-avatar" aria-hidden="true">{initials(friend.displayName)}</span>
+            <span>{friend.displayName.split(/\s+/)[0]}</span>
+          </button>
+        ))}
+      </div>
+
+      <div className="community-friend-list">
       {friends.map((friend) => (
         <article key={friend.userId} className="community-friend-card">
           <span className="post-author-avatar" aria-hidden="true">{initials(friend.displayName)}</span>
           <div className="community-friend-meta">
             <h3>{friend.displayName}</h3>
-            <small>{friend.totalXp.toLocaleString()} XP · {friend.streakDays}-day streak</small>
+            <small>{friend.streakDays}-day streak</small>
+            <p>{friend.totalXp.toLocaleString()} XP. Ready for a camera quest together.</p>
           </div>
+          <button type="button" className="community-chat-action" aria-label={`Message ${friend.displayName}`} onClick={playTap}>
+            <Icon name="scroll" />
+          </button>
           {friend.status === 'pending' && (
             <span className="post-rank-badge">{friend.direction === 'outgoing' ? 'Requested' : 'Pending'}</span>
           )}
         </article>
       ))}
+      </div>
     </div>
   );
 }

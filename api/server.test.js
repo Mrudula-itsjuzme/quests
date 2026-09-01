@@ -149,12 +149,16 @@ describe('Quest API', () => {
     expect(response.body.error.code).toBe('invalid_request');
   });
 
-  it('generates exactly one daily quest per category and replays idempotently', async () => {
+  it('generates ten daily quests and replays idempotently', async () => {
     const app = createApp({ config: testConfig() });
     const first = await request(app).post('/api/v1/quests/generate-daily').set('Idempotency-Key', 'daily-request-001').send({});
     const replay = await request(app).post('/api/v1/quests/generate-daily').set('Idempotency-Key', 'daily-request-001').send({});
     expect(first.status).toBe(201);
-    expect(first.body.map((item) => item.category).sort()).toEqual(['Body', 'Discovery', 'Mind']);
+    expect(first.body).toHaveLength(10);
+    expect(first.body.filter((item) => item.category === 'Discovery')).toHaveLength(4);
+    expect(first.body.filter((item) => item.category === 'Body')).toHaveLength(3);
+    expect(first.body.filter((item) => item.category === 'Mind')).toHaveLength(3);
+    expect(new Set(first.body.map((item) => item.definitionId)).size).toBe(10);
     expect(replay.body).toEqual(first.body);
   });
 
@@ -183,8 +187,9 @@ describe('Quest API', () => {
     expect(written.body.completed).toBe(true);
     expect(photographed.body.completed).toBe(true);
     expect(weekly.body).toEqual(expect.objectContaining({ cadence: 'weekly', verificationType: 'PHOTO' }));
-    expect(me.body).toEqual(expect.objectContaining({ id: expect.any(String), totalXp: expect.any(Number), level: expect.any(Number), streakDays: 1 }));
-    expect(active.body).toEqual([expect.objectContaining({ cadence: 'weekly' })]);
+    expect(me.body).toEqual(expect.objectContaining({ id: expect.any(String), totalXp: expect.any(Number), level: expect.any(Number), streakDays: 0 }));
+    expect(active.body).toEqual(expect.arrayContaining([expect.objectContaining({ cadence: 'weekly' })]));
+    expect(active.body.filter((item) => item.cadence === 'daily')).toHaveLength(7);
     expect(history.body).toHaveLength(3);
     expect(definitions.body.every((item) => item.cadence === 'daily')).toBe(true);
   });
@@ -235,7 +240,7 @@ describe('Quest API', () => {
     const quests = await request(app).get('/api/quests?account=another-user');
     const collectibles = await request(app).get('/api/collectibles?account=another-user');
     expect(quests.status).toBe(200);
-    expect(quests.body).toHaveLength(5);
+    expect(quests.body).toHaveLength(12);
     expect(quests.body[0]).toEqual(expect.objectContaining({ id: expect.any(String), title: expect.any(String), xp: expect.any(Number), proofType: expect.any(String) }));
     expect(collectibles.body).toEqual([]);
   });

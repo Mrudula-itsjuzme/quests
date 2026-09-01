@@ -86,11 +86,29 @@ describe('configuration security', () => {
       NODE_ENV: 'production',
       DEV_AUTH_ENABLED: 'false',
       DEV_ALLOW_LEGACY_MUTATIONS: 'false',
-      PROVIDER_MODE: 'disabled',
+      PROVIDER_MODE: 'http',
+      QUEST_AI_VERIFY_URL: 'https://verify.example.com/v1/proofs',
+      QUEST_PROVIDER_SECRET: 'provider-secret-value',
       DATABASE_URL: 'postgres://quest_app:secret@db:5432/quests',
       OIDC_ISSUER: 'http://identity.example.com',
       OIDC_AUDIENCE: 'habbit-api',
     })).toThrow(/HTTPS OIDC/);
+  });
+
+  it('rejects disabled or local proof providers in production', () => {
+    const base = {
+      NODE_ENV: 'production',
+      DEV_AUTH_ENABLED: 'false',
+      DEV_ALLOW_LEGACY_MUTATIONS: 'false',
+      DATABASE_URL: 'postgres://quest_app:secret@db:5432/quests',
+      OIDC_ISSUER: 'https://identity.example.com',
+      OIDC_AUDIENCE: 'habbit-api',
+      CORS_ORIGINS: 'https://app.example.com',
+      VISION_PROVIDER: 'openrouter',
+      OPENROUTER_API_KEY: 'openrouter-key-value',
+    };
+    expect(() => loadConfig({ ...base, PROVIDER_MODE: 'disabled' })).toThrow(/PROVIDER_MODE=http/);
+    expect(() => loadConfig({ ...base, PROVIDER_MODE: 'local' })).toThrow(/PROVIDER_MODE=http/);
   });
 
   it('rejects wildcard production CORS and public proxy trust', () => {
@@ -98,7 +116,9 @@ describe('configuration security', () => {
       NODE_ENV: 'production',
       DEV_AUTH_ENABLED: 'false',
       DEV_ALLOW_LEGACY_MUTATIONS: 'false',
-      PROVIDER_MODE: 'disabled',
+      PROVIDER_MODE: 'http',
+      QUEST_AI_VERIFY_URL: 'https://verify.example.com/v1/proofs',
+      QUEST_PROVIDER_SECRET: 'provider-secret-value',
       DATABASE_URL: 'postgres://quest_app:secret@db:5432/quests',
       OIDC_ISSUER: 'https://identity.example.com',
       OIDC_AUDIENCE: 'habbit-api',

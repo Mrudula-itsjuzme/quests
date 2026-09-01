@@ -348,6 +348,7 @@ export function createApp(options = {}) {
     sendCachedJson(req, res, await repository.listWorldHotspots({ category, bbox, limit: req.query.limit }));
   }));
   app.get('/api/v1/community/posts', asyncRoute(async (req, res) => {
+    if (config.NODE_ENV === 'development') await repository.seedDemoSocial?.(req.identity.id);
     const scope = req.query.scope == null || req.query.scope === '' ? 'public' : parse(communityScopeSchema, req.query.scope);
     res.json(redactPublicPayload(await repository.listCommunityPosts(req.identity.id, { scope, limit: req.query.limit })));
   }));
@@ -408,7 +409,10 @@ export function createApp(options = {}) {
     if (config.NODE_ENV !== 'test') auditLog('community_post_reported', { requestId: req.id, userId: req.identity.id, postId: report.postId, reason: report.reason });
     res.status(report.created ? 201 : 200).json(redactPublicPayload(report));
   }));
-  app.get('/api/v1/community/friends', asyncRoute(async (req, res) => res.json(redactPublicPayload(await repository.listFriends(req.identity.id)))));
+  app.get('/api/v1/community/friends', asyncRoute(async (req, res) => {
+    if (config.NODE_ENV === 'development') await repository.seedDemoSocial?.(req.identity.id);
+    res.json(redactPublicPayload(await repository.listFriends(req.identity.id)));
+  }));
   app.get('/api/v1/feed', asyncRoute(async (req, res) => res.json(redactPublicPayload(await engine.feed(req.identity)))));
   app.get('/api/v1/leaderboard', asyncRoute(async (req, res) => res.json(redactPublicPayload(await engine.leaderboard(req.identity)))));
   app.get('/api/v1/rewards', asyncRoute(async (req, res) => res.json(await engine.rewards(req.identity))));

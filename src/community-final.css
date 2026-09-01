@@ -1,0 +1,801 @@
+@media (max-width: 780px) {
+  html[data-wild-theme='dark'] body .app-shell .guild-page {
+    min-height: 100dvh !important;
+    padding: calc(20px + env(safe-area-inset-top, 0px)) 20px calc(140px + env(safe-area-inset-bottom, 0px)) !important;
+    background:
+      radial-gradient(circle at 18% 4%, rgba(38, 222, 142, 0.18), transparent 34%),
+      radial-gradient(circle at 92% 0%, rgba(255, 123, 112, 0.14), transparent 32%),
+      linear-gradient(180deg, #07130f 0%, #030605 76%) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-tabs-bar {
+    position: sticky !important;
+    top: calc(12px + env(safe-area-inset-top, 0px)) !important;
+    z-index: 20 !important;
+    width: min(100%, 294px) !important;
+    height: 48px !important;
+    margin: 0 0 18px !important;
+    padding: 4px !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 4px !important;
+    border-radius: 999px !important;
+    background: rgba(3, 5, 4, 0.78) !important;
+    border: 1px solid rgba(255, 248, 235, 0.15) !important;
+    box-shadow: 0 16px 44px rgba(0, 0, 0, 0.34) !important;
+    backdrop-filter: blur(22px) saturate(1.2) !important;
+    -webkit-backdrop-filter: blur(22px) saturate(1.2) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-tab-btn,
+  html[data-wild-theme='dark'] body .app-shell .community-tabs-bar button {
+    min-width: 0 !important;
+    min-height: 40px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 999px !important;
+    background: transparent !important;
+    color: rgba(255, 248, 235, 0.58) !important;
+    font-size: 0.86rem !important;
+    font-weight: 850 !important;
+    letter-spacing: 0 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-tab-btn.active,
+  html[data-wild-theme='dark'] body .app-shell .community-tabs-bar button.active {
+    background: #ff7b70 !important;
+    color: #130b08 !important;
+    box-shadow: 0 10px 24px rgba(255, 123, 112, 0.25) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-chats-screen {
+    display: grid !important;
+    gap: 12px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-chats-hero {
+    display: flex !important;
+    align-items: flex-end !important;
+    justify-content: space-between !important;
+    gap: 18px !important;
+    min-height: 142px !important;
+    padding: 18px !important;
+    border-radius: 26px !important;
+    border: 1px solid rgba(255, 248, 235, 0.13) !important;
+    background:
+      linear-gradient(90deg, rgba(5, 7, 6, 0.86), rgba(5, 7, 6, 0.2)),
+      url('/assets/verdant-explorer-banner.png') center / cover no-repeat !important;
+    box-shadow: 0 24px 58px rgba(0, 0, 0, 0.38) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-chats-kicker {
+    display: inline-flex !important;
+    width: max-content !important;
+    margin-bottom: 8px !important;
+    padding: 6px 9px !important;
+    border-radius: 999px !important;
+    background: rgba(255, 248, 235, 0.13) !important;
+    color: rgba(255, 248, 235, 0.78) !important;
+    font-size: 0.68rem !important;
+    font-weight: 850 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-chats-hero h2 {
+    max-width: 9ch !important;
+    margin: 0 !important;
+    color: #fff8eb !important;
+    font-size: clamp(1.9rem, 8vw, 2.65rem) !important;
+    line-height: 0.94 !important;
+    letter-spacing: 0 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-chats-hero p {
+    max-width: 17rem !important;
+    margin: 8px 0 0 !important;
+    color: rgba(255, 248, 235, 0.76) !important;
+    font-size: 0.9rem !important;
+    line-height: 1.28 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-hero-camera {
+    flex: 0 0 50px !important;
+    width: 50px !important;
+    height: 50px !important;
+    display: grid !important;
+    place-items: center !important;
+    border: 0 !important;
+    border-radius: 20px !important;
+    background: #2ed68b !important;
+    color: #04100a !important;
+    box-shadow: 0 18px 34px rgba(46, 214, 139, 0.28) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-story-rail {
+    display: flex !important;
+    gap: 12px !important;
+    overflow-x: auto !important;
+    padding: 0 0 2px !important;
+    scrollbar-width: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-story-rail::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-story-chip {
+    flex: 0 0 66px !important;
+    display: grid !important;
+    justify-items: center !important;
+    gap: 8px !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: rgba(255, 248, 235, 0.82) !important;
+    font-size: 0.78rem !important;
+    font-weight: 800 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-story-chip .post-author-avatar {
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 18px !important;
+    background: linear-gradient(135deg, #2ed68b, #ff7b70) !important;
+    color: #04100a !important;
+    box-shadow: 0 0 0 4px rgba(255, 248, 235, 0.1), 0 16px 32px rgba(0, 0, 0, 0.35) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-friend-list {
+    display: grid !important;
+    gap: 10px !important;
+    margin-top: 0 !important;
+    padding-bottom: 96px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-friend-card {
+    display: grid !important;
+    grid-template-columns: 46px 1fr 38px !important;
+    align-items: center !important;
+    gap: 10px !important;
+    min-height: 74px !important;
+    padding: 11px 12px !important;
+    border-radius: 21px !important;
+    background: rgba(255, 248, 235, 0.075) !important;
+    border: 1px solid rgba(255, 248, 235, 0.12) !important;
+    color: #fff8eb !important;
+    box-shadow: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-friend-card > .post-author-avatar {
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 16px !important;
+    background: rgba(46, 214, 139, 0.16) !important;
+    color: #8ff0bd !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-friend-meta h3 {
+    margin: 0 !important;
+    color: #fff8eb !important;
+    font-size: 0.96rem !important;
+    line-height: 1.12 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-friend-meta small {
+    display: block !important;
+    margin-top: 3px !important;
+    color: rgba(255, 248, 235, 0.55) !important;
+    font-size: 0.72rem !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-friend-meta p {
+    margin: 4px 0 0 !important;
+    color: rgba(255, 248, 235, 0.74) !important;
+    font-size: 0.78rem !important;
+    line-height: 1.2 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-chat-action {
+    width: 38px !important;
+    height: 38px !important;
+    display: grid !important;
+    place-items: center !important;
+    border: 1px solid rgba(255, 248, 235, 0.12) !important;
+    border-radius: 16px !important;
+    background: rgba(255, 248, 235, 0.09) !important;
+    color: #fff8eb !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-fab-btn {
+    right: 22px !important;
+    bottom: calc(94px + env(safe-area-inset-bottom, 0px)) !important;
+    width: 54px !important;
+    height: 54px !important;
+    border-radius: 20px !important;
+  }
+}
+
+@media (max-width: 780px) {
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-shell {
+    min-height: 100dvh !important;
+    padding: 32px 22px calc(128px + env(safe-area-inset-bottom, 0px)) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    scrollbar-width: none !important;
+    background:
+      radial-gradient(circle at 12% -10%, rgba(46, 214, 139, 0.2), transparent 32%),
+      radial-gradient(circle at 92% 2%, rgba(240, 206, 112, 0.12), transparent 30%),
+      linear-gradient(180deg, #10231b 0%, #030806 58%, #010302 100%) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-shell::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 14px !important;
+    height: auto !important;
+    min-height: 52px !important;
+    margin: 0 0 10px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-header h1 {
+    margin: 0 !important;
+    color: #fff8eb !important;
+    font-size: 2rem !important;
+    line-height: 1 !important;
+    font-weight: 900 !important;
+    letter-spacing: 0 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-icon-btn {
+    flex: 0 0 46px !important;
+    width: 46px !important;
+    height: 46px !important;
+    display: grid !important;
+    place-items: center !important;
+    border-radius: 18px !important;
+    border: 1px solid rgba(255, 248, 235, 0.14) !important;
+    background: rgba(255, 248, 235, 0.08) !important;
+    color: #fff8eb !important;
+    box-shadow: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-stats {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    margin: 0 0 16px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-stat {
+    min-width: 0 !important;
+    min-height: 58px !important;
+    display: grid !important;
+    align-content: center !important;
+    justify-items: center !important;
+    gap: 4px !important;
+    padding: 10px 6px !important;
+    border-radius: 20px !important;
+    border: 1px solid rgba(255, 248, 235, 0.12) !important;
+    background: rgba(255, 248, 235, 0.075) !important;
+    color: rgba(255, 248, 235, 0.72) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-stat strong {
+    color: #35e596 !important;
+    font-size: 1.05rem !important;
+    line-height: 1 !important;
+    font-weight: 900 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-stat.gold strong {
+    color: #f0ce70 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-stat small {
+    color: rgba(255, 248, 235, 0.58) !important;
+    font-size: 0.62rem !important;
+    line-height: 1 !important;
+    font-weight: 850 !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-tabs {
+    display: flex !important;
+    gap: 9px !important;
+    width: calc(100% + 44px) !important;
+    margin: 0 -22px 22px !important;
+    padding: 0 22px 2px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scrollbar-width: none !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-tabs::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-tab {
+    flex: 0 0 auto !important;
+    min-width: 76px !important;
+    height: 46px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    padding: 0 15px !important;
+    border-radius: 18px !important;
+    border: 1px solid rgba(255, 248, 235, 0.12) !important;
+    background: rgba(255, 248, 235, 0.08) !important;
+    color: rgba(255, 248, 235, 0.74) !important;
+    font-size: 0.82rem !important;
+    font-weight: 850 !important;
+    box-shadow: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-tab.active {
+    border-color: rgba(46, 214, 139, 0.48) !important;
+    background: linear-gradient(135deg, #35e596, #f0ce70) !important;
+    color: #04100a !important;
+    box-shadow: 0 14px 30px rgba(46, 214, 139, 0.18) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .library-start-card {
+    display: grid !important;
+    grid-template-rows: minmax(190px, 1fr) auto !important;
+    height: min(430px, calc(100dvh - 338px)) !important;
+    min-height: 360px !important;
+    margin: 6px 0 0 !important;
+    border-radius: 30px !important;
+    border: 1px solid rgba(255, 248, 235, 0.13) !important;
+    overflow: hidden !important;
+    background: rgba(3, 8, 6, 0.94) !important;
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.36) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .library-start-card .library-empty-media {
+    position: relative !important;
+    min-height: 190px !important;
+    background:
+      linear-gradient(180deg, rgba(3, 8, 6, 0) 0%, rgba(3, 8, 6, 0.08) 66%, rgba(3, 8, 6, 0.2) 100%),
+      url('/assets/verdant-explorer-banner.png') center / cover no-repeat !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .library-start-card .gallery-empty-icon {
+    position: absolute !important;
+    left: 20px !important;
+    bottom: 18px !important;
+    width: 48px !important;
+    height: 48px !important;
+    display: grid !important;
+    place-items: center !important;
+    border-radius: 18px !important;
+    background: rgba(3, 8, 6, 0.62) !important;
+    border: 1px solid rgba(255, 248, 235, 0.12) !important;
+    color: #fff8eb !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .library-start-panel {
+    display: grid !important;
+    gap: 9px !important;
+    padding: 18px 20px 20px !important;
+    background:
+      linear-gradient(135deg, rgba(255, 248, 235, 0.08), rgba(255, 248, 235, 0.03)),
+      rgba(3, 8, 6, 0.98) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .library-start-panel .library-loop-kicker {
+    width: max-content !important;
+    padding: 7px 10px !important;
+    border-radius: 999px !important;
+    background: rgba(255, 248, 235, 0.12) !important;
+    color: rgba(255, 248, 235, 0.72) !important;
+    font-size: 0.68rem !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .library-start-panel h3 {
+    margin: 0 !important;
+    color: #fff8eb !important;
+    font-size: 2rem !important;
+    line-height: 0.96 !important;
+    font-weight: 900 !important;
+    letter-spacing: 0 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .library-start-panel p {
+    margin: 0 !important;
+    color: rgba(255, 248, 235, 0.66) !important;
+    font-size: 0.86rem !important;
+    line-height: 1.25 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .library-start-cta {
+    width: 100% !important;
+    height: 50px !important;
+    margin: 4px 0 0 !important;
+    border: 0 !important;
+    border-radius: 18px !important;
+    background: linear-gradient(135deg, #35e596, #f0ce70) !important;
+    color: #04100a !important;
+    font-size: 0.96rem !important;
+    font-weight: 900 !important;
+    box-shadow: 0 18px 34px rgba(46, 214, 139, 0.2) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-empty.library-loop-empty {
+    min-height: 0 !important;
+    display: grid !important;
+    grid-template-rows: minmax(0, 1fr) auto !important;
+    gap: 0 !important;
+    margin: 6px 0 0 !important;
+    padding: 0 !important;
+    height: min(430px, calc(100dvh - 338px)) !important;
+    aspect-ratio: auto !important;
+    border-radius: 30px !important;
+    border: 1px solid rgba(255, 248, 235, 0.13) !important;
+    color: #fff8eb !important;
+    text-align: left !important;
+    overflow: hidden !important;
+    position: relative !important;
+    background: rgba(4, 9, 7, 0.92) !important;
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.36) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-empty.library-loop-empty::before {
+    display: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .library-empty-media {
+    position: relative !important;
+    min-height: 0 !important;
+    background:
+      linear-gradient(180deg, rgba(3, 8, 6, 0.02), rgba(3, 8, 6, 0.12)),
+      url('/assets/verdant-explorer-banner.png') center / cover no-repeat !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-empty-icon {
+    width: 48px !important;
+    height: 48px !important;
+    display: grid !important;
+    place-items: center !important;
+    border-radius: 18px !important;
+    background: rgba(255, 248, 235, 0.11) !important;
+    color: #fff8eb !important;
+    font-size: 1rem !important;
+    box-shadow: none !important;
+    position: absolute !important;
+    left: 20px !important;
+    bottom: 18px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .library-empty-panel {
+    display: grid !important;
+    gap: 9px !important;
+    padding: 17px 20px 20px !important;
+    border-top: 1px solid rgba(255, 248, 235, 0.1) !important;
+    background:
+      linear-gradient(135deg, rgba(255, 248, 235, 0.08), rgba(255, 248, 235, 0.03)),
+      rgba(3, 8, 6, 0.96) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .library-loop-kicker {
+    width: max-content !important;
+    padding: 7px 10px !important;
+    border-radius: 999px !important;
+    background: rgba(255, 248, 235, 0.12) !important;
+    color: rgba(255, 248, 235, 0.72) !important;
+    font-size: 0.68rem !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+    position: static !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-empty h3 {
+    max-width: 9ch !important;
+    margin: 0 !important;
+    color: #fff8eb !important;
+    font-size: 2.05rem !important;
+    line-height: 0.96 !important;
+    font-weight: 900 !important;
+    letter-spacing: 0 !important;
+    min-height: 0 !important;
+    z-index: 2 !important;
+    position: static !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-empty p {
+    display: block !important;
+    max-width: 18rem !important;
+    margin: 0 !important;
+    color: rgba(255, 248, 235, 0.66) !important;
+    font-size: 0.84rem !important;
+    line-height: 1.25 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .library-loop-rail {
+    display: none !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    margin: 4px 0 0 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .library-loop-rail span {
+    min-width: 0 !important;
+    min-height: 46px !important;
+    display: grid !important;
+    align-content: center !important;
+    justify-items: center !important;
+    gap: 3px !important;
+    border-radius: 18px !important;
+    border: 1px solid rgba(255, 248, 235, 0.12) !important;
+    background: rgba(255, 248, 235, 0.1) !important;
+    color: rgba(255, 248, 235, 0.72) !important;
+    font-size: 0.68rem !important;
+    font-weight: 850 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .library-loop-rail strong {
+    color: #fff8eb !important;
+    font-size: 0.96rem !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-empty-cta {
+    position: static !important;
+    inset: auto !important;
+    z-index: 2 !important;
+    transform: none !important;
+    width: 100% !important;
+    height: 50px !important;
+    margin: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: 0 !important;
+    border-radius: 18px !important;
+    background: linear-gradient(135deg, #35e596, #f0ce70) !important;
+    color: #04100a !important;
+    font-size: 0.96rem !important;
+    font-weight: 900 !important;
+    box-shadow: 0 18px 34px rgba(46, 214, 139, 0.2) !important;
+  }
+}
+
+@media (max-width: 780px) {
+  html[data-wild-theme='dark'] body .app-shell .quest-user-topbar {
+    background: rgba(3, 5, 4, 0.82) !important;
+    border: 1px solid rgba(255, 248, 235, 0.15) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-coin-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    min-width: 112px !important;
+    min-height: 42px !important;
+    padding: 0 16px !important;
+    border-radius: 999px !important;
+    background: rgba(255, 248, 235, 0.13) !important;
+    border: 1px solid rgba(255, 248, 235, 0.2) !important;
+    color: #fff8eb !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-coin-badge svg {
+    width: 15px !important;
+    height: 15px !important;
+    color: #f0ce70 !important;
+    opacity: 1 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-coin-badge span {
+    color: #fff8eb !important;
+    opacity: 1 !important;
+    font-size: 1rem !important;
+    font-weight: 850 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-cadence-tabs {
+    background: rgba(255, 248, 235, 0.08) !important;
+    border: 1px solid rgba(255, 248, 235, 0.14) !important;
+    border-radius: 999px !important;
+    padding: 4px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-cadence-btn {
+    color: rgba(255, 248, 235, 0.66) !important;
+    border-radius: 999px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-cadence-btn.active {
+    background: #ff7b70 !important;
+    color: #0f0907 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-cadence-btn.active span {
+    color: #0f0907 !important;
+    opacity: 1 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quests-shell {
+    min-height: 100dvh !important;
+    padding: 36px 24px calc(132px + env(safe-area-inset-bottom, 0px)) !important;
+    overflow-y: auto !important;
+    scrollbar-width: none !important;
+    background:
+      radial-gradient(circle at 18% -8%, rgba(46, 214, 139, 0.2), transparent 30%),
+      radial-gradient(circle at 88% 0%, rgba(255, 123, 112, 0.16), transparent 34%),
+      linear-gradient(180deg, #12281f 0%, #030806 56%, #010302 100%) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quests-shell::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quests-card-list {
+    display: grid !important;
+    gap: 10px !important;
+    padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-item-card {
+    min-height: 78px !important;
+    border-radius: 24px !important;
+    border: 1px solid rgba(255, 248, 235, 0.12) !important;
+    background:
+      linear-gradient(135deg, rgba(255, 248, 235, 0.12), rgba(255, 248, 235, 0.045)),
+      rgba(6, 12, 9, 0.84) !important;
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.28) !important;
+    overflow: hidden !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-card-content {
+    display: grid !important;
+    grid-template-columns: 48px minmax(0, 1fr) 54px !important;
+    align-items: center !important;
+    gap: 12px !important;
+    min-height: 78px !important;
+    padding: 12px !important;
+    color: #fff8eb !important;
+    background: transparent !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-row-thumb {
+    width: 48px !important;
+    height: 48px !important;
+    display: grid !important;
+    place-items: center !important;
+    border-radius: 18px !important;
+    border: 1px solid rgba(255, 248, 235, 0.14) !important;
+    background: linear-gradient(145deg, rgba(46, 214, 139, 0.34), rgba(3, 8, 6, 0.92)) !important;
+    color: #8ff0bd !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-row-thumb.category-discovery {
+    background: linear-gradient(145deg, rgba(240, 206, 112, 0.42), rgba(3, 8, 6, 0.92)) !important;
+    color: #f0ce70 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-row-thumb.category-body {
+    background: linear-gradient(145deg, rgba(46, 214, 139, 0.38), rgba(3, 8, 6, 0.92)) !important;
+    color: #7ff3bb !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-row-thumb.category-mind {
+    background: linear-gradient(145deg, rgba(113, 154, 255, 0.38), rgba(3, 8, 6, 0.92)) !important;
+    color: #adc2ff !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-row-main {
+    min-width: 0 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-item-title {
+    margin: 0 0 7px !important;
+    color: #fff8eb !important;
+    font-size: 0.94rem !important;
+    line-height: 1.12 !important;
+    font-weight: 850 !important;
+    letter-spacing: 0 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-row-meta {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    min-width: 0 !important;
+    margin-bottom: 7px !important;
+    overflow: hidden !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-progress-num {
+    color: rgba(255, 248, 235, 0.68) !important;
+    font-size: 0.72rem !important;
+    font-weight: 760 !important;
+    white-space: nowrap !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-reward-pill {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    height: 22px !important;
+    padding: 0 8px !important;
+    border-radius: 999px !important;
+    background: rgba(255, 248, 235, 0.1) !important;
+    color: #fff8eb !important;
+    font-size: 0.68rem !important;
+    font-weight: 850 !important;
+    white-space: nowrap !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-reward-pill.is-coin {
+    color: #f0ce70 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .progress-wrap.compact,
+  html[data-wild-theme='dark'] body .app-shell .quest-row-main .progress-wrap {
+    width: 100% !important;
+    height: 4px !important;
+    margin: 0 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .progress-bar {
+    height: 4px !important;
+    border: 0 !important;
+    border-radius: 999px !important;
+    background: rgba(255, 248, 235, 0.12) !important;
+    overflow: hidden !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .progress-bar > div {
+    height: 100% !important;
+    border-radius: inherit !important;
+    background: linear-gradient(90deg, #2ed68b, #f0ce70) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-claim-btn {
+    width: 54px !important;
+    height: 46px !important;
+    min-width: 54px !important;
+    border: 1px solid rgba(255, 248, 235, 0.12) !important;
+    border-radius: 18px !important;
+    background: rgba(255, 248, 235, 0.09) !important;
+    color: #fff8eb !important;
+    font-size: 0.78rem !important;
+    font-weight: 850 !important;
+    box-shadow: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-auto-loader {
+    color: #fff8eb !important;
+    background: rgba(3, 8, 6, 0.74) !important;
+    border: 1px solid rgba(255, 248, 235, 0.14) !important;
+  }
+}

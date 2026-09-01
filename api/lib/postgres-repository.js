@@ -103,7 +103,7 @@ export class PostgresQuestRepository {
         `INSERT INTO quest_assignments
           (id, user_id, definition_id, title, description, category, rarity, cadence, verification_type, subject_tag, target_value, unit, xp_reward, instructions, period_key, status, progress_value, assigned_at, starts_at, expires_at)
          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,'active',0,$16,$17,$18)
-         ON CONFLICT (user_id, cadence, period_key, category) DO UPDATE SET updated_at = quest_assignments.updated_at
+         ON CONFLICT (user_id, cadence, period_key, definition_id) DO UPDATE SET updated_at = quest_assignments.updated_at
          RETURNING *`,
         [randomUUID(), item.userId, item.definitionId, item.title, item.description, item.category, item.rarity, item.cadence, item.verificationType, item.subjectTag, item.targetValue, item.unit, item.xpReward, JSON.stringify(item.instructions), item.periodKey, item.assignedAt, item.startsAt, item.expiresAt],
       );
@@ -155,7 +155,7 @@ export class PostgresQuestRepository {
           `INSERT INTO quest_assignments
             (id, user_id, definition_id, title, description, category, rarity, cadence, verification_type, subject_tag, target_value, unit, xp_reward, instructions, period_key, status, progress_value, assigned_at, starts_at, expires_at)
            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,'active',0,$16,$17,$18)
-           ON CONFLICT (user_id, cadence, period_key, category) DO UPDATE SET updated_at = quest_assignments.updated_at
+           ON CONFLICT (user_id, cadence, period_key, definition_id) DO UPDATE SET updated_at = quest_assignments.updated_at
            RETURNING *`,
           [randomUUID(), userId, item.definitionId, item.title, item.description, item.category, item.rarity, cadence, item.verificationType, item.subjectTag, item.targetValue, item.unit, item.xpReward, JSON.stringify(item.instructions), periodKey, item.assignedAt, item.startsAt, item.expiresAt],
         );
@@ -287,7 +287,7 @@ export class PostgresQuestRepository {
             SET total_assignments = EXCLUDED.total_assignments,
                 completed_assignments = EXCLUDED.completed_assignments,
                 updated_at = NOW()`, [userId, dailyPeriodKey, count.rows[0].total, count.rows[0].completed]);
-        if (count.rows[0].total === 3 && count.rows[0].completed === 3) {
+        if (count.rows[0].total > 0 && count.rows[0].completed === count.rows[0].total) {
           const bonusKey = `${userId}:${dailyPeriodKey}:bonus`;
           const bonus = await client.query(`INSERT INTO quest_xp_ledger (id, ledger_key, user_id, amount, reason) VALUES ($1,$2,$3,150,'daily_bonus') ON CONFLICT (ledger_key) DO NOTHING RETURNING amount`, [randomUUID(), bonusKey, userId]);
           bonusXp = Number(bonus.rows[0]?.amount || 0);
