@@ -7,6 +7,30 @@ on:
     branches: [ main, master ]
 
 jobs:
+  preflight:
+    name: Preflight (main only)
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: npm ci
+      - name: Run production env checks
+        env:
+          # These should be set as repo secrets in production
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          PROVIDER_MODE: ${{ secrets.PROVIDER_MODE }}
+          QUEST_AI_VERIFY_URL: ${{ secrets.QUEST_AI_VERIFY_URL }}
+          QUEST_PROVIDER_SECRET: ${{ secrets.QUEST_PROVIDER_SECRET }}
+          OIDC_ISSUER: ${{ secrets.OIDC_ISSUER }}
+          OIDC_JWKS_URL: ${{ secrets.OIDC_JWKS_URL }}
+          CORS_ORIGINS: ${{ secrets.CORS_ORIGINS }}
+        run: node scripts/check_prod_env.js
+
   test:
     name: Run unit and server tests
     runs-on: ubuntu-latest
