@@ -5,7 +5,38 @@ import { useMe, useCaptures } from '../quests/queries';
 import { coinBalance } from '../../lib/playerEconomy';
 import { playTap } from '../../lib/useSoundEffects';
 import { SettingsModal } from '../../components/SettingsModal';
-import { Icon } from '../../components/Icon';
+
+// Convert XP to star rank (S=5★, A=4★, B=3★, C=2★, D=1★)
+function rarityToStars(grade) {
+  return { S: 5, A: 4, B: 3, C: 2, D: 1 }[grade?.toUpperCase()] ?? 0;
+}
+
+const RANK_COLORS = {
+  S: { bg: 'rgba(240,196,107,0.15)', border: 'rgba(240,196,107,0.5)', text: '#f0c46b', label: 'Legendary' },
+  A: { bg: 'rgba(167,139,250,0.15)', border: 'rgba(167,139,250,0.5)', text: '#a78bfa', label: 'Epic' },
+  B: { bg: 'rgba(96,165,250,0.15)',  border: 'rgba(96,165,250,0.5)',  text: '#60a5fa', label: 'Rare' },
+  C: { bg: 'rgba(52,211,153,0.15)', border: 'rgba(52,211,153,0.4)',  text: '#34d399', label: 'Uncommon' },
+  D: { bg: 'rgba(255,255,255,0.05)', border: 'rgba(255,255,255,0.1)', text: 'rgba(233,241,236,0.55)', label: 'Common' },
+};
+
+function RankBadge({ grade }) {
+  const cfg = RANK_COLORS[grade?.toUpperCase()] || RANK_COLORS.D;
+  const stars = rarityToStars(grade);
+  return (
+    <span className="profile-rank-badge" style={{ background: cfg.bg, borderColor: cfg.border, color: cfg.text }}>
+      {grade?.toUpperCase()}
+      {stars > 0 && <span aria-label={`${stars} stars`}> {'★'.repeat(stars)}</span>}
+    </span>
+  );
+}
+
+const MENU_ITEMS = [
+  { id: 'rewards', label: 'Rewards & Store', icon: 'chest', to: '/app/rewards', emoji: '🎁' },
+  { id: 'collection', label: 'My Library', icon: 'book', to: '/app/collection', emoji: '📚' },
+  { id: 'community', label: 'Community', icon: 'shield', to: '/app/community', emoji: '🤝' },
+  { id: 'settings', label: 'Settings', icon: 'gear', emoji: '⚙️' },
+  { id: 'help', label: 'Help & Support', icon: 'feather', emoji: '💬' },
+];
 
 export function ProfilePage() {
   const { data: me } = useMe();
@@ -13,127 +44,149 @@ export function ProfilePage() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [notice, setNotice] = useState('');
 
-  // Discoveries are captures, not quest collectible unlocks — the Collection
-  // page counts the same source, so the two screens agree.
-  const discoveries = (captures || []).filter((card) => card.status !== 'rejected');
+  const discoveries = (captures || []).filter((c) => c.status !== 'rejected');
   const totalCount = discoveries.length;
-  const sRankCount = discoveries.filter((card) => (card.rarityGrade || card.rarityTier) === 'S').length;
   const totalXp = me?.totalXp || 0;
   const totalCoins = coinBalance(me);
   const currentStreak = me?.streakDays || 0;
+  const level = me?.level || 1;
+  const progress = me?.progressToNextLevel || 0;
 
-  const unavailable = (message) => { playTap(); setNotice(message); };
+  const unavailable = (msg) => { playTap(); setNotice(msg); };
 
-  const MENU_ITEMS = [
-    { id: 'rewards', label: 'Rewards & Store', icon: 'chest', to: '/app/rewards' },
-    { id: 'collection', label: 'Library', icon: 'book', to: '/app/collection' },
-    { id: 'community', label: 'Community', icon: 'shield', to: '/app/community' },
-    { id: 'settings', label: 'Settings', icon: 'gear', action: () => setSettingsOpen(true) },
-    { id: 'help', label: 'Help & Support', icon: 'feather', action: () => unavailable('Help & support is not connected yet.') },
-  ];
+  const handleMenuItem = (item) => {
+    playTap();
+    if (item.id === 'settings') setSettingsOpen(true);
+    else if (item.id === 'help') unavailable('Help & support coming soon.');
+  };
+
+  // Rank breakdown from captures
+  const rankBreakdown = ['S', 'A', 'B', 'C', 'D'].map((grade) => ({
+    grade,
+    count: discoveries.filter((c) => (c.rarityGrade || c.rarityTier || 'D').toUpperCase() === grade).length,
+  }));
 
   return (
-    <main className="profile-shell">
+    <main className="profile-shell-v2">
       <h1 className="sr-only">Profile</h1>
-      {/* Top Explorer Hero Card */}
+
+      {/* ── Hero banner ── */}
       <motion.div
-        className="profile-hero-card"
-        initial={{ opacity: 0, y: 10 }}
+        className="profile-hero-v2"
+        initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.25 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 26 }}
       >
-        {/* Avatar uploads aren't supported server-side, so the ring shows the
-            player's initials rather than a stock bird standing in as them. */}
-        <div className="profile-avatar-ring">
-          <span className="profile-avatar-initials" aria-hidden="true">
-            {(me?.displayName || 'Adventurer').split(/\s+/).slice(0, 2).map((part) => part[0]?.toUpperCase() || '').join('')}
-          </span>
+        {/* Avatar */}
+        <div className="profile-avatar-v2" aria-hidden="true">
+          {(me?.displayName || 'A').charAt(0).toUpperCase()}
         </div>
-        <div className="profile-identity-info">
+
+        <div className="profile-identity-v2">
           <h2>{me?.displayName || 'Adventurer'}</h2>
           {me && (
-            <>
-              <div className="profile-identity-title">{me.tierLabel || `${me.tier} Explorer`}</div>
-              <div className="profile-xp-row">
-                <span>Level {me.level}</span>
-                <span>{me.xpIntoLevel} / {me.xpForCurrentLevel} XP</span>
-              </div>
-              <div className="profile-xp-bar-wrap">
+            <div className="profile-tier-row">
+              <span className="profile-tier-label">{me.tierLabel || `${me.tier} Explorer`}</span>
+              <span className="profile-level-pill">Lv. {level}</span>
+            </div>
+          )}
+          {/* XP bar */}
+          {me && (
+            <div className="profile-xp-wrap">
+              <div className="profile-xp-track">
                 <motion.div
-                  className="profile-xp-bar-fill"
-                  initial={{ width: '0%' }}
-                  animate={{ width: `${Math.min(100, Math.round((me.progressToNextLevel || 0) * 100))}%` }}
+                  className="profile-xp-fill"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${Math.round((progress || 0) * 100)}%` }}
                   transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
                 />
               </div>
-            </>
+              <span className="profile-xp-label">{me.xpIntoLevel} / {me.xpForCurrentLevel} XP</span>
+            </div>
           )}
+        </div>
+
+        <div className="profile-streak-badge" title={`${currentStreak}-day streak`}>
+          🔥 {currentStreak}
         </div>
       </motion.div>
 
-      {/* 3-Block Stat Summary Grid */}
-      <div className="profile-stats-grid">
-        <div className="profile-stat-card">
-          <small>Discoveries</small>
+      {/* ── Stat grid ── */}
+      <motion.div
+        className="profile-stat-grid-v2"
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.08, type: 'spring', stiffness: 300, damping: 26 }}
+      >
+        <div className="profile-stat-v2">
           <strong>{totalCount}</strong>
+          <small>Discoveries</small>
         </div>
-        <div className="profile-stat-card">
-          <small>S Rank</small>
-          <strong>{sRankCount}</strong>
-        </div>
-        <div className="profile-stat-card">
-          <small>XP Earned</small>
+        <div className="profile-stat-v2 gold">
           <strong>{totalXp.toLocaleString()}</strong>
+          <small>Total XP</small>
         </div>
-      </div>
+        <div className="profile-stat-v2">
+          <strong>{totalCoins.toLocaleString()}</strong>
+          <small>Coins</small>
+        </div>
+      </motion.div>
 
-      {/* Menu List with Chevrons */}
-      <div className="profile-menu-list">
-        {MENU_ITEMS.map((item) => {
-          const content = (
-            <>
-              <span className="profile-menu-label">
-                <Icon name={item.icon} />
-                <span>{item.label}</span>
-              </span>
-              <span className="profile-menu-chevron" aria-hidden="true">›</span>
-            </>
-          );
-          return item.to ? (
-            <Link key={item.id} to={item.to} className="profile-menu-item" onClick={playTap}>
-              {content}
+      {/* ── Rank breakdown ── */}
+      {totalCount > 0 && (
+        <motion.div
+          className="profile-rank-section"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.16 }}
+        >
+          <p className="profile-section-eyebrow">Rarity Breakdown</p>
+          <div className="profile-rank-row">
+            {rankBreakdown.map(({ grade, count }) => (
+              count > 0 ? (
+                <div key={grade} className="profile-rank-cell">
+                  <RankBadge grade={grade} />
+                  <span className="profile-rank-count">×{count}</span>
+                </div>
+              ) : null
+            ))}
+            {rankBreakdown.every(({ count }) => count === 0) && (
+              <p className="profile-rank-empty">Capture nature to earn rank badges</p>
+            )}
+          </div>
+        </motion.div>
+      )}
+
+      {/* ── Menu list ── */}
+      <motion.div
+        className="profile-menu-v2"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.22 }}
+      >
+        {MENU_ITEMS.map((item) =>
+          item.to ? (
+            <Link key={item.id} to={item.to} className="profile-menu-row-v2" onClick={playTap}>
+              <span className="profile-menu-emoji">{item.emoji}</span>
+              <span className="profile-menu-row-label">{item.label}</span>
+              <span className="profile-menu-chevron">›</span>
             </Link>
           ) : (
-            <div
+            <button
               key={item.id}
-              className="profile-menu-item"
-              role="button"
-              tabIndex={0}
-              onClick={item.action}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') item.action(); }}
+              type="button"
+              className="profile-menu-row-v2"
+              onClick={() => handleMenuItem(item)}
             >
-              {content}
-            </div>
-          );
-        })}
-      </div>
+              <span className="profile-menu-emoji">{item.emoji}</span>
+              <span className="profile-menu-row-label">{item.label}</span>
+              <span className="profile-menu-chevron">›</span>
+            </button>
+          )
+        )}
+      </motion.div>
 
-      {/* Coins & streak — both server-authoritative values. */}
-      <div className="profile-store-card">
-        <h4>Coins &amp; Streak</h4>
-        <div className="profile-coin-row">
-          <Icon name="coin" />
-          <strong>{totalCoins.toLocaleString()}</strong>
-        </div>
-        <div className="profile-streak-row">
-          <div>
-            <small>Current streak</small>
-            <strong>{currentStreak} day{currentStreak === 1 ? '' : 's'}</strong>
-          </div>
-          <Icon name="flame" />
-        </div>
-      </div>
-
+      {/* Toast */}
       <AnimatePresence>
         {notice && (
           <motion.div
@@ -142,10 +195,9 @@ export function ProfilePage() {
             initial={{ opacity: 0, y: 20, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
-            transition={{ type: 'spring', stiffness: 450, damping: 25 }}
           >
             <span>{notice}</span>
-            <button type="button" onClick={() => { playTap(); setNotice(''); }} aria-label="Dismiss notification">×</button>
+            <button type="button" onClick={() => { playTap(); setNotice(''); }} aria-label="Dismiss">×</button>
           </motion.div>
         )}
       </AnimatePresence>
@@ -154,5 +206,3 @@ export function ProfilePage() {
     </main>
   );
 }
-
-

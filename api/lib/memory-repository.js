@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { progressionEngine } from './progression-engine.js';
 import { demoWorldHotspots } from './world-hotspots.js';
+import { speciesCatalog } from './species-catalog.js';
 
 export class MemoryQuestRepository {
   constructor({ definitions = [] } = {}) {
@@ -29,6 +30,7 @@ export class MemoryQuestRepository {
     this.communityReports = [];
     this.friendships = [];
     this.accountDeletionRequests = [];
+    this.demoSocialSeededFor = new Set();
   }
 
   // --- World ---
@@ -70,6 +72,7 @@ export class MemoryQuestRepository {
   }
 
   async listCommunityPosts(viewerId, { scope = 'public', limit = 50 } = {}) {
+    await this.seedDemoSocial(viewerId);
     let posts = this.communityPosts.filter((item) => item.visibility === 'public');
     if (scope === 'friends') {
       const friendIds = new Set((await this.listFriends(viewerId)).filter((f) => f.status === 'accepted').map((f) => f.userId));
@@ -161,6 +164,7 @@ export class MemoryQuestRepository {
   }
 
   async listFriends(userId) {
+    await this.seedDemoSocial(userId);
     return this.friendships
       .filter((item) => (item.requesterId === userId || item.addresseeId === userId) && item.status !== 'blocked')
       .map((item) => {
@@ -177,8 +181,228 @@ export class MemoryQuestRepository {
       });
   }
 
+  async seedDemoSocial(viewerId) {
+    if (!viewerId || this.demoSocialSeededFor.has(viewerId)) return;
+    this.demoSocialSeededFor.add(viewerId);
+
+    // Four fake friends at distinct XP tiers:
+    // Arjun  = beginner  (~760 XP, level ~3, Scout)
+    // Mira   = mid-tier  (~2840 XP, level ~11, Guardian)
+    // Ravi   = mid-high  (~4100 XP, level ~16, Pathfinder)
+    // Nila   = veteran   (~5320 XP, level ~21, Mythril Knight)
+    const demoUsers = [
+      { id: '10000000-0000-4000-8000-000000000101', displayName: 'Mira Fern',  timezone: 'Asia/Kolkata', totalXp: 2840, streakDays: 12, primaryPath: 'Nature Observation', onboardingCompletedAt: '2026-08-30T00:00:00.000Z' },
+      { id: '10000000-0000-4000-8000-000000000102', displayName: 'Arjun Vale', timezone: 'Asia/Kolkata', totalXp: 760,  streakDays: 4,  primaryPath: 'Outdoor Movement',    onboardingCompletedAt: '2026-08-30T00:00:00.000Z' },
+      { id: '10000000-0000-4000-8000-000000000103', displayName: 'Nila Skies', timezone: 'Asia/Kolkata', totalXp: 5320, streakDays: 21, primaryPath: 'Discovery',           onboardingCompletedAt: '2026-08-30T00:00:00.000Z' },
+      { id: '10000000-0000-4000-8000-000000000104', displayName: 'Ravi Moss',  timezone: 'Asia/Kolkata', totalXp: 4100, streakDays: 17, primaryPath: 'Body',                 onboardingCompletedAt: '2026-08-30T00:00:00.000Z' },
+    ];
+
+    for (const user of demoUsers) {
+      if (!this.users.has(user.id)) this.users.set(user.id, { ...user });
+    }
+
+    for (const user of demoUsers) {
+      const exists = this.friendships.some((item) =>
+        item.status === 'accepted'
+        && ((item.requesterId === viewerId && item.addresseeId === user.id)
+          || (item.requesterId === user.id && item.addresseeId === viewerId)));
+      if (!exists) {
+        this.friendships.push({
+          requesterId: user.id,
+          addresseeId: viewerId,
+          status: 'accepted',
+          createdAt: new Date('2026-08-30T11:00:00.000Z').toISOString(),
+          updatedAt: new Date('2026-08-30T11:00:00.000Z').toISOString(),
+        });
+      }
+    }
+
+    const speciesById = new Map(speciesCatalog.map((item) => [item.id, item]));
+
+    // 7 demo captured cards (4 original + 3 new for Ravi, Mira, Nila)
+    const demoCards = [
+      // --- original 4 ---
+      {
+        id: '20000000-0000-4000-8000-000000000201',
+        userId: demoUsers[0].id,
+        speciesId: 'water-waterfall',
+        cardTitle: 'Hidden Monsoon Falls',
+        itemName: 'Forest Waterfall',
+        caption: 'Mira found a waterfall trail after the rain cleared.',
+        placeLabel: 'Cubbon morning loop',
+        gps: { lat: 12.9763, lng: 77.5929 },
+        rarityGrade: 'A', rarityStars: 4, xpAwarded: 140, coinsAwarded: 12,
+        capturedAt: '2026-08-30T09:20:00.000Z',
+      },
+      {
+        id: '20000000-0000-4000-8000-000000000202',
+        userId: demoUsers[1].id,
+        speciesId: 'sky-indian-roller',
+        cardTitle: 'Blue Flash Over Lalbagh',
+        itemName: 'Indian Roller',
+        caption: 'Arjun caught the blue wing flash right before sunset.',
+        placeLabel: 'Lalbagh Botanical Garden',
+        gps: { lat: 12.9507, lng: 77.5848 },
+        rarityGrade: 'B', rarityStars: 3, xpAwarded: 90, coinsAwarded: 8,
+        capturedAt: '2026-08-30T12:45:00.000Z',
+      },
+      {
+        id: '20000000-0000-4000-8000-000000000203',
+        userId: demoUsers[2].id,
+        speciesId: 'fire-rainbow',
+        cardTitle: 'Double Rainbow Break',
+        itemName: 'Rainbow',
+        caption: 'Nila found a rare sky card on the walk home.',
+        placeLabel: 'Nandi Hills outlook',
+        gps: { lat: 13.3702, lng: 77.6835 },
+        rarityGrade: 'S', rarityStars: 5, xpAwarded: 260, coinsAwarded: 20,
+        capturedAt: '2026-08-30T15:10:00.000Z',
+      },
+      {
+        id: '20000000-0000-4000-8000-000000000204',
+        userId: demoUsers[0].id,
+        speciesId: 'earth-domestic-cat',
+        cardTitle: 'Canteen Cat Watch',
+        itemName: 'Domestic Cat',
+        caption: 'Daily quest proof: a very serious snack inspector.',
+        placeLabel: 'Neighborhood lane',
+        gps: { lat: 12.9718, lng: 77.6412 },
+        rarityGrade: 'D', rarityStars: 1, xpAwarded: 35, coinsAwarded: 2,
+        capturedAt: '2026-08-30T16:30:00.000Z',
+      },
+      // --- 3 new test cards ---
+      {
+        id: '20000000-0000-4000-8000-000000000205',
+        userId: demoUsers[3].id, // Ravi
+        speciesId: 'sky-barn-owl',
+        cardTitle: 'Ghost of the Banyan',
+        itemName: 'Barn Owl',
+        caption: "Spotted this guy at 11 PM perched on the old banyan. Absolutely silent.",
+        placeLabel: 'Hesaraghatta Lake bund',
+        gps: { lat: 13.1314, lng: 77.4649 },
+        rarityGrade: 'B', rarityStars: 3, xpAwarded: 95, coinsAwarded: 9,
+        capturedAt: '2026-08-31T23:05:00.000Z',
+      },
+      {
+        id: '20000000-0000-4000-8000-000000000206',
+        userId: demoUsers[0].id, // Mira
+        speciesId: 'grass-lotus',
+        cardTitle: 'Pink Dawn Lotus',
+        itemName: 'Sacred Lotus',
+        caption: 'Early morning light hit the lotus pond perfectly. Worth the 5 AM alarm.',
+        placeLabel: 'Ulsoor Lake, East',
+        gps: { lat: 12.9802, lng: 77.6172 },
+        rarityGrade: 'A', rarityStars: 4, xpAwarded: 130, coinsAwarded: 11,
+        capturedAt: '2026-09-01T05:14:00.000Z',
+      },
+      {
+        id: '20000000-0000-4000-8000-000000000207',
+        userId: demoUsers[2].id, // Nila
+        speciesId: 'sky-milky-way',
+        cardTitle: 'Core of the Galaxy',
+        itemName: 'Milky Way',
+        caption: 'No light pollution, no moon. Just the galaxy. S-rank confirmed.',
+        placeLabel: 'Skandagiri summit trail',
+        gps: { lat: 13.6164, lng: 77.6974 },
+        rarityGrade: 'S', rarityStars: 5, xpAwarded: 280, coinsAwarded: 22,
+        capturedAt: '2026-09-01T01:33:00.000Z',
+      },
+    ];
+
+    for (const card of demoCards) {
+      if (this.capturedCards.some((item) => item.id === card.id)) continue;
+      const species = speciesById.get(card.speciesId);
+      this.capturedCards.push({
+        ...card,
+        captureId: null,
+        category: species?.category || 'Discovery',
+        rarityTier: card.rarityGrade,
+        rarityScore: card.rarityStars / 5,
+        description: species?.encyclopedia || '',
+        imageRef: '/assets/verdant-explorer-banner.png',
+        status: 'final',
+        humanVerified: true,
+        antiCheatVerdict: 'demo_seed',
+        confidence: 0.93,
+        serverReceivedAt: card.capturedAt,
+        rarityWeightSetVersion: 1,
+        rarityFactorBreakdown: {},
+      });
+    }
+
+    // 7 community posts (4 original + 3 new)
+    const demoPosts = [
+      { id: '30000000-0000-4000-8000-000000000301', userId: demoUsers[0].id, cardId: demoCards[0].id, caption: demoCards[0].caption, hashtags: ['#waterfall', '#afterrain'],    placeLabel: demoCards[0].placeLabel, gps: demoCards[0].gps, createdAt: '2026-08-30T09:24:00.000Z' },
+      { id: '30000000-0000-4000-8000-000000000302', userId: demoUsers[1].id, cardId: demoCards[1].id, caption: demoCards[1].caption, hashtags: ['#birding', '#lalbagh'],        placeLabel: demoCards[1].placeLabel, gps: demoCards[1].gps, createdAt: '2026-08-30T12:49:00.000Z' },
+      { id: '30000000-0000-4000-8000-000000000303', userId: demoUsers[2].id, cardId: demoCards[2].id, caption: demoCards[2].caption, hashtags: ['#rare', '#skycard'],           placeLabel: demoCards[2].placeLabel, gps: demoCards[2].gps, createdAt: '2026-08-30T15:16:00.000Z' },
+      { id: '30000000-0000-4000-8000-000000000304', userId: demoUsers[0].id, cardId: demoCards[3].id, caption: demoCards[3].caption, hashtags: ['#dailyquest', '#citynature'],  placeLabel: demoCards[3].placeLabel, gps: demoCards[3].gps, createdAt: '2026-08-30T16:34:00.000Z' },
+      // new
+      { id: '30000000-0000-4000-8000-000000000305', userId: demoUsers[3].id, cardId: demoCards[4].id, caption: demoCards[4].caption, hashtags: ['#owl', '#nightwalk', '#rare'], placeLabel: demoCards[4].placeLabel, gps: demoCards[4].gps, createdAt: '2026-08-31T23:09:00.000Z' },
+      { id: '30000000-0000-4000-8000-000000000306', userId: demoUsers[0].id, cardId: demoCards[5].id, caption: demoCards[5].caption, hashtags: ['#lotus', '#earlybird'],        placeLabel: demoCards[5].placeLabel, gps: demoCards[5].gps, createdAt: '2026-09-01T05:18:00.000Z' },
+      { id: '30000000-0000-4000-8000-000000000307', userId: demoUsers[2].id, cardId: demoCards[6].id, caption: demoCards[6].caption, hashtags: ['#milkyway', '#astrophoto'],    placeLabel: demoCards[6].placeLabel, gps: demoCards[6].gps, createdAt: '2026-09-01T01:37:00.000Z' },
+    ];
+
+    for (const post of demoPosts) {
+      if (this.communityPosts.some((item) => item.id === post.id)) continue;
+      this.communityPosts.push({ ...post, visibility: 'public' });
+    }
+    this.communityPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    // Viewer liked: original waterfall, Nila's rainbow, Nila's Milky Way, Ravi's owl
+    const likedPostIds = [demoPosts[0].id, demoPosts[2].id, demoPosts[4].id, demoPosts[6].id];
+    for (const postId of likedPostIds) {
+      if (!this.communityLikes.some((like) => like.postId === postId && like.userId === viewerId)) {
+        this.communityLikes.push({ postId, userId: viewerId });
+      }
+    }
+
+    // Cross-likes between fake users to make counts look realistic
+    const crossLikes = [
+      { postId: demoPosts[0].id, userId: demoUsers[3].id },  // Ravi likes Mira's waterfall
+      { postId: demoPosts[2].id, userId: demoUsers[0].id },  // Mira likes Nila's rainbow
+      { postId: demoPosts[2].id, userId: demoUsers[1].id },  // Arjun likes Nila's rainbow
+      { postId: demoPosts[4].id, userId: demoUsers[0].id },  // Mira likes Ravi's owl
+      { postId: demoPosts[5].id, userId: demoUsers[3].id },  // Ravi likes Mira's lotus
+      { postId: demoPosts[6].id, userId: demoUsers[1].id },  // Arjun likes Nila's Milky Way
+      { postId: demoPosts[6].id, userId: demoUsers[3].id },  // Ravi likes Nila's Milky Way
+    ];
+    for (const like of crossLikes) {
+      if (!this.communityLikes.some((l) => l.postId === like.postId && l.userId === like.userId)) {
+        this.communityLikes.push(like);
+      }
+    }
+
+    const comments = [
+      // original
+      { id: '40000000-0000-4000-8000-000000000401', postId: demoPosts[0].id, userId: demoUsers[2].id, displayName: demoUsers[2].displayName, body: 'This should be a weekly hotspot.', createdAt: '2026-08-30T09:31:00.000Z' },
+      { id: '40000000-0000-4000-8000-000000000402', postId: demoPosts[1].id, userId: demoUsers[0].id, displayName: demoUsers[0].displayName, body: 'Adding this to tomorrow morning route.', createdAt: '2026-08-30T12:57:00.000Z' },
+      { id: '40000000-0000-4000-8000-000000000403', postId: demoPosts[2].id, userId: demoUsers[1].id, displayName: demoUsers[1].displayName, body: 'S rank deserved.', createdAt: '2026-08-30T15:21:00.000Z' },
+      // new
+      { id: '40000000-0000-4000-8000-000000000404', postId: demoPosts[4].id, userId: demoUsers[2].id, displayName: demoUsers[2].displayName, body: 'Barn Owl at night is so hard to get. Nice B-rank!', createdAt: '2026-08-31T23:19:00.000Z' },
+      { id: '40000000-0000-4000-8000-000000000405', postId: demoPosts[4].id, userId: demoUsers[0].id, displayName: demoUsers[0].displayName, body: 'Which trail? Adding to my night walk list 🦉', createdAt: '2026-08-31T23:44:00.000Z' },
+      { id: '40000000-0000-4000-8000-000000000406', postId: demoPosts[5].id, userId: demoUsers[3].id, displayName: demoUsers[3].displayName, body: 'That golden hour light is perfect. A-rank well earned.', createdAt: '2026-09-01T05:29:00.000Z' },
+      { id: '40000000-0000-4000-8000-000000000407', postId: demoPosts[6].id, userId: demoUsers[0].id, displayName: demoUsers[0].displayName, body: 'I need to plan a Skandagiri night hike. This is stunning.', createdAt: '2026-09-01T01:52:00.000Z' },
+      { id: '40000000-0000-4000-8000-000000000408', postId: demoPosts[6].id, userId: demoUsers[3].id, displayName: demoUsers[3].displayName, body: 'Core of the galaxy 🌌 Nila you never miss.', createdAt: '2026-09-01T02:08:00.000Z' },
+    ];
+    for (const comment of comments) {
+      if (!this.communityComments.some((item) => item.id === comment.id)) this.communityComments.push(comment);
+    }
+  }
+
   async ensureUser(user) {
-    const current = this.users.get(user.id) || { id: user.id, displayName: user.displayName || 'Adventurer', timezone: user.timezone || 'UTC', totalXp: 0, streakDays: 0, lastStreakPeriod: null, primaryPath: null, reminderTime: null, motionPreference: 'system', onboardingCompletedAt: null, tourVersionSeen: 0 };
+    const current = this.users.get(user.id) || {
+      id: user.id,
+      displayName: user.displayName || 'Adventurer',
+      timezone: user.timezone || 'UTC',
+      totalXp: Math.max(0, Number(user.totalXp) || 0),
+      streakDays: Math.max(0, Number(user.streakDays) || 0),
+      lastStreakPeriod: user.lastStreakPeriod || null,
+      primaryPath: user.primaryPath || null,
+      reminderTime: null,
+      motionPreference: 'system',
+      onboardingCompletedAt: user.onboardingCompletedAt || null,
+      tourVersionSeen: 0,
+    };
     this.users.set(user.id, { ...current, ...user, totalXp: current.totalXp, streakDays: current.streakDays, lastStreakPeriod: current.lastStreakPeriod });
     return { ...this.users.get(user.id) };
   }

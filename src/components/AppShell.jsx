@@ -10,12 +10,16 @@ import { JournalTransition } from './motion/JournalTransition';
 import { WaxSealCeremony } from './motion/WaxSealCeremony';
 import { Icon } from './Icon';
 import { playHover, playLevelUp, playTap } from '../lib/useSoundEffects';
-import { PullToRefresh } from './motion/PullToRefresh';
 import { MagneticButton } from './motion/MagneticButton';
 import { WorldAmbience } from './WorldAmbience';
-import { DawnMoment, useDawnMoment } from './DawnMoment';
 import { useAndroidBackButton } from '../lib/useAndroidBackButton';
 import { DesktopSidebar } from './DesktopSidebar';
+
+const THEME_KEY = 'wild-realm-theme';
+
+function readThemePreference() {
+  return 'dark';
+}
 
 // Capture is the core verb of the product, so the shell owns the flow: the
 // centre FAB must work from every destination, not only the world route.
@@ -30,7 +34,7 @@ const navItemsLeft = [
 ];
 
 const navItemsRight = [
-  { to: '/app/collection', label: 'Library', icon: 'book' },
+  { to: '/app/library', label: 'Library', icon: 'book' },
   { to: '/app/community', label: 'Community', icon: 'user' },
 ];
 
@@ -42,8 +46,8 @@ export function AppShell() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const [levelUp, setLevelUp] = useState(null);
-  const [captureOpen, setCaptureOpen] = useState(false);
-  const { visible: dawnVisible, dismiss: dismissDawn } = useDawnMoment();
+  const [captureOpen, setCaptureOpen] = useState(() => location.pathname === '/app');
+  const [themeMode] = useState(readThemePreference);
 
   const isWorldRoute = location.pathname === '/app';
 
@@ -85,6 +89,16 @@ export function AppShell() {
   }, [captureOpen, logoutDialogOpen, settingsOpen, notice, levelUp]);
 
   useAndroidBackButton(handleHardwareBack);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    root.dataset.wildTheme = themeMode;
+    try {
+      localStorage.setItem(THEME_KEY, 'dark');
+    } catch {
+      // Ignore storage failures; the visual state still applies for this run.
+    }
+  }, [themeMode]);
 
   return (
     <div className="app-shell">
@@ -153,13 +167,11 @@ export function AppShell() {
 
       {/* Main scrolling content area */}
       <div className={`mobile-content-area ${isWorldRoute ? 'mobile-content-area-world' : ''}`}>
-        <PullToRefresh>
-          <AnimatePresence mode="wait">
-            <JournalTransition key={location.pathname} className="route-stage">
-              <Outlet />
-            </JournalTransition>
-          </AnimatePresence>
-        </PullToRefresh>
+        <AnimatePresence mode="wait">
+          <JournalTransition key={location.pathname} className="route-stage">
+            <Outlet />
+          </JournalTransition>
+        </AnimatePresence>
 
         {/* Floating Glass Bottom HUD Dock */}
         <nav className="mobile-bottom-dock" aria-label="Primary Navigation">
@@ -245,10 +257,6 @@ export function AppShell() {
         {levelUp && (
           <WaxSealCeremony levelUp={levelUp} onComplete={() => setLevelUp(null)} />
         )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {dawnVisible && <DawnMoment onDismiss={dismissDawn} />}
       </AnimatePresence>
 
       <AnimatePresence>

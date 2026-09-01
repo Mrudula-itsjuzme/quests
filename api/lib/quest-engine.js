@@ -306,18 +306,34 @@ export class QuestEngine {
   async runScheduler() {
     const users = await this.repository.listUsers();
     const results = [];
-    for (const user of users) {
-      const identity = { id: user.id, displayName: user.displayName, timezone: user.timezone };
-      const daily = await this.generateDaily(identity, `scheduler-daily-${dailyPeriod(this.providers.clock.now(), user.timezone).key}`);
-      const weekly = await this.generateWeekly(identity, `scheduler-weekly-${cadenceStrategies.weekly.period(this.providers.clock.now(), user).key}`);
-      const monthly = await this.generateMonthly(identity, `scheduler-monthly-${cadenceStrategies.monthly.period(this.providers.clock.now(), user).key}`);
-      const periodKey = dailyPeriod(this.providers.clock.now(), user.timezone).key;
-      const notification = await this.repository.createNotification({ userId: user.id, kind: 'quests_ready', dedupeKey: `quests-ready:${periodKey}`, title: 'New quests are ready', body: 'Your adventure awaits.' });
-      await this.providers.notifications?.send({ userId: user.id, notification }).catch(() => {});
-      results.push({ userId: user.id, daily: daily.length, weekly: Boolean(weekly), monthly: Boolean(monthly) });
+    const errors = [];
+
+    // Fan out in batches of 20 concurrent users — keeps DB pool (max 10 conns)
+    // from being overwhelmed while still finishing ~100 users in ~5 batches
+    // rather than a 300+ sequential-await serial chain.
+    const BATCH_SIZE = 20;
+    for (let i = 0; i < users.length; i += BATCH_SIZE) {
+      const batch = users.slice(i, i + BATCH_SIZE);
+      const outcomes = await Promise.allSettled(batch.map(async (user) => {
+        const identity = { id: user.id, displayName: user.displayName, timezone: user.timezone };
+        const now = this.providers.clock.now();
+        const daily = await this.generateDaily(identity, `scheduler-daily-${dailyPeriod(now, user.timezone).key}`);
+        const weekly = await this.generateWeekly(identity, `scheduler-weekly-${cadenceStrategies.weekly.period(now, user).key}`);
+        const monthly = await this.generateMonthly(identity, `scheduler-monthly-${cadenceStrategies.monthly.period(now, user).key}`);
+        const periodKey = dailyPeriod(now, user.timezone).key;
+        const notification = await this.repository.createNotification({ userId: user.id, kind: 'quests_ready', dedupeKey: `quests-ready:${periodKey}`, title: 'New quests are ready', body: 'Your adventure awaits.' });
+        await this.providers.notifications?.send({ userId: user.id, notification }).catch(() => {});
+        return { userId: user.id, daily: daily.length, weekly: Boolean(weekly), monthly: Boolean(monthly) };
+      }));
+      for (const outcome of outcomes) {
+        if (outcome.status === 'fulfilled') results.push(outcome.value);
+        else errors.push({ reason: outcome.reason?.message || String(outcome.reason) });
+      }
     }
-    return { processedUsers: results.length, users: results };
+
+    return { processedUsers: results.length, users: results, errors };
   }
+
 
   async requireActive(userId, assignmentId) {
     const assignment = await this.repository.getAssignment(userId, assignmentId);

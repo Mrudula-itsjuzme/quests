@@ -5,7 +5,6 @@ import { CaptureImage } from '../../components/CaptureImage';
 
 function useCountUp(targetValue, duration = 1200) {
   const [count, setCount] = useState(0);
-
   useEffect(() => {
     if (!targetValue) return;
     let startTimestamp = null;
@@ -14,50 +13,77 @@ function useCountUp(targetValue, duration = 1200) {
       const progress = Math.min((timestamp - startTimestamp) / duration, 1);
       const easeOutQuad = 1 - (1 - progress) * (1 - progress);
       setCount(Math.floor(easeOutQuad * targetValue));
-      if (progress < 1) {
-        window.requestAnimationFrame(step);
-      }
+      if (progress < 1) window.requestAnimationFrame(step);
     };
     window.requestAnimationFrame(step);
   }, [targetValue, duration]);
-
   return count;
 }
 
 const GRADE_LABELS = { S: 'LEGENDARY', A: 'EPIC', B: 'RARE', C: 'UNCOMMON', D: 'COMMON' };
 
-export function DiscoveryCard({ card, species, imageUrl, isNew = false, onAddToLibrary, onShare, onClose, layoutIdPrefix = '' }) {
+// Share card to Instagram/other platforms via Web Share API
+async function shareToInstagram(cardTitle, gradeLabel, xp, imageUrl) {
+  const shareText = `🌿 I found a ${gradeLabel} "${cardTitle}" in Wild Realm! +${xp} XP\n#WildRealm #NatureExplorer`;
+  if (navigator.share && imageUrl) {
+    try {
+      // Fetch image as blob for sharing
+      const res = await fetch(imageUrl);
+      const blob = await res.blob();
+      const file = new File([blob], 'discovery.jpg', { type: blob.type });
+      await navigator.share({ title: cardTitle, text: shareText, files: [file] });
+      return 'shared';
+    } catch (err) {
+      if (err.name === 'AbortError') return 'cancelled';
+    }
+  }
+  // Fallback: copy text
+  try { await navigator.clipboard.writeText(shareText); return 'copied'; } catch { /* ignore */ }
+  return 'fallback';
+}
+
+export function DiscoveryCard({
+  card,
+  species,
+  imageUrl,
+  imageFilter,
+  isNew = false,
+  titleValue,
+  onTitleChange,
+  notesValue = '',
+  onNotesChange,
+  onAddToLibrary,
+  onShare,
+  onClose,
+  layoutIdPrefix = '',
+}) {
   const cardData = card || {};
-  // The species catalog carries the scientific name and element; the capture
-  // row only stores the species id, so resolve rather than guess.
   const speciesEntry = species?.find((entry) => entry.id === cardData.speciesId) || null;
   const itemName = cardData.itemName || cardData.cardTitle || cardData.title || 'Discovered Creature';
   const scientificName = cardData.scientificName || speciesEntry?.scientificName || null;
-  // The API serves photography as `imageRef` (a same-origin media URL); raw
-  // base64 is no longer part of the contract. `imageUrl` stays as an explicit
-  // caller override for the freshly-captured frame before the card is saved.
   const cardImg = cardData.imageRef || imageUrl || cardData.imageUrl || null;
   const rawXp = cardData.xpAwarded ?? cardData.xpEarned ?? cardData.xp ?? 0;
   const animatedXp = useCountUp(rawXp, 1000);
   const coins = cardData.coinsAwarded ?? 0;
   const confidence = cardData.confidence != null ? Math.round(cardData.confidence * 100) : null;
   const locationText = cardData.location
-    || (cardData.gps ? `${cardData.gps.lat?.toFixed(2)}°, ${cardData.gps.lng?.toFixed(2)}°` : null);
-  // rarityGrade is the S–D grade from the rarity engine; rarityTier is the
-  // legacy Bronze/Silver label kept for older collectibles.
+    || (cardData.gps ? `${cardData.gps.lat?.toFixed(4)}°N, ${cardData.gps.lng?.toFixed(4)}°E` : null);
   const rarityTier = (cardData.rarityGrade || cardData.rarityTier || cardData.rarity || 'D').toUpperCase();
   const gradeLabel = GRADE_LABELS[rarityTier] || rarityTier;
   const stars = cardData.rarityStars ?? null;
   const elementCategory = cardData.element || speciesEntry?.element || cardData.category || null;
-  const capturedAtDate = cardData.capturedAt ? new Date(cardData.capturedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  const aiCaption = cardData.description || speciesEntry?.encyclopedia || speciesEntry?.summary || null;
+  const capturedAtDate = cardData.capturedAt
+    ? new Date(cardData.capturedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+    : new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
   const cardId = cardData.assetId || cardData.id || 'new';
+  const [shareNotice, setShareNotice] = useState('');
 
-  // 3D Tilt interaction logic
+  // 3D tilt
   const cardRef = useRef(null);
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-
   const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [10, -10]), { stiffness: 300, damping: 20 });
   const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-10, 10]), { stiffness: 300, damping: 20 });
   const glareX = useTransform(x, [-0.5, 0.5], ['0%', '100%']);
@@ -66,17 +92,16 @@ export function DiscoveryCard({ card, species, imageUrl, isNew = false, onAddToL
   const handlePointerMove = (e) => {
     if (!cardRef.current) return;
     const rect = cardRef.current.getBoundingClientRect();
-    const width = rect.width;
-    const height = rect.height;
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
-    x.set(mouseX / width - 0.5);
-    y.set(mouseY / height - 0.5);
+    x.set((e.clientX - rect.left) / rect.width - 0.5);
+    y.set((e.clientY - rect.top) / rect.height - 0.5);
   };
+  const handlePointerLeave = () => { x.set(0); y.set(0); };
 
-  const handlePointerLeave = () => {
-    x.set(0);
-    y.set(0);
+  const handleInstagramShare = async () => {
+    const result = await shareToInstagram(itemName, gradeLabel, rawXp, cardImg);
+    if (result === 'copied') setShareNotice('Caption copied! Open Instagram and paste it.');
+    else if (result === 'shared') setShareNotice('Shared! 🎉');
+    setTimeout(() => setShareNotice(''), 3000);
   };
 
   return (
@@ -87,46 +112,28 @@ export function DiscoveryCard({ card, species, imageUrl, isNew = false, onAddToL
       drag="y"
       dragConstraints={{ top: 0, bottom: 0 }}
       dragElastic={0.4}
-      onDragEnd={(e, info) => {
-        if (info.offset.y > 100) {
-          (onClose || onAddToLibrary)();
-        }
-      }}
-      style={{
-        rotateX,
-        rotateY,
-        transformStyle: 'preserve-3d',
-        perspective: 1000,
-        touchAction: 'none' // Better for drag physics
-      }}
+      onDragEnd={(e, info) => { if (info.offset.y > 100) (onClose || onAddToLibrary)(); }}
+      style={{ rotateX, rotateY, transformStyle: 'preserve-3d', perspective: 1000, touchAction: 'none' }}
       onPointerMove={handlePointerMove}
       onPointerLeave={handlePointerLeave}
     >
-      {/* Top Navigation Bar */}
+      {/* Top bar */}
       <div className="discovery-modal-header">
-        <button
-          type="button"
-          className="discovery-close-btn"
-          onClick={onClose || onAddToLibrary}
-          aria-label="Close discovery card"
-        >
+        <button type="button" className="discovery-close-btn" onClick={onClose || onAddToLibrary} aria-label="Close">
           <Icon name="plus" />
         </button>
-        {/* Only a just-minted card is a new discovery; the same component also
-            renders existing cards opened from the collection. */}
-        <span className="discovery-header-badge">{isNew ? 'New discovery' : gradeLabel}</span>
-        <button
-          type="button"
-          className="discovery-share-top-btn"
-          onClick={onShare}
-          aria-label="Share discovery"
-        >
+        <span className="discovery-header-badge">{isNew ? '✨ New Discovery' : gradeLabel}</span>
+        <button type="button" className="discovery-share-top-btn" onClick={() => onShare?.({ caption: notesValue.trim() || undefined })} aria-label="Share">
           <Icon name="feather" />
         </button>
       </div>
 
-      {/* Hero Image Frame with Holographic Overlay */}
-      <motion.div layoutId={layoutIdPrefix ? `${layoutIdPrefix}img-${cardId}` : undefined} className="discovery-hero-frame">
+      {/* ── 65% Hero Photo ── */}
+      <motion.div
+        layoutId={layoutIdPrefix ? `${layoutIdPrefix}img-${cardId}` : undefined}
+        className="discovery-hero-frame"
+        style={{ aspectRatio: '4/3' }}
+      >
         {cardImg ? (
           <CaptureImage
             imageRef={cardImg}
@@ -135,16 +142,15 @@ export function DiscoveryCard({ card, species, imageUrl, isNew = false, onAddToL
             className="discovery-hero-image"
             eager
             useAuth={cardImg?.includes('/captures/')}
+            style={{ filter: imageFilter && imageFilter !== 'none' ? imageFilter : undefined }}
           />
         ) : (
-          // No stored media for this capture: the rarity crest stands in
-          // rather than an unrelated stock animal.
           <div className={`discovery-hero-fallback rank-hex-${rarityTier.toLowerCase()}`} role="img" aria-label={`${itemName}, ${gradeLabel} rank`}>
             <span>{rarityTier}</span>
           </div>
         )}
 
-        {/* Dynamic Holographic Glare Layer */}
+        {/* Holographic glare for S/A rank */}
         {(rarityTier === 'S' || rarityTier === 'A') && (
           <motion.div
             className="discovery-holo-glare"
@@ -153,112 +159,146 @@ export function DiscoveryCard({ card, species, imageUrl, isNew = false, onAddToL
             }}
           />
         )}
+
+        {/* XP badge floating on photo */}
+        {rawXp > 0 && (
+          <motion.div
+            className="discovery-xp-badge"
+            initial={{ opacity: 0, scale: 0.6, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ delay: 0.4, type: 'spring', stiffness: 400, damping: 20 }}
+          >
+            +{animatedXp} XP
+          </motion.div>
+        )}
+
+        {/* Rarity badge on photo */}
+        <div className={`discovery-photo-rarity rank-hex-${rarityTier.toLowerCase()}`} aria-label={`${gradeLabel} rank`}>
+          {rarityTier}
+        </div>
       </motion.div>
 
-      {/* Creature Title, Elements & Gold Hex Rarity Badge */}
-      <div className="discovery-title-row">
-        <div className="discovery-title-info">
-          <h2>{itemName}</h2>
-          {scientificName && <em>{scientificName}</em>}
-          <div className="discovery-element-tags">
-            {elementCategory && <span className="discovery-tag">{elementCategory}</span>}
+      {/* ── Card body: 35% info ── */}
+      <div className="discovery-card-body">
+        {/* Title + stars */}
+        <div className="discovery-title-row">
+          <div className="discovery-title-info">
+            {isNew && onTitleChange ? (
+              <input
+                className="discovery-title-input"
+                value={titleValue ?? itemName}
+                onChange={(e) => onTitleChange(e.target.value)}
+                maxLength={80}
+                placeholder="Name this discovery…"
+                aria-label="Card name"
+              />
+            ) : (
+              <h2>{itemName}</h2>
+            )}
+            {scientificName && <em className="discovery-sci-name">{scientificName}</em>}
             {stars != null && (
-              <span className="discovery-tag discovery-stars" aria-label={`${stars} of 5 rarity stars`}>
+              <span className="discovery-stars" aria-label={`${stars} of 5 rarity stars`}>
                 {'★'.repeat(stars)}<i>{'★'.repeat(Math.max(0, 5 - stars))}</i>
               </span>
             )}
           </div>
         </div>
 
-        {/* Rarity Hexagon Badge */}
-        <motion.div 
-          className="discovery-hex-badge-wrap"
-          initial={{ opacity: 0, scale: 0.5, rotate: -30 }}
-          animate={{ opacity: 1, scale: 1, rotate: 0 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.15 }}
-        >
-          <div className={`discovery-hex-badge rank-hex-${rarityTier.toLowerCase()}`}>
-            <span>{rarityTier}</span>
+        {/* ── 3-section info area ── */}
+        <div className="discovery-info-sections">
+          {/* 1. AI Caption / Observed */}
+          <div className="discovery-info-section">
+            <span className="discovery-info-label">🤖 AI Observed</span>
+            <p className="discovery-info-value">
+              {aiCaption || `${gradeLabel} specimen identified with ${confidence != null ? confidence + '% confidence' : 'high confidence'}.`}
+            </p>
           </div>
-          <small>{gradeLabel}</small>
-        </motion.div>
-      </div>
 
-      {/* 4-Column Stat Grid */}
-      <motion.div 
-        className="discovery-stat-grid"
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, type: 'spring', stiffness: 400, damping: 30 }}
-      >
-        <div className={`discovery-stat-box ${rarityTier === 'S' ? 'gold' : ''}`}>
-          <small>RARITY</small>
-          <strong>{rarityTier} Rank</strong>
-          <span className="stat-sub font-gold">({gradeLabel})</span>
-        </div>
-        <div className="discovery-stat-box gold">
-          <small>XP EARNED</small>
-          <strong>+{animatedXp} XP</strong>
-          {coins > 0 && <span className="stat-sub font-gold">+{coins} coins</span>}
-        </div>
-        <div className="discovery-stat-box">
-          <small>AI CONFIDENCE</small>
-          <strong>{confidence != null ? `${confidence}%` : '—'}</strong>
-        </div>
-        {/* 'rejected' must never read as verified — each status gets its own chip. */}
-        <div className={`discovery-stat-box ${cardData.status === 'final' ? 'verified' : ''}`}>
-          <small>STATUS</small>
-          <strong className={`chip-${cardData.status === 'final' ? 'verified' : cardData.status === 'rejected' ? 'rejected' : 'pending'}`}>
-            {cardData.status === 'final' ? 'Verified' : cardData.status === 'rejected' ? 'Not verified' : 'Under review'}
-          </strong>
-        </div>
-      </motion.div>
+          {/* 2. Location */}
+          <div className="discovery-info-section">
+            <span className="discovery-info-label">📍 Location</span>
+            <p className="discovery-info-value">{locationText || 'Location not recorded'}</p>
+            <span className="discovery-info-date">{capturedAtDate}</span>
+          </div>
 
-      {/* Description Text — species encyclopedia entry, never invented copy. */}
-      {(cardData.description || speciesEntry?.encyclopedia) && (
-        <motion.p
-          className="discovery-description"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-        >
-          {cardData.description || speciesEntry.encyclopedia}
-        </motion.p>
-      )}
-
-      {/* Metadata Strip */}
-      <div className="discovery-env-strip-row">
-        <div className="env-box">
-          <small>LOCATION</small>
-          <span>{locationText || 'Not recorded'}</span>
+          {/* 3. Notes */}
+          <div className="discovery-info-section">
+            <span className="discovery-info-label">📝 Notes</span>
+            {isNew && onNotesChange ? (
+              <textarea
+                className="discovery-notes-input"
+                value={notesValue}
+                onChange={(e) => onNotesChange(e.target.value)}
+                maxLength={500}
+                rows={2}
+                placeholder="Mood, habitat, what you noticed…"
+              />
+            ) : (
+              <p className="discovery-info-value">{notesValue || cardData.notes || '—'}</p>
+            )}
+          </div>
         </div>
-        <div className="env-box">
-          <small>DATE &amp; TIME</small>
-          <span>{capturedAtDate}</span>
-        </div>
-      </div>
 
-      {/* Primary Action Buttons */}
-      <div className="discovery-action-btns">
-        <motion.button
-          type="button"
-          className="discovery-btn-glass"
-          onClick={onAddToLibrary}
-          whileTap={{ scale: 0.95 }}
-        >
-          <Icon name="book" /> {isNew ? 'Add to library' : 'Close'}
-        </motion.button>
-        <motion.button
-          type="button"
-          className="discovery-btn-primary"
-          onClick={onShare}
-          whileTap={{ scale: 0.95 }}
-        >
-          <Icon name="feather" /> Share
-        </motion.button>
+        {/* Element / category tags */}
+        {elementCategory && (
+          <div className="discovery-element-tags">
+            <span className="discovery-tag">{elementCategory}</span>
+            {confidence != null && <span className="discovery-tag">{confidence}% match</span>}
+          </div>
+        )}
+
+        {/* Coins stat (if any) */}
+        {coins > 0 && (
+          <div className="discovery-coins-row">
+            <Icon name="coin" /> <strong>+{coins} coins</strong>
+          </div>
+        )}
+
+        {/* Share notice */}
+        {shareNotice && (
+          <motion.p
+            className="discovery-share-notice"
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+          >
+            {shareNotice}
+          </motion.p>
+        )}
+
+        {/* Action buttons */}
+        <div className="discovery-action-btns">
+          <motion.button
+            type="button"
+            className="discovery-btn-glass"
+            onClick={onAddToLibrary}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Icon name="book" /> {isNew ? 'Save to Library' : 'Close'}
+          </motion.button>
+
+          {/* Community share */}
+          <motion.button
+            type="button"
+            className="discovery-btn-primary"
+            onClick={() => onShare?.({ caption: notesValue.trim() || undefined })}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Icon name="feather" /> Share
+          </motion.button>
+
+          {/* Instagram / native share */}
+          <motion.button
+            type="button"
+            className="discovery-btn-insta"
+            onClick={handleInstagramShare}
+            whileTap={{ scale: 0.95 }}
+            title="Share to Instagram / device"
+          >
+            📸
+          </motion.button>
+        </div>
       </div>
     </motion.div>
   );
 }
-
-

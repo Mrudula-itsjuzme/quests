@@ -13,7 +13,22 @@ export function createAuthMiddleware(config, options = {}) {
       const authorization = req.get('authorization') || '';
       if (!authorization.startsWith('Bearer ')) {
         if (config.DEV_AUTH_ENABLED && config.NODE_ENV !== 'production') {
-          req.identity = { id: config.DEV_USER_ID, displayName: 'Local Adventurer', timezone: config.DEV_USER_TIMEZONE };
+          const localIdentity = {
+            id: config.DEV_USER_ID,
+            displayName: 'Local Adventurer',
+            timezone: config.DEV_USER_TIMEZONE,
+          };
+          if (config.NODE_ENV === 'development') {
+            Object.assign(localIdentity, {
+              displayName: 'Demo Explorer',
+              totalXp: 1120,
+              streakDays: 5,
+              lastStreakPeriod: new Date().toISOString().slice(0, 10),
+              primaryPath: 'Discovery',
+              onboardingCompletedAt: '2026-08-30T00:00:00.000Z',
+            });
+          }
+          req.identity = localIdentity;
           return next();
         }
         return res.status(401).json({ error: { code: 'authentication_required', requestId: req.id } });

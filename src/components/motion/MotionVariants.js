@@ -109,16 +109,18 @@ export const calmFade = {
  * exits faster than it enters so the incoming screen is never kept waiting.
  */
 export const journalPageTurn = {
-  initial: { opacity: 0, y: 6 },
+  initial: { opacity: 0, y: 10, scale: 0.985 },
   animate: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.2, ease: appleEase },
+    scale: 1,
+    transition: { duration: 0.28, ease: appleEase },
   },
   exit: {
     opacity: 0,
-    y: -3,
-    transition: { duration: 0.1, ease: [0.4, 0, 1, 1] },
+    y: -6,
+    scale: 0.992,
+    transition: { duration: 0.16, ease: [0.4, 0, 1, 1] },
   },
 };
 

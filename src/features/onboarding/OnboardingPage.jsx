@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Icon, categoryIcon } from '../../components/Icon';
 import { useMe, useUpdateMe } from '../quests/queries';
 import { playHover, playSuccess, playTap } from '../../lib/useSoundEffects';
+import { FullScreenStatus } from '../auth/ProtectedRoute';
 
 const detectedTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
 
@@ -15,7 +16,15 @@ export function OnboardingPage() {
   const [timezone, setTimezone] = useState(detectedTimezone);
   const [primaryPath, setPrimaryPath] = useState('Mind');
 
-  if (isLoading) return <p role="status" className="fullscreen-status">Preparing your field journal…</p>;
+  if (isLoading) {
+    return (
+      <FullScreenStatus
+        type="loading"
+        title="Setting up Wild Realm"
+        text="Loading your camera, quests, and profile."
+      />
+    );
+  }
   if (me?.onboardingCompletedAt) return <Navigate to="/app" replace />;
 
   const onNextStep = (e) => {
@@ -44,19 +53,21 @@ export function OnboardingPage() {
     <main className="onboarding-shell celestial-onboarding">
       <section className="onboarding-experience">
         <aside className="onboarding-visual" aria-hidden="true">
-          <img src="/auth-celestial-aperture.png" alt="" />
+          {/* Real landscape photography, not the celestial-portal plate: this
+              is a nature exploration app, and the artwork should say so. */}
+          <img src="/assets/verdant-explorer-banner.png" alt="" />
           <div className="onboarding-orbit">
             <Icon name={categoryIcon(primaryPath)} />
           </div>
-          <p>Chapter {step} of 3 — Your path unfolds</p>
+          <p>Step {step} of 3</p>
         </aside>
 
         <div className="onboarding-card">
           <div className="onboarding-chapter">
             <span>0{step}</span>
             <div>
-              <small>CHAPTER {step === 1 ? 'ONE' : step === 2 ? 'TWO' : 'THREE'}</small>
-              <strong>{step === 1 ? 'Wayfarer Identity' : step === 2 ? 'Primary Sanctuary Path' : 'Milestone Pledge'}</strong>
+              <small>{step === 1 ? 'WELCOME' : step === 2 ? 'FOCUS' : 'SETUP'}</small>
+              <strong>{step === 1 ? 'Create your profile' : step === 2 ? 'Choose your style' : 'Ready to explore'}</strong>
             </div>
           </div>
 
@@ -69,22 +80,22 @@ export function OnboardingPage() {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.25 }}
               >
-                <h1>How shall the journal address you?</h1>
-                <p>Choose an adventurer name for your daily progress logs and guild recognition.</p>
+                <h1>What should we call you?</h1>
+                <p>This name appears on quests, discoveries, and shared cards.</p>
                 <form onSubmit={onNextStep} className="onboarding-form">
                   <div className="auth-field">
-                    <label htmlFor="displayName">Wayfarer Name</label>
+                    <label htmlFor="displayName">Display name</label>
                     <input
                       id="displayName"
                       value={displayName}
                       onChange={(event) => setDisplayName(event.target.value)}
                       maxLength={120}
-                      placeholder="e.g. Scholar Rowan, Wayfarer Lyra"
+                      placeholder="e.g. Rowan, Lyra, Sam"
                       required
                     />
                   </div>
                   <button type="submit" className="auth-submit" onMouseEnter={playHover}>
-                    <span>Continue to Path Focus</span>
+                    <span>Continue</span>
                     <Icon name="compass" />
                   </button>
                 </form>
@@ -99,8 +110,8 @@ export function OnboardingPage() {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.25 }}
               >
-                <h1>Choose your primary path</h1>
-                <p>This tunes your daily quest deck to focus on your core growth pillar.</p>
+                <h1>Choose your discovery style</h1>
+                <p>Daily quests will adapt around the way you like to explore.</p>
                 <form onSubmit={onNextStep} className="onboarding-form">
                   <fieldset>
                     <legend className="sr-only">Primary focus</legend>
@@ -134,7 +145,7 @@ export function OnboardingPage() {
                       ‹ Back
                     </button>
                     <button type="submit" className="auth-submit" onMouseEnter={playHover}>
-                      <span>Set Timezone & Pledge</span>
+                      <span>Continue</span>
                       <Icon name="compass" />
                     </button>
                   </div>
@@ -150,11 +161,11 @@ export function OnboardingPage() {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.25 }}
               >
-                <h1>Seal your adventure pledge</h1>
-                <p>Daily quests reset at midnight in your local timezone to keep your streak true.</p>
+                <h1>Set your reset time</h1>
+                <p>Daily quests reset at midnight in your timezone so streaks stay consistent.</p>
                 <form onSubmit={onSubmit} className="onboarding-form">
                   <div className="auth-field">
-                    <label htmlFor="timezone">Timezone Sanctuary</label>
+                    <label htmlFor="timezone">Timezone</label>
                     <input
                       id="timezone"
                       value={timezone}
@@ -172,7 +183,7 @@ export function OnboardingPage() {
                       ‹ Back
                     </button>
                     <button type="submit" className="auth-submit" disabled={updateMe.isPending} onMouseEnter={playHover}>
-                      <span>{updateMe.isPending ? 'Sealing Journal…' : 'Begin Your Quest Journey'}</span>
+                      <span>{updateMe.isPending ? 'Saving...' : 'Start exploring'}</span>
                       <Icon name={updateMe.isPending ? 'star' : 'compass'} />
                     </button>
                   </div>

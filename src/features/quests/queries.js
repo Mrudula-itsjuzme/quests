@@ -63,7 +63,7 @@ export function useRenameCapture() {
   const api = useApiClient();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ captureId, cardTitle }) => api.renameCapture(captureId, cardTitle),
+    mutationFn: ({ captureId, cardTitle, notes }) => api.renameCapture(captureId, { cardTitle, notes }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['captures'] }),
   });
 }

@@ -154,13 +154,14 @@ export function createApiClient(getToken) {
       if (token === 'guest') return guestDelay((guestCaptures || GUEST_CAPTURES).find((item) => item.id === captureId), 200);
       return request(`/cards/${captureId}/add`, { method: 'POST', idempotencyKey, token });
     },
-    renameCapture: async (captureId, cardTitle) => {
+    renameCapture: async (captureId, patch) => {
       const token = await getToken();
+      const body = typeof patch === 'string' ? { cardTitle: patch } : patch;
       if (token === 'guest') {
-        guestCaptures = (guestCaptures || GUEST_CAPTURES).map((item) => (item.id === captureId ? { ...item, cardTitle } : item));
+        guestCaptures = (guestCaptures || GUEST_CAPTURES).map((item) => (item.id === captureId ? { ...item, ...body } : item));
         return guestDelay(guestCaptures.find((item) => item.id === captureId), 200);
       }
-      return request(`/captures/${captureId}`, { method: 'PATCH', body: { cardTitle }, token });
+      return request(`/captures/${captureId}`, { method: 'PATCH', body, token });
     },
     getQuestHistory: async (signal) => {
       const token = await getToken();

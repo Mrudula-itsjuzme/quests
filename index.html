@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <meta name="theme-color" content="#0a1410" />
+    <meta name="theme-color" content="#050e0a" />
     <meta name="description" content="Wild Realm — explore the real world, capture what you find, and discover its rarity." />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -12,10 +12,86 @@
     <link rel="icon" type="image/png" href="/icon-192.png" />
     <link rel="apple-touch-icon" href="/icon-192.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <title>Wild Realm</title>
+    <style>
+      /* ── Inline splash — shown while JS bundle loads ── */
+      #splash {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        background: radial-gradient(ellipse 90% 60% at 50% -5%,
+          rgba(16, 185, 129, 0.22), transparent 55%),
+          #050e0a;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        transition: opacity 0.45s ease;
+      }
+      #splash.done { opacity: 0; pointer-events: none; }
+      .splash-icon {
+        width: 76px; height: 76px;
+        background: radial-gradient(circle at 35% 35%, #4ade80, #10b981);
+        border-radius: 26px;
+        display: grid; place-items: center;
+        font-size: 2.2rem;
+        box-shadow:
+          0 0 48px rgba(16, 185, 129, 0.4),
+          0 8px 32px rgba(0, 0, 0, 0.55);
+        animation: splash-breathe 2.2s ease-in-out infinite;
+      }
+      @keyframes splash-breathe {
+        0%, 100% {
+          transform: scale(1);
+          box-shadow: 0 0 48px rgba(16,185,129,0.4), 0 8px 32px rgba(0,0,0,0.55);
+        }
+        50% {
+          transform: scale(1.05);
+          box-shadow: 0 0 72px rgba(16,185,129,0.55), 0 12px 40px rgba(0,0,0,0.65);
+        }
+      }
+      .splash-wordmark {
+        font-size: 1rem;
+        font-weight: 800;
+        letter-spacing: 0.22em;
+        color: rgba(240, 253, 244, 0.9);
+        text-transform: uppercase;
+      }
+      .splash-bar {
+        width: 128px; height: 3px; border-radius: 99px;
+        background: rgba(255, 255, 255, 0.1); overflow: hidden;
+        margin-top: 4px;
+      }
+      .splash-fill {
+        height: 100%; border-radius: 99px;
+        background: linear-gradient(90deg, #10b981, #4ade80);
+        animation: splash-load 1.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+      @keyframes splash-load { from { width: 0% } to { width: 100% } }
+    </style>
   </head>
   <body>
+    <div id="splash">
+      <div class="splash-icon">🌿</div>
+      <div class="splash-wordmark">Wild Realm</div>
+      <div class="splash-bar"><div class="splash-fill"></div></div>
+    </div>
     <div id="root"></div>
+    <script>
+      // Called by main.jsx after first React paint
+      window.__hideSplash = function() {
+        var el = document.getElementById('splash');
+        if (el) {
+          el.classList.add('done');
+          setTimeout(function() { el && el.parentNode && el.parentNode.removeChild(el); }, 500);
+        }
+      };
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

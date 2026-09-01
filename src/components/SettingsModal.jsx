@@ -26,7 +26,7 @@ export function SettingsModal({ onClose, user, onLogout }) {
       className="modal-overlay"
       role="dialog"
       aria-modal="true"
-      aria-label="Sanctuary Settings"
+      aria-label="Settings"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -41,18 +41,18 @@ export function SettingsModal({ onClose, user, onLogout }) {
       >
         <div className="settings-header">
           <div>
-            <p className="eyebrow">SANCTUARY PREFERENCES</p>
-            <h2>Journal Settings</h2>
+            <p className="eyebrow">APP PREFERENCES</p>
+            <h2>Settings</h2>
           </div>
           <button type="button" className="detail-close" onClick={() => { playTap(); onClose(); }} aria-label="Close settings">×</button>
         </div>
 
         <div className="settings-section">
-          <h3><Icon name="volume-2" /> Sound Atmosphere</h3>
+          <h3><Icon name="volume-2" /> Sound</h3>
           <div className="setting-row">
             <div>
-              <strong>Tactile Haptics & Chimes</strong>
-              <p>Play subtle audio cues when turning pages and claiming rewards</p>
+              <strong>Feedback sounds</strong>
+              <p>Play subtle cues when capturing, switching tabs, and claiming rewards</p>
             </div>
             <button
               type="button"
@@ -66,7 +66,7 @@ export function SettingsModal({ onClose, user, onLogout }) {
         </div>
 
         <div className="settings-section">
-          <h3><Icon name="sparkles" /> Motion & Fluidity</h3>
+          <h3><Icon name="sparkles" /> Motion</h3>
           <div className="setting-options">
             <button
               type="button"
@@ -75,7 +75,7 @@ export function SettingsModal({ onClose, user, onLogout }) {
               onMouseEnter={playHover}
             >
               <span>Full Motion</span>
-              <small>3D book physics & 60fps sweeps</small>
+              <small>Responsive transitions and capture feedback</small>
             </button>
             <button
               type="button"
@@ -84,17 +84,17 @@ export function SettingsModal({ onClose, user, onLogout }) {
               onMouseEnter={playHover}
             >
               <span>Calm Motion</span>
-              <small>Gentle dissolves & static focus</small>
+              <small>Reduced movement for quieter use</small>
             </button>
           </div>
         </div>
 
         <div className="settings-section">
-          <h3><Icon name="user" /> Wayfarer Session</h3>
+          <h3><Icon name="user" /> Account</h3>
           <div className="setting-row">
             <div>
               <strong>{user?.displayName || user?.email || 'Wayfarer'}</strong>
-              <p>Active journal session</p>
+              <p>Active Wild Realm session</p>
             </div>
             {onLogout && (
               <button
@@ -110,7 +110,7 @@ export function SettingsModal({ onClose, user, onLogout }) {
         </div>
 
         <div className="settings-footer">
-          <p>Wild Realm Field Journal v1.4.0 — Exploring the Natural World</p>
+          <p>Wild Realm v1.4.0</p>
         </div>
       </motion.div>
     </motion.div>

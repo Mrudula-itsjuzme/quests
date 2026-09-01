@@ -6,15 +6,23 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import App from './App';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { queryClient } from './lib/queryClient';
-import '@fontsource/cormorant-garamond/500.css';
-import '@fontsource/cormorant-garamond/600.css';
-import '@fontsource/cormorant-garamond/700.css';
 import '@fontsource/manrope/400.css';
 import '@fontsource/manrope/500.css';
 import '@fontsource/manrope/600.css';
 import '@fontsource/manrope/700.css';
 import './index.css';
 import './wild-realm.css';
+import './design-system.css';
+
+// Hide the inline splash as soon as React hydrates
+if (typeof window !== 'undefined' && window.__hideSplash) {
+  // Use requestAnimationFrame to wait for first real paint
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      window.__hideSplash();
+    });
+  });
+}
 
 const Router = Capacitor.isNativePlatform() ? HashRouter : BrowserRouter;
 
@@ -37,4 +45,3 @@ if (typeof window !== 'undefined' && 'serviceWorker' in navigator && import.meta
     });
   });
 }
-

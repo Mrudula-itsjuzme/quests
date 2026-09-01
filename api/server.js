@@ -82,7 +82,10 @@ const captureCreateSchema = z.object({
   liveness: livenessSchema,
   chosenCandidateIndex: z.number().int().min(0).max(2).optional(),
 }).strict();
-const captureRenameSchema = z.object({ cardTitle: z.string().trim().min(1).max(80) }).strict();
+const captureRenameSchema = z.object({
+  cardTitle: z.string().trim().min(1).max(80).optional(),
+  notes: z.string().trim().max(500).nullable().optional(),
+}).strict().refine((value) => Object.keys(value).length > 0, 'capture update cannot be empty');
 const postIdSchema = z.string().uuid();
 const hotspotCategorySchema = z.enum(['Hotspots', 'Parks', 'Waterfalls', 'Birding']);
 // "minLng,minLat,maxLng,maxLat" — the GeoJSON/slippy-map ordering, so the

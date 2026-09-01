@@ -190,11 +190,35 @@ export class PostgresQuestRepository {
   async expireAssignments(userId, now) { await this.pool.query(`UPDATE quest_assignments SET status = 'expired', updated_at = NOW() WHERE user_id = $1 AND status = ANY($2) AND expires_at <= $3`, [userId, ['active', 'pending_verification', 'rejected'], now]); }
   async hasImageHash(userId, hash) { const { rowCount } = await this.pool.query('SELECT 1 FROM quest_submissions WHERE user_id = $1 AND image_hash = $2 LIMIT 1', [userId, hash]); return rowCount > 0; }
   async hasSimilarImageHash(userId, hash, threshold = 0.95) {
-    const { rows } = await this.pool.query('SELECT image_hash FROM quest_submissions WHERE user_id = $1 AND image_hash IS NOT NULL', [userId]);
+    // Exact match first (index lookup, O(1)); only fall back to JS similarity
+    // scan on a bounded sample when threshold allows near-duplicates.
+    if (threshold >= 1) {
+      const { rowCount } = await this.pool.query(
+        'SELECT 1 FROM quest_submissions WHERE user_id = $1 AND image_hash = $2 LIMIT 1',
+        [userId, hash],
+      );
+      return rowCount > 0;
+    }
+    const { rows } = await this.pool.query(
+      'SELECT image_hash FROM quest_submissions WHERE user_id = $1 AND image_hash IS NOT NULL LIMIT 1000',
+      [userId],
+    );
     return rows.some((row) => hashSimilarity(row.image_hash, hash) >= threshold);
   }
   async hasGlobalSimilarImageHash(userId, hash, threshold = 0.95) {
-    const { rows } = await this.pool.query('SELECT image_hash FROM quest_submissions WHERE user_id <> $1 AND image_hash IS NOT NULL', [userId]);
+    // Exact match first — avoids JS scan for the common duplicate-detection case.
+    if (threshold >= 1) {
+      const { rowCount } = await this.pool.query(
+        'SELECT 1 FROM quest_submissions WHERE user_id <> $1 AND image_hash = $2 LIMIT 1',
+        [userId, hash],
+      );
+      return rowCount > 0;
+    }
+    // Bounded scan — prevents full-table read at scale (100+ users × N captures).
+    const { rows } = await this.pool.query(
+      'SELECT image_hash FROM quest_submissions WHERE user_id <> $1 AND image_hash IS NOT NULL LIMIT 1000',
+      [userId],
+    );
     return rows.some((row) => hashSimilarity(row.image_hash, hash) >= threshold);
   }
   async countRecentRejectedSubmissions(userId, since) {
@@ -324,15 +348,15 @@ export class PostgresQuestRepository {
       }
       const { rows } = await client.query(
         `INSERT INTO captured_cards
-          (id, user_id, capture_id, item_name, category, card_title, rarity_tier, rarity_score, description, image_ref, image_hash,
+          (id, user_id, capture_id, item_name, category, card_title, rarity_tier, rarity_score, description, notes, image_ref, image_hash,
            status, gps_lat, gps_lng, gps_accuracy_m, gps_altitude, heading, captured_at, server_received_at,
            anti_cheat_verdict, anti_cheat_reason, anti_cheat_detail, reject_reason,
            species_id, confidence, rarity_grade, rarity_stars, rarity_weight_set_version, rarity_factor_breakdown, xp_awarded, coins_awarded)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32)
         RETURNING *`,
         [
           cardId, card.userId, card.captureId || null, card.itemName, card.category, card.cardTitle, card.rarityTier, card.rarityScore,
-          card.description, imageRef, card.imageHash || null,
+          card.description, card.notes || null, imageRef, card.imageHash || null,
           card.status || 'final', card.gps?.lat ?? null, card.gps?.lng ?? null, card.gps?.accuracyM ?? null, card.gps?.altitude ?? null,
           card.heading ?? null, card.capturedAt || new Date(), card.serverReceivedAt || new Date(),
           card.antiCheatVerdict || null, card.antiCheatReason || null, JSON.stringify(card.antiCheatDetail || []), card.rejectReason || null,
@@ -355,12 +379,14 @@ export class PostgresQuestRepository {
         );
       }
       // Provisional (pending human verification) captures don't credit XP until approved — blueprint §6/§21.
+      // ON CONFLICT DO NOTHING makes the INSERT idempotent so a network-timeout
+      // retry that re-runs createCapturedCard cannot double-credit XP.
       if (created.status === 'final' && card.xpAwarded > 0) {
-        await client.query(
-          'INSERT INTO capture_xp_ledger (id, card_id, user_id, amount) VALUES ($1,$2,$3,$4)',
+        const credited = await client.query(
+          'INSERT INTO capture_xp_ledger (id, card_id, user_id, amount) VALUES ($1,$2,$3,$4) ON CONFLICT (card_id) DO NOTHING RETURNING id',
           [randomUUID(), created.id, card.userId, card.xpAwarded],
         );
-        await client.query('UPDATE quest_users SET total_xp = total_xp + $2, updated_at = NOW() WHERE id = $1', [card.userId, card.xpAwarded]);
+        if (credited.rowCount) await client.query('UPDATE quest_users SET total_xp = total_xp + $2, updated_at = NOW() WHERE id = $1', [card.userId, card.xpAwarded]);
       }
       // Coins follow the same rule as XP: only credited once the capture is final.
       if (created.status === 'final' && card.coinsAwarded > 0) {
@@ -399,7 +425,15 @@ export class PostgresQuestRepository {
     return rows[0] ? mapCapturedCard(rows[0]) : null;
   }
   async updateCapturedCard(userId, cardId, patch) {
-    const { rows } = await this.pool.query('UPDATE captured_cards SET card_title = COALESCE($3, card_title), updated_at = NOW() WHERE user_id = $1 AND id = $2 RETURNING *', [userId, cardId, patch.cardTitle ?? null]);
+    const { rows } = await this.pool.query(
+      `UPDATE captured_cards
+       SET card_title = COALESCE($3, card_title),
+           notes = CASE WHEN $4::boolean THEN $5 ELSE notes END,
+           updated_at = NOW()
+       WHERE user_id = $1 AND id = $2
+       RETURNING *`,
+      [userId, cardId, patch.cardTitle ?? null, Object.prototype.hasOwnProperty.call(patch, 'notes'), patch.notes ?? null],
+    );
     return rows[0] ? mapCapturedCard(rows[0]) : null;
   }
   /** Any provisional capture, across all players — an admin queue, not scoped to one user. */
@@ -496,6 +530,14 @@ export class PostgresQuestRepository {
     return { speciesCount: speciesCount.rows[0].count, totalCount: totalCount.rows[0].count };
   }
   async hasSimilarCaptureImageHash(userId, hash, threshold = 0.95) {
+    // 10-minute recent window is already small; exact match first for speed.
+    if (threshold >= 1) {
+      const { rowCount } = await this.pool.query(
+        "SELECT 1 FROM captured_cards WHERE user_id = $1 AND image_hash = $2 AND captured_at >= NOW() - INTERVAL '10 minutes' LIMIT 1",
+        [userId, hash],
+      );
+      return rowCount > 0;
+    }
     const { rows } = await this.pool.query(
       "SELECT image_hash FROM captured_cards WHERE user_id = $1 AND image_hash IS NOT NULL AND captured_at >= NOW() - INTERVAL '10 minutes'",
       [userId],
@@ -503,7 +545,19 @@ export class PostgresQuestRepository {
     return rows.some((row) => hashSimilarity(row.image_hash, hash) >= threshold);
   }
   async hasGlobalSimilarCaptureImageHash(userId, hash, threshold = 0.98) {
-    const { rows } = await this.pool.query('SELECT image_hash FROM captured_cards WHERE user_id <> $1 AND image_hash IS NOT NULL', [userId]);
+    // Exact lookup first (covers threshold = 1.0 and the common re-photo case).
+    if (threshold >= 0.98) {
+      const { rowCount } = await this.pool.query(
+        'SELECT 1 FROM captured_cards WHERE user_id <> $1 AND image_hash = $2 LIMIT 1',
+        [userId, hash],
+      );
+      if (rowCount > 0) return true;
+    }
+    // Bounded scan — prevents unbounded full-table read at scale.
+    const { rows } = await this.pool.query(
+      'SELECT image_hash FROM captured_cards WHERE user_id <> $1 AND image_hash IS NOT NULL ORDER BY captured_at DESC LIMIT 1000',
+      [userId],
+    );
     return rows.some((row) => hashSimilarity(row.image_hash, hash) >= threshold);
   }
   // --- World ---
@@ -548,6 +602,9 @@ export class PostgresQuestRepository {
       );
       if (post.cardId) await client.query('UPDATE capture_media SET public_safe = TRUE, updated_at = NOW() WHERE card_id = $1', [post.cardId]);
       await client.query('COMMIT');
+      // Pass post.userId (the sharer / viewer) so viewerLiked is computed from
+      // the correct perspective, not the captured card's owner (same person here,
+      // but explicit is safer for future multi-share scenarios).
       return { post: await this.getCommunityPost(post.userId, rows[0].id), created: true };
     } catch (error) {
       await client.query('ROLLBACK');
@@ -887,6 +944,7 @@ function mapCapturedCard(row) {
     rarityTier: row.rarity_tier,
     rarityScore: Number(row.rarity_score),
     description: row.description,
+    notes: row.notes ?? null,
     imageRef: row.image_ref,
     status: row.status,
     gps: row.gps_lat != null ? { lat: Number(row.gps_lat), lng: Number(row.gps_lng), accuracyM: row.gps_accuracy_m != null ? Number(row.gps_accuracy_m) : null, altitude: row.gps_altitude != null ? Number(row.gps_altitude) : null } : null,

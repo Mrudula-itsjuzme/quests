@@ -1,0 +1,2 @@
+ALTER TABLE captured_cards
+  ADD COLUMN IF NOT EXISTS notes TEXT;

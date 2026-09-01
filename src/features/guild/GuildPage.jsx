@@ -13,9 +13,9 @@ import { playTap } from '../../lib/useSoundEffects';
 import { CommunityShareSheet } from './CommunityShareSheet';
 
 const TABS = [
-  { id: 'FEED', label: 'Feed' },
-  { id: 'FRIENDS', label: 'Friends' },
-  { id: 'MAP', label: 'Map' },
+  { id: 'FRIENDS', label: 'Chats' },
+  { id: 'FEED', label: 'Realm' },
+  { id: 'MAP', label: 'Places' },
 ];
 
 function timeAgo(value) {
@@ -39,7 +39,7 @@ function initials(name) {
 }
 
 export function GuildPage() {
-  const [tab, setTab] = useState('FEED');
+  const [tab, setTab] = useState('FRIENDS');
   const [shareOpen, setShareOpen] = useState(false);
   const [notice, setNotice] = useState('');
 
@@ -135,13 +135,22 @@ function CommunityFeed({ onShare }) {
 
   if (!posts?.length) {
     return (
-      <div className="community-state-panel">
-        <Icon name="compass" />
-        <p className="community-state-title">No discoveries shared yet.</p>
-        <p>Be the first explorer to post a find from your collection.</p>
-        <button type="button" className="continue-journey-btn" onClick={() => { playTap(); onShare(); }}>
-          Share a discovery <span>→</span>
-        </button>
+      <div className="community-empty-loop">
+        <div className="community-empty-copy">
+          <Icon name="compass" />
+          <span className="sr-only">No discoveries shared yet.</span>
+          <p className="community-state-title">Start today’s discovery loop.</p>
+          <p>Capture something nearby, save it to Library, then share the card when it earns a rank.</p>
+          <button type="button" className="continue-journey-btn" onClick={() => { playTap(); onShare(); }}>
+            Share from Library <span>→</span>
+          </button>
+        </div>
+        <div className="retention-loop-rail" aria-label="Discovery loop">
+          <span><strong>1</strong> Snap</span>
+          <span><strong>2</strong> Rank</span>
+          <span><strong>3</strong> Save</span>
+          <span><strong>4</strong> Share</span>
+        </div>
       </div>
     );
   }
@@ -307,10 +316,15 @@ function FriendsPanel() {
 
   if (!friends?.length) {
     return (
-      <div className="community-state-panel">
+      <div className="community-state-panel community-chat-empty">
         <Icon name="user" />
-        <p className="community-state-title">No explorers in your circle yet.</p>
-        <p>Friend requests are not open yet — your accepted explorers will appear here.</p>
+        <p className="community-state-title">Start a trail chat.</p>
+        <p>Friends, streak partners, and shared quest plans will live here.</p>
+        <div className="retention-loop-rail" aria-label="Chat loop">
+          <span><strong>1</strong> Add</span>
+          <span><strong>2</strong> Plan</span>
+          <span><strong>3</strong> Snap</span>
+        </div>
       </div>
     );
   }

@@ -194,6 +194,7 @@ export function WorldScreen() {
         phase={phase}
         weather={weather}
         hotspots={filteredHotspots}
+        userPosition={lastKnownPosition}
         onSelectHotspot={(hotspot) => {
           playTap();
           setSelectedHotspot(hotspot);

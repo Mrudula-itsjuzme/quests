@@ -38,7 +38,7 @@ function App() {
       }
 
       // 2. Navigate back if not on a root tab
-      const rootPaths = ['/', '/sign-in', '/sign-up', '/app', '/app/quests', '/app/community', '/app/rewards', '/app/collection', '/app/profile'];
+      const rootPaths = ['/', '/sign-in', '/sign-up', '/app', '/app/quests', '/app/community', '/app/rewards', '/app/collection', '/app/library', '/app/profile'];
       if (!rootPaths.includes(location.pathname)) {
         navigate(-1);
         return;
@@ -55,7 +55,7 @@ function App() {
   return (
     <MotionConfig reducedMotion={motionReduced ? 'always' : 'user'}>
       <AuthProvider>
-        <Suspense fallback={<div className="route-suspense-fallback" />}>
+        <Suspense fallback={null}>
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/sign-in" element={<AuthPage mode="sign-in" />} />
@@ -69,6 +69,7 @@ function App() {
                   <Route path="community" element={<GuildPage />} />
                   <Route path="rewards" element={<RewardsPage />} />
                   <Route path="collection" element={<GalleryPage />} />
+                  <Route path="library" element={<GalleryPage />} />
                   <Route path="profile" element={<ProfilePage />} />
                 </Route>
               </Route>

@@ -1,46 +1,144 @@
-import { motion } from 'framer-motion';
-import { WeatherLayer } from './WeatherLayer';
+import { useEffect, useRef } from 'react';
+import 'leaflet/dist/leaflet.css';
 
-export function WorldCanvas({ phase, weather, hotspots = [], onSelectHotspot }) {
-  return (
-    <div className={`world-canvas-wrap world-phase-${phase}`}>
-      {/* Terrain & Satellite Map Image Background */}
-      <div className="explore-map-terrain" />
+// Leaflet is loaded lazily to avoid SSR issues with the window object
+let L = null;
 
-      {/* Interactive Map Hotspot Pins */}
-      {hotspots.map((pin) => (
-        <motion.div
-          key={pin.id}
-          className="map-hotspot-pin"
-          style={{ left: `${pin.x}%`, top: `${pin.y}%` }}
-          initial={{ scale: 0, opacity: 0, clipPath: 'circle(0% at 50% 50%)' }}
-          animate={{ scale: [1, 1.05, 1], opacity: 1, clipPath: 'circle(100% at 50% 50%)' }}
-          transition={{ 
-            clipPath: { duration: 0.8, ease: 'easeOut' },
-            scale: { repeat: Infinity, duration: 4, ease: 'easeInOut', delay: Math.random() * 2 }
-          }}
-          whileHover={{ scale: 1.15, y: -4 }}
-          onClick={() => onSelectHotspot?.(pin)}
-        >
-          {/* Capture clusters show their best rarity grade; curated places
-              show a category initial so both read as map pins. */}
-          <div className={pin.grade ? `map-hotspot-thumb rank-hex-${pin.grade.toLowerCase()}` : 'map-hotspot-thumb map-hotspot-curated'}>
-            {pin.grade || (pin.category ? pin.category[0] : '·')}
-          </div>
-          <div className="map-hotspot-label">
-            <span>{pin.title}</span>
-            {pin.distanceLabel && <span className="map-hotspot-rating">{pin.distanceLabel}</span>}
-          </div>
-        </motion.div>
-      ))}
-
-      {/* User Location Radar Pulse */}
-      <div className="map-user-pin" style={{ left: '50%', top: '50%' }}>
-        <div className="map-user-pulse" />
-      </div>
-
-      <WeatherLayer condition={weather} phase={phase} />
-    </div>
-  );
+async function getLeaflet() {
+  if (L) return L;
+  L = (await import('leaflet')).default;
+  // Fix default marker icons broken by bundlers
+  delete L.Icon.Default.prototype._getIconUrl;
+  L.Icon.Default.mergeOptions({
+    iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  });
+  return L;
 }
 
+// Custom pin HTML for hotspot markers
+function makePinHtml(pin) {
+  const grade = pin.grade || '';
+  const gradeClass = grade ? `rank-hex-${grade.toLowerCase()}` : 'map-pin-curated';
+  const label = grade || getCategoryEmoji(pin.category);
+  return `
+    <div class="map-leaflet-pin ${gradeClass}" title="${pin.title}">
+      <div class="map-leaflet-pin-inner">${label}</div>
+    </div>
+  `;
+}
+
+function getCategoryEmoji(category = '') {
+  const map = { Parks: '🌳', Waterfalls: '💧', Birding: '🦜', Hotspots: '⭐' };
+  return map[category] || '📍';
+}
+
+export function WorldCanvas({ hotspots = [], onSelectHotspot, userPosition }) {
+  const containerRef = useRef(null);
+  const mapRef = useRef(null);
+  const markersRef = useRef([]);
+  const userMarkerRef = useRef(null);
+
+  // Initialize map
+  useEffect(() => {
+    if (mapRef.current || !containerRef.current) return;
+
+    let destroyed = false;
+    getLeaflet().then((Leaflet) => {
+      if (destroyed || !containerRef.current) return;
+
+      // Center on Bangalore by default (user's location used when available)
+      const map = Leaflet.map(containerRef.current, {
+        zoomControl: false,
+        attributionControl: false,
+      }).setView([12.9716, 77.5946], 12);
+
+      // Dark/nature-themed tiles (CartoDB Dark Matter for premium look)
+      Leaflet.tileLayer(
+        'https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}.png',
+        {
+          attribution: '© OpenStreetMap © CARTO',
+          subdomains: 'abcd',
+          maxZoom: 19,
+        },
+      ).addTo(map);
+
+      // Compact attribution in bottom-right
+      Leaflet.control.attribution({ prefix: false, position: 'bottomright' }).addTo(map);
+
+      mapRef.current = map;
+    });
+
+    return () => {
+      destroyed = true;
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
+    };
+  }, []);
+
+  // Update user position marker
+  useEffect(() => {
+    if (!mapRef.current) return;
+    getLeaflet().then((Leaflet) => {
+      if (!mapRef.current) return;
+
+      if (userMarkerRef.current) {
+        userMarkerRef.current.remove();
+        userMarkerRef.current = null;
+      }
+
+      const pos = userPosition || { lat: 12.9716, lng: 77.5946 };
+
+      const userIcon = Leaflet.divIcon({
+        className: '',
+        html: `<div class="map-user-dot"><div class="map-user-pulse-ring"></div></div>`,
+        iconSize: [24, 24],
+        iconAnchor: [12, 12],
+      });
+
+      userMarkerRef.current = Leaflet.marker([pos.lat, pos.lng], { icon: userIcon })
+        .addTo(mapRef.current);
+
+      // Pan to user position
+      mapRef.current.setView([pos.lat, pos.lng], 13, { animate: true });
+    });
+  }, [userPosition]);
+
+  // Update hotspot markers
+  useEffect(() => {
+    if (!mapRef.current) return;
+    getLeaflet().then((Leaflet) => {
+      if (!mapRef.current) return;
+
+      // Clear old markers
+      markersRef.current.forEach((m) => m.remove());
+      markersRef.current = [];
+
+      hotspots.forEach((pin) => {
+        const lat = pin.lat ?? pin.gps?.lat;
+        const lng = pin.lng ?? pin.gps?.lng;
+        if (!lat || !lng) return;
+
+        const icon = Leaflet.divIcon({
+          className: '',
+          html: makePinHtml(pin),
+          iconSize: [44, 44],
+          iconAnchor: [22, 44],
+        });
+
+        const marker = Leaflet.marker([lat, lng], { icon })
+          .addTo(mapRef.current)
+          .on('click', () => onSelectHotspot?.(pin));
+
+        markersRef.current.push(marker);
+      });
+    });
+  }, [hotspots, onSelectHotspot]);
+
+  return (
+    <div className="world-canvas-wrap" ref={containerRef} />
+  );
+}

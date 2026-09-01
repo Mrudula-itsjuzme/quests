@@ -1,8 +1,9 @@
 import { useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Icon } from '../../components/Icon';
-import { useAddCardToLibrary, useCaptureItem, useRenameCapture, useShareDiscovery, useSpecies } from '../quests/queries';
+import { useAddCardToLibrary, useCaptureItem, useMe, useRenameCapture, useShareDiscovery, useSpecies } from '../quests/queries';
 import { playTap } from '../../lib/useSoundEffects';
 import { collectCaptureTelemetry } from '../../lib/captureTelemetry';
 import { useCameraPreview } from '../../lib/useCameraPreview';
@@ -20,26 +21,34 @@ function fileToDataUrl(file) {
 }
 
 const ANTI_CHEAT_MESSAGES = {
-  matches_existing_capture: 'This photo has already been captured by someone else. Try a genuinely new find.',
-  velocity_exceeds_human_possible: 'That location doesn’t match your last capture. Check your location and try again.',
-  multiple_integrity_flags: 'We couldn’t verify this capture. Please retake the photo outdoors, live.',
+  matches_existing_capture: 'This photo has already been captured. Try a genuinely new find.',
+  velocity_exceeds_human_possible: "That location doesn't match your last capture. Check your location and try again.",
+  multiple_integrity_flags: 'We couldn\'t verify this capture. Please retake the photo outdoors, live.',
 };
 
+// Real CSS photo filters (Instagram/Snapchat-style) — applied to preview via filter CSS
+const CAPTURE_FILTERS = [
+  { id: 'Auto', label: 'Auto', css: 'none' },
+  { id: 'Vivid', label: 'Vivid', css: 'saturate(1.48) contrast(1.08)' },
+  { id: 'Film', label: 'Film', css: 'saturate(0.9) contrast(0.96) sepia(0.18)' },
+  { id: 'Glow', label: 'Glow', css: 'brightness(1.12) saturate(1.16) contrast(0.94)' },
+  { id: 'Crisp', label: 'Crisp', css: 'contrast(1.18) saturate(1.08)' },
+  { id: 'Noir', label: 'Noir', css: 'grayscale(1) contrast(1.18) brightness(1.04)' },
+  { id: 'Fade', label: 'Fade', css: 'brightness(1.1) saturate(0.72) contrast(0.86)' },
+];
+
 function messageForRejection(reason) {
-  return ANTI_CHEAT_MESSAGES[reason] || 'We couldn’t verify this capture. Please retake the photo.';
+  return ANTI_CHEAT_MESSAGES[reason] || "We couldn't verify this capture. Please retake the photo.";
 }
 
 function triggerHaptic(pattern = [15, 30, 15]) {
   if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-    try {
-      navigator.vibrate(pattern);
-    } catch {
-      // ignore
-    }
+    try { navigator.vibrate(pattern); } catch { /* ignore */ }
   }
 }
 
 export function CaptureFlow({ onClose }) {
+  const navigate = useNavigate();
   const inputRef = useRef(null);
   const [stage, setStage] = useState('prompt'); // prompt | scanning | candidates | reveal | error
   const [card, setCard] = useState(null);
@@ -48,16 +57,32 @@ export function CaptureFlow({ onClose }) {
   const [pendingBundle, setPendingBundle] = useState(null);
   const [candidates, setCandidates] = useState([]);
   const [previewUrl, setPreviewUrl] = useState('');
-  // The viewfinder only runs while the player is composing a shot.
+  const [notes, setNotes] = useState('');
+  const [activeFilter, setActiveFilter] = useState('Auto');
   const { videoRef, status: cameraStatus } = useCameraPreview(stage === 'prompt');
   const captureItem = useCaptureItem();
   const addCardToLibrary = useAddCardToLibrary();
   const renameCapture = useRenameCapture();
   const shareDiscovery = useShareDiscovery();
+  const { data: me } = useMe();
   const { data: species } = useSpecies();
 
+  const currentFilter = CAPTURE_FILTERS.find((f) => f.id === activeFilter) || CAPTURE_FILTERS[0];
+
+  const persistCardEdits = async () => {
+    if (!card?.id) return card;
+    const patch = {};
+    const nextTitle = name.trim();
+    if (nextTitle && nextTitle !== card.cardTitle) patch.cardTitle = nextTitle;
+    if (notes.trim() !== (card.notes || '')) patch.notes = notes.trim() || null;
+    if (!Object.keys(patch).length) return card;
+    const updated = await renameCapture.mutateAsync({ captureId: card.id, ...patch });
+    setCard(updated);
+    return updated;
+  };
+
   const submitCapture = async (bundle) => {
-    if (captureItem.isPending) return; // Prevent duplicate submissions
+    if (captureItem.isPending) return;
     triggerHaptic([20, 40, 20]);
     try {
       const result = await captureItem.mutateAsync(bundle);
@@ -69,6 +94,7 @@ export function CaptureFlow({ onClose }) {
       }
       setCard(result);
       setName(result.cardTitle);
+      setNotes('');
       setStage('reveal');
       triggerHaptic([40, 60, 40, 60, 100]);
     } catch (error) {
@@ -114,6 +140,7 @@ export function CaptureFlow({ onClose }) {
           const blob = await response.blob();
           const file = new File([blob], 'capture.jpg', { type: 'image/jpeg' });
           const [dataUrl, telemetry] = await Promise.all([fileToDataUrl(file), collectCaptureTelemetry(file)]);
+          setPreviewUrl(dataUrl);
           await submitCapture({
             captureId: crypto.randomUUID(),
             imageBase64: dataUrl,
@@ -125,7 +152,7 @@ export function CaptureFlow({ onClose }) {
           });
         }
       } catch {
-        // User likely cancelled the camera, do nothing to allow trying again
+        // User likely cancelled
       }
     } else {
       inputRef.current?.click();
@@ -140,13 +167,7 @@ export function CaptureFlow({ onClose }) {
 
   const handleConfirm = async () => {
     playTap();
-    if (card && name.trim() && name.trim() !== card.cardTitle) {
-      try {
-        await renameCapture.mutateAsync({ captureId: card.id, cardTitle: name.trim() });
-      } catch {
-        // Card is already saved server-side under its original name; a failed rename isn't fatal to the capture.
-      }
-    }
+    try { await persistCardEdits(); } catch { /* save still confirms the server-minted card */ }
     if (card?.id) {
       try {
         await addCardToLibrary.mutateAsync(card.id);
@@ -157,14 +178,12 @@ export function CaptureFlow({ onClose }) {
     onClose();
   };
 
-  // Sharing publishes a real community post for this capture. The card is
-  // already saved either way, so a failed share reports itself instead of
-  // silently closing as if it had succeeded.
-  const handleShare = async () => {
+  const handleShare = async ({ caption } = {}) => {
     playTap();
     if (!card || shareDiscovery.isPending) return;
     try {
-      await shareDiscovery.mutateAsync({ cardId: card.id });
+      const updatedCard = await persistCardEdits();
+      await shareDiscovery.mutateAsync({ cardId: updatedCard.id, caption: caption || notes.trim() || undefined });
       window.dispatchEvent(new CustomEvent('habbit-notice', { detail: 'Shared to the community feed.' }));
       onClose();
     } catch (error) {
@@ -186,11 +205,13 @@ export function CaptureFlow({ onClose }) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
+      {/* Global close button */}
       <button type="button" className="capture-flow-close" aria-label="Close" onClick={() => { playTap(); onClose(); }}>
         <Icon name="plus" />
       </button>
 
       <AnimatePresence mode="wait">
+        {/* ── VIEWFINDER (prompt stage) ── */}
         {stage === 'prompt' && (
           <motion.div
             key="prompt"
@@ -200,10 +221,11 @@ export function CaptureFlow({ onClose }) {
             exit={{ opacity: 0, scale: 1.02 }}
             transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
           >
-            {/* The camera IS the environment — full-bleed, never inside a card. */}
+            {/* Full-bleed camera feed */}
             <video
               ref={videoRef}
               className={`capture-viewfinder-video${cameraStatus === 'live' ? ' is-live' : ''}`}
+              style={{ filter: currentFilter.css !== 'none' ? currentFilter.css : undefined }}
               playsInline
               muted
               autoPlay
@@ -211,11 +233,16 @@ export function CaptureFlow({ onClose }) {
             />
             <div className="capture-viewfinder-vignette" aria-hidden="true" />
 
+            {/* Top HUD */}
             <div className="capture-viewfinder-top">
-              <div className="capture-locus">
-                <Icon name="compass" />
-                <span>{cameraStatus === 'live' ? 'Live' : 'Camera off'}</span>
+              <div className="capture-player-badge" aria-label={`Level ${me?.level ?? 1} explorer`}>
+                <span className="capture-player-avatar">{(me?.displayName || 'D').slice(0, 1)}</span>
+                <span>
+                  <strong>Level {me?.level ?? 1}</strong>
+                  <small>{(me?.totalXp ?? 0).toLocaleString()} XP</small>
+                </span>
               </div>
+              <div className="capture-brand-title">Wild Realm</div>
               <div className="capture-top-actions">
                 <button type="button" className="capture-chip-btn" aria-label="Toggle flash">
                   <Icon name="bolt" />
@@ -230,6 +257,8 @@ export function CaptureFlow({ onClose }) {
                 </button>
               </div>
             </div>
+
+            {/* Corner reticle */}
             <div className="capture-reticle" aria-hidden="true">
               <span className="capture-bracket tl" />
               <span className="capture-bracket tr" />
@@ -237,18 +266,46 @@ export function CaptureFlow({ onClose }) {
               <span className="capture-bracket br" />
             </div>
 
+            {/* Bottom controls */}
             <div className="capture-viewfinder-bottom">
-              <p className="capture-hint">Aim at a living subject and capture it live.</p>
+              <p className="capture-hint">Aim at nature — AI will classify it instantly.</p>
+
+              {/* Real photo-filter strip (Instagram/Snap style) */}
+              <div className="capture-filter-strip" aria-label="Camera filters">
+                {CAPTURE_FILTERS.map((filter) => (
+                  <button
+                    key={filter.id}
+                    type="button"
+                    className={`capture-filter-chip ${activeFilter === filter.id ? 'active' : ''}`}
+                    aria-pressed={activeFilter === filter.id}
+                    onClick={() => { playTap(); setActiveFilter(filter.id); }}
+                    title={filter.id}
+                  >
+                    <span
+                      className={`capture-filter-preview filter-${filter.id.toLowerCase()}`}
+                      style={{ filter: filter.css !== 'none' ? filter.css : undefined }}
+                      aria-hidden="true"
+                    />
+                    <span className="capture-filter-label">{filter.label}</span>
+                  </button>
+                ))}
+              </div>
+
               <div className="capture-controls">
                 <button
                   type="button"
                   className="capture-side-btn"
                   aria-label="Open your library"
-                  onClick={() => { playTap(); onClose(); }}
+                  onClick={() => {
+                    playTap();
+                    onClose();
+                    navigate('/app/library');
+                  }}
                 >
                   <Icon name="book" />
                 </button>
 
+                {/* Big shutter button */}
                 <button
                   type="button"
                   className="capture-shutter"
@@ -276,6 +333,7 @@ export function CaptureFlow({ onClose }) {
           </motion.div>
         )}
 
+        {/* ── SCANNING ── */}
         {stage === 'scanning' && (
           <motion.div
             key="scanning"
@@ -284,11 +342,16 @@ export function CaptureFlow({ onClose }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            {/* The subject stays on screen — the scan happens over the photo,
-                not in an abstract panel, so the moment stays grounded. */}
-            {previewUrl && <img className="capture-scanning-photo" src={previewUrl} alt="" aria-hidden="true" />}
+            {previewUrl && (
+              <img
+                className="capture-scanning-photo"
+                src={previewUrl}
+                alt=""
+                aria-hidden="true"
+                style={{ filter: currentFilter.css !== 'none' ? currentFilter.css : undefined }}
+              />
+            )}
             <div className="capture-viewfinder-vignette" aria-hidden="true" />
-
             <div className="capture-reticle is-scanning" aria-hidden="true">
               <span className="capture-bracket tl" />
               <span className="capture-bracket tr" />
@@ -301,7 +364,6 @@ export function CaptureFlow({ onClose }) {
                 transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
               />
             </div>
-
             <div className="capture-scan-panel" role="status" aria-live="polite">
               <span className="capture-scan-label">
                 <span className="capture-scan-blip" aria-hidden="true" />
@@ -320,6 +382,7 @@ export function CaptureFlow({ onClose }) {
           </motion.div>
         )}
 
+        {/* ── CANDIDATES ── */}
         {stage === 'candidates' && (
           <motion.div
             key="candidates"
@@ -329,7 +392,7 @@ export function CaptureFlow({ onClose }) {
             exit={{ opacity: 0, y: -12 }}
           >
             <h2>Which one is it?</h2>
-            <p>We’re not fully sure — pick the closest match, or retake the photo.</p>
+            <p>We're not fully sure — pick the closest match, or retake the photo.</p>
             <ul className="capture-candidate-list">
               {candidates.map((candidate, index) => (
                 <li key={candidate.commonName}>
@@ -346,6 +409,7 @@ export function CaptureFlow({ onClose }) {
           </motion.div>
         )}
 
+        {/* ── ERROR ── */}
         {stage === 'error' && (
           <motion.div
             key="error"
@@ -361,6 +425,7 @@ export function CaptureFlow({ onClose }) {
           </motion.div>
         )}
 
+        {/* ── REVEAL ── */}
         {stage === 'reveal' && card && (
           <motion.div
             key="reveal"
@@ -374,7 +439,12 @@ export function CaptureFlow({ onClose }) {
               card={card}
               species={species}
               imageUrl={previewUrl}
+              imageFilter={currentFilter.css}
               isNew
+              titleValue={name}
+              onTitleChange={setName}
+              notesValue={notes}
+              onNotesChange={setNotes}
               onAddToLibrary={handleConfirm}
               onShare={handleShare}
             />
