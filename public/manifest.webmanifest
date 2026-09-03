@@ -1,6 +1,6 @@
 {
-  "name": "Wild Realm — HABBIT Journal",
-  "short_name": "Wild Realm",
+  "name": "Wander",
+  "short_name": "Wander",
   "description": "Explore the real world, capture what you find, and discover its rarity.",
   "start_url": "/app",
   "display": "standalone",
