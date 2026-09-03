@@ -35,9 +35,6 @@
 }
 
 /* 2. Quests Overlapping Text Fix */
-.quest-item-instruction {
-  padding-right: 64px !important; /* Make room for the absolute positioned 'claim' badge */
-}
 .quest-item-card {
   padding-bottom: 8px !important; /* Extra breathing room */
 }

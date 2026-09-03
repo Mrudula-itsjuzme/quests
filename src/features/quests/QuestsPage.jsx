@@ -182,10 +182,6 @@ export function QuestsPage() {
                         )}
                       </div>
                       <ProgressBar value={questProgressRatio(quest)} compact />
-                      <div className="quest-card-footer">
-                        <span className="quest-status-copy">{statusLabel}</span>
-                        <span className="quest-action-copy">{questActionLabel(quest)}</span>
-                      </div>
                     </div>
 
                     <AnimatePresence mode="wait">
