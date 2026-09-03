@@ -4056,7 +4056,7 @@ body,
   }
 
   .topbar.mobile-only {
-    display: none !important;
+    /* Restored so user can access profile & settings */
   }
 
   .mobile-content-area {
