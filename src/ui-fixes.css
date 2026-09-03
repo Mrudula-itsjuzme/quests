@@ -1,0 +1,92 @@
+/* --- UI FIXES OVERRIDES --- */
+
+/* 1. New Discovery Background Fix */
+.capture-flow-panel-clean, .discovery-card-modal {
+  background: linear-gradient(135deg, rgba(10, 25, 18, 0.95), rgba(0, 10, 5, 0.98)) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  color: #fff !important;
+  border: 1px solid rgba(16, 185, 129, 0.2) !important;
+}
+
+.discovery-info-section {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #e5e7eb !important;
+}
+
+.discovery-info-label {
+  color: #a7f3d0 !important;
+}
+
+.discovery-info-value {
+  color: #fff !important;
+}
+
+.discovery-title-input {
+  color: #fff !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+}
+
+.discovery-title-input::placeholder,
+.discovery-notes-input::placeholder {
+  color: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* 2. Quests Overlapping Text Fix */
+.quest-item-instruction {
+  padding-right: 64px !important; /* Make room for the absolute positioned 'claim' badge */
+}
+.quest-item-card {
+  padding-bottom: 8px !important; /* Extra breathing room */
+}
+
+/* 3. Library Alignment & Contrast Fix */
+.gallery-v2-count {
+  color: #a7f3d0 !important;
+  opacity: 1 !important;
+}
+
+.gallery-v2-info {
+  background: rgba(10, 25, 18, 0.8) !important; /* Fix light grey bleed */
+  color: #fff !important;
+}
+
+.gallery-v2-name {
+  color: #fff !important;
+}
+
+.gallery-v2-meta {
+  color: rgba(167, 243, 208, 0.8) !important;
+}
+
+.gallery-v2-grid {
+  padding-bottom: 140px !important; /* Ensure content clears the tab bar */
+}
+
+/* 4. Map Bottom Sheet Z-Index Fix */
+.world-bottom-sheet {
+  z-index: 1000 !important; /* Ensure it stays above map pins */
+}
+.leaflet-pane {
+  z-index: 10 !important;
+}
+.leaflet-top, .leaflet-bottom {
+  z-index: 20 !important;
+}
+
+/* 5. Camera Button Alignment Fix */
+.dock-shutter-btn {
+  transform: translateY(-8px) !important;
+  border: 4px solid #000 !important; /* Provide visual separation from the dock behind it */
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4) !important;
+}
+
+/* Ensure the dock itself has a solid background so lists don't bleed through text */
+.mobile-bottom-dock {
+  background: rgba(10, 25, 18, 0.95) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-top: 1px solid rgba(16, 185, 129, 0.2) !important;
+}

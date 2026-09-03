@@ -14,6 +14,7 @@ import './index.css';
 import './wild-realm.css';
 import './design-system.css';
 import './community-final.css';
+import './ui-fixes.css';
 
 const Router = Capacitor.isNativePlatform() ? HashRouter : BrowserRouter;
 

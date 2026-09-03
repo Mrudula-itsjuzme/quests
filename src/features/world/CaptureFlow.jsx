@@ -298,13 +298,13 @@ export function CaptureFlow({ onClose }) {
             <video
               ref={videoRef}
               className={`capture-viewfinder-video${cameraStatus === 'live' ? ' is-live' : ''}`}
-              style={!isNative && currentFilter.css !== 'none' ? { filter: currentFilter.css } : undefined}
+              style={currentFilter.css !== 'none' ? { filter: currentFilter.css } : undefined}
               playsInline
               muted
               autoPlay
               aria-hidden="true"
             />
-            {!isNative && <div className={`capture-filter-aura filter-${activeFilter.toLowerCase()}`} aria-hidden="true" />}
+            <div className={`capture-filter-aura filter-${activeFilter.toLowerCase()}`} aria-hidden="true" />
             <div className="capture-viewfinder-vignette" aria-hidden="true" />
 
             {/* Top HUD */}

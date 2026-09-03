@@ -48,7 +48,7 @@ export function GalleryPage() {
     if (activeTab !== 'all') {
       filtered = activeTab === 'familiars'
         ? collection.filter((c) => (speciesById.get(c.speciesId)?.category || c.category) === 'Fauna')
-        : collection.filter((c) => (speciesById.get(c.speciesId)?.element || 'Earth') === activeTab);
+        : collection.filter((c) => (speciesById.get(c.speciesId)?.element || c.element || 'Earth') === activeTab);
     }
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
