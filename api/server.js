@@ -397,10 +397,12 @@ export function createApp(options = {}) {
     res.status(result.created ? 201 : 200).json(redactPublicPayload(result.post));
   }));
   app.get('/api/v1/community/posts/:postId/comments', asyncRoute(async (req, res) => {
-    res.json(redactPublicPayload(await repository.listCommunityComments(parse(postIdSchema, req.params.postId))));
+    const comments = await repository.listCommunityComments(req.identity.id, parse(postIdSchema, req.params.postId));
+    if (comments == null) return res.status(404).json({ error: { code: 'post_not_found', requestId: req.id } });
+    res.json(redactPublicPayload(comments));
   }));
   app.get('/api/v1/community/posts/:postId/media', asyncRoute(async (req, res) => {
-    const media = await repository.getCommunityPostMedia(parse(postIdSchema, req.params.postId));
+    const media = await repository.getCommunityPostMedia(req.identity.id, parse(postIdSchema, req.params.postId));
     if (!media) return res.status(404).json({ error: { code: 'community_media_not_found', requestId: req.id } });
     sendCaptureMedia(res, media);
   }));

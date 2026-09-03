@@ -1,6 +1,7 @@
 import { QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import fs from 'node:fs';
 import { queryClient } from './lib/queryClient';
 import App from './App';
 
@@ -243,10 +244,43 @@ describe('App (development auth mode)', () => {
     expect(screen.getByText(/Bronze Explorer I/i)).toBeInTheDocument();
   });
 
+  it.each(['/app/library', '/app/quests', '/app/community', '/app/profile'])('opens camera capture from %s', async (route) => {
+    renderApp(route);
+    const cameraButtons = await screen.findAllByLabelText(/open camera capture/i);
+
+    fireEvent.click(cameraButtons[cameraButtons.length - 1]);
+
+    expect(await screen.findByRole('button', { name: /capture photo/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /bloom/i })).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('navigates every primary dock tab without leaving a blank app shell', async () => {
+    renderApp('/app');
+    await screen.findByLabelText(/notifications/i);
+
+    fireEvent.click(screen.getAllByRole('link', { name: /quests/i }).at(-1));
+    expect(await screen.findByRole('heading', { name: /^quests$/i, hidden: true })).toBeInTheDocument();
+
+    fireEvent.click(screen.getAllByRole('link', { name: /library/i }).at(-1));
+    expect(await screen.findByText(/Your collection starts here/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getAllByRole('link', { name: /community/i }).at(-1));
+    expect(await screen.findByRole('heading', { name: /^community$/i, hidden: true })).toBeInTheDocument();
+
+    fireEvent.click(screen.getAllByRole('link', { name: /map/i }).at(-1));
+    expect(await screen.findByLabelText(/notifications/i)).toBeInTheDocument();
+  });
+
   it('shows the collection empty state when no collectibles are unlocked', async () => {
     renderApp('/app/collection');
 
     expect(await screen.findByText(/Your collection starts here/i)).toBeInTheDocument();
+  });
+
+  it('does not ship the removed blocking startup splash', () => {
+    const html = fs.readFileSync(`${process.cwd()}/index.html`, 'utf8');
+    expect(html).not.toContain('id="splash"');
+    expect(html).not.toContain('__hideSplash');
   });
 
   it('redirects unauthenticated dev-mode users straight into the app (no fake landing bypass)', async () => {

@@ -15,16 +15,6 @@ import './wild-realm.css';
 import './design-system.css';
 import './community-final.css';
 
-// Hide the inline splash as soon as React hydrates
-if (typeof window !== 'undefined' && window.__hideSplash) {
-  // Use requestAnimationFrame to wait for first real paint
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      window.__hideSplash();
-    });
-  });
-}
-
 const Router = Capacitor.isNativePlatform() ? HashRouter : BrowserRouter;
 
 ReactDOM.createRoot(document.getElementById('root')).render(

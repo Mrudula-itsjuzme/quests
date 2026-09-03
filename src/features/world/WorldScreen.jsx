@@ -104,7 +104,15 @@ export function WorldScreen() {
   }, [hotspots, selectedTag, searchQuery]);
 
   if (meLoading || !me) {
-    return <div className="world-screen world-screen-loading" aria-busy="true" />;
+    return (
+      <div className="world-screen world-screen-loading" aria-busy="true">
+        <div className="world-loading-map" />
+        <div className="world-loading-card">
+          <Icon name="compass" />
+          <p role="status">Opening map</p>
+        </div>
+      </div>
+    );
   }
 
   return (

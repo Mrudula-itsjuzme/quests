@@ -332,6 +332,13 @@ body {
   min-width: 0;
   min-height: 0;
 }
+
+.mobile-content-area-world .world-explore-container,
+.mobile-content-area-world .world-screen-loading {
+  flex: 1;
+  height: 100%;
+  min-height: 100dvh;
+}
 .top-nav a,
 .mobile-bottom-dock a {
   color: var(--quest-muted);
@@ -8202,9 +8209,17 @@ body, .app-shell {
 .world-explore-container {
   position: relative;
   width: 100%;
-  min-height: calc(100vh - 80px);
-  background: radial-gradient(circle at 50% 30%, #0d1a12 0%, #060907 70%);
+  height: 100%;
+  min-height: 100dvh;
+  background:
+    linear-gradient(rgba(111, 191, 122, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(111, 191, 122, 0.055) 1px, transparent 1px),
+    radial-gradient(circle at 42% 34%, rgba(33, 212, 137, 0.22), transparent 34%),
+    radial-gradient(circle at 68% 62%, rgba(240, 206, 112, 0.12), transparent 34%),
+    linear-gradient(180deg, #07140f 0%, #020504 100%);
+  background-size: 48px 48px, 48px 48px, 100% 100%, 100% 100%, 100% 100%;
   overflow: hidden;
+  isolation: isolate;
 }
 
 /* Top Search & Filter Bar Overlay */

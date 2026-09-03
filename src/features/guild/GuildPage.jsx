@@ -13,9 +13,9 @@ import { playTap } from '../../lib/useSoundEffects';
 import { CommunityShareSheet } from './CommunityShareSheet';
 
 const TABS = [
-  { id: 'FRIENDS', label: 'Chats' },
-  { id: 'FEED', label: 'Realm' },
-  { id: 'MAP', label: 'Places' },
+  { id: 'FRIENDS', label: 'Chats', icon: 'user' },
+  { id: 'FEED', label: 'Realm', icon: 'star' },
+  { id: 'MAP', label: 'Places', icon: 'compass' },
 ];
 
 function timeAgo(value) {
@@ -59,6 +59,7 @@ export function GuildPage() {
             className={`community-tab-btn ${tab === item.id ? 'active' : ''}`}
             onClick={() => { playTap(); setTab(item.id); }}
           >
+            <Icon name={item.icon} />
             {item.label}
           </button>
         ))}

@@ -247,7 +247,7 @@ export function AppShell() {
 
       <AnimatePresence>
         {captureOpen && (
-          <Suspense fallback={null}>
+          <Suspense fallback={<div className="camera-route-loading" role="status" aria-live="polite"><Icon name="camera" /></div>}>
             <CaptureFlow onClose={() => setCaptureOpen(false)} />
           </Suspense>
         )}

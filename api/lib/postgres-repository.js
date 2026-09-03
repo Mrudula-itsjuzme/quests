@@ -616,15 +616,17 @@ export class PostgresQuestRepository {
 
   async listCommunityPosts(viewerId, { scope = 'public', limit = 50 } = {}) {
     const values = [viewerId, Math.min(Number(limit) || 50, 100)];
+    const visibleClause = communityVisibleClause('$1');
     const scopeClause = scope === 'friends'
-      ? `AND p.user_id IN (
-           SELECT CASE WHEN requester_id = $1 THEN addressee_id ELSE requester_id END
-           FROM community_friendships
-           WHERE status = 'accepted' AND (requester_id = $1 OR addressee_id = $1)
+      ? `AND p.user_id <> $1 AND EXISTS (
+           SELECT 1 FROM community_friendships f
+           WHERE f.status = 'accepted'
+             AND ((f.requester_id = $1 AND f.addressee_id = p.user_id)
+               OR (f.addressee_id = $1 AND f.requester_id = p.user_id))
          )`
-      : '';
+      : "AND p.visibility = 'public'";
     const { rows } = await this.pool.query(
-      `${COMMUNITY_POST_SELECT} WHERE p.visibility = 'public' ${scopeClause}
+      `${COMMUNITY_POST_SELECT} WHERE ${visibleClause} ${scopeClause}
        ORDER BY p.created_at DESC LIMIT $2`,
       values,
     );
@@ -632,16 +634,16 @@ export class PostgresQuestRepository {
   }
 
   async getCommunityPost(viewerId, postId) {
-    const { rows } = await this.pool.query(`${COMMUNITY_POST_SELECT} WHERE p.id = $2`, [viewerId, postId]);
+    const { rows } = await this.pool.query(`${COMMUNITY_POST_SELECT} WHERE p.id = $2 AND ${communityVisibleClause('$1')}`, [viewerId, postId]);
     return rows[0] ? mapCommunityPost(rows[0]) : null;
   }
-  async getCommunityPostMedia(postId) {
+  async getCommunityPostMedia(viewerId, postId) {
     const { rows } = await this.pool.query(
       `SELECT m.* FROM community_posts p
        JOIN captured_cards c ON c.id = p.card_id
        JOIN capture_media m ON m.card_id = c.id
-       WHERE p.id = $1 AND p.visibility = 'public' AND c.status = 'final' AND m.public_safe = TRUE`,
-      [postId],
+       WHERE p.id = $2 AND ${communityVisibleClause('$1')} AND c.status = 'final' AND m.public_safe = TRUE`,
+      [viewerId, postId],
     );
     return rows[0] ? mapCaptureMedia(rows[0]) : null;
   }
@@ -650,7 +652,7 @@ export class PostgresQuestRepository {
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
-      const post = await client.query('SELECT id FROM community_posts WHERE id = $1 FOR UPDATE', [postId]);
+      const post = await client.query(`SELECT id FROM community_posts p WHERE id = $2 AND ${communityVisibleClause('$1')} FOR UPDATE`, [userId, postId]);
       if (!post.rows[0]) { await client.query('ROLLBACK'); return null; }
       // Counters are recomputed from the like rows rather than incremented, so
       // repeated likes/unlikes stay consistent under concurrency.
@@ -674,7 +676,7 @@ export class PostgresQuestRepository {
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
-      const post = await client.query('SELECT id FROM community_posts WHERE id = $1 FOR UPDATE', [postId]);
+      const post = await client.query(`SELECT id FROM community_posts p WHERE id = $2 AND ${communityVisibleClause('$1')} FOR UPDATE`, [userId, postId]);
       if (!post.rows[0]) { await client.query('ROLLBACK'); return null; }
       const { rows } = await client.query(
         'INSERT INTO community_post_comments (id, post_id, user_id, body) VALUES ($1,$2,$3,$4) RETURNING *',
@@ -691,13 +693,19 @@ export class PostgresQuestRepository {
     }
   }
 
-  async listCommunityComments(postId) {
+  async listCommunityComments(userId, postId) {
     const { rows } = await this.pool.query(
       `SELECT c.*, u.display_name FROM community_post_comments c
        JOIN quest_users u ON u.id = c.user_id
-       WHERE c.post_id = $1 ORDER BY c.created_at ASC LIMIT 200`,
-      [postId],
+       JOIN community_posts p ON p.id = c.post_id
+       WHERE c.post_id = $2 AND ${communityVisibleClause('$1')}
+       ORDER BY c.created_at ASC LIMIT 200`,
+      [userId, postId],
     );
+    if (rows.length === 0) {
+      const post = await this.getCommunityPost(userId, postId);
+      if (!post) return null;
+    }
     return rows.map(mapCommunityComment);
   }
 
@@ -705,7 +713,7 @@ export class PostgresQuestRepository {
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
-      const post = await client.query('SELECT id FROM community_posts WHERE id = $1 FOR UPDATE', [postId]);
+      const post = await client.query(`SELECT id FROM community_posts p WHERE id = $2 AND ${communityVisibleClause('$1')} FOR UPDATE`, [userId, postId]);
       if (!post.rows[0]) { await client.query('ROLLBACK'); return null; }
       const { rows } = await client.query(
         `INSERT INTO community_post_reports (id, post_id, user_id, reason, details)
@@ -985,6 +993,16 @@ function rankTitleForPercentile(percentile) {
   if (percentile <= 10) return 'Guardian';
   if (percentile <= 25) return 'Scout';
   return 'Adventurer';
+}
+function communityVisibleClause(viewerSql) {
+  return `(p.visibility = 'public'
+    OR p.user_id = ${viewerSql}
+    OR (p.visibility = 'friends' AND EXISTS (
+      SELECT 1 FROM community_friendships f
+      WHERE f.status = 'accepted'
+        AND ((f.requester_id = ${viewerSql} AND f.addressee_id = p.user_id)
+          OR (f.addressee_id = ${viewerSql} AND f.requester_id = p.user_id))
+    )))`;
 }
 function hashSimilarity(left, right) {
   const a = String(left || '');

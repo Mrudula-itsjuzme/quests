@@ -187,7 +187,14 @@ export function useQuestDefinitions(filters = {}) {
 
 function useInvalidateQuestState() {
   const queryClient = useQueryClient();
-  return () => {
+  return (assignments) => {
+    if (Array.isArray(assignments)) {
+      queryClient.setQueryData(['quests', 'active'], (previous = []) => {
+        const byId = new Map((Array.isArray(previous) ? previous : []).map((quest) => [quest.id, quest]));
+        for (const quest of assignments) byId.set(quest.id, quest);
+        return Array.from(byId.values());
+      });
+    }
     queryClient.invalidateQueries({ queryKey: ['quests'] });
     queryClient.invalidateQueries({ queryKey: ['me'] });
     queryClient.invalidateQueries({ queryKey: ['collectibles'] });

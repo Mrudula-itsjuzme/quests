@@ -28,13 +28,18 @@ const ANTI_CHEAT_MESSAGES = {
 
 // Real CSS photo filters (Instagram/Snapchat-style) — applied to preview via filter CSS
 const CAPTURE_FILTERS = [
-  { id: 'Auto', label: 'Auto', css: 'none' },
-  { id: 'Vivid', label: 'Vivid', css: 'saturate(1.48) contrast(1.08)' },
-  { id: 'Film', label: 'Film', css: 'saturate(0.9) contrast(0.96) sepia(0.18)' },
-  { id: 'Glow', label: 'Glow', css: 'brightness(1.12) saturate(1.16) contrast(0.94)' },
-  { id: 'Crisp', label: 'Crisp', css: 'contrast(1.18) saturate(1.08)' },
-  { id: 'Noir', label: 'Noir', css: 'grayscale(1) contrast(1.18) brightness(1.04)' },
-  { id: 'Fade', label: 'Fade', css: 'brightness(1.1) saturate(0.72) contrast(0.86)' },
+  { id: 'Auto', label: 'Auto', css: 'none', accent: '#f8eed6' },
+  { id: 'Vivid', label: 'Vivid', css: 'saturate(1.5) contrast(1.08) brightness(1.02)', accent: '#35e596' },
+  { id: 'Bloom', label: 'Bloom', css: 'brightness(1.12) saturate(1.18) contrast(0.92)', accent: '#ffd4da' },
+  { id: 'Film', label: 'Film', css: 'saturate(0.9) contrast(0.96) sepia(0.2)', accent: '#f0ce70' },
+  { id: 'Dawn', label: 'Dawn', css: 'brightness(1.1) saturate(1.1) sepia(0.22) hue-rotate(-8deg)', accent: '#ff9a76' },
+  { id: 'Mist', label: 'Mist', css: 'brightness(1.16) saturate(0.78) contrast(0.82)', accent: '#c7ddff' },
+  { id: 'Glow', label: 'Glow', css: 'brightness(1.14) saturate(1.2) contrast(0.94)', accent: '#d9ff72' },
+  { id: 'Crisp', label: 'Crisp', css: 'contrast(1.2) saturate(1.1) brightness(1.02)', accent: '#9cf4ff' },
+  { id: 'Forest', label: 'Forest', css: 'saturate(1.24) contrast(1.05) hue-rotate(10deg) brightness(0.96)', accent: '#64f0a2' },
+  { id: 'Dream', label: 'Dream', css: 'brightness(1.08) saturate(1.26) contrast(0.88) hue-rotate(-12deg)', accent: '#d8b4fe' },
+  { id: 'Fade', label: 'Fade', css: 'brightness(1.1) saturate(0.72) contrast(0.86)', accent: '#c9c2ae' },
+  { id: 'Noir', label: 'Noir', css: 'grayscale(1) contrast(1.2) brightness(1.04)', accent: '#ffffff' },
 ];
 
 function messageForRejection(reason) {
@@ -68,6 +73,19 @@ export function CaptureFlow({ onClose }) {
   const { data: species } = useSpecies();
 
   const currentFilter = CAPTURE_FILTERS.find((f) => f.id === activeFilter) || CAPTURE_FILTERS[0];
+
+  const cycleFilter = () => {
+    const currentIndex = CAPTURE_FILTERS.findIndex((filter) => filter.id === activeFilter);
+    const next = CAPTURE_FILTERS[(currentIndex + 1) % CAPTURE_FILTERS.length];
+    setActiveFilter(next.id);
+    triggerHaptic([8]);
+  };
+
+  const openLibrary = () => {
+    playTap();
+    onClose();
+    navigate('/app/library');
+  };
 
   const persistCardEdits = async () => {
     if (!card?.id) return card;
@@ -231,6 +249,7 @@ export function CaptureFlow({ onClose }) {
               autoPlay
               aria-hidden="true"
             />
+            <div className={`capture-filter-aura filter-${activeFilter.toLowerCase()}`} aria-hidden="true" />
             <div className="capture-viewfinder-vignette" aria-hidden="true" />
 
             {/* Top HUD */}
@@ -243,32 +262,21 @@ export function CaptureFlow({ onClose }) {
                 </span>
               </div>
               <div className="capture-brand-title">Wild Realm</div>
-              <div className="capture-top-actions">
-                <button type="button" className="capture-chip-btn" aria-label="Toggle flash">
-                  <Icon name="bolt" />
-                </button>
-                <button
-                  type="button"
-                  className="capture-chip-btn"
-                  aria-label="Close capture"
-                  onClick={() => { playTap(); onClose(); }}
-                >
-                  <Icon name="plus" />
-                </button>
-              </div>
+              <span className="capture-top-spacer" aria-hidden="true" />
             </div>
 
-            {/* Corner reticle */}
-            <div className="capture-reticle" aria-hidden="true">
-              <span className="capture-bracket tl" />
-              <span className="capture-bracket tr" />
-              <span className="capture-bracket bl" />
-              <span className="capture-bracket br" />
+            <div className="capture-social-rail" aria-label="Camera quick actions">
+              <button type="button" className="capture-rail-btn" aria-label="Next filter" title="Next filter" onClick={() => { playTap(); cycleFilter(); }}>
+                <Icon name="rotate" />
+              </button>
             </div>
 
             {/* Bottom controls */}
             <div className="capture-viewfinder-bottom">
-              <p className="capture-hint">Aim at nature — AI will classify it instantly.</p>
+              <div className="capture-focus-pill" aria-live="polite">
+                <span className="capture-focus-dot" style={{ background: currentFilter.accent }} aria-hidden="true" />
+                <span>{currentFilter.label}</span>
+              </div>
 
               {/* Real photo-filter strip (Instagram/Snap style) */}
               <div className="capture-filter-strip" aria-label="Camera filters">
@@ -278,8 +286,19 @@ export function CaptureFlow({ onClose }) {
                     type="button"
                     className={`capture-filter-chip ${activeFilter === filter.id ? 'active' : ''}`}
                     aria-pressed={activeFilter === filter.id}
-                    onClick={() => { playTap(); setActiveFilter(filter.id); }}
+                    aria-label={activeFilter === filter.id ? `Capture with ${filter.label}` : `Select ${filter.label} filter`}
+                    onClick={(event) => {
+                      playTap();
+                      event.currentTarget.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                      if (activeFilter === filter.id) {
+                        triggerHaptic([12]);
+                        handleNativeCamera();
+                        return;
+                      }
+                      setActiveFilter(filter.id);
+                    }}
                     title={filter.id}
+                    style={{ '--filter-accent': filter.accent }}
                   >
                     <span
                       className={`capture-filter-preview filter-${filter.id.toLowerCase()}`}
@@ -291,35 +310,26 @@ export function CaptureFlow({ onClose }) {
                 ))}
               </div>
 
-              <div className="capture-controls">
+              <div className="capture-corner-controls">
+                <button
+                  type="button"
+                  className="capture-side-btn"
+                  aria-label="Close capture"
+                  onClick={() => { playTap(); onClose(); }}
+                >
+                  <Icon name="plus" />
+                </button>
+
                 <button
                   type="button"
                   className="capture-side-btn"
                   aria-label="Open your library"
-                  onClick={() => {
-                    playTap();
-                    onClose();
-                    navigate('/app/library');
-                  }}
+                  onClick={openLibrary}
                 >
                   <Icon name="book" />
                 </button>
-
-                {/* Big shutter button */}
-                <button
-                  type="button"
-                  className="capture-shutter"
-                  aria-label="Capture photo"
-                  onClick={() => { playTap(); triggerHaptic([12]); handleNativeCamera(); }}
-                >
-                  <span className="capture-shutter-ring" aria-hidden="true" />
-                  <span className="capture-shutter-core" aria-hidden="true">
-                    <Icon name="leaf" />
-                  </span>
-                </button>
-
-                <span className="capture-side-btn is-placeholder" aria-hidden="true" />
               </div>
+
             </div>
 
             <input

@@ -166,13 +166,6 @@ export function GalleryPage() {
                 ? 'Snap, rank, note, and save a real-world find.'
                 : 'Use Camera to capture a verified find for this category.'}
             </p>
-            <button
-              type="button"
-              className="library-start-cta"
-              onClick={() => { playTap(); window.dispatchEvent(new CustomEvent('wild-realm-open-capture')); }}
-            >
-              Open Camera
-            </button>
           </div>
         </div>
       ) : (

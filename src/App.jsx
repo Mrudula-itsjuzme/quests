@@ -55,7 +55,7 @@ function App() {
   return (
     <MotionConfig reducedMotion={motionReduced ? 'always' : 'user'}>
       <AuthProvider>
-        <Suspense fallback={null}>
+        <Suspense fallback={<AppLoading />}>
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/sign-in" element={<AuthPage mode="sign-in" />} />
@@ -79,6 +79,15 @@ function App() {
         </Suspense>
       </AuthProvider>
     </MotionConfig>
+  );
+}
+
+function AppLoading() {
+  return (
+    <div className="app-route-loading" role="status" aria-live="polite">
+      <span />
+      <p>Opening Wild Realm</p>
+    </div>
   );
 }
 

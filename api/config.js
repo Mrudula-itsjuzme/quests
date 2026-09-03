@@ -28,7 +28,7 @@ const schema = z.object({
   RATE_LIMIT_AUTH: z.coerce.number().int().min(1).default(120),
   RATE_LIMIT_READS: z.coerce.number().int().min(1).default(240),
   RATE_LIMIT_WRITES: z.coerce.number().int().min(1).default(40),
-  REQUEST_BODY_LIMIT: z.string().regex(/^\d+(kb|mb)$/i).default('128kb'),
+  REQUEST_BODY_LIMIT: z.string().regex(/^\d+(kb|mb)$/i).default('10mb'),
   PROVIDER_MODE: z.enum(['local', 'disabled', 'http']).default('disabled'),
   QUEST_AI_VERIFY_URL: z.string().url().optional(),
   QUEST_PROVIDER_SECRET: z.string().min(16).optional(),
@@ -79,6 +79,9 @@ export function loadConfig(env = process.env, options = {}) {
     if (config.DEV_ALLOW_LEGACY_MUTATIONS) {
       throw new Error('Production requires DEV_ALLOW_LEGACY_MUTATIONS to be disabled.');
     }
+    if (!config.OIDC_ISSUER || !config.OIDC_AUDIENCE) {
+      throw new Error('Production requires OIDC_ISSUER and OIDC_AUDIENCE, or SUPABASE_URL so they can be derived.');
+    }
     const insecureOidc = [config.OIDC_ISSUER, config.OIDC_JWKS_URL].filter(Boolean).some((value) => new URL(value).protocol !== 'https:');
     if (insecureOidc) {
       throw new Error('Production requires HTTPS OIDC endpoints.');
@@ -88,6 +91,12 @@ export function loadConfig(env = process.env, options = {}) {
     }
     if (!config.QUEST_AI_VERIFY_URL || !config.QUEST_PROVIDER_SECRET) {
       throw new Error('Production requires configured HTTP quest providers (QUEST_AI_VERIFY_URL and QUEST_PROVIDER_SECRET).');
+    }
+    if (new URL(config.QUEST_AI_VERIFY_URL).protocol !== 'https:') {
+      throw new Error('Production requires HTTPS quest provider endpoints.');
+    }
+    if (!config.CRON_SECRET) {
+      throw new Error('Production requires CRON_SECRET for the authenticated scheduler endpoint.');
     }
     if (!config.corsOrigins.length || config.corsOrigins.includes('*')) {
       throw new Error('Production requires explicit production CORS origins.');

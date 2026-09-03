@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { QuestDetail } from './QuestDetail';
-import { ProgressBar, questProgressRatio } from './QuestCard';
+import { ProgressBar, questProgressRatio, questStatusLabel } from './QuestCard';
 import { Icon, categoryIcon } from '../../components/Icon';
 import { playTap } from '../../lib/useSoundEffects';
 import { BottomSheet } from '../../components/motion/BottomSheet';
@@ -14,6 +14,8 @@ import {
   useGenerateMonthly,
   useMe,
 } from './queries';
+
+const CADENCE_LABEL = { daily: "Today's Quests", weekly: 'Weekly Quests', monthly: 'Monthly Quests' };
 
 export function QuestsPage() {
   const activeQuery = useActiveQuests();
@@ -33,6 +35,10 @@ export function QuestsPage() {
 
   const me = meQuery.data;
   const gold = coinBalance(me);
+  const xpIntoLevel = Number(me?.xpIntoLevel || 0);
+  const xpForCurrentLevel = Number(me?.xpForCurrentLevel || 0);
+  const xpProgress = xpForCurrentLevel > 0 ? xpIntoLevel / xpForCurrentLevel : Number(me?.progressToNextLevel || 0);
+  const xpRemaining = Math.max(0, xpForCurrentLevel - xpIntoLevel);
 
   const visibleQuests = useMemo(
     () => quests.filter((q) => !tab || (q.cadence && q.cadence.toLowerCase() === tab.toLowerCase())),
@@ -40,6 +46,7 @@ export function QuestsPage() {
   );
 
   const selected = quests.find((q) => q.id === selectedId) || null;
+  const completedVisibleCount = visibleQuests.filter((quest) => quest.status === 'completed').length;
 
   useEffect(() => {
     const handleQuestCompleted = (event) => {
@@ -63,17 +70,18 @@ export function QuestsPage() {
       <h1 className="sr-only">Quests</h1>
       {/* Top User Bar */}
       <div className="quest-user-topbar">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div className="quest-explorer-main">
           <div className="quest-user-avatar" aria-hidden="true">
             <span>{(me?.displayName || 'Adventurer').split(/\s+/).slice(0, 2).map((part) => part[0]?.toUpperCase() || '').join('')}</span>
           </div>
-          <div>
-            <h3 style={{ fontSize: '0.95rem', margin: 0, fontWeight: '800' }}>{me?.displayName || 'Adventurer'}</h3>
+          <div className="quest-explorer-copy">
+            <h3>{me?.displayName || 'Adventurer'}</h3>
             {me && (
-              <small style={{ color: 'var(--wild-emerald)', fontSize: '0.72rem', fontWeight: '700' }}>
+              <small>
                 {me.tierLabel || `${me.tier} Explorer`} • {me.xpIntoLevel} / {me.xpForCurrentLevel} XP
               </small>
             )}
+            <ProgressBar value={xpProgress} compact />
           </div>
         </div>
         <div className="quest-coin-badge" aria-label={`${gold} coins`}>
@@ -81,6 +89,22 @@ export function QuestsPage() {
           <span>{gold.toLocaleString()}</span>
         </div>
       </div>
+
+      {me && (
+        <section className="quest-season-strip" aria-label="Explorer progression">
+          <div className="quest-season-topline">
+            <span>VERDANT SEASON</span>
+          </div>
+          <div className="quest-season-rank">
+            <strong>{me.tierLabel || `${me.tier} Explorer`}</strong>
+            <span>{xpIntoLevel} / {xpForCurrentLevel} XP</span>
+          </div>
+          <ProgressBar value={xpProgress} compact />
+          {xpForCurrentLevel > 0 && (
+            <p>{xpRemaining} XP to next explorer rank</p>
+          )}
+        </section>
+      )}
 
       {/* Cadence Filter Tabs */}
       <div className="quest-cadence-tabs" style={{ position: 'relative' }}>
@@ -117,87 +141,88 @@ export function QuestsPage() {
 
       {/* Quests List */}
       <div className="quests-card-list">
+        <div className="quests-section-header">
+          <h2>{CADENCE_LABEL[tab] || 'Quests'}</h2>
+          <span>{completedVisibleCount}/{visibleQuests.length}</span>
+        </div>
         {activeQuery.isLoading ? (
-          <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--wild-text-dim)' }}>Loading quests...</div>
+          <QuestLoadingStack />
         ) : visibleQuests.length === 0 ? (
-          <div className="quests-empty-state quest-loop-empty">
-            <div className="quest-loop-kicker">Next best action</div>
-            <h2>Building your {tab} quest deck.</h2>
-            <p>AI is choosing camera-only tasks for your streak. No upload shortcuts, no setup step.</p>
-            <div className="retention-loop-rail" aria-label="Quest loop">
-              <span><strong>1</strong> AI picks</span>
-              <span><strong>2</strong> Capture</span>
-              <span><strong>3</strong> Claim XP</span>
-            </div>
-            <div className="quest-auto-loader" role="status" aria-live="polite">
-              <span />
-              Preparing quests
-            </div>
-          </div>
+          <QuestLoadingStack />
         ) : (
-          visibleQuests.map((quest) => {
-            const isDone = quest.status === 'completed';
-            return (
-              <motion.div
-                key={quest.id}
-                className={`quest-item-card ${isDone ? 'completed' : ''} with-photo`}
-                whileHover={{ scale: 1.01 }}
-                onClick={() => { playTap(); setSelectedId(quest.id); }}
-              >
-                <div className="quest-card-content">
-                  {/* A category crest, not a stock landscape: the previous rows
-                      pulled unrelated Unsplash photos keyed off id length. */}
-                  <div className={`quest-row-thumb category-${(quest.category || 'Discovery').toLowerCase()}`} aria-hidden="true">
-                    <Icon name={categoryIcon(quest.category)} />
-                  </div>
-                  <div className="quest-row-main">
-                    <h4 className="quest-item-title">{quest.title}</h4>
-                    <div className="quest-row-meta">
-                      <span className="quest-progress-num">{quest.progressValue}/{quest.targetValue} {quest.unit}</span>
-                      <span className="quest-reward-pill">XP {quest.xpReward}</span>
-                      {quest.coinReward > 0 && (
-                        <span className="quest-reward-pill is-coin">
-                          <Icon name="coin" /> {quest.coinReward}
-                        </span>
-                      )}
+          <>
+            {visibleQuests.map((quest) => {
+              const state = questState(quest);
+              const statusLabel = questDisplayStatus(quest);
+              return (
+                <motion.div
+                  key={quest.id}
+                  className={`quest-item-card ${state} rarity-${(quest.rarity || 'Common').toLowerCase()} with-photo`}
+                  whileHover={{ scale: 1.01 }}
+                  onClick={() => { playTap(); setSelectedId(quest.id); }}
+                >
+                  <div className="quest-card-content">
+                    <div className="quest-card-topline">
+                      <span className="quest-rarity-mark">
+                        <Icon name={categoryIcon(quest.category)} />
+                        {(quest.rarity || quest.category || 'Quest').toUpperCase()}
+                      </span>
+                      <span className="quest-xp-reward">+{quest.xpReward} XP</span>
                     </div>
-                    <ProgressBar value={questProgressRatio(quest)} compact />
-                  </div>
+                    <div className="quest-row-main">
+                      <h4 className="quest-item-title">{quest.title}</h4>
+                      <p className="quest-item-instruction">{quest.description || `Capture ${quest.targetValue} ${quest.unit || 'finds'} to complete this quest.`}</p>
+                      <div className="quest-row-meta">
+                        <span className="quest-progress-num">{quest.progressValue}/{quest.targetValue} {quest.unit}</span>
+                        <span className="quest-reward-pill">XP {quest.xpReward}</span>
+                        {quest.coinReward > 0 && (
+                          <span className="quest-reward-pill is-coin">
+                            <Icon name="coin" /> {quest.coinReward}
+                          </span>
+                        )}
+                      </div>
+                      <ProgressBar value={questProgressRatio(quest)} compact />
+                      <div className="quest-card-footer">
+                        <span className="quest-status-copy">{statusLabel}</span>
+                        <span className="quest-action-copy">{questActionLabel(quest)}</span>
+                      </div>
+                    </div>
 
-                  <AnimatePresence mode="wait">
-                    {isDone ? (
-                      <motion.div
-                        key="done"
-                        initial={{ scale: 0, opacity: 0, rotate: -45 }}
-                        animate={{ scale: 1, opacity: 1, rotate: 0 }}
-                        transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-                        className="quest-claim-btn"
-                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: '1px solid var(--quest-gold-dim)', color: 'var(--quest-gold-bright)' }}
-                      >
-                        ✔
-                      </motion.div>
-                    ) : (
-                      <motion.button
-                        key="claim"
-                        initial={{ opacity: 1 }}
-                        exit={{ scale: 0, opacity: 0 }}
-                        type="button"
-                        className="quest-claim-btn glass"
-                        whileTap={{ scale: 0.9 }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          playTap();
-                          setSelectedId(quest.id);
-                        }}
-                      >
-                        View
-                      </motion.button>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </motion.div>
-            );
-          })
+                    <AnimatePresence mode="wait">
+                      {state === 'completed' ? (
+                        <motion.div
+                          key="done"
+                          initial={{ scale: 0, opacity: 0, rotate: -45 }}
+                          animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                          transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                          className="quest-claim-btn"
+                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: '1px solid var(--quest-gold-dim)', color: 'var(--quest-gold-bright)' }}
+                        >
+                          ✔
+                        </motion.div>
+                      ) : (
+                        <motion.button
+                          key="claim"
+                          initial={{ opacity: 1 }}
+                          exit={{ scale: 0, opacity: 0 }}
+                          type="button"
+                          className="quest-claim-btn glass"
+                          whileTap={{ scale: 0.9 }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            playTap();
+                            setSelectedId(quest.id);
+                          }}
+                        >
+                          {questActionLabel(quest)}
+                        </motion.button>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </>
         )}
       </div>
 
@@ -220,4 +245,45 @@ export function QuestsPage() {
       </AnimatePresence>
     </main>
   );
+}
+
+function QuestLoadingStack() {
+  return (
+    <div className="quest-loading-stack" role="status" aria-live="polite">
+      <div className="quest-compact-loader">
+        <span />
+        <div>
+          <strong>Preparing today's quests</strong>
+          <p>Finding something worth exploring...</p>
+        </div>
+      </div>
+      {[0, 1, 2].map((item) => (
+        <div key={item} className="quest-skeleton-card" aria-hidden="true">
+          <span />
+          <strong />
+          <p />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function questState(quest) {
+  if (quest.status === 'completed') return 'completed';
+  if (quest.status === 'pending_verification') return 'pending';
+  if (quest.status === 'rejected') return 'needs-work';
+  if (quest.progressValue > 0) return 'in-progress';
+  return 'not-started';
+}
+
+function questActionLabel(quest) {
+  if (quest.status === 'completed') return 'DONE';
+  if (quest.status === 'pending_verification') return 'REVIEW';
+  if (quest.status === 'rejected') return 'RETRY';
+  return quest.progressValue > 0 ? 'OPEN' : 'START';
+}
+
+function questDisplayStatus(quest) {
+  if (quest.status === 'active' && Number(quest.progressValue || 0) === 0) return 'Not started';
+  return questStatusLabel(quest);
 }

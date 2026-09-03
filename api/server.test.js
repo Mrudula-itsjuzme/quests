@@ -706,6 +706,42 @@ describe('Community API', () => {
     expect(feed.body[0].commentCount).toBe(1);
   });
 
+  it('keeps friends-only community posts behind the friendship boundary', async () => {
+    const repository = new MemoryQuestRepository({ definitions: questDefinitions });
+    const app = createApp({ config: testConfig(), repository, visionProvider: highConfidenceVisionProvider() });
+    const viewerId = testConfig().DEV_USER_ID;
+    const friendId = 'friend-author';
+    const strangerId = 'stranger-viewer';
+    await repository.ensureUser({ id: viewerId, displayName: 'Local', timezone: 'UTC' });
+    await repository.ensureUser({ id: friendId, displayName: 'Friend Author', timezone: 'UTC' });
+    await repository.ensureUser({ id: strangerId, displayName: 'Stranger', timezone: 'UTC' });
+    repository.friendships.push({ requesterId: viewerId, addresseeId: friendId, status: 'accepted' });
+    const card = await repository.createCapturedCard({
+      userId: friendId,
+      itemName: 'Hidden Fern',
+      category: 'Flora',
+      cardTitle: 'Hidden Fern',
+      rarityTier: 'B',
+      rarityScore: 0.5,
+      description: '',
+      status: 'final',
+      mediaData: PIXEL_PNG,
+      mediaContentType: 'image/png',
+    });
+    const { post } = await repository.createCommunityPost({ userId: friendId, cardId: card.id, visibility: 'friends', caption: 'Friends only' });
+
+    const publicFeed = await request(app).get('/api/v1/community/posts');
+    expect(publicFeed.body).toHaveLength(0);
+    const friendFeed = await request(app).get('/api/v1/community/posts?scope=friends');
+    expect(friendFeed.body).toHaveLength(1);
+    expect(friendFeed.body[0].id).toBe(post.id);
+    expect((await request(app).get(`/api/v1/community/posts/${post.id}/comments`)).status).toBe(200);
+    expect((await request(app).get(`/api/v1/community/posts/${post.id}/media`)).status).toBe(200);
+    expect(await repository.getCommunityPost(strangerId, post.id)).toBeNull();
+    expect(await repository.getCommunityPostMedia(strangerId, post.id)).toBeNull();
+    expect(await repository.createCommunityComment(strangerId, post.id, 'Can I see this?')).toBeNull();
+  });
+
   it('accepts one report per viewer and keeps the report queue server-side', async () => {
     const app = createApp({ config: testConfig(), visionProvider: highConfidenceVisionProvider() });
     const card = await mintCapture(app, 'community-report-001');

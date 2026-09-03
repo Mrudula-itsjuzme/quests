@@ -9,6 +9,7 @@ describe('configuration security', () => {
       DEV_ALLOW_LEGACY_MUTATIONS: false,
       PROVIDER_MODE: 'disabled',
       listenHost: '127.0.0.1',
+      REQUEST_BODY_LIMIT: '10mb',
     }));
   });
 
@@ -89,10 +90,41 @@ describe('configuration security', () => {
       PROVIDER_MODE: 'http',
       QUEST_AI_VERIFY_URL: 'https://verify.example.com/v1/proofs',
       QUEST_PROVIDER_SECRET: 'provider-secret-value',
+      CRON_SECRET: 'cron-secret-value',
       DATABASE_URL: 'postgres://quest_app:secret@db:5432/quests',
       OIDC_ISSUER: 'http://identity.example.com',
       OIDC_AUDIENCE: 'habbit-api',
     })).toThrow(/HTTPS OIDC/);
+  });
+
+  it('requires real auth metadata, scheduler secret, and HTTPS proof endpoint in production', () => {
+    const base = {
+      NODE_ENV: 'production',
+      DEV_AUTH_ENABLED: 'false',
+      DEV_ALLOW_LEGACY_MUTATIONS: 'false',
+      PROVIDER_MODE: 'http',
+      QUEST_AI_VERIFY_URL: 'https://verify.example.com/v1/proofs',
+      QUEST_PROVIDER_SECRET: 'provider-secret-value',
+      CRON_SECRET: 'cron-secret-value',
+      DATABASE_URL: 'postgres://quest_app:secret@db:5432/quests',
+      CORS_ORIGINS: 'https://app.example.com',
+      VISION_PROVIDER: 'openrouter',
+      OPENROUTER_API_KEY: 'openrouter-key-value',
+    };
+    expect(() => loadConfig(base)).toThrow(/OIDC_ISSUER and OIDC_AUDIENCE/);
+    expect(() => loadConfig({ ...base, SUPABASE_URL: 'https://project-ref.supabase.co' })).not.toThrow();
+    expect(() => loadConfig({
+      ...base,
+      OIDC_ISSUER: 'https://identity.example.com',
+      OIDC_AUDIENCE: 'habbit-api',
+      CRON_SECRET: undefined,
+    })).toThrow(/CRON_SECRET/);
+    expect(() => loadConfig({
+      ...base,
+      OIDC_ISSUER: 'https://identity.example.com',
+      OIDC_AUDIENCE: 'habbit-api',
+      QUEST_AI_VERIFY_URL: 'http://verify.example.com/v1/proofs',
+    })).toThrow(/HTTPS quest provider/);
   });
 
   it('rejects disabled or local proof providers in production', () => {
@@ -119,6 +151,7 @@ describe('configuration security', () => {
       PROVIDER_MODE: 'http',
       QUEST_AI_VERIFY_URL: 'https://verify.example.com/v1/proofs',
       QUEST_PROVIDER_SECRET: 'provider-secret-value',
+      CRON_SECRET: 'cron-secret-value',
       DATABASE_URL: 'postgres://quest_app:secret@db:5432/quests',
       OIDC_ISSUER: 'https://identity.example.com',
       OIDC_AUDIENCE: 'habbit-api',

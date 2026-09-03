@@ -215,6 +215,260 @@
   }
 }
 
+.app-route-loading {
+  min-height: 100dvh;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 12px;
+  background:
+    radial-gradient(circle at 50% 36%, rgba(53, 229, 150, 0.16), transparent 30%),
+    #020504;
+  color: rgba(255, 248, 235, 0.8);
+  font-weight: 850;
+}
+
+.app-route-loading span {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 248, 235, 0.18);
+  border-top-color: #35e596;
+  animation: wild-spin 0.9s linear infinite;
+}
+
+.app-route-loading p {
+  margin: 0;
+}
+
+.camera-route-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: grid;
+  place-items: center;
+  background: #020504;
+  color: #35e596;
+}
+
+.camera-route-loading svg {
+  width: 34px;
+  height: 34px;
+  animation: wild-pulse 1s ease-in-out infinite;
+}
+
+@keyframes wild-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes wild-pulse {
+  0%, 100% { opacity: 0.55; transform: scale(0.96); }
+  50% { opacity: 1; transform: scale(1.04); }
+}
+
+@media (max-width: 780px) {
+  html[data-wild-theme='dark'] body .app-shell .mobile-content-area {
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior-y: contain !important;
+    scrollbar-width: none !important;
+    background: #020504 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .mobile-content-area::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .mobile-bottom-dock {
+    left: 16px !important;
+    right: 16px !important;
+    bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
+    width: auto !important;
+    min-height: 68px !important;
+    padding: 8px 10px !important;
+    border-radius: 28px !important;
+    border: 1px solid rgba(255, 248, 235, 0.13) !important;
+    background: rgba(2, 5, 4, 0.78) !important;
+    box-shadow: 0 22px 60px rgba(0, 0, 0, 0.5) !important;
+    backdrop-filter: blur(24px) saturate(1.2) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(1.2) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .mobile-bottom-dock .dock-item {
+    min-width: 0 !important;
+    height: 50px !important;
+    gap: 3px !important;
+    color: rgba(255, 248, 235, 0.55) !important;
+    font-size: 0.68rem !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .mobile-bottom-dock .dock-item.active {
+    color: #f0ce70 !important;
+    background: transparent !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .mobile-bottom-dock .dock-item svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .dock-shutter-item {
+    position: relative !important;
+    display: grid !important;
+    place-items: center !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .dock-shutter-item::after,
+  html[data-wild-theme='dark'] body .app-shell .dock-shutter-btn::after,
+  html[data-wild-theme='dark'] body .app-shell .dock-shutter-btn span {
+    display: none !important;
+    content: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .dock-shutter-btn {
+    width: 64px !important;
+    height: 64px !important;
+    border-radius: 50% !important;
+    transform: translateY(-18px) !important;
+    background:
+      radial-gradient(circle at 35% 28%, rgba(255, 248, 235, 0.26), transparent 24%),
+      linear-gradient(145deg, #35e596, #0fa96d) !important;
+    box-shadow:
+      0 0 0 7px rgba(46, 214, 139, 0.16),
+      0 18px 42px rgba(46, 214, 139, 0.36) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-tabs-bar {
+    width: 100% !important;
+    height: 58px !important;
+    margin: 0 0 16px !important;
+    padding: 0 !important;
+    gap: 0 !important;
+    border-radius: 0 !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(255, 248, 235, 0.1) !important;
+    background: rgba(2, 5, 4, 0.62) !important;
+    box-shadow: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-tabs-bar button {
+    position: relative !important;
+    min-height: 58px !important;
+    display: inline-grid !important;
+    place-items: center !important;
+    align-content: center !important;
+    gap: 3px !important;
+    border-radius: 0 !important;
+    color: rgba(255, 248, 235, 0.54) !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-tabs-bar button svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-tabs-bar button.active {
+    background: transparent !important;
+    color: #fff8eb !important;
+    box-shadow: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-tabs-bar button.active::after {
+    content: '' !important;
+    position: absolute !important;
+    left: 28% !important;
+    right: 28% !important;
+    bottom: 0 !important;
+    height: 3px !important;
+    border-radius: 999px !important;
+    background: #35e596 !important;
+    box-shadow: 0 0 22px rgba(46, 214, 139, 0.7) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-chats-hero,
+  html[data-wild-theme='dark'] body .app-shell .community-empty-loop,
+  html[data-wild-theme='dark'] body .app-shell .library-start-card,
+  html[data-wild-theme='dark'] body .app-shell .quest-loop-empty {
+    border-radius: 26px !important;
+    border: 1px solid rgba(255, 248, 235, 0.11) !important;
+    background-color: rgba(4, 8, 7, 0.88) !important;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-friend-card,
+  html[data-wild-theme='dark'] body .app-shell .community-post-card,
+  html[data-wild-theme='dark'] body .app-shell .quest-item-card {
+    border-radius: 22px !important;
+    border-color: rgba(255, 248, 235, 0.1) !important;
+    background:
+      linear-gradient(135deg, rgba(255, 248, 235, 0.09), rgba(255, 248, 235, 0.025)),
+      rgba(4, 8, 7, 0.92) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-fab-btn {
+    display: grid !important;
+    place-items: center !important;
+    right: 22px !important;
+    bottom: calc(98px + env(safe-area-inset-bottom, 0px)) !important;
+    width: 52px !important;
+    height: 52px !important;
+    border-radius: 50% !important;
+    border: 0 !important;
+    background: #35e596 !important;
+    color: #04100a !important;
+    box-shadow: 0 18px 42px rgba(46, 214, 139, 0.35) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-shell {
+    padding: 28px 20px calc(132px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-header {
+    min-height: 46px !important;
+    margin-bottom: 14px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-header h1 {
+    font-size: 1.78rem !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-tabs {
+    width: calc(100% + 40px) !important;
+    margin: 0 -20px 18px !important;
+    padding: 0 20px 4px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .library-start-card {
+    height: auto !important;
+    min-height: 0 !important;
+    grid-template-rows: 210px auto !important;
+    margin-top: 8px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .library-start-panel h3 {
+    max-width: 11ch !important;
+    font-size: 1.72rem !important;
+    line-height: 1 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .library-start-panel {
+    padding: 18px 18px 18px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quests-shell {
+    padding: 30px 22px calc(132px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-loop-empty {
+    min-height: 320px !important;
+    padding: 24px 20px !important;
+  }
+}
+
 @media (max-width: 780px) {
   html[data-wild-theme='dark'] body .app-shell .gallery-v2-shell {
     min-height: 100dvh !important;
@@ -798,4 +1052,1087 @@
     background: rgba(3, 8, 6, 0.74) !important;
     border: 1px solid rgba(255, 248, 235, 0.14) !important;
   }
+}
+
+/* Production mobile polish: this file is imported last, and this block must
+   stay last so old experimental theme rules cannot reintroduce hidden text,
+   stuck-card chrome, or bottom-dock overlap. */
+@media (max-width: 780px) {
+  html[data-wild-theme='dark'] body .app-shell .mobile-content-area {
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior-y: contain !important;
+    background: #020504 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-shell,
+  html[data-wild-theme='dark'] body .app-shell .guild-page,
+  html[data-wild-theme='dark'] body .app-shell .quests-shell {
+    min-height: 100dvh !important;
+    padding-bottom: calc(142px + env(safe-area-inset-bottom, 0px)) !important;
+    overflow-y: visible !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .mobile-bottom-dock {
+    left: 16px !important;
+    right: 16px !important;
+    bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
+    width: auto !important;
+    min-height: 68px !important;
+    border-radius: 28px !important;
+    background: rgba(2, 5, 4, 0.8) !important;
+    border: 1px solid rgba(255, 248, 235, 0.13) !important;
+    box-shadow: 0 22px 60px rgba(0, 0, 0, 0.5) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .dock-shutter-item::after,
+  html[data-wild-theme='dark'] body .app-shell .dock-shutter-btn::after,
+  html[data-wild-theme='dark'] body .app-shell .dock-shutter-btn span {
+    display: none !important;
+    content: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .dock-shutter-btn {
+    width: 64px !important;
+    height: 64px !important;
+    border-radius: 50% !important;
+    transform: translateY(-18px) !important;
+    background: linear-gradient(145deg, #35e596, #0fa96d) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-tabs-bar {
+    width: 100% !important;
+    height: 58px !important;
+    margin: 0 0 16px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(255, 248, 235, 0.1) !important;
+    border-radius: 0 !important;
+    background: rgba(2, 5, 4, 0.64) !important;
+    box-shadow: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-tabs-bar button {
+    position: relative !important;
+    min-height: 58px !important;
+    display: inline-grid !important;
+    align-content: center !important;
+    justify-items: center !important;
+    gap: 3px !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: rgba(255, 248, 235, 0.58) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-tabs-bar button svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-tabs-bar button.active {
+    color: #fff8eb !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-tabs-bar button.active::after {
+    content: '' !important;
+    position: absolute !important;
+    left: 28% !important;
+    right: 28% !important;
+    bottom: 0 !important;
+    height: 3px !important;
+    border-radius: 999px !important;
+    background: #35e596 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-header {
+    min-height: 46px !important;
+    margin-bottom: 14px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-header h1 {
+    font-size: 1.78rem !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .library-start-card {
+    height: auto !important;
+    min-height: 0 !important;
+    grid-template-rows: 210px auto !important;
+    margin-top: 8px !important;
+    border-radius: 26px !important;
+    overflow: hidden !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .library-start-card .library-empty-media {
+    min-height: 210px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .library-start-panel {
+    padding: 18px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .library-start-panel h3 {
+    max-width: 11ch !important;
+    font-size: 1.72rem !important;
+    line-height: 1 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .profile-shell-v2 {
+    min-height: 100dvh !important;
+    padding: calc(18px + env(safe-area-inset-top, 0px)) 18px calc(142px + env(safe-area-inset-bottom, 0px)) !important;
+    gap: 16px !important;
+    overflow: visible !important;
+    background:
+      radial-gradient(circle at 18% -8%, rgba(53, 229, 150, 0.16), transparent 32%),
+      radial-gradient(circle at 92% 2%, rgba(240, 206, 112, 0.12), transparent 30%),
+      linear-gradient(180deg, #07120d 0%, #020504 58%, #000201 100%) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .profile-hero-v2 {
+    min-height: 118px !important;
+    padding: 18px !important;
+    align-items: center !important;
+    border-radius: 28px !important;
+    border: 1px solid rgba(255, 248, 235, 0.14) !important;
+    background:
+      linear-gradient(135deg, rgba(255, 248, 235, 0.1), rgba(255, 248, 235, 0.03)),
+      rgba(11, 18, 14, 0.88) !important;
+    box-shadow: 0 20px 54px rgba(0, 0, 0, 0.34) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .profile-avatar-v2 {
+    width: 62px !important;
+    height: 62px !important;
+    border-radius: 22px !important;
+    background: linear-gradient(145deg, #fff8eb, #35e596 58%, #ff7a6d) !important;
+    color: #04100b !important;
+    box-shadow: 0 16px 42px rgba(53, 229, 150, 0.24) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .profile-identity-v2 h2 {
+    color: #fff8eb !important;
+    font-size: 1.22rem !important;
+    line-height: 1.08 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .profile-tier-label,
+  html[data-wild-theme='dark'] body .app-shell .profile-xp-label,
+  html[data-wild-theme='dark'] body .app-shell .profile-section-eyebrow,
+  html[data-wild-theme='dark'] body .app-shell .profile-rank-empty {
+    color: rgba(255, 248, 235, 0.72) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .profile-level-pill {
+    background: rgba(53, 229, 150, 0.16) !important;
+    border-color: rgba(53, 229, 150, 0.32) !important;
+    color: #78f0b6 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .profile-xp-track {
+    height: 7px !important;
+    background: rgba(255, 248, 235, 0.12) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .profile-xp-fill {
+    background: linear-gradient(90deg, #35e596, #f0ce70) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .profile-streak-badge {
+    color: #fff8eb !important;
+    background: rgba(255, 122, 109, 0.18) !important;
+    border-color: rgba(255, 122, 109, 0.34) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .profile-stat-grid-v2 {
+    gap: 10px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .profile-stat-v2,
+  html[data-wild-theme='dark'] body .app-shell .profile-rank-section,
+  html[data-wild-theme='dark'] body .app-shell .profile-menu-v2 {
+    border: 1px solid rgba(255, 248, 235, 0.12) !important;
+    background: rgba(255, 248, 235, 0.075) !important;
+    box-shadow: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .profile-stat-v2 {
+    min-width: 0 !important;
+    padding: 14px 6px !important;
+    border-radius: 20px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .profile-stat-v2 strong {
+    color: #35e596 !important;
+    font-size: 1.28rem !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .profile-stat-v2.gold strong {
+    color: #f0ce70 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .profile-stat-v2 small {
+    color: rgba(255, 248, 235, 0.66) !important;
+    letter-spacing: 0 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .profile-menu-v2 {
+    border-radius: 24px !important;
+    overflow: hidden !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .profile-menu-row-v2 {
+    min-height: 58px !important;
+    padding: 15px 16px !important;
+    border-bottom: 1px solid rgba(255, 248, 235, 0.1) !important;
+    background: rgba(255, 248, 235, 0.02) !important;
+    color: #fff8eb !important;
+    font-weight: 760 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .profile-menu-row-v2:hover,
+  html[data-wild-theme='dark'] body .app-shell .profile-menu-row-v2:active {
+    background: rgba(53, 229, 150, 0.1) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .profile-menu-emoji {
+    width: 34px !important;
+    height: 34px !important;
+    display: inline-grid !important;
+    place-items: center !important;
+    border-radius: 14px !important;
+    background: rgba(255, 248, 235, 0.1) !important;
+    font-size: 1rem !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .profile-menu-row-label {
+    color: #fff8eb !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .profile-menu-chevron {
+    color: rgba(255, 248, 235, 0.58) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-tabs {
+    padding-right: 54px !important;
+    scroll-padding-inline: 18px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-shell {
+    gap: 10px !important;
+    padding: 26px 20px calc(128px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-header {
+    margin-bottom: 6px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-stats {
+    display: flex !important;
+    align-items: baseline !important;
+    justify-content: flex-start !important;
+    gap: 16px !important;
+    margin: 0 0 10px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-stat {
+    min-height: 0 !important;
+    display: inline-flex !important;
+    flex: 0 0 auto !important;
+    align-items: baseline !important;
+    justify-content: flex-start !important;
+    gap: 5px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-stat strong {
+    font-size: 0.98rem !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-stat small {
+    font-size: 0.68rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-tabs {
+    gap: 7px !important;
+    margin: 0 -20px 14px !important;
+    padding: 0 20px 2px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-tab {
+    min-width: 0 !important;
+    height: 34px !important;
+    padding: 0 12px !important;
+    border-radius: 999px !important;
+    border-color: rgba(255, 248, 235, 0.08) !important;
+    background: rgba(255, 248, 235, 0.045) !important;
+    font-size: 0.78rem !important;
+    font-weight: 760 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-tab.active {
+    background: rgba(53, 229, 150, 0.16) !important;
+    border-color: rgba(53, 229, 150, 0.3) !important;
+    color: #8ff0bd !important;
+    box-shadow: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .library-start-card {
+    grid-template-rows: 132px auto !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin-top: 0 !important;
+    border-radius: 18px !important;
+    border-color: rgba(255, 248, 235, 0.08) !important;
+    background: rgba(3, 8, 6, 0.72) !important;
+    box-shadow: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .library-start-card .library-empty-media {
+    min-height: 132px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .library-start-panel {
+    gap: 7px !important;
+    padding: 14px 16px 16px !important;
+    background: rgba(3, 8, 6, 0.88) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .library-start-panel .library-loop-kicker {
+    padding: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: rgba(255, 248, 235, 0.5) !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .library-start-panel h3 {
+    max-width: 18ch !important;
+    font-size: 1.22rem !important;
+    line-height: 1.05 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .library-start-panel p {
+    max-width: 26ch !important;
+    font-size: 0.8rem !important;
+    color: rgba(255, 248, 235, 0.56) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .guild-page {
+    padding: calc(14px + env(safe-area-inset-top, 0px)) 18px calc(124px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-tabs-bar {
+    height: 42px !important;
+    margin: 0 0 12px !important;
+    border-bottom-color: rgba(255, 248, 235, 0.06) !important;
+    background: rgba(2, 5, 4, 0.42) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-tabs-bar button {
+    min-height: 42px !important;
+    gap: 2px !important;
+    font-size: 0.74rem !important;
+    font-weight: 760 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-tabs-bar button svg {
+    width: 15px !important;
+    height: 15px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-tabs-bar button.active::after {
+    left: 35% !important;
+    right: 35% !important;
+    height: 2px !important;
+    box-shadow: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-chats-screen {
+    gap: 10px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-chats-hero {
+    min-height: 86px !important;
+    align-items: center !important;
+    padding: 12px 14px !important;
+    border-radius: 16px !important;
+    border-color: rgba(255, 248, 235, 0.08) !important;
+    box-shadow: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-chats-kicker {
+    margin-bottom: 4px !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    font-size: 0.66rem !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-chats-hero h2 {
+    max-width: none !important;
+    font-size: 1.24rem !important;
+    line-height: 1.04 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-chats-hero p {
+    max-width: 15rem !important;
+    margin-top: 4px !important;
+    font-size: 0.76rem !important;
+    line-height: 1.25 !important;
+    color: rgba(255, 248, 235, 0.62) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-hero-camera {
+    width: 38px !important;
+    height: 38px !important;
+    flex-basis: 38px !important;
+    border-radius: 50% !important;
+    box-shadow: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-story-rail {
+    gap: 9px !important;
+    padding-bottom: 0 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-story-chip {
+    flex-basis: 54px !important;
+    gap: 5px !important;
+    font-size: 0.7rem !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-story-chip .post-author-avatar {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 50% !important;
+    box-shadow: 0 0 0 1px rgba(255, 248, 235, 0.1) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-friend-list {
+    gap: 0 !important;
+    padding-bottom: 24px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-friend-card {
+    grid-template-columns: 38px 1fr 34px !important;
+    min-height: 62px !important;
+    padding: 9px 0 !important;
+    border-width: 0 0 1px !important;
+    border-radius: 0 !important;
+    border-color: rgba(255, 248, 235, 0.07) !important;
+    background: transparent !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-friend-card > .post-author-avatar {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 50% !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-friend-meta h3 {
+    font-size: 0.9rem !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-friend-meta small {
+    margin-top: 2px !important;
+    font-size: 0.68rem !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-friend-meta p {
+    margin-top: 2px !important;
+    font-size: 0.72rem !important;
+    color: rgba(255, 248, 235, 0.56) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-chat-action {
+    width: 32px !important;
+    height: 32px !important;
+    border: 0 !important;
+    border-radius: 50% !important;
+    background: rgba(255, 248, 235, 0.055) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-feed-stream {
+    gap: 12px !important;
+    margin-bottom: 24px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-post-card {
+    border-radius: 14px !important;
+    border-color: rgba(255, 248, 235, 0.07) !important;
+    background: rgba(4, 8, 7, 0.62) !important;
+    box-shadow: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quests-shell {
+    padding: 24px 20px calc(128px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-user-topbar {
+    margin-bottom: 10px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-cadence-tabs {
+    height: 36px !important;
+    margin: 10px 0 12px !important;
+    padding: 3px !important;
+    border-color: rgba(255, 248, 235, 0.08) !important;
+    background: rgba(255, 248, 235, 0.055) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-cadence-btn {
+    min-height: 30px !important;
+    padding: 0 !important;
+    font-size: 0.7rem !important;
+    font-weight: 780 !important;
+    letter-spacing: 0 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-cadence-btn.active {
+    background: rgba(53, 229, 150, 0.18) !important;
+    color: #8ff0bd !important;
+    box-shadow: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-cadence-btn.active span {
+    color: #8ff0bd !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-cadence-btn [style*='background'] {
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quests-card-list {
+    gap: 8px !important;
+    padding-bottom: 24px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-item-card {
+    min-height: 70px !important;
+    border-radius: 16px !important;
+    border-color: rgba(255, 248, 235, 0.08) !important;
+    background: rgba(6, 12, 9, 0.66) !important;
+    box-shadow: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-card-content {
+    grid-template-columns: 40px minmax(0, 1fr) 46px !important;
+    min-height: 70px !important;
+    gap: 10px !important;
+    padding: 10px 8px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-row-thumb {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 14px !important;
+    border-color: rgba(255, 248, 235, 0.08) !important;
+    box-shadow: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-item-title {
+    margin-bottom: 5px !important;
+    font-size: 0.88rem !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-row-meta {
+    margin-bottom: 5px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-reward-pill {
+    height: auto !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    font-weight: 760 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-claim-btn {
+    width: 44px !important;
+    height: 34px !important;
+    min-width: 44px !important;
+    border-radius: 999px !important;
+    font-size: 0.72rem !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-loop-empty {
+    min-height: 164px !important;
+    padding: 18px 16px !important;
+    border-radius: 16px !important;
+    border-color: rgba(255, 248, 235, 0.08) !important;
+    background: rgba(4, 8, 7, 0.66) !important;
+    box-shadow: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-loop-empty h2 {
+    margin: 4px 0 6px !important;
+    font-size: 1.15rem !important;
+    line-height: 1.08 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-loop-empty p {
+    margin: 0 !important;
+    font-size: 0.78rem !important;
+    line-height: 1.3 !important;
+    color: rgba(255, 248, 235, 0.56) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-loop-kicker {
+    color: rgba(255, 248, 235, 0.48) !important;
+    font-size: 0.68rem !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-loop-empty .retention-loop-rail {
+    display: flex !important;
+    gap: 10px !important;
+    margin-top: 12px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-loop-empty .retention-loop-rail span {
+    min-height: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: rgba(255, 248, 235, 0.56) !important;
+    font-size: 0.68rem !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-loop-empty .retention-loop-rail strong {
+    color: #8ff0bd !important;
+    font-size: 0.7rem !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-auto-loader {
+    width: max-content !important;
+    margin-top: 12px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: rgba(255, 248, 235, 0.58) !important;
+    font-size: 0.72rem !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quests-card-list {
+    display: grid !important;
+    gap: 10px !important;
+    margin-top: 12px !important;
+    padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-cadence-tabs {
+    margin-bottom: 0 !important;
+    background: rgba(2, 7, 5, 0.78) !important;
+    border-color: rgba(255, 248, 235, 0.1) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-cadence-btn {
+    min-height: 42px !important;
+    background: rgba(9, 16, 12, 0.72) !important;
+    color: rgba(255, 248, 235, 0.56) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-cadence-btn.active {
+    background: #2ed68b !important;
+    color: #03110a !important;
+    box-shadow: 0 10px 26px rgba(46, 214, 139, 0.24) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-compact-loader {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-self: center !important;
+    gap: 12px !important;
+    margin-top: 24px !important;
+    padding: 14px 16px !important;
+    border: 1px solid rgba(255, 248, 235, 0.1) !important;
+    border-radius: 18px !important;
+    background: rgba(4, 8, 7, 0.66) !important;
+    color: #fff8eb !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-compact-loader > span {
+    width: 9px !important;
+    height: 9px !important;
+    flex: 0 0 auto !important;
+    border-radius: 999px !important;
+    background: #2ed68b !important;
+    box-shadow: 0 0 0 0 rgba(46, 214, 139, 0.36) !important;
+    animation: wr-pulse-dot 1.3s ease-in-out infinite !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-compact-loader strong {
+    display: block !important;
+    font-size: 0.88rem !important;
+    line-height: 1.1 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-compact-loader p {
+    margin: 3px 0 0 !important;
+    color: rgba(255, 248, 235, 0.56) !important;
+    font-size: 0.74rem !important;
+    line-height: 1.25 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quests-section-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    margin: 2px 2px 0 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quests-section-header h2 {
+    margin: 0 !important;
+    color: #fff8eb !important;
+    font-size: 1rem !important;
+    line-height: 1.15 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quests-section-header span {
+    color: rgba(255, 248, 235, 0.58) !important;
+    font-size: 0.78rem !important;
+    font-weight: 850 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-item-card {
+    border-radius: 16px !important;
+    background: rgba(9, 16, 12, 0.74) !important;
+    box-shadow: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-card-content {
+    gap: 10px !important;
+    padding: 12px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-row-thumb {
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 14px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-item-title {
+    margin: 0 !important;
+    color: #fff8eb !important;
+    font-size: 0.94rem !important;
+    line-height: 1.16 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-item-instruction {
+    margin: 3px 0 7px !important;
+    color: rgba(255, 248, 235, 0.58) !important;
+    font-size: 0.74rem !important;
+    line-height: 1.28 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-explorer-main {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    min-width: 0 !important;
+    flex: 1 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-explorer-copy {
+    display: grid !important;
+    gap: 4px !important;
+    min-width: 0 !important;
+    flex: 1 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-explorer-copy h3 {
+    margin: 0 !important;
+    color: #fff8eb !important;
+    font-size: 0.94rem !important;
+    line-height: 1.05 !important;
+    font-weight: 850 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-explorer-copy small {
+    color: rgba(255, 248, 235, 0.62) !important;
+    font-size: 0.68rem !important;
+    line-height: 1.1 !important;
+    font-weight: 760 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-explorer-copy .progress-bar {
+    height: 4px !important;
+    background: rgba(255, 248, 235, 0.1) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-season-strip {
+    display: grid !important;
+    gap: 7px !important;
+    margin-top: 10px !important;
+    padding: 12px 14px !important;
+    min-height: 86px !important;
+    border: 1px solid rgba(255, 248, 235, 0.09) !important;
+    border-radius: 18px !important;
+    background:
+      radial-gradient(circle at 18% 0%, rgba(46, 214, 139, 0.14), transparent 44%),
+      rgba(6, 12, 9, 0.7) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-season-topline,
+  html[data-wild-theme='dark'] body .app-shell .quest-season-rank {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-season-topline span {
+    color: rgba(240, 206, 112, 0.76) !important;
+    font-size: 0.66rem !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.08em !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-season-rank strong {
+    color: #fff8eb !important;
+    font-size: 0.88rem !important;
+    line-height: 1.1 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-season-rank span,
+  html[data-wild-theme='dark'] body .app-shell .quest-season-strip p {
+    margin: 0 !important;
+    color: rgba(255, 248, 235, 0.55) !important;
+    font-size: 0.72rem !important;
+    line-height: 1.15 !important;
+    font-weight: 760 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-season-strip .progress-bar {
+    height: 6px !important;
+    background: rgba(255, 248, 235, 0.1) !important;
+    box-shadow: 0 0 18px rgba(46, 214, 139, 0.08) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-compact-loader {
+    justify-self: stretch !important;
+    margin-top: 0 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-loading-stack {
+    display: grid !important;
+    gap: 10px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-skeleton-card {
+    min-height: 86px !important;
+    padding: 12px !important;
+    border: 1px solid rgba(255, 248, 235, 0.08) !important;
+    border-radius: 16px !important;
+    background: rgba(9, 16, 12, 0.58) !important;
+    overflow: hidden !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-skeleton-card span,
+  html[data-wild-theme='dark'] body .app-shell .quest-skeleton-card strong,
+  html[data-wild-theme='dark'] body .app-shell .quest-skeleton-card p {
+    display: block !important;
+    border-radius: 999px !important;
+    background: linear-gradient(90deg, rgba(255,248,235,0.06), rgba(255,248,235,0.13), rgba(255,248,235,0.06)) !important;
+    background-size: 180% 100% !important;
+    animation: quest-skeleton-sheen 1.4s ease-in-out infinite !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-skeleton-card span {
+    width: 96px !important;
+    height: 12px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-skeleton-card strong {
+    width: 70% !important;
+    height: 16px !important;
+    margin-top: 13px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-skeleton-card p {
+    width: 46% !important;
+    height: 9px !important;
+    margin: 10px 0 0 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-card-content {
+    display: grid !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-card-topline,
+  html[data-wild-theme='dark'] body .app-shell .quest-card-footer {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-rarity-mark {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    color: rgba(255, 248, 235, 0.58) !important;
+    font-size: 0.66rem !important;
+    line-height: 1 !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.05em !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-rarity-mark svg {
+    width: 13px !important;
+    height: 13px !important;
+    color: #2ed68b !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-xp-reward {
+    color: #f0ce70 !important;
+    font-size: 0.72rem !important;
+    font-weight: 900 !important;
+    text-shadow: 0 0 14px rgba(240, 206, 112, 0.14) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-card-footer {
+    margin-top: 8px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-status-copy {
+    color: rgba(255, 248, 235, 0.56) !important;
+    font-size: 0.72rem !important;
+    font-weight: 780 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-action-copy {
+    color: #2ed68b !important;
+    font-size: 0.68rem !important;
+    font-weight: 950 !important;
+    letter-spacing: 0.06em !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-item-card.in-progress,
+  html[data-wild-theme='dark'] body .app-shell .quest-item-card.pending {
+    border-color: rgba(46, 214, 139, 0.22) !important;
+    box-shadow: inset 3px 0 rgba(46, 214, 139, 0.65) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-item-card.completed {
+    border-color: rgba(46, 214, 139, 0.34) !important;
+    background: rgba(11, 34, 22, 0.74) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-item-card.needs-work {
+    border-color: rgba(240, 206, 112, 0.26) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-item-card.rarity-rare .quest-rarity-mark,
+  html[data-wild-theme='dark'] body .app-shell .quest-item-card.rarity-epic .quest-rarity-mark,
+  html[data-wild-theme='dark'] body .app-shell .quest-item-card.rarity-legendary .quest-rarity-mark {
+    color: rgba(240, 206, 112, 0.78) !important;
+  }
+
+  @keyframes quest-skeleton-sheen {
+    0% { background-position: 120% 0; }
+    100% { background-position: -80% 0; }
+  }
+}
+
+html[data-wild-theme='dark'] body .app-status-screen.fullscreen-ambient-loader {
+  min-height: 100dvh !important;
+  padding: max(28px, env(safe-area-inset-top, 0px)) 24px max(28px, env(safe-area-inset-bottom, 0px)) !important;
+  display: grid !important;
+  place-items: center !important;
+  background:
+    linear-gradient(180deg, rgba(1, 5, 4, 0.36), rgba(1, 5, 4, 0.86)),
+    url('/assets/verdant-explorer-banner.png') center / cover no-repeat,
+    #020504 !important;
+  color: #fff8eb !important;
+}
+
+html[data-wild-theme='dark'] body .app-status-screen .app-status-backdrop {
+  background:
+    radial-gradient(circle at 18% 8%, rgba(46, 214, 139, 0.16), transparent 28%),
+    radial-gradient(circle at 86% 18%, rgba(240, 206, 112, 0.10), transparent 26%),
+    linear-gradient(180deg, rgba(2, 5, 4, 0.08), rgba(2, 5, 4, 0.58)) !important;
+}
+
+html[data-wild-theme='dark'] body .app-status-screen .app-status-card {
+  width: min(82vw, 330px) !important;
+  padding: 22px 18px 18px !important;
+  border-radius: 24px !important;
+  border: 1px solid rgba(255, 248, 235, 0.14) !important;
+  background: rgba(7, 12, 9, 0.68) !important;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.48) !important;
+  backdrop-filter: blur(24px) saturate(1.08) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(1.08) !important;
+}
+
+html[data-wild-theme='dark'] body .app-status-screen .app-status-lens {
+  width: 66px !important;
+  height: 66px !important;
+  margin-bottom: 16px !important;
+}
+
+html[data-wild-theme='dark'] body .app-status-screen .ambient-compass-ring {
+  width: 60px !important;
+  height: 60px !important;
+  border-color: rgba(240, 206, 112, 0.24) !important;
+  background: rgba(255, 248, 235, 0.06) !important;
+}
+
+html[data-wild-theme='dark'] body .app-status-screen .ambient-compass-icon {
+  color: #f0ce70 !important;
+}
+
+html[data-wild-theme='dark'] body .app-status-screen .ambient-title-text {
+  margin: 0 !important;
+  color: #fff8eb !important;
+  font-size: 1.08rem !important;
+  line-height: 1.15 !important;
+  font-weight: 850 !important;
+}
+
+html[data-wild-theme='dark'] body .app-status-screen .ambient-subtitle-text {
+  margin: 6px 0 0 !important;
+  color: rgba(255, 248, 235, 0.68) !important;
+  font-size: 0.86rem !important;
+  line-height: 1.35 !important;
+}
+
+html[data-wild-theme='dark'] body .app-status-screen .ambient-status-badge {
+  margin-top: 10px !important;
+  padding: 6px 10px !important;
+  border-color: rgba(255, 248, 235, 0.12) !important;
+  background: rgba(255, 248, 235, 0.07) !important;
+  color: rgba(255, 248, 235, 0.58) !important;
+  font-size: 0.72rem !important;
+}
+
+html[data-wild-theme='dark'] body .app-status-screen .ambient-action-area {
+  margin-top: 16px !important;
+}
+
+html[data-wild-theme='dark'] body .app-status-screen .ambient-action-btn {
+  min-height: 46px !important;
+  border-radius: 16px !important;
+  background: #fff8eb !important;
+  color: #050706 !important;
+  box-shadow: none !important;
 }

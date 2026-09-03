@@ -72,17 +72,24 @@ export class MemoryQuestRepository {
   }
 
   async listCommunityPosts(viewerId, { scope = 'public', limit = 50 } = {}) {
-    let posts = this.communityPosts.filter((item) => item.visibility === 'public');
-    if (scope === 'friends') {
-      const friendIds = new Set((await this.listFriends(viewerId)).filter((f) => f.status === 'accepted').map((f) => f.userId));
-      posts = posts.filter((item) => friendIds.has(item.userId));
-    }
+    let posts = this.communityPosts.filter((item) => this._canViewCommunityPost(viewerId, item));
+    if (scope === 'public') posts = posts.filter((item) => item.visibility === 'public');
+    if (scope === 'friends') posts = posts.filter((item) => item.userId !== viewerId);
     return posts.slice(0, Math.min(Number(limit) || 50, 100)).map((item) => this._decorateCommunityPost(viewerId, item));
   }
 
   async getCommunityPost(viewerId, postId) {
     const item = this.communityPosts.find((entry) => entry.id === postId);
-    return item ? this._decorateCommunityPost(viewerId, item) : null;
+    return item && this._canViewCommunityPost(viewerId, item) ? this._decorateCommunityPost(viewerId, item) : null;
+  }
+
+  _canViewCommunityPost(viewerId, item) {
+    if (!item) return false;
+    if (item.visibility === 'public' || item.userId === viewerId) return true;
+    return this.friendships.some((friendship) =>
+      friendship.status === 'accepted'
+      && ((friendship.requesterId === viewerId && friendship.addresseeId === item.userId)
+        || (friendship.requesterId === item.userId && friendship.addresseeId === viewerId)));
   }
 
   _decorateCommunityPost(viewerId, item) {
@@ -116,7 +123,8 @@ export class MemoryQuestRepository {
   }
 
   async setCommunityPostLike(userId, postId, liked) {
-    if (!this.communityPosts.some((item) => item.id === postId)) return null;
+    const post = this.communityPosts.find((item) => item.id === postId);
+    if (!this._canViewCommunityPost(userId, post)) return null;
     const existing = this.communityLikes.findIndex((like) => like.postId === postId && like.userId === userId);
     if (liked && existing === -1) this.communityLikes.push({ postId, userId });
     if (!liked && existing !== -1) this.communityLikes.splice(existing, 1);
@@ -124,18 +132,22 @@ export class MemoryQuestRepository {
   }
 
   async createCommunityComment(userId, postId, body) {
-    if (!this.communityPosts.some((item) => item.id === postId)) return null;
+    const post = this.communityPosts.find((item) => item.id === postId);
+    if (!this._canViewCommunityPost(userId, post)) return null;
     const value = { id: randomUUID(), postId, userId, displayName: this.users.get(userId)?.displayName || 'Adventurer', body, createdAt: new Date().toISOString() };
     this.communityComments.push(value);
     return clone(value);
   }
 
-  async listCommunityComments(postId) {
+  async listCommunityComments(userId, postId) {
+    const post = this.communityPosts.find((item) => item.id === postId);
+    if (!this._canViewCommunityPost(userId, post)) return null;
     return this.communityComments.filter((item) => item.postId === postId).map(clone);
   }
 
   async reportCommunityPost(userId, postId, { reason, details = '' }) {
-    if (!this.communityPosts.some((item) => item.id === postId)) return null;
+    const post = this.communityPosts.find((item) => item.id === postId);
+    if (!this._canViewCommunityPost(userId, post)) return null;
     const existing = this.communityReports.find((item) => item.postId === postId && item.userId === userId);
     if (existing) return { ...clone(existing), created: false };
     const value = { id: randomUUID(), postId, userId, reason, details, status: 'pending', createdAt: new Date().toISOString() };
@@ -152,9 +164,9 @@ export class MemoryQuestRepository {
     return true;
   }
 
-  async getCommunityPostMedia(postId) {
-    const post = this.communityPosts.find((entry) => entry.id === postId && entry.visibility === 'public');
-    if (!post?.cardId) return null;
+  async getCommunityPostMedia(userId, postId) {
+    const post = this.communityPosts.find((entry) => entry.id === postId);
+    if (!this._canViewCommunityPost(userId, post) || !post.cardId) return null;
     const card = this.capturedCards.find((entry) => entry.id === post.cardId);
     if (!card || card.status !== 'final') return null;
     const media = this.captureMedia.get(card.id);
