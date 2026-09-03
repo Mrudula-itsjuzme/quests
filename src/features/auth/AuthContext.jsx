@@ -6,6 +6,7 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(supabaseConfigured);
+  const offlineNativeMode = import.meta.env.VITE_OFFLINE_NATIVE === 'true';
   const [isGuest, setIsGuest] = useState(() => localStorage.getItem('habbit_guest_mode') === 'true');
   const devMode = !supabaseConfigured;
 
@@ -43,12 +44,21 @@ export function AuthProvider({ children }) {
       loading,
       session,
       user: session?.user ?? null,
-      isAuthenticated: devMode || isGuest || Boolean(session),
+      isAuthenticated: (devMode && !offlineNativeMode) || isGuest || Boolean(session),
       getToken: async () => {
         if (isGuest) return 'guest';
         if (devMode) return 'dev';
         const { data } = await supabase.auth.getSession();
         return data.session?.access_token ?? null;
+      },
+      signInWithOAuth: async (provider) => {
+        exitGuest();
+        if (!supabaseConfigured) throw new Error('Social sign-in is not configured for this build.');
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider,
+          options: { redirectTo: window.location.origin + '/app' },
+        });
+        if (error) throw error;
       },
       signInWithPassword: async (email, password) => {
         exitGuest();
@@ -66,7 +76,7 @@ export function AuthProvider({ children }) {
         await supabase.auth.signOut();
       },
     }),
-    [devMode, isGuest, loading, session],
+    [devMode, isGuest, loading, offlineNativeMode, session],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

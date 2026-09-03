@@ -133,9 +133,6 @@ export function WorldScreen() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <button type="button" className="explore-filter-btn" aria-label="Filter Map">
-            <Icon name="gear" />
-          </button>
         </div>
 
         <div className="explore-category-tags">
@@ -209,11 +206,24 @@ export function WorldScreen() {
         }}
       />
 
-      {/* Map Control Buttons */}
-      <button type="button" className="map-control-btn map-control-layers" aria-label="Toggle Layers" onClick={playTap}>
-        <Icon name="grid" />
-      </button>
-      <button type="button" className="map-control-btn map-control-locate" aria-label="Locate Me" onClick={playTap}>
+      <button
+        type="button"
+        className="map-control-btn map-control-locate"
+        aria-label="Locate me"
+        onClick={() => {
+          playTap();
+          if (lastKnownPosition) {
+            setSelectedHotspot({
+              id: 'current-position',
+              title: 'Your current area',
+              category: 'Explorer position',
+              region: 'Location is approximate',
+              description: 'Wild Realm uses this only to sort nearby hotspots and discoveries.',
+            });
+          }
+        }}
+        disabled={!lastKnownPosition}
+      >
         <Icon name="compass" />
       </button>
 

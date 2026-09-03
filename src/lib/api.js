@@ -78,12 +78,90 @@ import {
   GUEST_COMMUNITY_POSTS,
   GUEST_WORLD_HOTSPOTS,
 } from './guestData';
+import { deleteLocalCaptureImage, saveLocalCaptureImage } from './localCaptureStore';
 
 let guestCaptures = null;
+let guestCommunityPosts = null;
+
+const GUEST_CAPTURES_KEY = 'wild_realm_guest_captures_v1';
+const GUEST_POSTS_KEY = 'wild_realm_guest_posts_v1';
+const MAX_GUEST_CAPTURES = 100;
+const MAX_GUEST_POSTS = 100;
+const MAX_TITLE_LENGTH = 80;
+const MAX_NOTES_LENGTH = 500;
+const MAX_CAPTION_LENGTH = 280;
+
+function readGuestList(key, fallback) {
+  try {
+    const stored = localStorage.getItem(key);
+    if (!stored) return fallback;
+    const parsed = JSON.parse(stored);
+    return Array.isArray(parsed) ? parsed : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function writeGuestList(key, value) {
+  try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* ignore */ }
+}
+
+function sanitizeText(value, maxLength) {
+  if (typeof value !== 'string') return null;
+  const text = value.trim().replace(/\s+/g, ' ').slice(0, maxLength);
+  return text || null;
+}
+
+function privateGps(gps) {
+  const lat = Number(gps?.lat);
+  const lng = Number(gps?.lng);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+  return {
+    lat: Math.round(lat * 1000) / 1000,
+    lng: Math.round(lng * 1000) / 1000,
+  };
+}
+
+function locationLabel(gps) {
+  return gps ? `${gps.lat.toFixed(3)}, ${gps.lng.toFixed(3)}` : null;
+}
+
+function guestCaptureList() {
+  if (!guestCaptures) guestCaptures = readGuestList(GUEST_CAPTURES_KEY, GUEST_CAPTURES);
+  return guestCaptures;
+}
+
+function setGuestCaptures(next) {
+  guestCaptures = next;
+  writeGuestList(GUEST_CAPTURES_KEY, next);
+  return guestCaptures;
+}
+
+function guestPostList() {
+  if (!guestCommunityPosts) guestCommunityPosts = readGuestList(GUEST_POSTS_KEY, GUEST_COMMUNITY_POSTS);
+  return guestCommunityPosts;
+}
+
+function setGuestPosts(next) {
+  guestCommunityPosts = next;
+  writeGuestList(GUEST_POSTS_KEY, next);
+  return guestCommunityPosts;
+}
 
 async function guestDelay(data, ms = 450) {
   await new Promise((resolve) => setTimeout(resolve, ms));
   return JSON.parse(JSON.stringify(data));
+}
+
+function makeGuestRank() {
+  const ranks = [
+    { grade: 'S', tier: 'Legendary', stars: 5, xp: 180 },
+    { grade: 'A', tier: 'Epic', stars: 4, xp: 130 },
+    { grade: 'B', tier: 'Rare', stars: 3, xp: 95 },
+    { grade: 'C', tier: 'Uncommon', stars: 2, xp: 65 },
+    { grade: 'D', tier: 'Common', stars: 1, xp: 35 },
+  ];
+  return ranks[Math.floor(Math.random() * ranks.length)];
 }
 
 export function createApiClient(getToken) {
@@ -123,7 +201,7 @@ export function createApiClient(getToken) {
     },
     getCaptures: async (signal) => {
       const token = await getToken();
-      if (token === 'guest') return guestDelay(guestCaptures || GUEST_CAPTURES, 200);
+      if (token === 'guest') return guestDelay(guestCaptureList(), 200);
       return request('/captures', { signal, token });
     },
     getSpecies: async (signal) => {
@@ -134,32 +212,55 @@ export function createApiClient(getToken) {
     createCapture: async (bundle, idempotencyKey) => {
       const token = await getToken();
       if (token === 'guest') {
+        const rank = makeGuestRank();
+        const captureId = bundle.captureId || newIdempotencyKey();
+        const imageRef = await saveLocalCaptureImage(captureId, bundle.imageBase64);
+        const gps = privateGps(bundle.gps);
         const card = {
-          id: newIdempotencyKey(),
+          id: captureId,
           itemName: 'Mysterious Object',
-          category: ['Mind', 'Body', 'Discovery'][Math.floor(Math.random() * 3)],
+          category: ['Grass', 'Water', 'Earth', 'Sky'][Math.floor(Math.random() * 4)],
           cardTitle: 'The Curious Find',
-          rarityTier: ['Bronze', 'Silver', 'Gold', 'Platinum'][Math.floor(Math.random() * 4)],
+          rarityTier: rank.tier,
+          rarityGrade: rank.grade,
+          rarityStars: rank.stars,
           rarityScore: Math.random(),
-          description: 'A guest-mode capture — sign in to use the real rarity engine.',
-          capturedAt: new Date().toISOString(),
+          xpAwarded: rank.xp,
+          imageRef,
+          description: 'AI observed shape, color, and context from this live capture.',
+          capturedAt: bundle.capturedAt || new Date().toISOString(),
+          gps,
+          location: locationLabel(gps),
+          status: 'saved',
+          notes: null,
         };
-        guestCaptures = [card, ...(guestCaptures || GUEST_CAPTURES)];
+        const combined = [card, ...guestCaptureList()];
+        const removed = combined.slice(MAX_GUEST_CAPTURES);
+        setGuestCaptures(combined.slice(0, MAX_GUEST_CAPTURES));
+        await Promise.all(removed.map((item) => deleteLocalCaptureImage(item.imageRef)));
         return guestDelay(card, 500);
       }
       return request('/captures', { method: 'POST', body: bundle, idempotencyKey, token });
     },
     addCardToLibrary: async (captureId, idempotencyKey) => {
       const token = await getToken();
-      if (token === 'guest') return guestDelay((guestCaptures || GUEST_CAPTURES).find((item) => item.id === captureId), 200);
+      if (token === 'guest') return guestDelay(guestCaptureList().find((item) => item.id === captureId), 200);
       return request(`/cards/${captureId}/add`, { method: 'POST', idempotencyKey, token });
     },
     renameCapture: async (captureId, patch) => {
       const token = await getToken();
       const body = typeof patch === 'string' ? { cardTitle: patch } : patch;
       if (token === 'guest') {
-        guestCaptures = (guestCaptures || GUEST_CAPTURES).map((item) => (item.id === captureId ? { ...item, ...body } : item));
-        return guestDelay(guestCaptures.find((item) => item.id === captureId), 200);
+        const updates = {};
+        if (Object.hasOwn(body || {}, 'cardTitle')) {
+          updates.cardTitle = sanitizeText(body.cardTitle, MAX_TITLE_LENGTH) || 'Untitled discovery';
+        }
+        if (Object.hasOwn(body || {}, 'notes')) {
+          updates.notes = sanitizeText(body.notes, MAX_NOTES_LENGTH);
+        }
+        const next = guestCaptureList().map((item) => (item.id === captureId ? { ...item, ...updates } : item));
+        setGuestCaptures(next);
+        return guestDelay(next.find((item) => item.id === captureId), 200);
       }
       return request(`/captures/${captureId}`, { method: 'PATCH', body, token });
     },
@@ -204,12 +305,35 @@ export function createApiClient(getToken) {
     },
     getCommunityPosts: async (scope = 'public', signal) => {
       const token = await getToken();
-      if (token === 'guest') return guestDelay(GUEST_COMMUNITY_POSTS, 200);
+      if (token === 'guest') return guestDelay(guestPostList(), 200);
       return request(`/community/posts?scope=${encodeURIComponent(scope)}`, { signal, token });
     },
     createCommunityPost: async (payload, idempotencyKey) => {
       const token = await getToken();
-      if (token === 'guest') throw new ApiError(403, 'guest_write_unavailable');
+      if (token === 'guest') {
+        const discovery = guestCaptureList().find((item) => item.id === payload.cardId);
+        if (!discovery) throw new ApiError(404, 'capture_not_found');
+        const post = {
+          id: idempotencyKey || newIdempotencyKey(),
+          author: {
+            userId: GUEST_USER.id,
+            displayName: GUEST_USER.displayName,
+            totalXp: GUEST_USER.totalXp,
+            rankTitle: GUEST_USER.tierLabel,
+          },
+          cardId: discovery.id,
+          discovery,
+          caption: sanitizeText(payload.caption, MAX_CAPTION_LENGTH)
+            || sanitizeText(discovery.notes, MAX_CAPTION_LENGTH)
+            || `${GUEST_USER.displayName} found ${discovery.cardTitle || discovery.itemName}.`,
+          liked: false,
+          likeCount: 0,
+          commentCount: 0,
+          createdAt: new Date().toISOString(),
+        };
+        setGuestPosts([post, ...guestPostList()].slice(0, MAX_GUEST_POSTS));
+        return guestDelay(post, 200);
+      }
       return request('/community/posts', { method: 'POST', body: payload, idempotencyKey, token });
     },
     setCommunityPostLike: async (postId, liked) => {

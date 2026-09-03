@@ -3,7 +3,7 @@ import { useMe } from '../quests/queries';
 import { FullScreenStatus } from './ProtectedRoute';
 
 export function RequireOnboarding() {
-  const { data: me, isLoading, isError, refetch } = useMe();
+  const { data: me, isLoading, isError } = useMe();
 
   if (isLoading) {
     return (
@@ -15,16 +15,12 @@ export function RequireOnboarding() {
     );
   }
 
-  if (isError) {
-    return (
-      <FullScreenStatus
-        type="error"
-        title="Connection Paused"
-        text="Wild Realm could not reach the backend."
-        statusHint="Check the local API or network tunnel, then retry."
-        onRetry={() => refetch()}
-      />
-    );
+  if (isError && !me) {
+    // If we have no cached data and the network fails, we could either 
+    // block them or just let them into the app offline.
+    // To make it an offline-first app, we'll let them through to the Outlet.
+    // The rest of the app can handle missing data gracefully.
+    console.warn("Backend unreachable, starting offline mode...");
   }
 
   if (me && !me.onboardingCompletedAt) return <Navigate to="/onboarding" replace />;

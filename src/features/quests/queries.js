@@ -46,7 +46,10 @@ export function useCaptureItem() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (bundle) => api.createCapture(bundle, newIdempotencyKey()),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['captures'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['captures'] });
+      queryClient.invalidateQueries({ queryKey: ['world', 'hotspots'] });
+    },
   });
 }
 
@@ -55,7 +58,10 @@ export function useAddCardToLibrary() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (captureId) => api.addCardToLibrary(captureId, newIdempotencyKey()),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['captures'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['captures'] });
+      queryClient.invalidateQueries({ queryKey: ['world', 'hotspots'] });
+    },
   });
 }
 
@@ -105,7 +111,11 @@ export function useShareDiscovery() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (payload) => api.createCommunityPost(payload, newIdempotencyKey()),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['community', 'posts'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['community', 'posts'] });
+      queryClient.invalidateQueries({ queryKey: ['captures'] });
+      queryClient.invalidateQueries({ queryKey: ['world', 'hotspots'] });
+    },
   });
 }
 

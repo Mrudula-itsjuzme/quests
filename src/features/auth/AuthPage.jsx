@@ -83,7 +83,7 @@ function StrengthBar({ strength }) {
 
 /* ─── Main ────────────────────────────────────────────────────────────────── */
 export function AuthPage({ mode }) {
-  const { devMode, isAuthenticated, signInWithPassword, signUpWithPassword, enterAsGuest } = useAuth();
+  const { devMode, isAuthenticated, signInWithOAuth, signInWithPassword, signUpWithPassword, enterAsGuest } = useAuth();
   const location = useLocation();
   const isSignUp = mode === 'sign-up';
 
@@ -129,6 +129,18 @@ export function AuthPage({ mode }) {
       setSubmitState('success');
     } catch (err) {
       setError(err.message || 'Authentication failed. Please try again.');
+      setSubmitState('idle');
+    }
+  };
+
+  const handleSocialSignIn = async (provider) => {
+    playTap();
+    setError('');
+    setSubmitState('loading');
+    try {
+      await signInWithOAuth(provider);
+    } catch (err) {
+      setError(err.message || 'Social sign-in failed. Please try again.');
       setSubmitState('idle');
     }
   };
@@ -295,8 +307,34 @@ export function AuthPage({ mode }) {
             </form>
           )}
 
+          {submitState !== 'success' && (
+            <motion.div className="auth-social-stack" variants={fieldStagger} initial="hidden" animate="show" custom={4}>
+              <div className="auth-divider"><span>or</span></div>
+              <button
+                type="button"
+                className="auth-social-btn"
+                disabled={submitState === 'loading'}
+                onClick={() => handleSocialSignIn('google')}
+                onMouseEnter={playHover}
+              >
+                <span aria-hidden="true">G</span>
+                Continue with Google
+              </button>
+              <button
+                type="button"
+                className="auth-social-btn"
+                disabled={submitState === 'loading'}
+                onClick={() => handleSocialSignIn('apple')}
+                onMouseEnter={playHover}
+              >
+                <span aria-hidden="true"></span>
+                Continue with Apple
+              </button>
+            </motion.div>
+          )}
+
           {/* Footer links */}
-          <motion.div className="auth-footer-links" variants={fieldStagger} initial="hidden" animate="show" custom={4}>
+          <motion.div className="auth-footer-links" variants={fieldStagger} initial="hidden" animate="show" custom={5}>
             <Link to={switchPath} onClick={handleModeSwitch} className="auth-link" onMouseEnter={playHover}>
               {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
             </Link>

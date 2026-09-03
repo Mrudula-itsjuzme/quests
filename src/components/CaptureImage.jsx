@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AuthImage } from './AuthImage';
+import { isLocalCaptureRef, readLocalCaptureImage } from '../lib/localCaptureStore';
 
 /**
  * The one place a capture photograph is rendered.
@@ -19,8 +20,27 @@ import { AuthImage } from './AuthImage';
  */
 export function CaptureImage({ imageRef, alt, element, className = '', eager = false, useAuth = false }) {
   const [state, setState] = useState('loading'); // loading | loaded | failed
+  const [localSrc, setLocalSrc] = useState(null);
   const elementKey = (element || 'Earth').toLowerCase();
-  const showPhoto = Boolean(imageRef) && state !== 'failed';
+  const imageSrc = localSrc || imageRef;
+  const showPhoto = Boolean(imageSrc) && state !== 'failed';
+
+  useEffect(() => {
+    let active = true;
+    setState('loading');
+    setLocalSrc(null);
+    if (!isLocalCaptureRef(imageRef)) return () => { active = false; };
+    readLocalCaptureImage(imageRef)
+      .then((src) => {
+        if (!active) return;
+        if (src) setLocalSrc(src);
+        else setState('failed');
+      })
+      .catch(() => {
+        if (active) setState('failed');
+      });
+    return () => { active = false; };
+  }, [imageRef]);
 
   return (
     <div className={`capture-image ${className}`.trim()} data-state={showPhoto ? state : 'crest'}>
@@ -32,13 +52,13 @@ export function CaptureImage({ imageRef, alt, element, className = '', eager = f
       {showPhoto && (
         <AuthImage
           className="capture-image-photo"
-          src={imageRef}
+          src={imageSrc}
           alt={alt || ''}
           loading={eager ? 'eager' : 'lazy'}
           decoding="async"
           onLoad={() => setState('loaded')}
           onError={() => setState('failed')}
-          useAuth={useAuth}
+          useAuth={useAuth && !localSrc}
         />
       )}
     </div>

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import 'leaflet/dist/leaflet.css';
 
 // Leaflet is loaded lazily to avoid SSR issues with the window object
@@ -39,6 +39,8 @@ export function WorldCanvas({ hotspots = [], onSelectHotspot, userPosition }) {
   const mapRef = useRef(null);
   const markersRef = useRef([]);
   const userMarkerRef = useRef(null);
+  const [mapReady, setMapReady] = useState(false);
+  const offlineNative = import.meta.env.VITE_OFFLINE_NATIVE === 'true';
 
   // Initialize map
   useEffect(() => {
@@ -54,20 +56,23 @@ export function WorldCanvas({ hotspots = [], onSelectHotspot, userPosition }) {
         attributionControl: false,
       }).setView([12.9716, 77.5946], 12);
 
-      // Dark/nature-themed tiles (CartoDB Dark Matter for premium look)
-      Leaflet.tileLayer(
-        'https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}.png',
-        {
-          attribution: '© OpenStreetMap © CARTO',
-          subdomains: 'abcd',
-          maxZoom: 19,
-        },
-      ).addTo(map);
+      if (!offlineNative) {
+        // Dark/nature-themed tiles (CartoDB Dark Matter for premium look)
+        Leaflet.tileLayer(
+          'https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}.png',
+          {
+            attribution: '© OpenStreetMap © CARTO',
+            subdomains: 'abcd',
+            maxZoom: 19,
+          },
+        ).addTo(map);
 
-      // Compact attribution in bottom-right
-      Leaflet.control.attribution({ prefix: false, position: 'bottomright' }).addTo(map);
+        // Compact attribution in bottom-right
+        Leaflet.control.attribution({ prefix: false, position: 'bottomright' }).addTo(map);
+      }
 
       mapRef.current = map;
+      setMapReady(true);
     });
 
     return () => {
@@ -76,12 +81,13 @@ export function WorldCanvas({ hotspots = [], onSelectHotspot, userPosition }) {
         mapRef.current.remove();
         mapRef.current = null;
       }
+      setMapReady(false);
     };
-  }, []);
+  }, [offlineNative]);
 
   // Update user position marker
   useEffect(() => {
-    if (!mapRef.current) return;
+    if (!mapReady || !mapRef.current) return;
     getLeaflet().then((Leaflet) => {
       if (!mapRef.current) return;
 
@@ -105,11 +111,11 @@ export function WorldCanvas({ hotspots = [], onSelectHotspot, userPosition }) {
       // Pan to user position
       mapRef.current.setView([pos.lat, pos.lng], 13, { animate: true });
     });
-  }, [userPosition]);
+  }, [mapReady, userPosition]);
 
   // Update hotspot markers
   useEffect(() => {
-    if (!mapRef.current) return;
+    if (!mapReady || !mapRef.current) return;
     getLeaflet().then((Leaflet) => {
       if (!mapRef.current) return;
 
@@ -136,9 +142,9 @@ export function WorldCanvas({ hotspots = [], onSelectHotspot, userPosition }) {
         markersRef.current.push(marker);
       });
     });
-  }, [hotspots, onSelectHotspot]);
+  }, [hotspots, mapReady, onSelectHotspot]);
 
   return (
-    <div className="world-canvas-wrap" ref={containerRef} />
+    <div className={`world-canvas-wrap${offlineNative ? ' is-offline-map' : ''}`} ref={containerRef} />
   );
 }

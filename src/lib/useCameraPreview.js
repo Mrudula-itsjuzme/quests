@@ -41,7 +41,12 @@ export function useCameraPreview(active = true) {
       setStatus('starting');
       try {
         const stream = await media.getUserMedia({
-          video: { facingMode: { ideal: 'environment' } },
+          video: {
+            facingMode: { ideal: 'environment' },
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+            frameRate: { ideal: 24, max: 30 },
+          },
           audio: false,
         });
         if (cancelled) {

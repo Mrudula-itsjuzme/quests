@@ -20,6 +20,24 @@ function fileToDataUrl(file) {
   });
 }
 
+async function fileToOptimizedDataUrl(file) {
+  if (!('createImageBitmap' in window)) return fileToDataUrl(file);
+  const bitmap = await createImageBitmap(file);
+  const maxEdge = 1600;
+  const scale = Math.min(1, maxEdge / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+  canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+  const context = canvas.getContext('2d', { alpha: false });
+  if (!context) {
+    bitmap.close?.();
+    return fileToDataUrl(file);
+  }
+  context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close?.();
+  return canvas.toDataURL('image/jpeg', 0.82);
+}
+
 const ANTI_CHEAT_MESSAGES = {
   matches_existing_capture: 'This photo has already been captured. Try a genuinely new find.',
   velocity_exceeds_human_possible: "That location doesn't match your last capture. Check your location and try again.",
@@ -54,6 +72,7 @@ function triggerHaptic(pattern = [15, 30, 15]) {
 
 export function CaptureFlow({ onClose }) {
   const navigate = useNavigate();
+  const isNative = Capacitor.isNativePlatform();
   const inputRef = useRef(null);
   const [stage, setStage] = useState('prompt'); // prompt | scanning | candidates | reveal | error
   const [card, setCard] = useState(null);
@@ -128,7 +147,7 @@ export function CaptureFlow({ onClose }) {
     if (!file) return;
     setStage('scanning');
     setErrorMessage('');
-    const [dataUrl, telemetry] = await Promise.all([fileToDataUrl(file), collectCaptureTelemetry(file)]);
+    const [dataUrl, telemetry] = await Promise.all([fileToOptimizedDataUrl(file), collectCaptureTelemetry(file)]);
     setPreviewUrl(dataUrl);
     await submitCapture({
       captureId: crypto.randomUUID(),
@@ -141,9 +160,45 @@ export function CaptureFlow({ onClose }) {
     });
   };
 
+  const handleLivePreviewCapture = async () => {
+    const video = videoRef.current;
+    if (!video || !video.videoWidth || !video.videoHeight) return false;
+
+    const canvas = document.createElement('canvas');
+    const maxEdge = 1600;
+    const scale = Math.min(1, maxEdge / Math.max(video.videoWidth, video.videoHeight));
+    canvas.width = Math.max(1, Math.round(video.videoWidth * scale));
+    canvas.height = Math.max(1, Math.round(video.videoHeight * scale));
+    const context = canvas.getContext('2d', { alpha: false });
+    if (!context) return false;
+
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+    setStage('scanning');
+    setErrorMessage('');
+    setPreviewUrl(dataUrl);
+
+    const response = await fetch(dataUrl);
+    const blob = await response.blob();
+    const file = new File([blob], 'capture.jpg', { type: 'image/jpeg' });
+    const telemetry = await collectCaptureTelemetry(file);
+    await submitCapture({
+      captureId: crypto.randomUUID(),
+      imageBase64: dataUrl,
+      capturedAt: telemetry.capturedAt,
+      gps: telemetry.gps,
+      heading: telemetry.heading,
+      liveness: telemetry.liveness,
+      exif: telemetry.exif,
+    });
+    return true;
+  };
+
   const handleNativeCamera = async () => {
     if (captureItem.isPending) return;
-    if (Capacitor.isNativePlatform()) {
+    if (cameraStatus === 'live' && await handleLivePreviewCapture()) return;
+
+    if (isNative) {
       try {
         const image = await Camera.getPhoto({
           quality: 90,
@@ -157,7 +212,7 @@ export function CaptureFlow({ onClose }) {
           const response = await fetch(image.webPath);
           const blob = await response.blob();
           const file = new File([blob], 'capture.jpg', { type: 'image/jpeg' });
-          const [dataUrl, telemetry] = await Promise.all([fileToDataUrl(file), collectCaptureTelemetry(file)]);
+          const [dataUrl, telemetry] = await Promise.all([fileToOptimizedDataUrl(file), collectCaptureTelemetry(file)]);
           setPreviewUrl(dataUrl);
           await submitCapture({
             captureId: crypto.randomUUID(),
@@ -243,13 +298,13 @@ export function CaptureFlow({ onClose }) {
             <video
               ref={videoRef}
               className={`capture-viewfinder-video${cameraStatus === 'live' ? ' is-live' : ''}`}
-              style={{ filter: currentFilter.css !== 'none' ? currentFilter.css : undefined }}
+              style={!isNative && currentFilter.css !== 'none' ? { filter: currentFilter.css } : undefined}
               playsInline
               muted
               autoPlay
               aria-hidden="true"
             />
-            <div className={`capture-filter-aura filter-${activeFilter.toLowerCase()}`} aria-hidden="true" />
+            {!isNative && <div className={`capture-filter-aura filter-${activeFilter.toLowerCase()}`} aria-hidden="true" />}
             <div className="capture-viewfinder-vignette" aria-hidden="true" />
 
             {/* Top HUD */}
@@ -286,7 +341,7 @@ export function CaptureFlow({ onClose }) {
                     type="button"
                     className={`capture-filter-chip ${activeFilter === filter.id ? 'active' : ''}`}
                     aria-pressed={activeFilter === filter.id}
-                    aria-label={activeFilter === filter.id ? `Capture with ${filter.label}` : `Select ${filter.label} filter`}
+                    aria-label={activeFilter === filter.id ? `Capture photo with ${filter.label}` : `Select ${filter.label} filter`}
                     onClick={(event) => {
                       playTap();
                       event.currentTarget.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });

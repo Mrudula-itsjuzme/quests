@@ -8269,15 +8269,6 @@ body, .app-shell {
   color: #6b7280;
 }
 
-.explore-filter-btn {
-  background: transparent;
-  border: none;
-  color: var(--wild-emerald);
-  cursor: pointer;
-  display: grid;
-  place-items: center;
-}
-
 /* Category Filter Tags */
 .explore-category-tags {
   display: flex;
@@ -8431,8 +8422,12 @@ body, .app-shell {
   z-index: 20;
 }
 
-.map-control-layers { top: 80px; }
 .map-control-locate { top: 130px; }
+
+.map-control-btn:disabled {
+  opacity: 0.42;
+  cursor: default;
+}
 
 /* Bottom Sheet: Top Nature Hotspots Near You */
 .explore-bottom-sheet {

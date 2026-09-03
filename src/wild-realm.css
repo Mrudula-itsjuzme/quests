@@ -231,10 +231,6 @@ h1, h2, h3, h4, h5, h6, .brand-lockup strong {
   box-shadow: 0 0 16px rgba(111, 191, 122, 0.25) !important;
 }
 
-.explore-filter-btn {
-  color: var(--rarity-uncommon) !important;
-}
-
 .explore-tag {
   background: rgba(255, 255, 255, 0.05) !important;
   color: var(--quest-muted) !important;
@@ -873,6 +869,7 @@ body {
   object-fit: cover;
   opacity: 0;                 /* hidden until a real stream attaches */
   transition: opacity 420ms var(--quest-ease);
+  transform: translateZ(0);
 }
 .capture-viewfinder-video.is-live { opacity: 1; }
 
@@ -1206,6 +1203,47 @@ body {
 
 /* The dock must never sit on top of the capture experience, at any stage. */
 body:has(.capture-flow-overlay) .mobile-bottom-dock { display: none !important; }
+
+body:has(.capture-flow-overlay) .world-ambience,
+body:has(.capture-flow-overlay) .offline-sanctuary-bar {
+  display: none !important;
+}
+
+@media (pointer: coarse) {
+  .capture-viewfinder-video {
+    transition: opacity 120ms linear;
+    will-change: opacity;
+  }
+
+  .capture-viewfinder-vignette {
+    background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.34) 0%,
+      rgba(0, 0, 0, 0) 22%,
+      rgba(0, 0, 0, 0) 62%,
+      rgba(0, 0, 0, 0.46) 100%
+    );
+  }
+
+  .capture-player-badge,
+  .capture-rail-btn,
+  .capture-focus-pill,
+  .capture-side-btn {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  .capture-filter-preview {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.26);
+  }
+
+  .capture-filter-chip,
+  .capture-filter-preview,
+  .capture-side-btn,
+  .capture-rail-btn {
+    transition-duration: 80ms !important;
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .capture-reticle { animation: none; }
@@ -1680,10 +1718,25 @@ body:has(.capture-flow-overlay) .mobile-bottom-dock { display: none !important; 
 
 .quest-card-content {
   display: grid !important;
-  grid-template-columns: 42px 1fr auto !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
   align-items: center !important;
   gap: var(--space-3) !important;
   padding: 11px 12px !important;
+}
+
+.quest-card-topline {
+  grid-column: 1 / -1 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  min-width: 0 !important;
+}
+
+.quest-rarity-mark,
+.quest-xp-reward {
+  position: static !important;
+  white-space: nowrap !important;
 }
 
 .quest-row-thumb {
@@ -1929,9 +1982,7 @@ body:has(.capture-flow-overlay) .mobile-bottom-dock { display: none !important; 
   font-weight: 700 !important;
 }
 
-/* Map controls stack below the filter row rather than on top of it. */
-.map-control-btn.map-control-layers { top: 172px !important; }
-.map-control-btn.map-control-locate { top: 224px !important; }
+.map-control-btn.map-control-locate { top: 172px !important; }
 
 /* ==========================================================================
    WILD REALM — MOTION SYSTEM (second pass)
@@ -1973,7 +2024,6 @@ body:has(.capture-flow-overlay) .mobile-bottom-dock { display: none !important; 
 .profile-menu-list button,
 .library-element-tile,
 .map-control-btn,
-.explore-filter-btn,
 .quest-claim-btn,
 .community-fab-btn,
 .badges-panel a, .badges-panel button,
@@ -1995,7 +2045,6 @@ body:has(.capture-flow-overlay) .mobile-bottom-dock { display: none !important; 
 .library-tab-btn:active,
 .explore-tag:active,
 .map-control-btn:active,
-.explore-filter-btn:active,
 .quest-claim-btn:active,
 .community-fab-btn:active,
 .badges-panel a:active, .badges-panel button:active,
@@ -2542,6 +2591,66 @@ button[aria-disabled="true"] {
 .auth-submit-btn:hover { transform: translateY(-1px); box-shadow: 0 10px 28px rgba(16,185,129,0.4); }
 .auth-submit-btn:active { transform: translateY(0); filter: brightness(0.95); }
 .auth-submit-btn:disabled { filter: grayscale(0.8) brightness(0.6); cursor: not-allowed; transform: none; }
+.auth-social-stack {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(233,241,236,0.4);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgba(255,255,255,0.08);
+}
+.auth-social-btn {
+  width: 100%;
+  min-height: 46px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  color: rgba(240,253,244,0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+.auth-social-btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(34,197,94,0.34);
+  background: rgba(255,255,255,0.09);
+}
+.auth-social-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+.auth-social-btn > span {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: rgba(255,255,255,0.9);
+  color: #07140f;
+  font-weight: 900;
+  line-height: 1;
+}
 .auth-footer-links {
   display: flex; flex-direction: column;
   align-items: center; gap: 10px;
@@ -3004,6 +3113,29 @@ button[aria-disabled="true"] {
   height: 100% !important;
   background: transparent !important;
   font-family: inherit !important;
+}
+
+.world-canvas-wrap.is-offline-map::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 30% 26%, rgba(34, 197, 94, 0.18), transparent 24%),
+    radial-gradient(circle at 76% 64%, rgba(96, 165, 250, 0.14), transparent 28%),
+    linear-gradient(rgba(120, 190, 150, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(120, 190, 150, 0.06) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 44px 44px, 44px 44px;
+}
+
+.world-canvas-wrap.is-offline-map .leaflet-container,
+.world-canvas-wrap.is-offline-map .leaflet-pane,
+.world-canvas-wrap.is-offline-map .leaflet-map-pane {
+  background: transparent !important;
+}
+
+.world-canvas-wrap.is-offline-map .leaflet-tile-pane {
+  display: none !important;
 }
 
 /* Dark-tint attribution */

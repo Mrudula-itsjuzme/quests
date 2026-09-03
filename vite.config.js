@@ -6,7 +6,7 @@ const apiTarget = process.env.VITE_API_TARGET || 'http://localhost:3001';
 // A Capacitor build loads from capacitor://localhost, where the default
 // relative '/api' base resolves to the device instead of the backend. Fail the
 // build rather than shipping a native client that cannot reach the API.
-if (process.env.VITE_NATIVE_BUILD === 'true' && !process.env.VITE_API_BASE_URL) {
+if (process.env.VITE_NATIVE_BUILD === 'true' && process.env.VITE_OFFLINE_NATIVE !== 'true' && !process.env.VITE_API_BASE_URL) {
   throw new Error(
     'VITE_API_BASE_URL must be set to an absolute backend URL for native builds '
     + "(a relative '/api' resolves to the device, not the server).",
@@ -36,4 +36,3 @@ export default defineConfig({
     entries: ['index.html'],
   },
 });
-

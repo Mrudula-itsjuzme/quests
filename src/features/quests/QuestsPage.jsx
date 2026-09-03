@@ -207,6 +207,7 @@ export function QuestsPage() {
                           exit={{ scale: 0, opacity: 0 }}
                           type="button"
                           className="quest-claim-btn glass"
+                          aria-label="View"
                           whileTap={{ scale: 0.9 }}
                           onClick={(e) => {
                             e.stopPropagation();

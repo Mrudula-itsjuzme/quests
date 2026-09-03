@@ -10,6 +10,7 @@ import { AnimatedCounter } from '../../components/motion/AnimatedCounter';
 import { RewardsSkeleton } from '../../components/motion/SkeletonLoader';
 import { HoldButton } from '../../components/motion/HoldButton';
 import { staggerContainer, staggerItem, springConfig } from '../../components/motion/MotionVariants';
+import '../../rewards-override.css';
 
 const badgeDefinitions = [
   { icon: 'sun', label: 'First Light', threshold: 1 },

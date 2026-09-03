@@ -1,0 +1,49 @@
+/* --- WILD REALM REWARDS OVERRIDE --- */
+.rewards-reference .reward-panel {
+  background: rgba(10, 25, 18, 0.6) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(16, 185, 129, 0.2) !important;
+  color: #e5e7eb !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+}
+
+.rewards-reference .reward-panel h1,
+.rewards-reference .reward-panel h2,
+.rewards-reference .reward-panel h3,
+.rewards-reference .reward-panel strong {
+  color: #fff !important;
+}
+
+.rewards-reference .reward-panel p,
+.rewards-reference .reward-panel span,
+.rewards-reference .reward-panel small,
+.rewards-reference .reward-panel .eyebrow {
+  color: #a7f3d0 !important;
+}
+
+.rewards-reference .reward-panel .reward-empty {
+  color: rgba(167, 243, 208, 0.6) !important;
+}
+
+.rewards-reference .reward-panel button,
+.rewards-reference .reward-panel a {
+  color: #fff !important;
+  background: rgba(16, 185, 129, 0.2) !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+}
+
+.rewards-reference .reward-panel button:hover,
+.rewards-reference .reward-panel a:hover {
+  background: rgba(16, 185, 129, 0.3) !important;
+}
+
+.rewards-reference .reward-panel article {
+  background: rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.rewards-reference .reward-panel article:hover {
+  background: rgba(16, 185, 129, 0.1) !important;
+  border-color: rgba(16, 185, 129, 0.2) !important;
+}
