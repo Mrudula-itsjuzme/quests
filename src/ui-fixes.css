@@ -1,169 +1,154 @@
-/* --- PREMIUM UI POLISH OVERRIDES --- */
+/* --- TACTILE & HUMAN-CENTRIC UI OVERRIDES --- */
 
-/* 1. New Discovery Background Fix */
+/* 1. Discovery & Modals: Natural, Journal-like feel instead of glowing glass */
 .capture-flow-panel-clean, .discovery-card-modal {
-  background: linear-gradient(135deg, rgba(8, 20, 15, 0.95) 0%, rgba(2, 6, 4, 0.98) 100%) !important;
-  backdrop-filter: blur(24px) !important;
-  -webkit-backdrop-filter: blur(24px) !important;
-  color: #fff !important;
-  border: 1px solid rgba(52, 211, 133, 0.3) !important;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  background: #111412 !important; /* Deep natural charcoal */
+  color: #e6e2d3 !important; /* Warm parchment-like cream */
+  border: 1px solid rgba(230, 226, 211, 0.1) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6) !important;
+  /* Removed aggressive blur/glassmorphism */
 }
 
 .discovery-info-section {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  border-radius: 16px !important;
-  color: #e5e7eb !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+  background: rgba(230, 226, 211, 0.03) !important;
+  border: 1px solid rgba(230, 226, 211, 0.08) !important;
+  border-radius: 12px !important;
+  color: #d1cbb8 !important;
 }
 
 .discovery-info-label {
-  color: #6ee7a0 !important;
-  font-weight: 700 !important;
+  color: #9e9a8b !important;
+  font-weight: 600 !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.05em !important;
+  letter-spacing: 0.04em !important;
   font-size: 0.75rem !important;
 }
 
 .discovery-info-value {
-  color: #fff !important;
+  color: #e6e2d3 !important;
   font-weight: 500 !important;
 }
 
 .discovery-title-input {
-  color: #fff !important;
-  background: rgba(0, 0, 0, 0.2) !important;
-  border: 1px solid rgba(52, 211, 133, 0.4) !important;
-  border-radius: 12px !important;
-  padding: 8px 12px !important;
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.2) !important;
+  color: #e6e2d3 !important;
+  background: rgba(0, 0, 0, 0.1) !important;
+  border: 1px solid rgba(230, 226, 211, 0.15) !important;
+  border-radius: 8px !important;
+  padding: 10px 14px !important;
 }
 
 .discovery-title-input::placeholder,
 .discovery-notes-input::placeholder {
-  color: rgba(255, 255, 255, 0.3) !important;
+  color: rgba(230, 226, 211, 0.3) !important;
 }
 
-/* 2. Quests Polish */
+/* 2. Quests: Tactile, organic cards instead of neon panels */
 .quest-item-card {
-  background: linear-gradient(180deg, rgba(16, 28, 22, 0.9) 0%, rgba(6, 12, 9, 0.95) 100%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  border-radius: 20px !important;
+  background: #141815 !important;
+  border: 1px solid rgba(230, 226, 211, 0.06) !important;
+  border-radius: 16px !important;
   padding: 16px !important;
   margin-bottom: 12px !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
 }
 
 .quest-item-card.completed {
-  border: 1px solid rgba(245, 158, 11, 0.4) !important;
-  background: linear-gradient(180deg, rgba(30, 24, 12, 0.95) 0%, rgba(12, 8, 4, 0.98) 100%) !important;
+  border: 1px solid rgba(212, 175, 55, 0.3) !important; /* Subtle antique gold */
+  background: #161510 !important;
 }
 
 .quest-item-title {
   font-size: 1.05rem !important;
-  color: #ffffff !important;
-  letter-spacing: 0.02em !important;
+  color: #e6e2d3 !important;
+  font-family: Georgia, serif !important; /* Give it a slight editorial feel if available */
+  letter-spacing: 0.01em !important;
   margin-bottom: 4px !important;
+  font-weight: 500 !important;
 }
 
 .quest-claim-btn {
-  background: linear-gradient(135deg, #10b981 0%, #047857 100%) !important;
-  border: 1px solid rgba(110, 231, 160, 0.5) !important;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.3) !important;
-  border-radius: 14px !important;
-  font-weight: 800 !important;
+  background: #2b3a32 !important; /* Muted forest green */
+  color: #e6e2d3 !important;
+  border: 1px solid rgba(230, 226, 211, 0.15) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+  text-shadow: none !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  transition: background 0.2s ease !important;
 }
 
-/* 3. Library Alignment & Contrast Fix */
+.quest-claim-btn:active {
+  background: #202b25 !important;
+}
+
+/* 3. Library: Softer, archival gallery feel */
 .gallery-v2-count {
-  color: #6ee7a0 !important;
-  font-weight: 700 !important;
-  opacity: 1 !important;
+  color: #9e9a8b !important;
+  font-weight: 500 !important;
 }
 
 .gallery-v2-info {
-  background: linear-gradient(180deg, rgba(16, 28, 22, 0.9) 0%, rgba(6, 12, 9, 0.98) 100%) !important;
-  color: #fff !important;
-  padding: 10px 12px !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+  background: #111412 !important;
+  color: #e6e2d3 !important;
+  padding: 12px !important;
+  border-top: 1px solid rgba(230, 226, 211, 0.05) !important;
 }
 
 .gallery-v2-name {
-  color: #fff !important;
-  font-weight: 700 !important;
+  color: #e6e2d3 !important;
+  font-weight: 600 !important;
   font-size: 0.9rem !important;
 }
 
 .gallery-v2-meta {
-  color: rgba(167, 243, 208, 0.7) !important;
+  color: #9e9a8b !important;
   font-size: 0.7rem !important;
   text-transform: uppercase !important;
   letter-spacing: 0.05em !important;
 }
 
-.gallery-v2-grid {
-  padding-bottom: 140px !important;
-}
-
 .gallery-v2-card {
-  border-radius: 18px !important;
-  overflow: hidden !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(230, 226, 211, 0.1) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
 }
 
-/* 4. Map Bottom Sheet Z-Index Fix */
-.world-bottom-sheet {
-  z-index: 1000 !important;
-  background: rgba(10, 18, 14, 0.95) !important;
-  backdrop-filter: blur(20px) !important;
-  border-top: 1px solid rgba(52, 211, 133, 0.3) !important;
-}
-.leaflet-pane {
-  z-index: 10 !important;
-}
-.leaflet-top, .leaflet-bottom {
-  z-index: 20 !important;
-}
-
-/* 5. Camera Button & Dock Premium Polish */
+/* 4. Dock & Camera: Grounded, physical tool feel */
 .dock-shutter-btn {
-  transform: translateY(-12px) !important;
-  border: 4px solid #040c08 !important; 
-  background: linear-gradient(135deg, #10b981 0%, #047857 100%) !important;
-  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.5), inset 0 2px 4px rgba(255,255,255,0.4) !important;
+  transform: translateY(-8px) !important;
+  border: 3px solid #0f1210 !important; 
+  background: #d4af37 !important; /* Antique gold / brass feel */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
   border-radius: 50% !important;
-  width: 64px !important;
-  height: 64px !important;
+  width: 58px !important;
+  height: 58px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
 }
 .dock-shutter-btn svg {
-  width: 28px !important;
-  height: 28px !important;
-  color: #fff !important;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4)) !important;
+  width: 24px !important;
+  height: 24px !important;
+  color: #1a1a1a !important;
+  filter: none !important;
 }
 
 .mobile-bottom-dock {
-  background: linear-gradient(180deg, rgba(12, 24, 18, 0.85) 0%, rgba(4, 8, 6, 0.98) 100%) !important;
-  backdrop-filter: blur(24px) !important;
-  -webkit-backdrop-filter: blur(24px) !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
-  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.6) !important;
+  background: #0f1210 !important;
+  backdrop-filter: none !important; /* Remove glossy blur */
+  -webkit-backdrop-filter: none !important;
+  border-top: 1px solid rgba(230, 226, 211, 0.08) !important;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.5) !important;
   padding-bottom: env(safe-area-inset-bottom, 16px) !important;
 }
 
 .dock-item {
-  color: rgba(255, 255, 255, 0.4) !important;
-  transition: all 0.3s ease !important;
+  color: #6a6e6b !important;
 }
 .dock-item.active {
-  color: #6ee7a0 !important;
-  text-shadow: 0 0 12px rgba(110, 231, 160, 0.4) !important;
+  color: #e6e2d3 !important;
+  text-shadow: none !important;
 }
 .dock-item svg {
   width: 24px !important;
