@@ -33,6 +33,6 @@ export async function runMigrations({ pool, directory = resolve(dirname(fileURLT
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const config = loadConfig(process.env, { isMigration: true });
   if (!config.databaseUrl) throw new Error('DATABASE_URL or POSTGRES_URL is required for migrations');
-  const pool = new Pool({ connectionString: config.databaseUrl, ssl: config.DATABASE_SSL ? { rejectUnauthorized: true } : false });
+  const pool = new Pool({ connectionString: config.databaseUrl, ssl: config.DATABASE_SSL ? { rejectUnauthorized: false } : false });
   runMigrations({ pool }).finally(() => pool.end());
 }

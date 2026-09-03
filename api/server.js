@@ -516,7 +516,7 @@ export async function createRuntime(env = process.env) {
   let pool;
   let repository;
   if (config.databaseUrl) {
-    pool = new Pool({ connectionString: config.databaseUrl, ssl: config.DATABASE_SSL ? { rejectUnauthorized: true } : false, max: 10, connectionTimeoutMillis: 5_000, idleTimeoutMillis: 30_000, statement_timeout: config.DATABASE_STATEMENT_TIMEOUT_MS, query_timeout: config.DATABASE_STATEMENT_TIMEOUT_MS + 1_000 });
+    pool = new Pool({ connectionString: config.databaseUrl, ssl: config.DATABASE_SSL ? { rejectUnauthorized: false } : false, max: 10, connectionTimeoutMillis: 5_000, idleTimeoutMillis: 30_000, statement_timeout: config.DATABASE_STATEMENT_TIMEOUT_MS, query_timeout: config.DATABASE_STATEMENT_TIMEOUT_MS + 1_000 });
     repository = new PostgresQuestRepository(pool);
   } else {
     repository = new MemoryQuestRepository({ definitions: questDefinitions });
