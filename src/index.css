@@ -11,24 +11,24 @@
    src/components/motion/MotionVariants.js — --quest-ease mirrors appleEase.
    ========================================================================== */
 :root {
-  color-scheme: dark;
+  color-scheme: light;
   font-family: 'Manrope', ui-sans-serif, system-ui, -apple-system, sans-serif;
 
-  /* ---- Canonical palette: quest-* (Wild Realm — deep forest / amber) ---- */
-  --quest-ink: #020604;
-  --quest-ink-2: #05100A;
-  --quest-panel: rgba(6, 20, 12, 0.75);
-  --quest-panel-raised: rgba(9, 30, 18, 0.85);
-  --quest-surface: rgba(9, 30, 18, 0.85);
-  --quest-gold: #F59E0B;
-  --quest-gold-bright: #FCD34D;
-  --quest-gold-dim: #B45309;
-  --quest-cream: #F8FAFC;
-  --quest-fg: #F8FAFC;
-  --quest-muted: #94A3B8;
-  --quest-line: rgba(255, 255, 255, 0.08);
-  --quest-danger: #EF4444;
-  --quest-danger-soft: rgba(239, 68, 68, 0.15);
+  /* ---- Canonical palette: quest-* (Wander — field guide / earthy) ---- */
+  --quest-ink: #F5F3EC;
+  --quest-ink-2: #EAE6D8;
+  --quest-panel: rgba(252, 251, 248, 0.75);
+  --quest-panel-raised: rgba(252, 251, 248, 0.95);
+  --quest-surface: rgba(252, 251, 248, 0.95);
+  --quest-gold: #6D8764;
+  --quest-gold-bright: #5A7451;
+  --quest-gold-dim: #A1AD9E;
+  --quest-cream: #2D2B26;
+  --quest-fg: #2D2B26;
+  --quest-muted: #5C584E;
+  --quest-line: rgba(45, 43, 38, 0.12);
+  --quest-danger: #D9534F;
+  --quest-danger-soft: rgba(217, 83, 79, 0.15);
   --quest-ease: cubic-bezier(0.16, 1, 0.3, 1);
 
   /* ---- Rarity accents (grade D–S, blueprint §16.2) ---- */
@@ -259,9 +259,10 @@
 /* ========================================================================== */
 
 body {
-  background:
-    radial-gradient(circle at 50% 0%, rgba(45, 38, 30, 0.35), transparent 50rem),
-    var(--quest-ink);
+  background: var(--quest-ink);
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.6), transparent 40rem),
+    url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
 }
 
 .app-shell {
@@ -5868,6 +5869,8 @@ body {
 .journal-page-transition {
   backface-visibility: hidden;
   will-change: transform, opacity, filter;
+  width: 100%;
+  height: 100%;
 }
 
 .offline-sanctuary-bar {
@@ -8871,19 +8874,19 @@ body, .app-shell {
   margin-bottom: 10px;
 }
 
-.library-photo-card.rank-s {
+.library-photo-card.rank-5 {
   border-color: rgba(245, 158, 11, 0.2);
 }
 
-.library-photo-card.rank-a {
+.library-photo-card.rank-4 {
   border-color: rgba(192, 132, 252, 0.2);
 }
 
-.library-photo-card.rank-b {
+.library-photo-card.rank-3 {
   border-color: rgba(96, 165, 250, 0.2);
 }
 
-.library-photo-card.rank-c {
+.library-photo-card.rank-2 {
   border-color: rgba(34, 197, 94, 0.2);
 }
 
@@ -8975,15 +8978,15 @@ body, .app-shell {
   opacity: 0.85;
 }
 
-.rank-hex-s span { color: #fbbf24; }
-.rank-hex-a span { color: #c084fc; }
-.rank-hex-b span { color: #60a5fa; }
-.rank-hex-c span { color: #22c55e; }
+.rank-hex-5 span { color: #fbbf24; }
+.rank-hex-4 span { color: #c084fc; }
+.rank-hex-3 span { color: #60a5fa; }
+.rank-hex-2 span { color: #22c55e; }
 
-.rank-s .discovery-hex-badge { border-color: #fbbf24; }
-.rank-a .discovery-hex-badge { border-color: #c084fc; }
-.rank-b .discovery-hex-badge { border-color: #60a5fa; }
-.rank-c .discovery-hex-badge { border-color: #22c55e; }
+.rank-5 .discovery-hex-badge { border-color: #fbbf24; }
+.rank-4 .discovery-hex-badge { border-color: #c084fc; }
+.rank-3 .discovery-hex-badge { border-color: #60a5fa; }
+.rank-2 .discovery-hex-badge { border-color: #22c55e; }
 
 /* --------------------------------------------------------------------------
    PROFILE & SETTINGS VIEW (Experience 4 - ProfilePage)
@@ -10601,4 +10604,66 @@ span.post-author-avatar {
 
 @media (prefers-reduced-motion: reduce) {
   .map-hotspot-label { transition: none; }
+}
+
+/* Production polish: keep Rewards on the same dark Wild Realm surface as the
+   rest of the app. Older reference CSS made these panels bright and low
+   contrast on mobile. */
+.rewards-reference {
+  padding: calc(18px + env(safe-area-inset-top, 0px)) 18px calc(112px + env(safe-area-inset-bottom, 0px));
+  color: var(--quest-cream);
+}
+
+.rewards-reference .quests-header {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  margin: 0 0 12px;
+}
+
+.rewards-reference .quests-header h1 {
+  font-size: clamp(2rem, 9vw, 3rem);
+  line-height: 1;
+  color: var(--quest-cream);
+}
+
+.rewards-reference .reward-panel,
+.rewards-reference .rewards-hero {
+  color: var(--quest-cream);
+  background:
+    radial-gradient(circle at 80% 0%, rgba(52, 211, 133, 0.11), transparent 36%),
+    linear-gradient(160deg, rgba(14, 26, 19, 0.96), rgba(5, 13, 10, 0.98));
+  border: 1px solid rgba(207, 219, 205, 0.16);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.05), 0 18px 36px rgba(0, 0, 0, 0.38);
+}
+
+.rewards-reference .rewards-hero {
+  min-height: 0;
+  padding: 22px 20px;
+  margin: 0 0 14px;
+}
+
+.rewards-reference .rewards-hero-copy h1,
+.rewards-reference .reward-panel .section-title h2,
+.rewards-reference .reward-track-panel h3,
+.rewards-reference .current-rank-panel h2 {
+  color: var(--quest-cream);
+}
+
+.rewards-reference .season-progress {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(240, 196, 107, 0.24);
+}
+
+.rewards-reference .season-progress span,
+.rewards-reference .reward-panel p,
+.rewards-reference .reward-empty,
+.rewards-reference .badge-row small,
+.rewards-reference .chest-row span,
+.rewards-reference .claim-row span {
+  color: rgba(243, 238, 223, 0.68);
+}
+
+.rewards-reference .rewards-panel-grid {
+  grid-template-columns: 1fr;
 }

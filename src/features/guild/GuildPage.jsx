@@ -8,6 +8,7 @@ import {
   useCommunityPosts,
   useFriends,
   useToggleCommunityLike,
+  useReportCommunityPost
 } from '../quests/queries';
 import { playTap } from '../../lib/useSoundEffects';
 import { CommunityShareSheet } from './CommunityShareSheet';
@@ -113,6 +114,7 @@ export function GuildPage() {
 function CommunityFeed({ onShare }) {
   const { data: posts, isLoading, isError, refetch } = useCommunityPosts('public');
   const toggleLike = useToggleCommunityLike();
+  const reportPost = useReportCommunityPost();
   const [openComments, setOpenComments] = useState(null);
 
   if (isLoading) {
@@ -174,7 +176,7 @@ function CommunityFeed({ onShare }) {
           </div>
 
           {post.discovery && (
-            <div className={`post-photo-wrap rank-${(post.discovery.rarityGrade || post.discovery.rarityTier || 'd').toLowerCase()}`}>
+            <div className={`post-photo-wrap rank-${post.discovery.rarityStars || 1}`}>
               {post.discovery.imageRef ? (
                 <CaptureImage
                   imageRef={post.discovery.imageRef}
@@ -184,11 +186,9 @@ function CommunityFeed({ onShare }) {
                   useAuth={post.discovery.imageRef?.includes('/captures/')}
                 />
               ) : (
-                // A post whose discovery has no stored media (provisional, or
-                // media not retained) keeps the rarity crest instead.
                 <div className="post-photo-placeholder">
-                  <span className={`post-rarity-crest rank-hex-${(post.discovery.rarityGrade || 'd').toLowerCase()}`}>
-                    {post.discovery.rarityGrade || post.discovery.rarityTier || '—'}
+                  <span className={`post-rarity-crest rank-hex-${post.discovery.rarityStars || 1}`}>
+                    {post.discovery.rarityStars || 1}★
                   </span>
                   {post.discovery.rarityStars != null && (
                     <span className="post-rarity-stars" aria-label={`${post.discovery.rarityStars} of 5 rarity stars`}>
@@ -227,6 +227,21 @@ function CommunityFeed({ onShare }) {
                   onClick={() => { playTap(); setOpenComments(openComments === post.id ? null : post.id); }}
                 >
                   <Icon name="scroll" /> {post.commentCount}
+                </button>
+                <button
+                  type="button"
+                  className="post-action"
+                  aria-label="Report post"
+                  disabled={reportPost.isPending}
+                  onClick={() => {
+                    if (window.confirm('Report this post?')) {
+                      playTap();
+                      reportPost.mutate({ postId: post.id, reason: 'inappropriate' });
+                      alert('Thank you, this post has been reported.');
+                    }
+                  }}
+                >
+                  <Icon name="shield" />
                 </button>
               </div>
             </div>
@@ -422,7 +437,7 @@ function CommunityMap() {
           return (
             <span
               key={post.id}
-              className={`community-map-marker rank-hex-${(post.discovery?.rarityGrade || 'd').toLowerCase()}`}
+              className={`community-map-marker rank-hex-${post.discovery?.rarityStars || 1}`}
               style={{ left: `${left}%`, top: `${top}%` }}
               title={`${post.discovery?.itemName || 'Discovery'} — ${post.placeLabel || 'Unnamed location'}`}
             />

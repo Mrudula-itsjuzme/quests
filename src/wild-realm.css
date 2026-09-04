@@ -16,26 +16,26 @@ h1, h2, h3, h4, h5, h6, .brand-lockup strong {
 
 /* ── 2. Glassmorphic Bottom Nav — visuals only ──────────────────────────── */
 .mobile-bottom-dock {
-  /* Position: inset from edges for the pill look */
-  left: 14px !important;
-  right: 14px !important;
-  bottom: max(14px, env(safe-area-inset-bottom, 14px)) !important;
+  /* Position: flat at the bottom */
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
   /* prevent any inherited transform from shifting the dock */
   transform: none !important;
   /* Visuals */
-  background: rgba(10, 20, 16, 0.82) !important;
-  backdrop-filter: blur(20px) saturate(1.4) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(1.4) !important;
-  border: 1px solid rgba(111, 191, 122, 0.18) !important;
-  border-top: 1px solid rgba(111, 191, 122, 0.28) !important;
-  border-radius: 28px !important;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255,255,255,0.05) !important;
+  background: #9D9181 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 0 !important;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05) !important;
   align-items: center !important;
 }
 
 .dock-item {
-  color: var(--quest-muted) !important;
-  border-radius: 18px !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+  border-radius: 0 !important;
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
@@ -57,11 +57,11 @@ h1, h2, h3, h4, h5, h6, .brand-lockup strong {
 }
 
 .dock-item.active {
-  color: var(--rarity-uncommon) !important;
-  background: rgba(111, 191, 122, 0.12) !important;
+  color: #FFFFFF !important;
+  background: transparent !important;
   border: none !important;
-  box-shadow: inset 0 -2px var(--rarity-uncommon) !important;
-  text-shadow: 0 0 12px rgba(111, 191, 122, 0.4) !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
 }
 
 /* Central camera shutter */
@@ -285,7 +285,7 @@ h1, h2, h3, h4, h5, h6, .brand-lockup strong {
 }
 
 body {
-  background: radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.1), transparent 50rem), var(--quest-ink) !important;
+  background: var(--quest-ink) !important;
 }
 
 /* ── Modern Card Overrides (Collection & Community) ── */
@@ -329,7 +329,7 @@ body {
 }
 
 /* Make S-Rank cards pop with a soft glow instead of harsh borders */
-.library-photo-card.rank-s {
+.library-photo-card.rank-5 {
   background: linear-gradient(145deg, rgba(240, 196, 107, 0.1), rgba(20, 28, 24, 0.6)) !important;
   box-shadow: 0 8px 32px rgba(240, 196, 107, 0.15), inset 0 1px 0 rgba(240, 196, 107, 0.3) !important;
 }
@@ -337,11 +337,11 @@ body {
 /* ── Modern Quests Page Overrides ── */
 
 .quest-cadence-tabs {
-  background: rgba(255, 255, 255, 0.03) !important;
+  background: rgba(0, 0, 0, 0.05) !important;
   border-radius: 999px !important;
   padding: 6px !important;
   border: none !important;
-  box-shadow: inset 0 2px 8px rgba(0,0,0,0.5) !important;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.05) !important;
   margin: 16px 0 24px !important;
 }
 
@@ -354,34 +354,34 @@ body {
 }
 
 .quest-cadence-btn.active {
-  color: #fff !important;
-  background: transparent !important;
+  color: var(--quest-cream) !important;
+  background: #fff !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
 }
 
 .quest-item-card {
-  border-radius: 24px !important;
-  border: none !important;
-  background: rgba(20, 28, 24, 0.5) !important;
-  backdrop-filter: blur(12px) !important;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06) !important;
+  border-radius: 12px !important;
+  border: 1px solid var(--quest-line) !important;
+  background: var(--quest-panel) !important;
+  backdrop-filter: none !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;
   margin-bottom: 12px !important;
   overflow: hidden !important;
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease !important;
 }
 
 .quest-item-card:active {
-  transform: scale(0.96) !important;
+  transform: scale(0.98) !important;
 }
 
 .quest-card-bg {
-  opacity: 0.15 !important;
-  filter: saturate(0.8) contrast(1.2) !important;
+  display: none !important;
 }
 
 .quest-item-title {
   font-size: 1.1rem !important;
   font-weight: 800 !important;
-  color: #fff !important;
+  color: var(--quest-cream) !important;
   margin-bottom: 4px !important;
 }
 
@@ -405,13 +405,13 @@ body {
   border-radius: 24px !important;
 }
 
-.discovery-card-modal.rank-s {
+.discovery-card-modal.rank-5 {
   border: none !important;
   position: relative;
   box-shadow: 0 0 64px rgba(240, 196, 107, 0.25), 0 32px 80px rgba(0,0,0,0.7) !important;
 }
 
-.discovery-card-modal.rank-s::before {
+.discovery-card-modal.rank-5::before {
   content: "";
   position: absolute;
   inset: -2px;
@@ -426,7 +426,7 @@ body {
   padding: 2px;
 }
 
-.discovery-card-modal.rank-s .discovery-hero-frame {
+.discovery-card-modal.rank-5 .discovery-hero-frame {
   animation: breathing-aura 3s infinite ease-in-out;
 }
 
@@ -458,13 +458,12 @@ body {
   border: none !important;
 }
 
-/* ── 7. Quests Page ─────────────────────────────────────────────────────── */
 .quest-user-topbar {
-  background: rgba(14, 24, 19, 0.8) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
-  border-radius: 16px !important;
-  border: 1px solid rgba(111, 191, 122, 0.15) !important;
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-radius: 0 !important;
+  border: none !important;
 }
 
 .quest-cadence-btn.active {
@@ -472,12 +471,12 @@ body {
 }
 
 .quest-item-card {
-  background: rgba(19, 31, 25, 0.6) !important;
-  border: 1px solid rgba(255, 255, 255, 0.05) !important;
-  border-left: 4px solid var(--rarity-uncommon) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.3) !important;
+  background: var(--quest-panel) !important;
+  border: 1px solid var(--quest-line) !important;
+  border-left: 4px solid var(--quest-gold) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;
   border-radius: 12px !important;
 }
 
@@ -490,7 +489,7 @@ body {
 }
 .quest-item-card.completed {
   border-left-color: var(--quest-gold-bright) !important;
-  background: rgba(240, 196, 107, 0.06) !important;
+  background: rgba(109, 135, 100, 0.1) !important;
 }
 
 /* A per-row "View" is a SECONDARY action. It previously used full-strength
@@ -501,19 +500,19 @@ body {
   border-radius: 10px !important;
 }
 .quest-claim-btn:not(.glass) {
-  background: var(--rarity-uncommon) !important;
-  color: var(--quest-ink) !important;
-  box-shadow: 0 4px 16px rgba(111, 191, 122, 0.3) !important;
+  background: var(--quest-gold) !important;
+  color: #FCFBF8 !important;
+  box-shadow: 0 4px 12px rgba(109, 135, 100, 0.2) !important;
 }
 .quest-claim-btn.glass {
-  background: rgba(255, 255, 255, 0.06) !important;
-  color: #F4F7F5 !important;
+  background: rgba(0, 0, 0, 0.05) !important;
+  color: var(--quest-cream) !important;
   box-shadow: none !important;
 }
 
 .quest-reward-pill {
-  background: rgba(255, 255, 255, 0.06) !important;
-  color: rgba(233, 241, 236, 0.72) !important;
+  background: rgba(0, 0, 0, 0.05) !important;
+  color: var(--quest-muted) !important;
   border-radius: var(--radius-pill) !important;
   border: 0 !important;
 }
@@ -534,7 +533,7 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4) !important;
 }
-.library-photo-card.rank-s {
+.library-photo-card.rank-5 {
   border-color: var(--quest-gold-bright) !important;
   box-shadow: 0 12px 32px rgba(240, 196, 107, 0.15), inset 0 0 24px rgba(240, 196, 107, 0.08) !important;
 }
@@ -735,7 +734,6 @@ body {
    Earlier rules used repeat(6, 1fr) for five children, which starved the
    outer labels ("Collection"/"Community") and made them collide.
    ========================================================================== */
-@media (max-width: 900px) {
   .mobile-bottom-dock {
     display: grid !important;
     grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
@@ -745,14 +743,13 @@ body {
     min-height: 66px !important;
     padding: 8px 6px calc(8px + env(safe-area-inset-bottom, 0px)) !important;
 
-    background: linear-gradient(180deg, rgba(9, 22, 15, 0.86), rgba(4, 12, 8, 0.96)) !important;
-    backdrop-filter: blur(22px) saturate(1.35) !important;
-    -webkit-backdrop-filter: blur(22px) saturate(1.35) !important;
-    border: 1px solid rgba(120, 200, 140, 0.14) !important;
-    border-radius: 26px !important;
-    box-shadow:
-      0 14px 40px rgba(0, 0, 0, 0.6),
-      inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+    background: #9D9181 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: none !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 0 !important;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05) !important;
     overflow: visible !important;
   }
 
@@ -772,7 +769,7 @@ body {
     border-radius: 14px !important;
     background: transparent !important;
     box-shadow: none !important;
-    color: rgba(203, 225, 210, 0.52) !important;
+    color: rgba(255, 255, 255, 0.7) !important;
     font-family: var(--font-body, inherit) !important;
     font-size: 0.56rem !important;
     font-weight: 600 !important;
@@ -1363,11 +1360,11 @@ body:has(.capture-flow-overlay) .offline-sanctuary-bar {
   --rarity-accent: var(--rarity-common);
   --rarity-glow: rgba(148, 163, 184, 0.34);
 }
-.discovery-card-modal.rank-d { --rarity-accent: var(--rarity-common);    --rarity-glow: rgba(148, 163, 184, 0.30); }
-.discovery-card-modal.rank-c { --rarity-accent: var(--rarity-uncommon);  --rarity-glow: rgba(16, 185, 129, 0.34); }
-.discovery-card-modal.rank-b { --rarity-accent: var(--rarity-rare);      --rarity-glow: rgba(59, 130, 246, 0.40); }
-.discovery-card-modal.rank-a { --rarity-accent: var(--rarity-epic);      --rarity-glow: rgba(139, 92, 246, 0.48); }
-.discovery-card-modal.rank-s { --rarity-accent: var(--rarity-legendary); --rarity-glow: rgba(245, 158, 11, 0.58); }
+.discovery-card-modal.rank-1 { --rarity-accent: var(--rarity-common);    --rarity-glow: rgba(148, 163, 184, 0.30); }
+.discovery-card-modal.rank-2 { --rarity-accent: var(--rarity-uncommon);  --rarity-glow: rgba(16, 185, 129, 0.34); }
+.discovery-card-modal.rank-3 { --rarity-accent: var(--rarity-rare);      --rarity-glow: rgba(59, 130, 246, 0.40); }
+.discovery-card-modal.rank-4 { --rarity-accent: var(--rarity-epic);      --rarity-glow: rgba(139, 92, 246, 0.48); }
+.discovery-card-modal.rank-5 { --rarity-accent: var(--rarity-legendary); --rarity-glow: rgba(245, 158, 11, 0.58); }
 
 /* The capture overlay already owns a close affordance; the card's own header
    close would stack a second X in the same corner. */
@@ -1506,8 +1503,8 @@ body:has(.capture-flow-overlay) .offline-sanctuary-bar {
 }
 
 /* ---- Escalating rarity atmosphere: only A/S get a living halo ---- */
-.discovery-card-modal.rank-a .discovery-hero-frame,
-.discovery-card-modal.rank-s .discovery-hero-frame {
+.discovery-card-modal.rank-4 .discovery-hero-frame,
+.discovery-card-modal.rank-5 .discovery-hero-frame {
   animation: discovery-halo 3.6s ease-in-out infinite;
 }
 @keyframes discovery-halo {
@@ -1518,8 +1515,8 @@ body:has(.capture-flow-overlay) .offline-sanctuary-bar {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .discovery-card-modal.rank-a .discovery-hero-frame,
-  .discovery-card-modal.rank-s .discovery-hero-frame { animation: none; }
+  .discovery-card-modal.rank-4 .discovery-hero-frame,
+  .discovery-card-modal.rank-5 .discovery-hero-frame { animation: none; }
 }
 
 /* ==========================================================================
@@ -1529,11 +1526,11 @@ body:has(.capture-flow-overlay) .offline-sanctuary-bar {
    ========================================================================== */
 
 /* Rarity is one language across the app; the grid reads it from the grade. */
-.rank-badge-d, .stars-d { --rarity-accent: var(--rarity-common); }
-.rank-badge-c, .stars-c { --rarity-accent: var(--rarity-uncommon); }
-.rank-badge-b, .stars-b { --rarity-accent: var(--rarity-rare); }
-.rank-badge-a, .stars-a { --rarity-accent: var(--rarity-epic); }
-.rank-badge-s, .stars-s { --rarity-accent: var(--rarity-legendary); }
+.rank-badge-1, .stars-d { --rarity-accent: var(--rarity-common); }
+.rank-badge-2, .stars-c { --rarity-accent: var(--rarity-uncommon); }
+.rank-badge-3, .stars-b { --rarity-accent: var(--rarity-rare); }
+.rank-badge-4, .stars-a { --rarity-accent: var(--rarity-epic); }
+.rank-badge-5, .stars-s { --rarity-accent: var(--rarity-legendary); }
 
 /* Three columns at phone width — a trophy case, not a feed. */
 .library-card-grid {
@@ -1559,8 +1556,8 @@ body:has(.capture-flow-overlay) .offline-sanctuary-bar {
   break-inside: avoid;
 }
 /* Higher grades earn a visible halo; D/C stay quiet. */
-.library-photo-card:has(.rank-badge-a),
-.library-photo-card:has(.rank-badge-s) {
+.library-photo-card:has(.rank-badge-4),
+.library-photo-card:has(.rank-badge-5) {
   box-shadow: 0 0 22px -6px color-mix(in srgb, var(--rarity-accent) 65%, transparent),
               0 6px 18px rgba(0, 0, 0, 0.45) !important;
 }
@@ -3172,11 +3169,11 @@ button[aria-disabled="true"] {
   box-shadow: 0 0 16px rgba(111,191,122,0.6);
 }
 /* Grade-coloured pins */
-.map-leaflet-pin.rank-hex-s .map-leaflet-pin-inner { border-color: #f0c46b; color: #f0c46b; }
-.map-leaflet-pin.rank-hex-a .map-leaflet-pin-inner { border-color: #a78bfa; color: #a78bfa; }
-.map-leaflet-pin.rank-hex-b .map-leaflet-pin-inner { border-color: #60a5fa; color: #60a5fa; }
-.map-leaflet-pin.rank-hex-c .map-leaflet-pin-inner { border-color: #4ade80; color: #4ade80; }
-.map-leaflet-pin.rank-hex-d .map-leaflet-pin-inner { border-color: rgba(255,255,255,0.3); color: rgba(255,255,255,0.6); }
+.map-leaflet-pin.rank-hex-5 .map-leaflet-pin-inner { border-color: #f0c46b; color: #f0c46b; }
+.map-leaflet-pin.rank-hex-4 .map-leaflet-pin-inner { border-color: #a78bfa; color: #a78bfa; }
+.map-leaflet-pin.rank-hex-3 .map-leaflet-pin-inner { border-color: #60a5fa; color: #60a5fa; }
+.map-leaflet-pin.rank-hex-2 .map-leaflet-pin-inner { border-color: #4ade80; color: #4ade80; }
+.map-leaflet-pin.rank-hex-1 .map-leaflet-pin-inner { border-color: rgba(255,255,255,0.3); color: rgba(255,255,255,0.6); }
 .map-leaflet-pin.map-pin-curated .map-leaflet-pin-inner { font-size: 1.2rem; transform: none; border-radius: 50%; }
 
 /* User location dot */
@@ -3342,19 +3339,31 @@ button[aria-disabled="true"] {
   position: relative;
   display: flex;
   flex-direction: column;
-  border-radius: 16px;
+  border-radius: 20px;
   overflow: hidden;
-  background: rgba(15,25,20,0.8);
-  border: 1px solid rgba(255,255,255,0.07);
+  background: linear-gradient(145deg, rgba(20,32,25,0.95), rgba(12,20,16,0.85));
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.1);
   cursor: pointer;
   text-align: left;
   padding: 0;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.35);
-  transition: box-shadow 0.2s;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
 }
-.gallery-v2-card.rank-s {
-  border-color: rgba(240,196,107,0.35);
-  box-shadow: 0 4px 20px rgba(240,196,107,0.12);
+.gallery-v2-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.3), inset 0 1px 2px rgba(255,255,255,0.15);
+  border-color: rgba(34, 197, 94, 0.25);
+}
+
+.gallery-v2-card.rank-5 {
+  border-color: rgba(240,196,107,0.5);
+  box-shadow: 0 4px 24px rgba(240,196,107,0.2), inset 0 1px 1px rgba(240,196,107,0.2);
+  background: linear-gradient(145deg, rgba(32,28,16,0.95), rgba(20,16,8,0.85));
+}
+.gallery-v2-card.rank-4 {
+  border-color: rgba(167,139,250,0.4);
+  box-shadow: 0 4px 20px rgba(167,139,250,0.15), inset 0 1px 1px rgba(167,139,250,0.15);
+  background: linear-gradient(145deg, rgba(28,24,40,0.95), rgba(16,12,24,0.85));
 }
 /* Photo portion — ~70% height via aspect ratio */
 .gallery-v2-photo {
@@ -3373,14 +3382,16 @@ button[aria-disabled="true"] {
 .gallery-v2-rank-badge {
   position: absolute;
   top: 8px; left: 8px;
-  padding: 3px 9px;
+  padding: 4px 10px;
   border-radius: 999px;
   border: 1px solid;
   background: rgba(0,0,0,0.5);
-  backdrop-filter: blur(6px);
-  font-size: 0.68rem; font-weight: 900;
-  letter-spacing: 0.06em;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font-size: 0.72rem; font-weight: 900;
+  letter-spacing: 0.05em;
   z-index: 2;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
 }
 /* Stars bottom-right */
 .gallery-v2-stars {
@@ -3394,18 +3405,19 @@ button[aria-disabled="true"] {
 }
 /* Info strip — 30% */
 .gallery-v2-info {
-  padding: 8px 10px 10px;
-  display: flex; flex-direction: column; gap: 2px;
+  padding: 12px 14px 14px;
+  display: flex; flex-direction: column; gap: 4px;
+  background: rgba(0,0,0,0.2);
 }
 .gallery-v2-name {
-  font-size: 0.82rem; font-weight: 700;
+  font-size: 0.9rem; font-weight: 800;
   color: #f0fdf4;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   display: block;
 }
 .gallery-v2-meta {
-  font-size: 0.68rem;
-  color: rgba(233,241,236,0.4);
+  font-size: 0.72rem; font-weight: 500;
+  color: rgba(233,241,236,0.6);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   display: block;
 }
@@ -3449,4 +3461,70 @@ button[aria-disabled="true"] {
   color: #031a0d; font-size: 0.92rem; font-weight: 800;
   font-family: inherit;
   box-shadow: 0 4px 14px rgba(16,185,129,0.3);
+}
+
+/* Premium Quest UI Overrides */
+.quests-shell {
+  background: radial-gradient(circle at 50% 0%, rgba(20, 36, 26, 0.4) 0%, transparent 60%), 
+              linear-gradient(180deg, var(--quest-page-bg) 0%, #080c0a 100%);
+}
+
+.quest-item-card {
+  border: 1px solid rgba(34, 197, 94, 0.1) !important;
+  background: linear-gradient(145deg, rgba(16, 28, 20, 0.9), rgba(10, 18, 14, 0.95)) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.05) !important;
+  border-radius: 20px !important;
+  margin-bottom: 16px !important;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease !important;
+}
+
+.quest-item-card:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(34, 197, 94, 0.25) !important;
+}
+
+.quest-item-card.completed {
+  border-color: rgba(234, 179, 8, 0.3) !important;
+  background: linear-gradient(145deg, rgba(28, 24, 12, 0.9), rgba(18, 14, 8, 0.95)) !important;
+}
+
+.quest-cadence-tabs {
+  background: rgba(10, 16, 12, 0.6);
+  backdrop-filter: blur(8px);
+  border-radius: 999px;
+  padding: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 1px 4px rgba(0,0,0,0.2);
+}
+
+.quest-cadence-btn {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: rgba(255,255,255,0.5);
+  transition: color 0.2s ease;
+}
+
+.quest-cadence-btn.active {
+  color: var(--quest-green);
+}
+
+.quest-season-strip {
+  background: linear-gradient(90deg, rgba(20,36,26,0.6), rgba(10,18,14,0.8));
+  border: 1px solid rgba(34,197,94,0.15);
+  border-radius: 16px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.gallery-v2-card.rank-3 {
+  border-color: rgba(96,165,250,0.3);
+  box-shadow: 0 4px 20px rgba(96,165,250,0.1), inset 0 1px 1px rgba(96,165,250,0.1);
+}
+.gallery-v2-card.rank-2 {
+  border-color: rgba(74,222,128,0.3);
+  box-shadow: 0 4px 20px rgba(74,222,128,0.1), inset 0 1px 1px rgba(74,222,128,0.1);
+}
+.gallery-v2-card.rank-1 {
+  border-color: rgba(255,255,255,0.1);
 }

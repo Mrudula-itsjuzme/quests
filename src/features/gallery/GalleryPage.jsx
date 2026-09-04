@@ -16,9 +16,9 @@ const ELEMENT_TABS = [
   { id: 'familiars', label: 'Fauna', emoji: '🦎' },
 ];
 
-const RARITY_ORDER = ['S', 'A', 'B', 'C', 'D'];
+const RARITY_ORDER = [5, 4, 3, 2, 1];
 const GRADE_COLORS = {
-  S: '#f0c46b', A: '#a78bfa', B: '#60a5fa', C: '#4ade80', D: 'rgba(255,255,255,0.4)',
+  5: '#f0c46b', 4: '#a78bfa', 3: '#60a5fa', 2: '#4ade80', 1: 'rgba(255,255,255,0.4)',
 };
 
 const SORT_OPTIONS = [
@@ -57,7 +57,7 @@ export function GalleryPage() {
         (c.cardTitle || '').toLowerCase().includes(q)
       );
     }
-    const byRarity = (card) => RARITY_ORDER.indexOf((card.rarityGrade || card.rarityTier || 'D').toUpperCase());
+    const byRarity = (card) => RARITY_ORDER.indexOf(card.rarityStars || 1);
     return [...filtered].sort((a, b) => {
       if (sortBy === 'name') return (a.itemName || '').localeCompare(b.itemName || '');
       if (sortBy === 'recent') return new Date(b.capturedAt) - new Date(a.capturedAt);
@@ -65,7 +65,7 @@ export function GalleryPage() {
     });
   }, [collection, species, activeTab, sortBy, searchQuery]);
 
-  const sRankCount = collection.filter((c) => (c.rarityGrade || c.rarityTier) === 'S').length;
+  const sRankCount = collection.filter((c) => c.rarityStars === 5).length;
   const totalXp = collection.reduce((sum, c) => sum + (c.xpAwarded || 0), 0);
 
   return (
@@ -101,7 +101,7 @@ export function GalleryPage() {
         </div>
         <div className="gallery-v2-stat gold">
           <strong>{sRankCount}</strong>
-          <small>S Rank</small>
+          <small>5 Star</small>
         </div>
         <div className="gallery-v2-stat">
           <strong>{totalXp.toLocaleString()}</strong>
@@ -173,22 +173,21 @@ export function GalleryPage() {
         <div className="gallery-v2-grid">
           <AnimatePresence mode="popLayout">
             {displayList.map((card, i) => {
-              const rarity = (card.rarityGrade || card.rarityTier || 'D').toUpperCase();
+              const stars = card.rarityStars ?? 1;
               const speciesEntry = (species || []).find((s) => s.id === card.speciesId);
-              const stars = card.rarityStars ?? 0;
-              const gradeColor = GRADE_COLORS[rarity] || GRADE_COLORS.D;
+              const gradeColor = GRADE_COLORS[stars] || GRADE_COLORS[1];
               return (
                 <motion.button
                   key={card.id}
                   type="button"
-                  className={`gallery-v2-card rank-${rarity.toLowerCase()}`}
+                  className={`gallery-v2-card rank-${stars}`}
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ delay: Math.min(i, 10) * 0.025, type: 'spring', stiffness: 380, damping: 28 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => { playTap(); setSelectedCard(card); }}
-                  aria-label={`Open ${card.itemName}, ${rarity} rank`}
+                  aria-label={`Open ${card.itemName}, ${stars} star rank`}
                 >
                   {/* Photo — fills top 70% */}
                   <div className="gallery-v2-photo">
@@ -203,14 +202,8 @@ export function GalleryPage() {
                       className="gallery-v2-rank-badge"
                       style={{ color: gradeColor, borderColor: gradeColor }}
                     >
-                      {rarity}
+                      {stars}★
                     </span>
-                    {/* Stars overlay */}
-                    {stars > 0 && (
-                      <span className="gallery-v2-stars">
-                        {'★'.repeat(stars)}
-                      </span>
-                    )}
                   </div>
 
                   {/* Info — bottom 30% */}

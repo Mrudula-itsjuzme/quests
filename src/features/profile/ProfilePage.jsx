@@ -6,26 +6,20 @@ import { coinBalance } from '../../lib/playerEconomy';
 import { playTap } from '../../lib/useSoundEffects';
 import { SettingsModal } from '../../components/SettingsModal';
 
-// Convert XP to star rank (S=5★, A=4★, B=3★, C=2★, D=1★)
-function rarityToStars(grade) {
-  return { S: 5, A: 4, B: 3, C: 2, D: 1 }[grade?.toUpperCase()] ?? 0;
-}
-
+// Use 1-5 numeric ranks instead of legacy grades
 const RANK_COLORS = {
-  S: { bg: 'rgba(240,196,107,0.15)', border: 'rgba(240,196,107,0.5)', text: '#f0c46b', label: 'Legendary' },
-  A: { bg: 'rgba(167,139,250,0.15)', border: 'rgba(167,139,250,0.5)', text: '#a78bfa', label: 'Epic' },
-  B: { bg: 'rgba(96,165,250,0.15)',  border: 'rgba(96,165,250,0.5)',  text: '#60a5fa', label: 'Rare' },
-  C: { bg: 'rgba(52,211,153,0.15)', border: 'rgba(52,211,153,0.4)',  text: '#34d399', label: 'Uncommon' },
-  D: { bg: 'rgba(255,255,255,0.05)', border: 'rgba(255,255,255,0.1)', text: 'rgba(233,241,236,0.55)', label: 'Common' },
+  5: { bg: 'rgba(240,196,107,0.15)', border: 'rgba(240,196,107,0.5)', text: '#f0c46b', label: 'Legendary' },
+  4: { bg: 'rgba(167,139,250,0.15)', border: 'rgba(167,139,250,0.5)', text: '#a78bfa', label: 'Epic' },
+  3: { bg: 'rgba(96,165,250,0.15)',  border: 'rgba(96,165,250,0.5)',  text: '#60a5fa', label: 'Rare' },
+  2: { bg: 'rgba(52,211,153,0.15)', border: 'rgba(52,211,153,0.4)',  text: '#34d399', label: 'Uncommon' },
+  1: { bg: 'rgba(255,255,255,0.05)', border: 'rgba(255,255,255,0.1)', text: 'rgba(233,241,236,0.55)', label: 'Common' },
 };
 
-function RankBadge({ grade }) {
-  const cfg = RANK_COLORS[grade?.toUpperCase()] || RANK_COLORS.D;
-  const stars = rarityToStars(grade);
+function RankBadge({ stars }) {
+  const cfg = RANK_COLORS[stars] || RANK_COLORS[1];
   return (
     <span className="profile-rank-badge" style={{ background: cfg.bg, borderColor: cfg.border, color: cfg.text }}>
-      {grade?.toUpperCase()}
-      {stars > 0 && <span aria-label={`${stars} stars`}> {'★'.repeat(stars)}</span>}
+      {stars > 0 && <span aria-label={`${stars} stars`}>{stars} {'★'.repeat(stars)}</span>}
     </span>
   );
 }
@@ -61,9 +55,9 @@ export function ProfilePage() {
   };
 
   // Rank breakdown from captures
-  const rankBreakdown = ['S', 'A', 'B', 'C', 'D'].map((grade) => ({
-    grade,
-    count: discoveries.filter((c) => (c.rarityGrade || c.rarityTier || 'D').toUpperCase() === grade).length,
+  const rankBreakdown = [5, 4, 3, 2, 1].map((stars) => ({
+    stars,
+    count: discoveries.filter((c) => (c.rarityStars || 1) === stars).length,
   }));
 
   return (
@@ -142,10 +136,10 @@ export function ProfilePage() {
         >
           <p className="profile-section-eyebrow">Rarity Breakdown</p>
           <div className="profile-rank-row">
-            {rankBreakdown.map(({ grade, count }) => (
+            {rankBreakdown.map(({ stars, count }) => (
               count > 0 ? (
-                <div key={grade} className="profile-rank-cell">
-                  <RankBadge grade={grade} />
+                <div key={stars} className="profile-rank-cell">
+                  <RankBadge stars={stars} />
                   <span className="profile-rank-count">×{count}</span>
                 </div>
               ) : null

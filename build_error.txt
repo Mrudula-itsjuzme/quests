@@ -1,0 +1,29 @@
+
+> quests-app@1.0.0 build:native
+> VITE_NATIVE_BUILD=true vite build
+
+vite v6.4.3 building for production...
+transforming...
+✓ 167 modules transformed.
+✗ Build failed in 707ms
+error during build:
+src/lib/guestData.js (407:13): Identifier "GUEST_COMMUNITY_POSTS" has already been declared
+file: /home/mrudula/Downloads/HABBIT/quests/src/lib/guestData.js:407:13
+
+405: ];
+406: 
+407: export const GUEST_COMMUNITY_POSTS = [
+                  ^
+408:   {
+409:     id: 'post-1',
+
+    at getRollupError (file:///home/mrudula/Downloads/HABBIT/quests/node_modules/rollup/dist/es/shared/parseAst.js:317:41)
+    at error (file:///home/mrudula/Downloads/HABBIT/quests/node_modules/rollup/dist/es/shared/parseAst.js:313:42)
+    at Module.error (file:///home/mrudula/Downloads/HABBIT/quests/node_modules/rollup/dist/es/shared/node-entry.js:17396:16)
+    at ModuleScope.addDeclaration (file:///home/mrudula/Downloads/HABBIT/quests/node_modules/rollup/dist/es/shared/node-entry.js:5578:21)
+    at ModuleScope.addDeclaration (file:///home/mrudula/Downloads/HABBIT/quests/node_modules/rollup/dist/es/shared/node-entry.js:15398:22)
+    at Identifier.declare (file:///home/mrudula/Downloads/HABBIT/quests/node_modules/rollup/dist/es/shared/node-entry.js:5463:35)
+    at VariableDeclarator.declareDeclarator (file:///home/mrudula/Downloads/HABBIT/quests/node_modules/rollup/dist/es/shared/node-entry.js:15900:17)
+    at VariableDeclaration.initialise (file:///home/mrudula/Downloads/HABBIT/quests/node_modules/rollup/dist/es/shared/node-entry.js:15741:24)
+    at convertNode (file:///home/mrudula/Downloads/HABBIT/quests/node_modules/rollup/dist/es/shared/node-entry.js:16790:10)
+    at Array.exportNamedDeclaration (file:///home/mrudula/Downloads/HABBIT/quests/node_modules/rollup/dist/es/shared/node-entry.js:16385:48)

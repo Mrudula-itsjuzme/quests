@@ -1468,22 +1468,22 @@ body:has(.modal-backdrop) .mobile-bottom-dock {
 :root,
 :root[data-wild-theme='dark'],
 :root[data-wild-theme='light'] {
-  color-scheme: dark !important;
-  --wr-bg: #050706 !important;
-  --wr-bg-soft: #0a0f0d !important;
-  --wr-surface: rgba(11, 15, 13, 0.88) !important;
-  --wr-surface-2: rgba(16, 22, 19, 0.76) !important;
-  --wr-panel: rgba(10, 13, 12, 0.76) !important;
-  --wr-line: rgba(245, 241, 229, 0.16) !important;
-  --wr-line-strong: rgba(245, 241, 229, 0.26) !important;
-  --wr-text: #fff8eb !important;
-  --wr-muted: rgba(255, 248, 235, 0.68) !important;
-  --wr-faint: rgba(255, 248, 235, 0.46) !important;
-  --wr-accent: #21d489 !important;
-  --wr-accent-2: #14a876 !important;
-  --wr-coral: #ff7b70 !important;
-  --wr-brass: #f0ce70 !important;
-  --wr-shadow-float: 0 26px 72px rgba(0, 0, 0, 0.52) !important;
+  color-scheme: light !important;
+  --wr-bg: #F5F3EC !important;
+  --wr-bg-soft: #EAE6D8 !important;
+  --wr-surface: rgba(252, 251, 248, 0.88) !important;
+  --wr-surface-2: rgba(252, 251, 248, 0.76) !important;
+  --wr-panel: rgba(252, 251, 248, 0.76) !important;
+  --wr-line: rgba(45, 43, 38, 0.16) !important;
+  --wr-line-strong: rgba(45, 43, 38, 0.26) !important;
+  --wr-text: #2D2B26 !important;
+  --wr-muted: rgba(45, 43, 38, 0.68) !important;
+  --wr-faint: rgba(45, 43, 38, 0.46) !important;
+  --wr-accent: #6D8764 !important;
+  --wr-accent-2: #5A7451 !important;
+  --wr-coral: #6D8764 !important;
+  --wr-brass: #6D8764 !important;
+  --wr-shadow-float: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
 }
 
 html,
@@ -1497,15 +1497,12 @@ body,
 .guild-page,
 .quests-shell,
 .profile-page {
-  background: #050706 !important;
+  background: var(--wr-bg) !important;
   color: var(--wr-text) !important;
 }
 
 .app-shell::before {
-  background:
-    radial-gradient(circle at 18% 8%, rgba(33, 212, 137, 0.18), transparent 30%),
-    radial-gradient(circle at 92% 14%, rgba(240, 206, 112, 0.14), transparent 28%),
-    linear-gradient(180deg, #07120e 0%, #050706 54%, #030403 100%) !important;
+  background: none !important;
 }
 
 .community-tabs-bar,
@@ -1632,20 +1629,21 @@ body,
 }
 
 .mobile-bottom-dock {
-  background: rgba(4, 6, 5, 0.82) !important;
-  border: 1px solid rgba(255, 248, 235, 0.15) !important;
-  box-shadow: 0 -18px 54px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
-  backdrop-filter: blur(26px) saturate(1.2) !important;
+  background: #9D9181 !important;
+  border: none !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05) !important;
+  backdrop-filter: none !important;
 }
 
 .mobile-bottom-dock a,
 .mobile-bottom-dock .dock-item {
-  color: rgba(255, 248, 235, 0.62) !important;
+  color: rgba(255, 255, 255, 0.7) !important;
 }
 
 .mobile-bottom-dock a.active,
 .mobile-bottom-dock .dock-item.active {
-  color: var(--wr-brass) !important;
+  color: #ffffff !important;
 }
 
 .dock-shutter-btn {
@@ -4093,13 +4091,10 @@ body,
     text-transform: none !important;
   }
 
-  .quest-user-topbar,
   .library-stats-bar,
   .library-metric-strip,
   .community-tabs-bar,
-  .quest-cadence-tabs,
   .post-card,
-  .quest-item-card,
   .library-photo-card,
   .community-state-panel,
   .library-empty-state {
@@ -4109,14 +4104,11 @@ body,
     backdrop-filter: blur(18px) saturate(1.18);
   }
 
-  .quest-user-topbar,
   .library-stats-bar,
-  .community-tabs-bar,
-  .quest-cadence-tabs {
+  .community-tabs-bar {
     border-radius: 999px !important;
   }
 
-  .quest-item-card,
   .post-card,
   .library-photo-card,
   .community-state-panel,
@@ -4804,6 +4796,9 @@ body {
 }
 
 .world-explore-container {
+  min-height: 100dvh;
+  height: 100%;
+  position: relative;
   background:
     linear-gradient(180deg, rgba(3, 9, 7, 0.04), rgba(3, 9, 7, 0.82) 78%),
     var(--wr-bg-map) !important;
@@ -5110,33 +5105,8 @@ body {
 }
 
 @media (max-width: 780px) {
-  .app-shell {
-    background: #050706 !important;
-  }
-
   .mobile-content-area {
     padding-bottom: calc(94px + env(safe-area-inset-bottom)) !important;
-  }
-
-  .mobile-bottom-dock {
-    right: 14px !important;
-    bottom: calc(8px + env(safe-area-inset-bottom)) !important;
-    left: 14px !important;
-    height: 68px !important;
-    padding: 7px 12px !important;
-    border-radius: 26px !important;
-  }
-
-  .mobile-bottom-dock a,
-  .mobile-bottom-dock .dock-item {
-    color: rgba(248, 243, 231, 0.52) !important;
-  }
-
-  .mobile-bottom-dock a.active,
-  .mobile-bottom-dock .dock-item.active {
-    color: var(--wr-brass) !important;
-    background: transparent !important;
-    box-shadow: none !important;
   }
 
   .dock-shutter-btn {

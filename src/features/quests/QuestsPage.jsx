@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { QuestDetail } from './QuestDetail';
-import { ProgressBar, questProgressRatio, questStatusLabel } from './QuestCard';
+import { ProgressBar, questProgressRatio } from './QuestCard';
 import { Icon, categoryIcon } from '../../components/Icon';
 import { playTap } from '../../lib/useSoundEffects';
 import { BottomSheet } from '../../components/motion/BottomSheet';
@@ -68,43 +68,34 @@ export function QuestsPage() {
   return (
     <main className="quests-shell">
       <h1 className="sr-only">Quests</h1>
-      {/* Top User Bar */}
-      <div className="quest-user-topbar">
-        <div className="quest-explorer-main">
-          <div className="quest-user-avatar" aria-hidden="true">
+      {/* Explorer Profile */}
+      <div style={{ marginBottom: '24px' }}>
+        <h2 style={{ fontSize: '0.85rem', fontWeight: '800', letterSpacing: '0.05em', color: 'var(--quest-muted)', marginBottom: '12px', textTransform: 'uppercase' }}>Explorer Profile</h2>
+        <div className="quest-user-topbar" style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '16px', alignItems: 'center' }}>
+          <div className="quest-user-avatar" aria-hidden="true" style={{ width: '64px', height: '64px', borderRadius: '50%', border: '2px solid var(--quest-gold-dim)', display: 'grid', placeItems: 'center', background: 'var(--quest-ink-2)', color: 'var(--quest-gold-bright)', fontSize: '1.4rem' }}>
             <span>{(me?.displayName || 'Adventurer').split(/\s+/).slice(0, 2).map((part) => part[0]?.toUpperCase() || '').join('')}</span>
           </div>
-          <div className="quest-explorer-copy">
-            <h3>{me?.displayName || 'Adventurer'}</h3>
-            {me && (
-              <small>
-                {me.tierLabel || `${me.tier} Explorer`} • {me.xpIntoLevel} / {me.xpForCurrentLevel} XP
-              </small>
-            )}
-            <ProgressBar value={xpProgress} compact />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px' }}>
+              <div>
+                <h3 style={{ fontSize: '1.2rem', margin: '0 0 2px', color: 'var(--quest-cream)' }}>{me?.displayName || 'Adventurer'}</h3>
+                {me && (
+                  <small style={{ color: 'var(--quest-muted)', fontSize: '0.85rem' }}>
+                    Aspiring Naturalist | Level {me.level || 1}
+                  </small>
+                )}
+              </div>
+              {me && (
+                <div style={{ minWidth: '140px', textAlign: 'right' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--quest-cream)', textTransform: 'uppercase', marginBottom: '4px' }}>Rank: {me.tierLabel || `${me.tier} Explorer`}</div>
+                  <ProgressBar value={xpProgress} compact />
+                  <div style={{ fontSize: '0.75rem', color: 'var(--quest-muted)', marginTop: '4px' }}>{me.xpIntoLevel} / {me.xpForCurrentLevel} XP</div>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-        <div className="quest-coin-badge" aria-label={`${gold} coins`}>
-          <Icon name="coin" />
-          <span>{gold.toLocaleString()}</span>
         </div>
       </div>
-
-      {me && (
-        <section className="quest-season-strip" aria-label="Explorer progression">
-          <div className="quest-season-topline">
-            <span>VERDANT SEASON</span>
-          </div>
-          <div className="quest-season-rank">
-            <strong>{me.tierLabel || `${me.tier} Explorer`}</strong>
-            <span>{xpIntoLevel} / {xpForCurrentLevel} XP</span>
-          </div>
-          <ProgressBar value={xpProgress} compact />
-          {xpForCurrentLevel > 0 && (
-            <p>{xpRemaining} XP to next explorer rank</p>
-          )}
-        </section>
-      )}
 
       {/* Cadence Filter Tabs */}
       <div className="quest-cadence-tabs" style={{ position: 'relative' }}>
@@ -141,9 +132,11 @@ export function QuestsPage() {
 
       {/* Quests List */}
       <div className="quests-card-list">
-        <div className="quests-section-header">
-          <h2>{CADENCE_LABEL[tab] || 'Quests'}</h2>
-          <span>{completedVisibleCount}/{visibleQuests.length}</span>
+        <div className="quests-section-header" style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: '800', letterSpacing: '0.05em', color: 'var(--quest-cream)', textTransform: 'uppercase', margin: 0 }}>
+            {tab === 'daily' ? 'Daily Nature Quests' : CADENCE_LABEL[tab]}
+          </h2>
+          <span style={{ fontSize: '0.85rem', color: 'var(--quest-muted)', fontWeight: '700' }}>{completedVisibleCount}/{visibleQuests.length}</span>
         </div>
         {activeQuery.isLoading ? (
           <QuestLoadingStack />
@@ -153,7 +146,6 @@ export function QuestsPage() {
           <>
             {visibleQuests.map((quest) => {
               const state = questState(quest);
-              const statusLabel = questDisplayStatus(quest);
               return (
                 <motion.div
                   key={quest.id}
@@ -161,60 +153,29 @@ export function QuestsPage() {
                   whileHover={{ scale: 1.01 }}
                   onClick={() => { playTap(); setSelectedId(quest.id); }}
                 >
-                  <div className="quest-card-content">
-                    <div className="quest-card-topline">
-                      <span className="quest-rarity-mark">
-                        <Icon name={categoryIcon(quest.category)} />
-                        {(quest.rarity || quest.category || 'Quest').toUpperCase()}
-                      </span>
-                      <span className="quest-xp-reward">+{quest.xpReward} XP</span>
-                    </div>
-                    <div className="quest-row-main">
-                      <h4 className="quest-item-title">{quest.title}</h4>
-                      <p className="quest-item-instruction">{quest.description || `Capture ${quest.targetValue} ${quest.unit || 'finds'} to complete this quest.`}</p>
-                      <div className="quest-row-meta">
-                        <span className="quest-progress-num">{quest.progressValue}/{quest.targetValue} {quest.unit}</span>
-                        <span className="quest-reward-pill">XP {quest.xpReward}</span>
-                        {quest.coinReward > 0 && (
-                          <span className="quest-reward-pill is-coin">
-                            <Icon name="coin" /> {quest.coinReward}
-                          </span>
-                        )}
+                  <div className="quest-card-content" style={{ display: 'grid', gridTemplateColumns: '72px 1fr', gap: '16px', padding: '16px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                      <div className="quest-rarity-mark" style={{ width: '48px', height: '48px', borderRadius: '50%', display: 'grid', placeItems: 'center', background: 'var(--quest-ink-2)', color: 'var(--quest-gold-bright)', border: '1px solid var(--quest-line)' }}>
+                        <Icon name={categoryIcon(quest.category)} style={{ fontSize: '1.4rem' }} />
                       </div>
-                      <ProgressBar value={questProgressRatio(quest)} compact />
+                      <span className="quest-xp-reward" style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--quest-cream)' }}>{quest.xpReward} XP</span>
+                    </div>
+                    <div className="quest-row-main" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                      <h4 className="quest-item-title" style={{ textTransform: 'uppercase', letterSpacing: '0.02em', marginBottom: '8px' }}>{quest.title}</h4>
+                      
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--quest-cream)' }}>
+                        <div style={{ width: '18px', height: '18px', border: '2px solid var(--quest-gold-dim)', borderRadius: '4px', background: state === 'completed' ? 'var(--quest-gold)' : 'transparent', display: 'grid', placeItems: 'center' }}>
+                          {state === 'completed' && <Icon name="check" style={{ color: '#fff', fontSize: '12px' }} />}
+                        </div>
+                        {state === 'completed' ? 'COMPLETED' : 'Mark found'}
+                      </label>
+                      
+                      <p className="quest-item-instruction" style={{ color: 'var(--quest-muted)', fontSize: '0.85rem', lineHeight: '1.4', margin: 0 }}>
+                        {quest.description || `Capture ${quest.targetValue} ${quest.unit || 'finds'} to complete this quest.`}
+                      </p>
                     </div>
 
-                    <AnimatePresence mode="wait">
-                      {state === 'completed' ? (
-                        <motion.div
-                          key="done"
-                          initial={{ scale: 0, opacity: 0, rotate: -45 }}
-                          animate={{ scale: 1, opacity: 1, rotate: 0 }}
-                          transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-                          className="quest-claim-btn"
-                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: '1px solid var(--quest-gold-dim)', color: 'var(--quest-gold-bright)' }}
-                        >
-                          ✔
-                        </motion.div>
-                      ) : (
-                        <motion.button
-                          key="claim"
-                          initial={{ opacity: 1 }}
-                          exit={{ scale: 0, opacity: 0 }}
-                          type="button"
-                          className="quest-claim-btn glass"
-                          aria-label="View"
-                          whileTap={{ scale: 0.9 }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            playTap();
-                            setSelectedId(quest.id);
-                          }}
-                        >
-                          {questActionLabel(quest)}
-                        </motion.button>
-                      )}
-                    </AnimatePresence>
+
                   </div>
                 </motion.div>
               );
@@ -280,7 +241,3 @@ function questActionLabel(quest) {
   return quest.progressValue > 0 ? 'OPEN' : 'START';
 }
 
-function questDisplayStatus(quest) {
-  if (quest.status === 'active' && Number(quest.progressValue || 0) === 0) return 'Not started';
-  return questStatusLabel(quest);
-}

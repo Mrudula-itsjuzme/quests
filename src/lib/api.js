@@ -84,7 +84,7 @@ let guestCaptures = null;
 let guestCommunityPosts = null;
 
 const GUEST_CAPTURES_KEY = 'wild_realm_guest_captures_v1';
-const GUEST_POSTS_KEY = 'wild_realm_guest_posts_v1';
+const GUEST_POSTS_KEY = 'wild_realm_guest_posts_v2';
 const MAX_GUEST_CAPTURES = 100;
 const MAX_GUEST_POSTS = 100;
 const MAX_TITLE_LENGTH = 80;
@@ -340,6 +340,11 @@ export function createApiClient(getToken) {
       const token = await getToken();
       if (token === 'guest') throw new ApiError(403, 'guest_write_unavailable');
       return request(`/community/posts/${postId}/like`, { method: 'POST', body: { liked }, token });
+    },
+    reportCommunityPost: async (postId, reason) => {
+      const token = await getToken();
+      if (token === 'guest') return guestDelay({ success: true }, 200);
+      return request(`/community/posts/${postId}/report`, { method: 'POST', body: { reason }, token });
     },
     getCommunityComments: async (postId, signal) => {
       const token = await getToken();

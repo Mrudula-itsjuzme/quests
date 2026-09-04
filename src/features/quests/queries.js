@@ -145,6 +145,13 @@ export function useAddCommunityComment() {
   });
 }
 
+export function useReportCommunityPost() {
+  const api = useApiClient();
+  return useMutation({
+    mutationFn: ({ postId, reason }) => api.reportCommunityPost(postId, reason)
+  });
+}
+
 export function useFeed() {
   const api = useApiClient();
   return useQuery({ queryKey: ['feed'], queryFn: ({ signal }) => api.getFeed(signal) });

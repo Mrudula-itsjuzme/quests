@@ -57,12 +57,11 @@ export function WorldCanvas({ hotspots = [], onSelectHotspot, userPosition }) {
       }).setView([12.9716, 77.5946], 12);
 
       if (!offlineNative) {
-        // Dark/nature-themed tiles (CartoDB Dark Matter for premium look)
+        // OpenStreetMap standard tiles (No API Key Required)
         Leaflet.tileLayer(
-          'https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}.png',
+          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
           {
-            attribution: '© OpenStreetMap © CARTO',
-            subdomains: 'abcd',
+            attribution: '© OpenStreetMap contributors',
             maxZoom: 19,
           },
         ).addTo(map);

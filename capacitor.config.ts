@@ -4,6 +4,10 @@ const config: CapacitorConfig = {
   appId: 'com.wildrealm.app',
   appName: 'Wander',
   webDir: 'dist',
+  server: {
+    androidScheme: 'http',
+    cleartext: true
+  },
   plugins: {
     Keyboard: {
       resize: 'body'

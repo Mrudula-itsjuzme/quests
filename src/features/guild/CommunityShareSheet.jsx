@@ -113,8 +113,8 @@ export function CommunityShareSheet({ onClose, onShared }) {
                       checked={selectedId === card.id}
                       onChange={() => { playTap(); setSelectedId(card.id); }}
                     />
-                    <span className={`community-share-rank rank-badge-${(card.rarityTier || 'd').toLowerCase()}`}>
-                      {card.rarityTier || '—'}
+                    <span className={`community-share-rank rank-badge-${card.rarityStars || 1}`}>
+                      {card.rarityStars || 1}★
                     </span>
                     <span className="community-share-name">{card.cardTitle || card.itemName}</span>
                   </label>

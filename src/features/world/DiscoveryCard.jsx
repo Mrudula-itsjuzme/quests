@@ -20,8 +20,6 @@ function useCountUp(targetValue, duration = 1200) {
   return count;
 }
 
-const GRADE_LABELS = { S: 'LEGENDARY', A: 'EPIC', B: 'RARE', C: 'UNCOMMON', D: 'COMMON' };
-
 // Share card to Instagram/other platforms via Web Share API
 async function shareToInstagram(cardTitle, gradeLabel, xp, imageUrl) {
   const shareText = `🌿 I found a ${gradeLabel} "${cardTitle}" in Wild Realm! +${xp} XP\n#WildRealm #NatureExplorer`;
@@ -68,9 +66,16 @@ export function DiscoveryCard({
   const confidence = cardData.confidence != null ? Math.round(cardData.confidence * 100) : null;
   const locationText = cardData.location
     || (cardData.gps ? `${cardData.gps.lat?.toFixed(4)}°N, ${cardData.gps.lng?.toFixed(4)}°E` : null);
-  const rarityTier = (cardData.rarityGrade || cardData.rarityTier || cardData.rarity || 'D').toUpperCase();
-  const gradeLabel = GRADE_LABELS[rarityTier] || rarityTier;
-  const stars = cardData.rarityStars ?? null;
+  const rarityTierRaw = (cardData.rarityGrade || cardData.rarityTier || cardData.rarity || 'D').toUpperCase();
+  const stars = cardData.rarityStars ?? (
+    rarityTierRaw === 'S' || rarityTierRaw === 'LEGENDARY' ? 5 :
+    rarityTierRaw === 'A' || rarityTierRaw === 'EPIC' ? 4 :
+    rarityTierRaw === 'B' || rarityTierRaw === 'RARE' ? 3 :
+    rarityTierRaw === 'C' || rarityTierRaw === 'UNCOMMON' ? 2 :
+    1
+  );
+  const gradeLabel = `${stars} Star`;
+  const rarityTier = `${stars}`;
   const elementCategory = cardData.element || speciesEntry?.element || cardData.category || null;
   const aiCaption = cardData.description || speciesEntry?.encyclopedia || speciesEntry?.summary || null;
   const capturedAtDate = cardData.capturedAt
@@ -146,12 +151,12 @@ export function DiscoveryCard({
           />
         ) : (
           <div className={`discovery-hero-fallback rank-hex-${rarityTier.toLowerCase()}`} role="img" aria-label={`${itemName}, ${gradeLabel} rank`}>
-            <span>{rarityTier}</span>
+            <span>{stars}★</span>
           </div>
         )}
 
         {/* Holographic glare for S/A rank */}
-        {(rarityTier === 'S' || rarityTier === 'A') && (
+        {(stars >= 4) && (
           <motion.div
             className="discovery-holo-glare"
             style={{
@@ -174,7 +179,7 @@ export function DiscoveryCard({
 
         {/* Rarity badge on photo */}
         <div className={`discovery-photo-rarity rank-hex-${rarityTier.toLowerCase()}`} aria-label={`${gradeLabel} rank`}>
-          {rarityTier}
+          {stars}★
         </div>
       </motion.div>
 

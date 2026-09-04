@@ -18,7 +18,7 @@ import { DesktopSidebar } from './DesktopSidebar';
 const THEME_KEY = 'wild-realm-theme';
 
 function readThemePreference() {
-  return 'dark';
+  return 'light';
 }
 
 // Capture is the core verb of the product, so the shell owns the flow: the
@@ -94,7 +94,7 @@ export function AppShell() {
     const root = document.documentElement;
     root.dataset.wildTheme = themeMode;
     try {
-      localStorage.setItem(THEME_KEY, 'dark');
+      localStorage.setItem(THEME_KEY, 'light');
     } catch {
       // Ignore storage failures; the visual state still applies for this run.
     }
@@ -125,7 +125,7 @@ export function AppShell() {
           >
             <span className="brand-mark" aria-hidden="true"><Icon name="leaf" /></span>
             <div>
-              <strong>WILD REALM</strong>
+              <strong>WANDER</strong>
             </div>
           </motion.div>
           <div className="user-profile-trigger">
@@ -165,9 +165,8 @@ export function AppShell() {
           </div>
         </header>
 
-      {/* Main scrolling content area */}
       <div className={`mobile-content-area ${isWorldRoute ? 'mobile-content-area-world' : ''}`}>
-        <AnimatePresence mode="wait">
+        <AnimatePresence initial={false} mode="wait">
           <JournalTransition key={location.pathname} className="route-stage">
             <Outlet />
           </JournalTransition>
