@@ -8,14 +8,19 @@ function useCountUp(targetValue, duration = 1200) {
   useEffect(() => {
     if (!targetValue) return;
     let startTimestamp = null;
+    let animId = null;
     const step = (timestamp) => {
       if (!startTimestamp) startTimestamp = timestamp;
       const progress = Math.min((timestamp - startTimestamp) / duration, 1);
       const easeOutQuad = 1 - (1 - progress) * (1 - progress);
       setCount(Math.floor(easeOutQuad * targetValue));
-      if (progress < 1) window.requestAnimationFrame(step);
+      if (progress < 1) animId = window.requestAnimationFrame(step);
     };
-    window.requestAnimationFrame(step);
+    animId = window.requestAnimationFrame(step);
+    
+    return () => {
+      if (animId) window.cancelAnimationFrame(animId);
+    };
   }, [targetValue, duration]);
   return count;
 }

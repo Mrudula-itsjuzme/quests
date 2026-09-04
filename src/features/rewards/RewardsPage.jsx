@@ -202,8 +202,12 @@ function RewardsContent({
             disabled={claimRewards.isPending || !rewards.some((reward) => reward.status === 'claimable')}
             onComplete={async () => { 
               playSuccess(); 
-              const claimed = await claimRewards.mutateAsync(); 
-              setTimeout(() => setNotice(claimed.length ? `${claimed.length} milestone reward${claimed.length === 1 ? '' : 's'} claimed.` : 'No rewards are ready yet.'), 600); 
+              try {
+                const claimed = await claimRewards.mutateAsync(); 
+                setTimeout(() => setNotice(claimed.length ? `${claimed.length} milestone reward${claimed.length === 1 ? '' : 's'} claimed.` : 'No rewards are ready yet.'), 600); 
+              } catch (error) {
+                setTimeout(() => setNotice('Failed to claim rewards. Please try again.'), 600);
+              }
             }}
           >
             Hold to Claim

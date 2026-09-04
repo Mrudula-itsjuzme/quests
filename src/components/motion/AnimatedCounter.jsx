@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { animate, useMotionValue } from 'framer-motion';
 
-export function AnimatedCounter({ value, duration = 0.8, prefix = '', suffix = '', formatter = (val) => Math.round(val).toLocaleString() }) {
+const defaultFormatter = (val) => Math.round(val).toLocaleString();
+
+export function AnimatedCounter({ value, duration = 0.8, prefix = '', suffix = '', formatter = defaultFormatter }) {
   const count = useMotionValue(value);
   const [displayValue, setDisplayValue] = useState(formatter(value));
   const isFirstRender = useRef(true);

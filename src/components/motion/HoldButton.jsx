@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { motion, useAnimation } from 'framer-motion';
 
 export function HoldButton({ onComplete, disabled, children, className }) {
@@ -6,6 +6,10 @@ export function HoldButton({ onComplete, disabled, children, className }) {
   const holdTimeout = useRef(null);
   
   const HOLD_DURATION = 1500; // 1.5 seconds
+
+  useEffect(() => {
+    return () => clearTimeout(holdTimeout.current);
+  }, []);
 
   const startHold = () => {
     if (disabled) return;

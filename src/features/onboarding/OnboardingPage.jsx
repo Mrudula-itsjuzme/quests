@@ -41,12 +41,18 @@ export function OnboardingPage() {
   const onSubmit = async (event) => {
     event.preventDefault();
     playSuccess();
-    await updateMe.mutateAsync({
-      displayName: displayName.trim() || undefined,
-      timezone,
-      primaryPath,
-      onboardingCompleted: true,
-    });
+    try {
+      await updateMe.mutateAsync({
+        displayName: displayName.trim() || undefined,
+        timezone,
+        primaryPath,
+        onboardingCompleted: true,
+      });
+    } catch (error) {
+      // The error is already handled by updateMe.isError in the render method,
+      // but we need to catch the promise rejection to avoid crashing the app.
+      console.warn('Failed to save profile during onboarding:', error);
+    }
   };
 
   return (
