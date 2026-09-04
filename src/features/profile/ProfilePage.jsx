@@ -46,7 +46,11 @@ export function ProfilePage() {
   const level = me?.level || 1;
   const progress = me?.progressToNextLevel || 0;
 
-  const unavailable = (msg) => { playTap(); setNotice(msg); };
+  const unavailable = (msg) => { 
+    playTap(); 
+    setNotice(msg); 
+    setTimeout(() => setNotice(''), 4000);
+  };
 
   const handleMenuItem = (item) => {
     playTap();

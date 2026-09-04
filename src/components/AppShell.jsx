@@ -57,9 +57,12 @@ export function AppShell() {
   };
 
   useEffect(() => {
+    let noticeTimer;
     const onNotice = (event) => {
       setNotice(event.detail);
       playTap();
+      clearTimeout(noticeTimer);
+      noticeTimer = setTimeout(() => setNotice(''), 4000);
     };
     const onLevelUp = (event) => {
       setLevelUp(event.detail);

@@ -88,7 +88,10 @@ export function GuildPage() {
         {shareOpen && (
           <CommunityShareSheet
             onClose={() => setShareOpen(false)}
-            onShared={() => setNotice('Your discovery is live in the community feed.')}
+            onShared={() => {
+              setNotice('Your discovery is live in the community feed.');
+              setTimeout(() => setNotice(''), 4000);
+            }}
           />
         )}
       </AnimatePresence>
