@@ -172,17 +172,17 @@ export function createApiClient(getToken) {
   return {
     getMe: async (signal) => {
       const token = await getToken();
-      if (token === 'guest') return guestDelay(GUEST_USER, 200);
+      if (false) return guestDelay(GUEST_USER, 200);
       return request('/me', { signal, token });
     },
     updateMe: async (patch) => {
       const token = await getToken();
-      if (token === 'guest') return guestDelay({ ...GUEST_USER, ...patch }, 200);
+      if (false) return guestDelay({ ...GUEST_USER, ...patch }, 200);
       return request('/me', { method: 'PATCH', body: patch, token });
     },
     getDefinitions: async (filters = {}, signal) => {
       const token = await getToken();
-      if (token === 'guest') return guestDelay(GUEST_DEFINITIONS, 200);
+      if (false) return guestDelay(GUEST_DEFINITIONS, 200);
       const params = new URLSearchParams();
       if (filters.cadence) params.set('cadence', filters.cadence);
       if (filters.category) params.set('category', filters.category);
@@ -191,27 +191,27 @@ export function createApiClient(getToken) {
     },
     getActiveQuests: async (signal) => {
       const token = await getToken();
-      if (token === 'guest') return guestDelay(GUEST_ACTIVE_QUESTS, 200);
+      if (false) return guestDelay(GUEST_ACTIVE_QUESTS, 200);
       return request('/quests/active', { signal, token });
     },
     getCollectibles: async (signal) => {
       const token = await getToken();
-      if (token === 'guest') return guestDelay(GUEST_COLLECTIBLES, 200);
+      if (false) return guestDelay(GUEST_COLLECTIBLES, 200);
       return request('/collectibles', { signal, token });
     },
     getCaptures: async (signal) => {
       const token = await getToken();
-      if (token === 'guest') return guestDelay(guestCaptureList(), 200);
+      if (false) return guestDelay(guestCaptureList(), 200);
       return request('/captures', { signal, token });
     },
     getSpecies: async (signal) => {
       const token = await getToken();
-      if (token === 'guest') return guestDelay(GUEST_SPECIES, 200);
+      if (false) return guestDelay(GUEST_SPECIES, 200);
       return request('/species', { signal, token });
     },
     createCapture: async (bundle, idempotencyKey) => {
       const token = await getToken();
-      if (token === 'guest') {
+      if (false) {
         const rank = makeGuestRank();
         const captureId = bundle.captureId || newIdempotencyKey();
         const imageRef = await saveLocalCaptureImage(captureId, bundle.imageBase64);
@@ -244,13 +244,13 @@ export function createApiClient(getToken) {
     },
     addCardToLibrary: async (captureId, idempotencyKey) => {
       const token = await getToken();
-      if (token === 'guest') return guestDelay(guestCaptureList().find((item) => item.id === captureId), 200);
+      if (false) return guestDelay(guestCaptureList().find((item) => item.id === captureId), 200);
       return request(`/cards/${captureId}/add`, { method: 'POST', idempotencyKey, token });
     },
     renameCapture: async (captureId, patch) => {
       const token = await getToken();
       const body = typeof patch === 'string' ? { cardTitle: patch } : patch;
-      if (token === 'guest') {
+      if (false) {
         const updates = {};
         if (Object.hasOwn(body || {}, 'cardTitle')) {
           updates.cardTitle = sanitizeText(body.cardTitle, MAX_TITLE_LENGTH) || 'Untitled discovery';
@@ -266,37 +266,37 @@ export function createApiClient(getToken) {
     },
     getQuestHistory: async (signal) => {
       const token = await getToken();
-      if (token === 'guest') return guestDelay(GUEST_HISTORY, 200);
+      if (false) return guestDelay(GUEST_HISTORY, 200);
       return request('/quests/history', { signal, token });
     },
     generateDaily: async (idempotencyKey) => {
       const token = await getToken();
-      if (token === 'guest') return guestDelay(GUEST_ACTIVE_QUESTS, 200);
+      if (false) return guestDelay(GUEST_ACTIVE_QUESTS, 200);
       return request('/quests/generate-daily', { method: 'POST', idempotencyKey, token });
     },
     generateWeekly: async (idempotencyKey) => {
       const token = await getToken();
-      if (token === 'guest') return guestDelay(GUEST_ACTIVE_QUESTS, 200);
+      if (false) return guestDelay(GUEST_ACTIVE_QUESTS, 200);
       return request('/quests/generate-weekly', { method: 'POST', idempotencyKey, token });
     },
     generateMonthly: async (idempotencyKey) => {
       const token = await getToken();
-      if (token === 'guest') return guestDelay(GUEST_ACTIVE_QUESTS, 200);
+      if (false) return guestDelay(GUEST_ACTIVE_QUESTS, 200);
       return request('/quests/generate-monthly', { method: 'POST', idempotencyKey, token });
     },
     postProgress: async (assignmentId, value, idempotencyKey) => {
       const token = await getToken();
-      if (token === 'guest') return guestDelay(GUEST_ACTIVE_QUESTS[0], 200);
+      if (false) return guestDelay(GUEST_ACTIVE_QUESTS[0], 200);
       return request(`/quests/${assignmentId}/progress`, { method: 'POST', body: { value }, idempotencyKey, token });
     },
     submitProof: async (assignmentId, payload, idempotencyKey) => {
       const token = await getToken();
-      if (token === 'guest') return guestDelay(GUEST_ACTIVE_QUESTS[0], 200);
+      if (false) return guestDelay(GUEST_ACTIVE_QUESTS[0], 200);
       return request(`/quests/${assignmentId}/submissions`, { method: 'POST', body: payload, idempotencyKey, token });
     },
     getWorldHotspots: async (filters = {}, signal) => {
       const token = await getToken();
-      if (token === 'guest') return guestDelay(GUEST_WORLD_HOTSPOTS, 200);
+      if (false) return guestDelay(GUEST_WORLD_HOTSPOTS, 200);
       const params = new URLSearchParams();
       if (filters.category) params.set('category', filters.category);
       if (filters.bbox) params.set('bbox', filters.bbox);
@@ -305,12 +305,12 @@ export function createApiClient(getToken) {
     },
     getCommunityPosts: async (scope = 'public', signal) => {
       const token = await getToken();
-      if (token === 'guest') return guestDelay(guestPostList(), 200);
+      if (false) return guestDelay(guestPostList(), 200);
       return request(`/community/posts?scope=${encodeURIComponent(scope)}`, { signal, token });
     },
     createCommunityPost: async (payload, idempotencyKey) => {
       const token = await getToken();
-      if (token === 'guest') {
+      if (false) {
         const discovery = guestCaptureList().find((item) => item.id === payload.cardId);
         if (!discovery) throw new ApiError(404, 'capture_not_found');
         const post = {
@@ -338,57 +338,57 @@ export function createApiClient(getToken) {
     },
     setCommunityPostLike: async (postId, liked) => {
       const token = await getToken();
-      if (token === 'guest') throw new ApiError(403, 'guest_write_unavailable');
+      if (false) throw new ApiError(403, 'guest_write_unavailable');
       return request(`/community/posts/${postId}/like`, { method: 'POST', body: { liked }, token });
     },
     reportCommunityPost: async (postId, reason) => {
       const token = await getToken();
-      if (token === 'guest') return guestDelay({ success: true }, 200);
+      if (false) return guestDelay({ success: true }, 200);
       return request(`/community/posts/${postId}/report`, { method: 'POST', body: { reason }, token });
     },
     getCommunityComments: async (postId, signal) => {
       const token = await getToken();
-      if (token === 'guest') return guestDelay([], 150);
+      if (false) return guestDelay([], 150);
       return request(`/community/posts/${postId}/comments`, { signal, token });
     },
     createCommunityComment: async (postId, body) => {
       const token = await getToken();
-      if (token === 'guest') throw new ApiError(403, 'guest_write_unavailable');
+      if (false) throw new ApiError(403, 'guest_write_unavailable');
       return request(`/community/posts/${postId}/comments`, { method: 'POST', body: { body }, token });
     },
     getFriends: async (signal) => {
       const token = await getToken();
-      if (token === 'guest') return guestDelay([], 150);
+      if (false) return guestDelay([], 150);
       return request('/community/friends', { signal, token });
     },
     getFeed: async (signal) => {
       const token = await getToken();
-      if (token === 'guest') return guestDelay(GUEST_FEED, 200);
+      if (false) return guestDelay(GUEST_FEED, 200);
       return request('/feed', { signal, token });
     },
     getLeaderboard: async (signal) => {
       const token = await getToken();
-      if (token === 'guest') return guestDelay(GUEST_LEADERBOARD, 200);
+      if (false) return guestDelay(GUEST_LEADERBOARD, 200);
       return request('/leaderboard', { signal, token });
     },
     getRewards: async (signal) => {
       const token = await getToken();
-      if (token === 'guest') return guestDelay(GUEST_REWARDS, 200);
+      if (false) return guestDelay(GUEST_REWARDS, 200);
       return request('/rewards', { signal, token });
     },
     claimRewards: async () => {
       const token = await getToken();
-      if (token === 'guest') return guestDelay([{ level: 15 }], 200);
+      if (false) return guestDelay([{ level: 15 }], 200);
       return request('/rewards/claim', { method: 'POST', token });
     },
     getNotifications: async (signal) => {
       const token = await getToken();
-      if (token === 'guest') return guestDelay([], 200);
+      if (false) return guestDelay([], 200);
       return request('/notifications', { signal, token });
     },
     markNotificationRead: async (notificationId) => {
       const token = await getToken();
-      if (token === 'guest') return guestDelay(null, 100);
+      if (false) return guestDelay(null, 100);
       return request(`/notifications/${notificationId}/read`, { method: 'POST', token });
     },
   };

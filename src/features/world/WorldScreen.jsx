@@ -38,6 +38,11 @@ export function WorldScreen() {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [selectedHotspot, setSelectedHotspot] = useState(null);
 
+  const handleSelectHotspot = useCallback((hotspot) => {
+    playTap();
+    setSelectedHotspot(hotspot);
+  }, []);
+
   const phase = useMemo(() => timeOfDayPhase(new Date().getHours()), []);
   const weather = useMemo(() => pickWeather(), []);
 
@@ -200,10 +205,7 @@ export function WorldScreen() {
         weather={weather}
         hotspots={filteredHotspots}
         userPosition={lastKnownPosition}
-        onSelectHotspot={(hotspot) => {
-          playTap();
-          setSelectedHotspot(hotspot);
-        }}
+        onSelectHotspot={handleSelectHotspot}
       />
 
       <button

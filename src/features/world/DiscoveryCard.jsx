@@ -114,11 +114,7 @@ export function DiscoveryCard({
       layoutId={layoutIdPrefix ? `${layoutIdPrefix}card-${cardId}` : undefined}
       className={`discovery-card-modal rank-${rarityTier.toLowerCase()}`}
       ref={cardRef}
-      drag="y"
-      dragConstraints={{ top: 0, bottom: 0 }}
-      dragElastic={0.4}
-      onDragEnd={(e, info) => { if (info.offset.y > 100) (onClose || onAddToLibrary)(); }}
-      style={{ rotateX, rotateY, transformStyle: 'preserve-3d', perspective: 1000, touchAction: 'none' }}
+      style={{ rotateX, rotateY, transformStyle: 'preserve-3d', perspective: 1000 }}
       onPointerMove={handlePointerMove}
       onPointerLeave={handlePointerLeave}
     >

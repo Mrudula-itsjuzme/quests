@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { AuthImage } from './AuthImage';
 import { isLocalCaptureRef, readLocalCaptureImage } from '../lib/localCaptureStore';
+import { Icon } from './Icon';
 
 /**
  * The one place a capture photograph is rendered.
@@ -46,7 +47,13 @@ export function CaptureImage({ imageRef, alt, element, className = '', eager = f
     <div className={`capture-image ${className}`.trim()} data-state={showPhoto ? state : 'crest'}>
       {/* Always rendered: it is both the fallback and the loading ground. */}
       <div className={`capture-image-crest element-${elementKey}`} aria-hidden="true">
-        <span>{element || 'Wild'}</span>
+        {state === 'loading' ? (
+          <span className="capture-loader-icon" style={{ display: 'inline-block', animation: 'spin 2s linear infinite' }}>
+            <Icon name="refresh-cw" />
+          </span>
+        ) : (
+          <span>{element || 'Wild'}</span>
+        )}
       </div>
 
       {showPhoto && (
