@@ -61,10 +61,10 @@
 .quest-item-title {
   font-size: 1.05rem !important;
   color: #e6e2d3 !important;
-  font-family: Georgia, serif !important; /* Give it a slight editorial feel if available */
+  font-family: var(--font-display, 'Manrope', sans-serif) !important;
   letter-spacing: 0.01em !important;
   margin-bottom: 4px !important;
-  font-weight: 500 !important;
+  font-weight: 600 !important;
 }
 
 .quest-claim-btn {
@@ -3214,11 +3214,11 @@ html[data-wild-theme='dark'] body .app-shell .post-caption {
 
 .capture-filter-strip {
   min-height: 88px !important;
-  padding: 13px 78px 8px !important;
+  padding: 13px max(88px, calc(50vw - 44px)) 8px !important;
   align-items: center !important;
   overflow-x: auto !important;
   overflow-y: visible !important;
-  scroll-padding-inline: 146px !important;
+  scroll-padding-inline: max(88px, calc(50vw - 44px)) !important;
 }
 
 .capture-filter-chip {
@@ -3236,4 +3236,2318 @@ html[data-wild-theme='dark'] body .app-shell .post-caption {
 
 .capture-filter-chip.active {
   z-index: 4 !important;
+}
+
+/* Map HUD final polish: keep the right-side controls separate, not one tall pill. */
+.world-hud-right {
+  top: calc(100px + env(safe-area-inset-top, 0px)) !important;
+  right: 14px !important;
+  width: auto !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  gap: 10px !important;
+  pointer-events: none !important;
+}
+
+.world-hud-right > button,
+.world-hud-right > .world-hud-stats-popover {
+  pointer-events: auto !important;
+}
+
+.world-hud-stats-toggle,
+.world-hud-bell {
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 50% !important;
+  background: rgba(255, 250, 240, 0.94) !important;
+  border: 1px solid rgba(75, 56, 36, 0.13) !important;
+  color: #3c2a1b !important;
+  box-shadow: 0 12px 26px rgba(55, 34, 15, 0.15) !important;
+}
+
+.world-hud-stats-toggle span {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  white-space: nowrap !important;
+}
+
+.world-hud-stats-popover {
+  top: -2px !important;
+  right: 54px !important;
+}
+
+.world-hud-avatar {
+  width: 58px !important;
+  height: 58px !important;
+  box-shadow:
+    0 0 0 2px rgba(255, 250, 240, 0.82),
+    0 0 0 6px rgba(64, 45, 26, 0.2),
+    0 12px 28px rgba(55, 34, 15, 0.22) !important;
+}
+
+/* Final Library/map pass: override late compatibility rules. */
+html body .app-shell .gallery-v2-shell {
+  background:
+    radial-gradient(circle at 50% -8%, rgba(47, 122, 78, 0.1), transparent 28%),
+    linear-gradient(180deg, #fffaf0 0%, #efe4ce 100%) !important;
+}
+
+html body .app-shell .gallery-v2-header,
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-header {
+  margin: 0 20px 12px !important;
+  padding: 6px 0 0 !important;
+  min-height: 54px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html body .app-shell .gallery-v2-header h1,
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-header h1 {
+  color: #2e2015 !important;
+  -webkit-text-fill-color: #2e2015 !important;
+  font-size: 2.08rem !important;
+  font-weight: 980 !important;
+  line-height: 0.98 !important;
+  letter-spacing: 0 !important;
+}
+
+html body .app-shell .gallery-icon-btn {
+  width: 42px !important;
+  height: 42px !important;
+  background: rgba(255, 250, 240, 0.82) !important;
+  color: #2f754d !important;
+  border-color: rgba(77, 56, 32, 0.1) !important;
+}
+
+html body .app-shell .gallery-v2-stats,
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-stats {
+  margin: 0 20px 18px !important;
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+}
+
+html body .app-shell .gallery-v2-stat {
+  padding: 10px 11px !important;
+  border: 1px solid rgba(77, 56, 32, 0.09) !important;
+  border-radius: 16px !important;
+  background: rgba(255, 250, 240, 0.58) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.52) !important;
+}
+
+html body .app-shell .gallery-v2-stat strong {
+  display: block !important;
+  color: #2f2116 !important;
+  font-size: 1.02rem !important;
+  line-height: 1 !important;
+}
+
+html body .app-shell .gallery-v2-stat small {
+  display: block !important;
+  margin-top: 4px !important;
+  color: rgba(71, 54, 36, 0.74) !important;
+  font-size: 0.68rem !important;
+  font-weight: 900 !important;
+  white-space: nowrap !important;
+}
+
+html body .app-shell .gallery-v2-tabs,
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-tabs {
+  margin: 0 0 18px !important;
+  padding: 8px 20px !important;
+  background: rgba(255, 250, 240, 0.54) !important;
+  border-block: 1px solid rgba(77, 56, 32, 0.08) !important;
+  box-shadow: none !important;
+}
+
+html body .app-shell .gallery-v2-sort-row {
+  padding: 0 20px 18px !important;
+}
+
+html body .app-shell .gallery-sort-pills,
+html[data-wild-theme='dark'] body .app-shell .gallery-sort-pills {
+  width: min(224px, 100%) !important;
+  height: 40px !important;
+  padding: 4px !important;
+  box-shadow: 0 10px 20px rgba(72, 51, 27, 0.08) !important;
+}
+
+html body .app-shell .world-hud-left {
+  top: calc(34px + env(safe-area-inset-top, 0px)) !important;
+  right: 18px !important;
+}
+
+html body .app-shell .world-hud-avatar {
+  width: 50px !important;
+  height: 50px !important;
+  border-width: 3px !important;
+}
+
+html body .app-shell .world-hud-avatar-face {
+  width: 28px !important;
+  height: 28px !important;
+  font-size: 0.78rem !important;
+}
+
+html body .app-shell .world-xp-ring {
+  width: 48px !important;
+  height: 48px !important;
+}
+
+html body .app-shell .world-hud-level {
+  right: -6px !important;
+  bottom: -5px !important;
+  min-width: 20px !important;
+  height: 20px !important;
+  font-size: 0.62rem !important;
+}
+
+html body .app-shell .world-hud-right {
+  top: calc(96px + env(safe-area-inset-top, 0px)) !important;
+  right: 18px !important;
+}
+
+html body .app-shell .world-canvas-wrap {
+  background:
+    radial-gradient(circle at 48% 54%, rgba(47, 122, 78, 0.18), transparent 22%),
+    radial-gradient(circle at 30% 36%, rgba(128, 111, 93, 0.12), transparent 28%),
+    linear-gradient(35deg, transparent 0 46%, rgba(156, 123, 76, 0.22) 46% 48%, transparent 48% 100%),
+    linear-gradient(145deg, transparent 0 56%, rgba(47, 122, 78, 0.16) 56% 58%, transparent 58% 100%),
+    linear-gradient(rgba(47, 122, 78, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(47, 122, 78, 0.055) 1px, transparent 1px),
+    linear-gradient(180deg, #f8eedc 0%, #ead9ba 100%) !important;
+  background-size:
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    48px 48px,
+    48px 48px,
+    100% 100% !important;
+}
+
+html body .app-shell .world-canvas-wrap .leaflet-container {
+  background: transparent !important;
+}
+
+html body .app-shell .explore-search-input {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Map HUD simplification: profile pill plus separate stat actions. */
+html body .app-shell .world-hud-left {
+  top: calc(36px + env(safe-area-inset-top, 0px)) !important;
+  right: 18px !important;
+  width: auto !important;
+  height: auto !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+html body .app-shell .world-hud-avatar {
+  width: 76px !important;
+  height: 40px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 7px !important;
+  padding: 5px 7px !important;
+  border: 1px solid rgba(75, 56, 36, 0.14) !important;
+  border-radius: 999px !important;
+  background: rgba(255, 250, 240, 0.94) !important;
+  box-shadow: 0 12px 26px rgba(55, 34, 15, 0.16) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+}
+
+html body .app-shell .world-xp-ring {
+  display: none !important;
+}
+
+html body .app-shell .world-hud-avatar-face {
+  position: static !important;
+  width: 28px !important;
+  height: 28px !important;
+  flex: 0 0 28px !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, var(--profile-a, #2f8f5f), var(--profile-b, #a8e6bd)) !important;
+  color: #2f2116 !important;
+  font-size: 0.82rem !important;
+  font-weight: 950 !important;
+  box-shadow: inset 0 0 0 2px rgba(255, 250, 240, 0.72) !important;
+}
+
+html body .app-shell .world-hud-level {
+  position: static !important;
+  min-width: 0 !important;
+  height: 22px !important;
+  padding: 0 7px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: #2f754d !important;
+  color: #fffaf0 !important;
+  font-size: 0.66rem !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
+}
+
+html body .app-shell .world-hud-level::before {
+  content: "Lv ";
+}
+
+html body .app-shell .world-hud-right {
+  top: calc(88px + env(safe-area-inset-top, 0px)) !important;
+  right: 24px !important;
+  gap: 8px !important;
+}
+
+html body .app-shell .world-hud-stats-toggle,
+html body .app-shell .world-hud-bell {
+  width: 38px !important;
+  height: 38px !important;
+}
+
+html body .app-shell .explore-hotspot-chip {
+  border: 1px solid rgba(255, 250, 240, 0.7) !important;
+  background: rgba(255, 250, 240, 0.86) !important;
+  color: #215f3d !important;
+  text-shadow: none !important;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16) !important;
+}
+
+/* Library compact pass and discovery modal readability. */
+html body .app-shell .gallery-v2-shell {
+  padding-top: max(24px, env(safe-area-inset-top, 0px)) !important;
+}
+
+html body .app-shell .gallery-v2-header,
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-header {
+  margin: 0 34px 10px !important;
+  min-height: 40px !important;
+  padding: 0 !important;
+}
+
+html body .app-shell .gallery-v2-header h1,
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-header h1 {
+  font-size: 1.72rem !important;
+  font-weight: 980 !important;
+  line-height: 1.02 !important;
+}
+
+html body .app-shell .gallery-icon-btn {
+  width: 34px !important;
+  height: 34px !important;
+}
+
+html body .app-shell .gallery-v2-stats,
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-stats {
+  margin: 0 34px 12px !important;
+  gap: 7px !important;
+}
+
+html body .app-shell .gallery-v2-stat {
+  min-height: 42px !important;
+  padding: 7px 8px !important;
+  border-radius: 12px !important;
+  background: rgba(255, 250, 240, 0.46) !important;
+}
+
+html body .app-shell .gallery-v2-stat strong {
+  font-size: 0.86rem !important;
+}
+
+html body .app-shell .gallery-v2-stat small {
+  margin-top: 2px !important;
+  font-size: 0.58rem !important;
+}
+
+html body .app-shell .gallery-v2-tabs,
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-tabs {
+  margin-bottom: 12px !important;
+  padding: 6px 34px !important;
+}
+
+html body .app-shell .gallery-v2-tab {
+  height: 34px !important;
+  padding: 0 10px !important;
+  font-size: 0.78rem !important;
+}
+
+html body .app-shell .gallery-v2-sort-row {
+  padding: 0 34px 12px !important;
+  gap: 10px !important;
+}
+
+html body .app-shell .gallery-v2-count {
+  font-size: 0.78rem !important;
+}
+
+html body .app-shell .gallery-sort-pills,
+html[data-wild-theme='dark'] body .app-shell .gallery-sort-pills {
+  width: min(198px, 100%) !important;
+  height: 36px !important;
+  padding: 3px !important;
+}
+
+html body .app-shell .gallery-sort-pill {
+  height: 30px !important;
+  font-size: 0.68rem !important;
+  padding: 0 6px !important;
+}
+
+html body .app-shell .gallery-v2-grid {
+  padding-inline: 34px !important;
+  gap: 14px 16px !important;
+}
+
+html body .app-shell .gallery-v2-card {
+  min-height: 164px !important;
+  border-radius: 16px !important;
+}
+
+html body .app-shell .gallery-v2-photo {
+  aspect-ratio: 1 / 0.68 !important;
+}
+
+html body .app-shell .gallery-v2-info {
+  min-height: 48px !important;
+  padding: 7px 10px !important;
+}
+
+html body .app-shell .gallery-v2-name {
+  color: #6f604f !important;
+  font-size: 0.74rem !important;
+  line-height: 1.12 !important;
+}
+
+html body .app-shell .gallery-v2-meta {
+  margin-top: 4px !important;
+  font-size: 0.58rem !important;
+}
+
+html body .app-shell .gallery-v2-rank-badge {
+  min-width: 36px !important;
+  height: 26px !important;
+  padding: 0 8px !important;
+  color: #6e604f !important;
+  background: rgba(255, 250, 240, 0.92) !important;
+  border-color: rgba(77, 56, 32, 0.12) !important;
+  font-size: 0.68rem !important;
+  font-weight: 950 !important;
+  text-shadow: none !important;
+}
+
+html body .app-shell .discovery-card-modal {
+  color: #2d2115 !important;
+  background:
+    linear-gradient(180deg, rgba(255, 248, 232, 0.98), rgba(235, 213, 174, 0.96)) !important;
+}
+
+html body .app-shell .discovery-modal-header {
+  min-height: 42px !important;
+  padding: 8px 12px !important;
+}
+
+html body .app-shell .discovery-header-badge {
+  color: #6f604f !important;
+  font-size: 0.7rem !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.06em !important;
+  text-shadow: none !important;
+}
+
+html body .app-shell .discovery-hero-frame {
+  margin: 0 20px 16px !important;
+  border-radius: 18px !important;
+}
+
+html body .app-shell .discovery-hero-frame::after,
+html body .app-shell .discovery-holo-glare {
+  opacity: 0.35 !important;
+}
+
+html body .app-shell .discovery-photo-rarity {
+  top: 12px !important;
+  right: 12px !important;
+  min-width: 40px !important;
+  height: 34px !important;
+  padding: 0 9px !important;
+  border-radius: 999px !important;
+  background: rgba(255, 250, 240, 0.93) !important;
+  border: 1px solid rgba(77, 56, 32, 0.14) !important;
+  color: #6f604f !important;
+  font-size: 0.76rem !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
+  text-shadow: none !important;
+  box-shadow: 0 10px 20px rgba(55, 34, 15, 0.16) !important;
+}
+
+html body .app-shell .discovery-card-body {
+  padding: 0 36px 28px !important;
+}
+
+html body .app-shell .discovery-title-info h2 {
+  color: #2d2115 !important;
+  font-size: 1.36rem !important;
+  line-height: 1.08 !important;
+  font-weight: 950 !important;
+  text-shadow: none !important;
+}
+
+html body .app-shell .discovery-stars {
+  color: #8a7a65 !important;
+  font-size: 0.8rem !important;
+  letter-spacing: 0 !important;
+  text-shadow: none !important;
+}
+
+html body .app-shell .discovery-info-section {
+  background: rgba(255, 250, 240, 0.9) !important;
+  border: 1px solid rgba(77, 56, 32, 0.1) !important;
+  color: #2d2115 !important;
+}
+
+html body .app-shell .discovery-info-label {
+  color: rgba(75, 56, 36, 0.62) !important;
+  font-size: 0.68rem !important;
+  font-weight: 950 !important;
+}
+
+html body .app-shell .discovery-info-value,
+html body .app-shell .discovery-info-date {
+  color: #3b2b1e !important;
+  text-shadow: none !important;
+}
+
+/* Community final pass: clearer comments, report reason, denser Chats/Places. */
+html body .app-shell .guild-page.page-stack {
+  padding-top: max(14px, env(safe-area-inset-top, 0px)) !important;
+  background:
+    radial-gradient(circle at 50% -8%, rgba(47, 122, 78, 0.08), transparent 28%),
+    linear-gradient(180deg, #fffaf0 0%, #efe4ce 100%) !important;
+}
+
+html body .app-shell .community-tabs-bar,
+html[data-wild-theme='dark'] body .app-shell .community-tabs-bar {
+  height: 42px !important;
+  margin: 0 26px 12px !important;
+  padding: 3px !important;
+  border-radius: 999px !important;
+}
+
+html body .app-shell .community-tab-btn,
+html[data-wild-theme='dark'] body .app-shell .community-tab-btn {
+  height: 36px !important;
+  gap: 5px !important;
+  font-size: 0.72rem !important;
+}
+
+html body .app-shell .community-feed-stream,
+html[data-wild-theme='dark'] body .app-shell .community-feed-stream {
+  padding: 0 26px calc(96px + env(safe-area-inset-bottom, 0px)) !important;
+  gap: 14px !important;
+}
+
+html body .app-shell .community-post-card,
+html[data-wild-theme='dark'] body .app-shell .community-post-card {
+  border: 1px solid rgba(77, 56, 32, 0.1) !important;
+  border-radius: 16px !important;
+  background: rgba(255, 250, 240, 0.9) !important;
+  box-shadow: 0 14px 30px rgba(72, 51, 27, 0.08) !important;
+  overflow: hidden !important;
+}
+
+html body .app-shell .post-header-row,
+html[data-wild-theme='dark'] body .app-shell .post-header-row {
+  min-height: 64px !important;
+  padding: 10px 14px !important;
+}
+
+html body .app-shell .post-photo-wrap,
+html[data-wild-theme='dark'] body .app-shell .post-photo-wrap {
+  aspect-ratio: 1 / 0.48 !important;
+}
+
+html body .app-shell .post-info-block,
+html[data-wild-theme='dark'] body .app-shell .post-info-block {
+  padding: 12px 14px 14px !important;
+}
+
+html body .app-shell .post-info-block h3 {
+  font-size: 1rem !important;
+  line-height: 1.12 !important;
+}
+
+html body .app-shell .post-location {
+  margin-top: 3px !important;
+  font-size: 0.82rem !important;
+  color: #5e4b35 !important;
+}
+
+html body .app-shell .post-caption {
+  margin: 10px 0 0 !important;
+  font-size: 0.92rem !important;
+  line-height: 1.34 !important;
+  color: #2d2115 !important;
+}
+
+html body .app-shell .post-hashtags {
+  display: block !important;
+  margin-top: 7px !important;
+  color: #215f3d !important;
+  font-size: 0.84rem !important;
+  font-weight: 850 !important;
+}
+
+html body .app-shell .post-engagement-actions {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  margin-top: 14px !important;
+}
+
+html body .app-shell .post-action {
+  min-width: 0 !important;
+  height: 38px !important;
+  padding: 0 10px !important;
+  border-radius: 999px !important;
+  gap: 5px !important;
+  font-size: 0.78rem !important;
+  font-weight: 950 !important;
+}
+
+html body .app-shell .post-action strong {
+  font-size: 0.78rem !important;
+}
+
+html body .app-shell .post-view-comments {
+  display: inline-flex !important;
+  margin-top: 12px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: #5f4f3e !important;
+  font-size: 0.84rem !important;
+  font-weight: 950 !important;
+}
+
+html body .app-shell .post-comment-thread {
+  margin-top: 12px !important;
+  padding: 12px !important;
+  border-radius: 16px !important;
+  background: rgba(239, 228, 206, 0.56) !important;
+  border: 1px solid rgba(77, 56, 32, 0.1) !important;
+}
+
+html body .app-shell .post-comment-list {
+  display: grid !important;
+  gap: 8px !important;
+  margin-bottom: 10px !important;
+}
+
+html body .app-shell .post-comment {
+  display: grid !important;
+  grid-template-columns: auto 1fr !important;
+  gap: 8px !important;
+  align-items: baseline !important;
+  padding: 8px 10px !important;
+  border-radius: 12px !important;
+  background: rgba(255, 250, 240, 0.78) !important;
+}
+
+html body .app-shell .post-comment strong {
+  color: #215f3d !important;
+  font-size: 0.76rem !important;
+  font-weight: 950 !important;
+  white-space: nowrap !important;
+}
+
+html body .app-shell .post-comment p {
+  margin: 0 !important;
+  color: #3b2b1e !important;
+  font-size: 0.82rem !important;
+  line-height: 1.25 !important;
+}
+
+html body .app-shell .post-comment-form {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  gap: 8px !important;
+  margin-top: 10px !important;
+}
+
+html body .app-shell .post-comment-form input {
+  height: 42px !important;
+  border: 1px solid rgba(77, 56, 32, 0.14) !important;
+  border-radius: 999px !important;
+  background: rgba(255, 250, 240, 0.92) !important;
+  color: #2d2115 !important;
+  padding: 0 14px !important;
+}
+
+html body .app-shell .post-comment-form button {
+  height: 42px !important;
+  min-width: 68px !important;
+  border-radius: 999px !important;
+  background: #2f754d !important;
+  color: #fffaf0 !important;
+  font-weight: 950 !important;
+}
+
+html body .app-shell .community-chats-screen,
+html body .app-shell .community-map-panel {
+  margin: 0 26px calc(98px + env(safe-area-inset-bottom, 0px)) !important;
+  border: 1px solid rgba(77, 56, 32, 0.1) !important;
+  border-radius: 20px !important;
+  background: rgba(255, 250, 240, 0.66) !important;
+  box-shadow: 0 14px 30px rgba(72, 51, 27, 0.08) !important;
+  overflow: hidden !important;
+}
+
+html body .app-shell .community-chats-hero {
+  margin: 0 !important;
+  padding: 16px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: linear-gradient(135deg, rgba(255, 250, 240, 0.98), rgba(239, 228, 206, 0.7)) !important;
+  box-shadow: none !important;
+}
+
+html body .app-shell .community-chats-kicker {
+  display: none !important;
+}
+
+html body .app-shell .community-chats-hero h2 {
+  font-size: 1.1rem !important;
+  line-height: 1.1 !important;
+}
+
+html body .app-shell .community-chats-hero p {
+  margin-top: 4px !important;
+  font-size: 0.82rem !important;
+  line-height: 1.25 !important;
+}
+
+html body .app-shell .community-story-rail {
+  padding: 10px 14px 8px !important;
+  gap: 10px !important;
+  border-block: 1px solid rgba(77, 56, 32, 0.08) !important;
+}
+
+html body .app-shell .community-story-chip {
+  min-width: 54px !important;
+}
+
+html body .app-shell .community-story-chip .post-author-avatar {
+  width: 40px !important;
+  height: 40px !important;
+}
+
+html body .app-shell .community-friend-list {
+  gap: 0 !important;
+  padding: 0 !important;
+}
+
+html body .app-shell .community-friend-card {
+  display: grid !important;
+  grid-template-columns: 42px minmax(0, 1fr) 42px !important;
+  gap: 10px !important;
+  align-items: center !important;
+  min-height: 68px !important;
+  margin: 0 !important;
+  padding: 10px 12px !important;
+  border: 0 !important;
+  border-bottom: 1px solid rgba(77, 56, 32, 0.08) !important;
+  border-radius: 0 !important;
+  background: rgba(255, 250, 240, 0.76) !important;
+  box-shadow: none !important;
+}
+
+html body .app-shell .community-friend-meta h3 {
+  font-size: 0.88rem !important;
+  line-height: 1.08 !important;
+}
+
+html body .app-shell .community-friend-meta small,
+html body .app-shell .community-friend-meta p {
+  font-size: 0.72rem !important;
+  line-height: 1.22 !important;
+}
+
+html body .app-shell .community-chat-action {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50% !important;
+}
+
+html body .app-shell .community-map-canvas {
+  height: 176px !important;
+  border-radius: 0 !important;
+  background:
+    radial-gradient(circle at 72% 48%, rgba(47, 122, 78, 0.24), transparent 9%),
+    linear-gradient(135deg, #f8eedc 0%, #d7e2c2 46%, #ead9ba 100%) !important;
+}
+
+html body .app-shell .community-map-legend {
+  padding: 10px 14px 18px !important;
+  background: rgba(255, 250, 240, 0.78) !important;
+}
+
+html body .app-shell .community-map-legend li {
+  min-height: 38px !important;
+  align-items: center !important;
+  border-bottom: 1px solid rgba(77, 56, 32, 0.07) !important;
+}
+
+.community-report-backdrop {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 900 !important;
+  display: grid !important;
+  align-items: end !important;
+  background: rgba(35, 25, 15, 0.34) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+
+.community-report-sheet {
+  width: min(100%, 430px) !important;
+  margin: 0 auto !important;
+  padding: 14px 16px calc(16px + env(safe-area-inset-bottom, 0px)) !important;
+  border-radius: 24px 24px 0 0 !important;
+  background: #fffaf0 !important;
+  color: #2d2115 !important;
+  box-shadow: 0 -18px 42px rgba(35, 25, 15, 0.2) !important;
+}
+
+.community-report-head {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 36px !important;
+  gap: 12px !important;
+  align-items: start !important;
+}
+
+.community-report-head span {
+  color: #2f754d !important;
+  font-size: 0.72rem !important;
+  font-weight: 950 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+}
+
+.community-report-head h2 {
+  margin: 2px 0 0 !important;
+  color: #2d2115 !important;
+  font-size: 1.18rem !important;
+  line-height: 1.1 !important;
+}
+
+.community-report-head p {
+  margin: 5px 0 0 !important;
+  color: rgba(75, 56, 36, 0.72) !important;
+  font-size: 0.82rem !important;
+  line-height: 1.28 !important;
+}
+
+.community-report-head > button {
+  width: 34px !important;
+  height: 34px !important;
+  border: 1px solid rgba(77, 56, 32, 0.1) !important;
+  border-radius: 50% !important;
+  background: rgba(239, 228, 206, 0.55) !important;
+  color: #3b2b1e !important;
+}
+
+.community-report-options {
+  display: grid !important;
+  gap: 8px !important;
+  margin-top: 14px !important;
+}
+
+.community-report-options button {
+  min-height: 44px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 0 12px !important;
+  border: 1px solid rgba(77, 56, 32, 0.1) !important;
+  border-radius: 14px !important;
+  background: rgba(239, 228, 206, 0.42) !important;
+  color: #2d2115 !important;
+  font-weight: 900 !important;
+}
+
+.community-report-options button i {
+  width: 18px !important;
+  height: 18px !important;
+  border: 2px solid rgba(75, 56, 36, 0.28) !important;
+  border-radius: 50% !important;
+}
+
+.community-report-options button.selected {
+  border-color: rgba(47, 117, 77, 0.36) !important;
+  background: rgba(47, 117, 77, 0.1) !important;
+}
+
+.community-report-options button.selected i {
+  border-color: #2f754d !important;
+  box-shadow: inset 0 0 0 4px #fffaf0 !important;
+  background: #2f754d !important;
+}
+
+.community-report-actions {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 10px !important;
+  margin-top: 14px !important;
+}
+
+.community-report-actions button {
+  min-height: 44px !important;
+  border-radius: 999px !important;
+  font-weight: 950 !important;
+}
+
+.community-report-actions button:first-child {
+  background: rgba(239, 228, 206, 0.5) !important;
+  color: #3b2b1e !important;
+}
+
+.community-report-actions button:last-child {
+  background: #2f754d !important;
+  color: #fffaf0 !important;
+}
+
+/* Community social-feed pass: flatter Instagram-style stream. */
+html body .app-shell .guild-page.page-stack {
+  padding-top: max(14px, env(safe-area-inset-top, 0px)) !important;
+  background: #fffaf0 !important;
+}
+
+html body .app-shell .community-tabs-bar,
+html[data-wild-theme='dark'] body .app-shell .community-tabs-bar {
+  height: 44px !important;
+  margin: 0 16px 10px !important;
+  padding: 3px !important;
+  border: 1px solid rgba(77, 56, 32, 0.1) !important;
+  border-radius: 999px !important;
+  background: rgba(255, 250, 240, 0.92) !important;
+  box-shadow: 0 8px 18px rgba(72, 51, 27, 0.07) !important;
+}
+
+html body .app-shell .community-tab-btn,
+html[data-wild-theme='dark'] body .app-shell .community-tab-btn {
+  height: 38px !important;
+  border-radius: 999px !important;
+  font-size: 0.7rem !important;
+  font-weight: 950 !important;
+}
+
+html body .app-shell .community-feed-stream,
+html[data-wild-theme='dark'] body .app-shell .community-feed-stream {
+  width: 100% !important;
+  padding: 0 0 calc(92px + env(safe-area-inset-bottom, 0px)) !important;
+  gap: 0 !important;
+}
+
+html body .app-shell .community-post-card,
+html[data-wild-theme='dark'] body .app-shell .community-post-card {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-bottom: 1px solid rgba(77, 56, 32, 0.1) !important;
+  border-radius: 0 !important;
+  background: #fffaf0 !important;
+  box-shadow: none !important;
+}
+
+html body .app-shell .post-header-row,
+html[data-wild-theme='dark'] body .app-shell .post-header-row {
+  min-height: 58px !important;
+  padding: 9px 18px !important;
+  border-bottom: 0 !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+}
+
+html body .app-shell .post-author-block,
+html[data-wild-theme='dark'] body .app-shell .post-author-block {
+  grid-template-columns: 42px minmax(0, 1fr) !important;
+  gap: 10px !important;
+}
+
+html body .app-shell .post-author-avatar,
+html[data-wild-theme='dark'] body .app-shell .post-author-avatar {
+  width: 42px !important;
+  height: 42px !important;
+  font-size: 0.72rem !important;
+  box-shadow: 0 8px 18px rgba(47, 117, 77, 0.18) !important;
+}
+
+html body .app-shell .post-author-block h4,
+html[data-wild-theme='dark'] body .app-shell .post-author-block h4 {
+  max-width: 160px !important;
+  color: #2d2115 !important;
+  font-size: 0.86rem !important;
+  line-height: 1.08 !important;
+  letter-spacing: 0 !important;
+}
+
+html body .app-shell .post-author-block small,
+html[data-wild-theme='dark'] body .app-shell .post-author-block small {
+  color: rgba(75, 56, 36, 0.68) !important;
+  font-size: 0.72rem !important;
+  font-weight: 850 !important;
+}
+
+html body .app-shell .post-rank-badge,
+html[data-wild-theme='dark'] body .app-shell .post-rank-badge {
+  max-width: 112px !important;
+  height: 28px !important;
+  padding: 0 10px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: rgba(77, 56, 32, 0.14) !important;
+  color: #493725 !important;
+  font-size: 0.66rem !important;
+  font-weight: 950 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+html body .app-shell .post-photo-wrap,
+html[data-wild-theme='dark'] body .app-shell .post-photo-wrap {
+  width: 100% !important;
+  aspect-ratio: 1 / 0.62 !important;
+  border-radius: 0 !important;
+  background: #e8dcc7 !important;
+  box-shadow: none !important;
+}
+
+html body .app-shell .post-photo-wrap .capture-image,
+html body .app-shell .post-photo-wrap img {
+  border-radius: 0 !important;
+}
+
+html body .app-shell .post-info-block,
+html[data-wild-theme='dark'] body .app-shell .post-info-block {
+  padding: 12px 18px 18px !important;
+}
+
+html body .app-shell .post-info-block h3 {
+  margin: 0 !important;
+  color: #2d2115 !important;
+  font-size: 1rem !important;
+  line-height: 1.16 !important;
+}
+
+html body .app-shell .post-location {
+  margin: 3px 0 0 !important;
+  color: #6e604f !important;
+  font-size: 0.82rem !important;
+  font-weight: 900 !important;
+}
+
+html body .app-shell .post-caption {
+  margin: 10px 0 0 !important;
+  padding: 0 !important;
+  color: #2d2115 !important;
+  font-size: 0.92rem !important;
+  line-height: 1.32 !important;
+  font-weight: 760 !important;
+  text-align: left !important;
+}
+
+html body .app-shell .post-hashtags {
+  margin-top: 6px !important;
+  color: #215f3d !important;
+  font-size: 0.84rem !important;
+  font-weight: 900 !important;
+}
+
+html body .app-shell .post-engagement-row {
+  margin-top: 12px !important;
+}
+
+html body .app-shell .post-engagement-actions {
+  display: flex !important;
+  justify-content: flex-start !important;
+  gap: 16px !important;
+  margin-top: 0 !important;
+}
+
+html body .app-shell .post-action {
+  width: auto !important;
+  height: 32px !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: #3b2b1e !important;
+  box-shadow: none !important;
+  gap: 5px !important;
+  font-size: 0.82rem !important;
+}
+
+html body .app-shell .post-action svg {
+  width: 17px !important;
+  height: 17px !important;
+}
+
+html body .app-shell .post-action span,
+html body .app-shell .post-action strong {
+  font-size: 0.82rem !important;
+  font-weight: 920 !important;
+}
+
+html body .app-shell .post-action.active {
+  color: #215f3d !important;
+  background: transparent !important;
+}
+
+html body .app-shell .post-report-action {
+  margin-left: auto !important;
+  color: rgba(75, 56, 36, 0.68) !important;
+}
+
+html body .app-shell .post-view-comments {
+  margin-top: 8px !important;
+  color: rgba(75, 56, 36, 0.72) !important;
+  font-size: 0.82rem !important;
+}
+
+html body .app-shell .post-comment-thread {
+  margin-top: 10px !important;
+  padding: 10px !important;
+  border-radius: 14px !important;
+  background: rgba(239, 228, 206, 0.42) !important;
+}
+
+/* Final mobile polish: restore readable density after the compact overrides. */
+html body .app-shell .guild-page.page-stack {
+  padding: max(12px, env(safe-area-inset-top, 0px)) 14px calc(92px + env(safe-area-inset-bottom, 0px)) !important;
+  background: linear-gradient(180deg, #fffaf0 0%, #f3ead8 100%) !important;
+}
+
+html body .app-shell .community-tabs-bar,
+html[data-wild-theme='dark'] body .app-shell .community-tabs-bar {
+  height: 42px !important;
+  margin: 4px 2px 14px !important;
+  border-radius: 999px !important;
+}
+
+html body .app-shell .community-tab-btn,
+html[data-wild-theme='dark'] body .app-shell .community-tab-btn {
+  height: 36px !important;
+  font-size: 0.73rem !important;
+}
+
+html body .app-shell .community-feed-stream,
+html[data-wild-theme='dark'] body .app-shell .community-feed-stream {
+  padding: 0 0 10px !important;
+  gap: 16px !important;
+}
+
+html body .app-shell .community-post-card,
+html[data-wild-theme='dark'] body .app-shell .community-post-card {
+  overflow: hidden !important;
+  border: 1px solid rgba(78, 58, 35, 0.1) !important;
+  border-radius: 18px !important;
+  background: rgba(255, 250, 240, 0.96) !important;
+  box-shadow: 0 16px 36px rgba(72, 51, 27, 0.12) !important;
+}
+
+html body .app-shell .post-header-row,
+html[data-wild-theme='dark'] body .app-shell .post-header-row {
+  min-height: 60px !important;
+  padding: 10px 14px !important;
+}
+
+html body .app-shell .post-author-block,
+html[data-wild-theme='dark'] body .app-shell .post-author-block {
+  grid-template-columns: 42px minmax(0, 1fr) !important;
+}
+
+html body .app-shell .post-author-avatar,
+html[data-wild-theme='dark'] body .app-shell .post-author-avatar {
+  background: linear-gradient(135deg, #dff6d4, #4bae74) !important;
+  color: #173522 !important;
+}
+
+html body .app-shell .post-author-block h4,
+html[data-wild-theme='dark'] body .app-shell .post-author-block h4 {
+  font-size: 0.88rem !important;
+  line-height: 1.05 !important;
+}
+
+html body .app-shell .post-rank-badge,
+html[data-wild-theme='dark'] body .app-shell .post-rank-badge {
+  max-width: 116px !important;
+  height: 26px !important;
+  padding: 0 9px !important;
+  background: rgba(71, 54, 37, 0.16) !important;
+  font-size: 0.62rem !important;
+}
+
+html body .app-shell .post-photo-wrap,
+html[data-wild-theme='dark'] body .app-shell .post-photo-wrap {
+  height: 172px !important;
+  min-height: 172px !important;
+  aspect-ratio: auto !important;
+  border-radius: 0 !important;
+  background: #d8cbb4 !important;
+}
+
+html body .app-shell .post-photo-wrap .capture-image-photo,
+html body .app-shell .post-photo-wrap img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  opacity: 1 !important;
+  filter: saturate(1.04) contrast(1.02) !important;
+}
+
+html body .app-shell .post-info-block,
+html[data-wild-theme='dark'] body .app-shell .post-info-block {
+  padding: 13px 16px 16px !important;
+}
+
+html body .app-shell .post-info-block h3 {
+  font-size: 1rem !important;
+  line-height: 1.15 !important;
+}
+
+html body .app-shell .post-caption {
+  margin-top: 10px !important;
+  font-size: 0.92rem !important;
+  line-height: 1.35 !important;
+}
+
+html body .app-shell .post-engagement-actions {
+  gap: 10px !important;
+}
+
+html body .app-shell .post-action {
+  height: 34px !important;
+  padding: 0 11px !important;
+  border: 1px solid rgba(77, 56, 32, 0.11) !important;
+  border-radius: 999px !important;
+  background: rgba(255, 250, 240, 0.82) !important;
+  font-size: 0.78rem !important;
+}
+
+html body .app-shell .post-report-action {
+  margin-left: 0 !important;
+}
+
+html body .app-shell .post-view-comments {
+  margin-top: 10px !important;
+  font-size: 0.8rem !important;
+  font-weight: 900 !important;
+}
+
+html body .app-shell .post-comment-thread {
+  margin-top: 8px !important;
+  padding: 9px 10px !important;
+}
+
+html body .app-shell .gallery-v2-shell {
+  padding: 28px 20px calc(94px + env(safe-area-inset-bottom, 0px)) !important;
+  background: linear-gradient(180deg, #fffaf0 0%, #f3ead8 100%) !important;
+}
+
+html body .app-shell .gallery-v2-header,
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-header {
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+html body .app-shell .gallery-v2-header h1,
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-header h1 {
+  color: #2b2118 !important;
+  font-size: 1.82rem !important;
+  line-height: 1 !important;
+  font-weight: 950 !important;
+}
+
+html body .app-shell .gallery-v2-stats,
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-stats {
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 8px !important;
+  margin-top: 18px !important;
+}
+
+html body .app-shell .gallery-v2-stat {
+  min-height: 44px !important;
+  padding: 8px 10px !important;
+  border-radius: 12px !important;
+  background: rgba(255, 250, 240, 0.72) !important;
+  box-shadow: 0 10px 22px rgba(72, 51, 27, 0.08) !important;
+}
+
+html body .app-shell .gallery-v2-stat strong {
+  font-size: 0.95rem !important;
+}
+
+html body .app-shell .gallery-v2-stat small {
+  font-size: 0.66rem !important;
+  line-height: 1.1 !important;
+}
+
+html body .app-shell .gallery-v2-tabs,
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-tabs {
+  margin: 18px -20px 12px !important;
+  padding: 0 20px 12px !important;
+  background: transparent !important;
+  border-bottom: 1px solid rgba(77, 56, 32, 0.08) !important;
+}
+
+html body .app-shell .gallery-v2-tab {
+  min-width: 72px !important;
+  height: 38px !important;
+  border-radius: 999px !important;
+  font-size: 0.78rem !important;
+}
+
+html body .app-shell .gallery-v2-sort-row {
+  margin: 10px 0 14px !important;
+}
+
+html body .app-shell .gallery-sort-pills {
+  height: 42px !important;
+  padding: 3px !important;
+}
+
+html body .app-shell .gallery-sort-pill {
+  height: 36px !important;
+  min-width: 72px !important;
+  font-size: 0.72rem !important;
+}
+
+html body .app-shell .gallery-v2-grid {
+  gap: 14px !important;
+}
+
+html body .app-shell .gallery-v2-card {
+  min-height: 206px !important;
+  border-radius: 16px !important;
+  background: rgba(255, 250, 240, 0.94) !important;
+  box-shadow: 0 14px 30px rgba(72, 51, 27, 0.1) !important;
+}
+
+html body .app-shell .gallery-v2-photo {
+  height: 124px !important;
+  aspect-ratio: auto !important;
+}
+
+html body .app-shell .gallery-v2-photo img,
+html body .app-shell .gallery-v2-photo .capture-image-photo {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+html body .app-shell .gallery-v2-info {
+  min-height: 72px !important;
+  padding: 11px 12px 12px !important;
+}
+
+html body .app-shell .gallery-v2-name {
+  color: #493725 !important;
+  font-size: 0.88rem !important;
+  line-height: 1.12 !important;
+  font-weight: 950 !important;
+}
+
+html body .app-shell .gallery-v2-meta {
+  margin-top: 6px !important;
+  color: #7a6a58 !important;
+  font-size: 0.64rem !important;
+  letter-spacing: 0.04em !important;
+}
+
+/* Tighten the final pass for the actual 418px mobile viewport. */
+html body .app-shell .guild-page.page-stack {
+  padding: max(10px, env(safe-area-inset-top, 0px)) 12px calc(86px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+html body .app-shell .community-tabs-bar,
+html[data-wild-theme='dark'] body .app-shell .community-tabs-bar {
+  height: 40px !important;
+  margin-bottom: 12px !important;
+}
+
+html body .app-shell .community-tab-btn,
+html[data-wild-theme='dark'] body .app-shell .community-tab-btn {
+  height: 34px !important;
+  font-size: 0.69rem !important;
+}
+
+html body .app-shell .community-feed-stream,
+html[data-wild-theme='dark'] body .app-shell .community-feed-stream {
+  gap: 14px !important;
+}
+
+html body .app-shell .community-post-card,
+html[data-wild-theme='dark'] body .app-shell .community-post-card {
+  border-radius: 16px !important;
+}
+
+html body .app-shell .post-header-row,
+html[data-wild-theme='dark'] body .app-shell .post-header-row {
+  min-height: 54px !important;
+  padding: 8px 13px !important;
+}
+
+html body .app-shell .post-author-block,
+html[data-wild-theme='dark'] body .app-shell .post-author-block {
+  grid-template-columns: 38px minmax(0, 1fr) !important;
+  gap: 9px !important;
+}
+
+html body .app-shell .post-author-avatar,
+html[data-wild-theme='dark'] body .app-shell .post-author-avatar {
+  width: 38px !important;
+  height: 38px !important;
+}
+
+html body .app-shell .post-photo-wrap,
+html[data-wild-theme='dark'] body .app-shell .post-photo-wrap {
+  height: 148px !important;
+  min-height: 148px !important;
+}
+
+html body .app-shell .post-info-block,
+html[data-wild-theme='dark'] body .app-shell .post-info-block {
+  padding: 11px 14px 14px !important;
+}
+
+html body .app-shell .post-caption {
+  margin-top: 8px !important;
+}
+
+html body .app-shell .post-hashtags {
+  margin-top: 4px !important;
+}
+
+html body .app-shell .post-engagement-row {
+  margin-top: 10px !important;
+}
+
+html body .app-shell .post-action {
+  height: 32px !important;
+  padding: 0 10px !important;
+}
+
+html body .app-shell .post-view-comments {
+  margin-top: 8px !important;
+}
+
+html body .app-shell .gallery-v2-shell {
+  padding: 24px 18px calc(90px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+html body .app-shell .gallery-v2-header h1,
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-header h1 {
+  font-size: 1.62rem !important;
+}
+
+html body .app-shell .gallery-v2-stats,
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-stats {
+  margin-top: 14px !important;
+  gap: 6px !important;
+}
+
+html body .app-shell .gallery-v2-stat {
+  min-height: 38px !important;
+  padding: 7px 8px !important;
+}
+
+html body .app-shell .gallery-v2-stat strong {
+  font-size: 0.86rem !important;
+}
+
+html body .app-shell .gallery-v2-stat small {
+  font-size: 0.61rem !important;
+}
+
+html body .app-shell .gallery-v2-tabs,
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-tabs {
+  margin-top: 14px !important;
+  margin-bottom: 8px !important;
+  padding-bottom: 10px !important;
+}
+
+html body .app-shell .gallery-v2-tab {
+  height: 36px !important;
+  min-width: 68px !important;
+  color: #6f604f !important;
+}
+
+html body .app-shell .gallery-v2-tab:not(.active),
+html body .app-shell .gallery-v2-tab:not(.active) span {
+  opacity: 1 !important;
+}
+
+html body .app-shell .gallery-v2-sort-row {
+  margin: 8px 0 12px !important;
+}
+
+html body .app-shell .gallery-sort-pills {
+  height: 40px !important;
+}
+
+html body .app-shell .gallery-sort-pill {
+  height: 34px !important;
+  min-width: 68px !important;
+  font-size: 0.68rem !important;
+}
+
+html body .app-shell .gallery-v2-grid {
+  gap: 12px !important;
+}
+
+html body .app-shell .gallery-v2-card {
+  min-height: 184px !important;
+  border-radius: 15px !important;
+}
+
+html body .app-shell .gallery-v2-photo {
+  height: 108px !important;
+}
+
+html body .app-shell .gallery-v2-info {
+  min-height: 64px !important;
+  padding: 9px 11px 10px !important;
+}
+
+html body .app-shell .gallery-v2-name {
+  font-size: 0.8rem !important;
+}
+
+html body .app-shell .gallery-v2-meta {
+  margin-top: 5px !important;
+  font-size: 0.6rem !important;
+}
+
+/* Library header cleanup: remove the clipped paper-strip look. */
+html body .app-shell .gallery-v2-shell {
+  padding-top: max(26px, env(safe-area-inset-top, 0px)) !important;
+}
+
+html body .app-shell .gallery-v2-header,
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-header {
+  width: calc(100% - 64px) !important;
+  margin: 0 32px 16px !important;
+  min-height: auto !important;
+}
+
+html body .app-shell .gallery-v2-header h1,
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-header h1 {
+  font-size: 1.44rem !important;
+  line-height: 1.05 !important;
+  letter-spacing: 0 !important;
+}
+
+html body .app-shell .gallery-v2-stats,
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-stats {
+  width: calc(100% - 64px) !important;
+  margin: 0 32px 18px !important;
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+}
+
+html body .app-shell .gallery-v2-stat,
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-stat {
+  min-width: 0 !important;
+  min-height: 48px !important;
+  padding: 9px 10px !important;
+  border: 1px solid rgba(77, 56, 32, 0.08) !important;
+  border-radius: 14px !important;
+  background: rgba(255, 250, 240, 0.74) !important;
+  box-shadow: 0 10px 22px rgba(72, 51, 27, 0.07) !important;
+}
+
+html body .app-shell .gallery-v2-stat strong,
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-stat strong {
+  color: #2d2115 !important;
+  font-size: 0.88rem !important;
+  line-height: 1 !important;
+}
+
+html body .app-shell .gallery-v2-stat small,
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-stat small {
+  margin-top: 5px !important;
+  color: #5d4b38 !important;
+  font-size: 0.6rem !important;
+  line-height: 1.05 !important;
+  white-space: normal !important;
+}
+
+html body .app-shell .gallery-v2-tabs,
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-tabs {
+  margin: 0 -18px 18px !important;
+  padding: 0 18px 12px !important;
+  gap: 10px !important;
+  border-top: 1px solid rgba(77, 56, 32, 0.06) !important;
+  border-bottom: 1px solid rgba(77, 56, 32, 0.08) !important;
+  background: rgba(255, 250, 240, 0.32) !important;
+  overflow-x: auto !important;
+}
+
+html body .app-shell .gallery-v2-tab,
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-tab {
+  height: 36px !important;
+  min-width: max-content !important;
+  padding: 0 13px !important;
+  border: 1px solid transparent !important;
+  border-radius: 999px !important;
+  color: #665543 !important;
+  background: transparent !important;
+  opacity: 1 !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
+}
+
+html body .app-shell .gallery-v2-tab span,
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-tab span {
+  color: inherit !important;
+  opacity: 1 !important;
+}
+
+html body .app-shell .gallery-v2-tab.active,
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-tab.active {
+  color: #103d28 !important;
+  background: #35d989 !important;
+  border-color: rgba(21, 114, 70, 0.18) !important;
+  box-shadow: 0 10px 20px rgba(38, 175, 105, 0.2) !important;
+}
+
+html body .app-shell .gallery-v2-sort-row {
+  align-items: center !important;
+  padding: 0 16px 12px !important;
+}
+
+html body .app-shell .gallery-v2-count {
+  color: #7b6c5b !important;
+  font-size: 0.78rem !important;
+  font-weight: 850 !important;
+}
+
+/* Library top area: flatter, denser, less dashboard-like. */
+html body .app-shell .gallery-v2-shell {
+  padding-top: max(24px, env(safe-area-inset-top, 0px)) !important;
+}
+
+html body .app-shell .gallery-v2-header,
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-header {
+  margin: 0 34px 12px !important;
+  width: calc(100% - 68px) !important;
+}
+
+html body .app-shell .gallery-v2-header h1,
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-header h1 {
+  font-size: 1.36rem !important;
+  font-weight: 920 !important;
+}
+
+html body .app-shell .gallery-v2-stats,
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-stats {
+  width: calc(100% - 68px) !important;
+  margin: 0 34px 18px !important;
+  gap: 0 !important;
+  border: 1px solid rgba(77, 56, 32, 0.08) !important;
+  border-radius: 16px !important;
+  background: rgba(255, 250, 240, 0.56) !important;
+  box-shadow: 0 12px 28px rgba(72, 51, 27, 0.07) !important;
+  overflow: hidden !important;
+}
+
+html body .app-shell .gallery-v2-stat,
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-stat {
+  min-height: 42px !important;
+  padding: 8px 10px !important;
+  border: 0 !important;
+  border-right: 1px solid rgba(77, 56, 32, 0.08) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+html body .app-shell .gallery-v2-stat:last-child,
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-stat:last-child {
+  border-right: 0 !important;
+}
+
+html body .app-shell .gallery-v2-stat small,
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-stat small {
+  margin-top: 4px !important;
+}
+
+html body .app-shell .gallery-v2-tabs,
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-tabs {
+  margin-bottom: 14px !important;
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+}
+
+html body .app-shell .gallery-v2-tab,
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-tab {
+  height: 34px !important;
+  color: #4f4235 !important;
+  font-weight: 900 !important;
+}
+
+html body .app-shell .gallery-v2-tab:not(.active),
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-tab:not(.active) {
+  background: rgba(255, 250, 240, 0.4) !important;
+}
+
+html body .app-shell .gallery-v2-tab:not(.active) span,
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-tab:not(.active) span {
+  color: #4f4235 !important;
+  opacity: 1 !important;
+}
+
+html body .app-shell .gallery-v2-sort-row {
+  margin-top: 4px !important;
+  margin-bottom: 10px !important;
+}
+
+/* Creative Library redesign: image-first archive with one featured capture. */
+html body .app-shell .gallery-v2-shell {
+  padding: max(24px, env(safe-area-inset-top, 0px)) 16px calc(94px + env(safe-area-inset-bottom, 0px)) !important;
+  background:
+    radial-gradient(circle at 70% 0%, rgba(53, 217, 137, 0.1), transparent 26%),
+    linear-gradient(180deg, #fffaf0 0%, #f3ead8 100%) !important;
+}
+
+html body .app-shell .gallery-v2-header,
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-header {
+  width: 100% !important;
+  margin: 0 0 14px !important;
+  padding: 0 4px !important;
+}
+
+html body .app-shell .gallery-v2-header h1,
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-header h1 {
+  color: #2b2118 !important;
+  font-size: 1.82rem !important;
+  font-weight: 950 !important;
+  letter-spacing: 0 !important;
+}
+
+html body .app-shell .library-hero-panel {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: end !important;
+  gap: 12px !important;
+  margin-bottom: 14px !important;
+  padding: 12px !important;
+  border: 1px solid rgba(77, 56, 32, 0.09) !important;
+  border-radius: 18px !important;
+  background: rgba(255, 250, 240, 0.7) !important;
+  box-shadow: 0 14px 32px rgba(72, 51, 27, 0.08) !important;
+}
+
+html body .app-shell .library-kicker {
+  display: block !important;
+  color: #1f6b43 !important;
+  font-size: 0.66rem !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+}
+
+html body .app-shell .library-hero-panel p {
+  max-width: 190px !important;
+  margin: 5px 0 0 !important;
+  color: #5f4d3a !important;
+  font-size: 0.76rem !important;
+  line-height: 1.25 !important;
+  font-weight: 750 !important;
+}
+
+html body .app-shell .library-hero-panel .gallery-v2-stats,
+html[data-wild-theme='dark'] body .app-shell .library-hero-panel .gallery-v2-stats {
+  width: auto !important;
+  margin: 0 !important;
+  display: flex !important;
+  gap: 6px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+
+html body .app-shell .library-hero-panel .gallery-v2-stat,
+html[data-wild-theme='dark'] body .app-shell .library-hero-panel .gallery-v2-stat {
+  width: 48px !important;
+  min-height: 46px !important;
+  display: flex !important;
+  flex-direction: column-reverse !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  padding: 7px 6px !important;
+  border: 1px solid rgba(77, 56, 32, 0.08) !important;
+  border-radius: 14px !important;
+  background: rgba(255, 250, 240, 0.82) !important;
+}
+
+html body .app-shell .gallery-v2-stat dt,
+html body .app-shell .gallery-v2-stat small {
+  color: #756553 !important;
+  font-size: 0.55rem !important;
+  line-height: 1 !important;
+  font-weight: 900 !important;
+}
+
+html body .app-shell .gallery-v2-stat dd,
+html body .app-shell .gallery-v2-stat strong {
+  margin: 0 !important;
+  color: #2d2115 !important;
+  font-size: 0.94rem !important;
+  line-height: 1 !important;
+  font-weight: 950 !important;
+}
+
+html body .app-shell .gallery-v2-tabs,
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-tabs {
+  margin: 0 -16px 12px !important;
+  padding: 0 16px 10px !important;
+  border-top: 0 !important;
+  border-bottom: 1px solid rgba(77, 56, 32, 0.08) !important;
+  background: transparent !important;
+}
+
+html body .app-shell .gallery-v2-tab,
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-tab {
+  height: 34px !important;
+  padding: 0 12px !important;
+  color: #4c4034 !important;
+  background: rgba(255, 250, 240, 0.68) !important;
+  border: 1px solid rgba(77, 56, 32, 0.08) !important;
+}
+
+html body .app-shell .gallery-v2-sort-row {
+  padding: 0 0 12px !important;
+  margin: 0 !important;
+}
+
+html body .app-shell .gallery-sort-pills,
+html[data-wild-theme='dark'] body .app-shell .gallery-sort-pills {
+  width: auto !important;
+  height: 36px !important;
+  border-radius: 999px !important;
+}
+
+html body .app-shell .gallery-sort-pill {
+  min-width: 66px !important;
+  height: 30px !important;
+}
+
+html body .app-shell .gallery-v2-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+  padding: 0 0 12px !important;
+}
+
+html body .app-shell .gallery-v2-card {
+  min-height: 214px !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(77, 56, 32, 0.1) !important;
+  border-radius: 18px !important;
+  background: rgba(255, 250, 240, 0.95) !important;
+  box-shadow: 0 14px 30px rgba(72, 51, 27, 0.1) !important;
+}
+
+html body .app-shell .gallery-v2-card-featured {
+  grid-column: 1 / -1 !important;
+  min-height: 304px !important;
+}
+
+html body .app-shell .gallery-v2-photo {
+  height: 142px !important;
+  aspect-ratio: auto !important;
+}
+
+html body .app-shell .gallery-v2-card-featured .gallery-v2-photo {
+  height: 224px !important;
+}
+
+html body .app-shell .gallery-v2-photo img,
+html body .app-shell .gallery-v2-photo .capture-image-photo,
+html body .app-shell .gallery-v2-photo .capture-image {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+html body .app-shell .gallery-v2-info {
+  min-height: 70px !important;
+  padding: 11px 12px 12px !important;
+}
+
+html body .app-shell .gallery-v2-card-featured .gallery-v2-info {
+  min-height: 78px !important;
+  padding: 13px 14px 14px !important;
+}
+
+html body .app-shell .gallery-v2-name {
+  color: #3c2d20 !important;
+  font-size: 0.88rem !important;
+  line-height: 1.12 !important;
+  font-weight: 950 !important;
+}
+
+html body .app-shell .gallery-v2-card-featured .gallery-v2-name {
+  font-size: 1.12rem !important;
+}
+
+html body .app-shell .gallery-v2-meta {
+  color: #756553 !important;
+  font-size: 0.62rem !important;
+  font-weight: 900 !important;
+}
+
+html body .app-shell .gallery-v2-rank-badge {
+  top: 9px !important;
+  left: 9px !important;
+  right: auto !important;
+  height: 30px !important;
+  min-width: 44px !important;
+  color: #5c4b38 !important;
+  background: rgba(255, 250, 240, 0.9) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+
+html body .app-shell .gallery-v2-tabs .gallery-v2-tab:not(.active),
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-tabs .gallery-v2-tab:not(.active),
+html body .app-shell .gallery-v2-tabs .gallery-v2-tab:not(.active) span,
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-tabs .gallery-v2-tab:not(.active) span {
+  color: #4a3d31 !important;
+  opacity: 1 !important;
+  text-shadow: none !important;
+}
+
+html body .app-shell .gallery-v2-tabs .gallery-v2-tab:not(.active) {
+  background: rgba(255, 250, 240, 0.72) !important;
+}
+
+/* Discovery modal glitch fix: keep media content inside the hero frame. */
+html body .app-shell .selection-overlay .discovery-card-modal {
+  overflow: hidden !important;
+  isolation: isolate !important;
+}
+
+html body .app-shell .selection-overlay .discovery-hero-frame {
+  position: relative !important;
+  overflow: hidden !important;
+  contain: paint !important;
+  background: #d8cbb4 !important;
+}
+
+html body .app-shell .selection-overlay .discovery-hero-frame .capture-image,
+html body .app-shell .selection-overlay .discovery-hero-frame .discovery-hero-image {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+  overflow: hidden !important;
+  border-radius: inherit !important;
+  background: transparent !important;
+}
+
+html body .app-shell .selection-overlay .discovery-hero-frame .capture-image-photo {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+  object-fit: cover !important;
+  border-radius: inherit !important;
+}
+
+html body .app-shell .selection-overlay .discovery-hero-frame .capture-image[data-state='loaded'] .capture-image-crest {
+  display: none !important;
+}
+
+html body .app-shell .selection-overlay .discovery-hero-frame .capture-image-crest {
+  position: absolute !important;
+  inset: 0 !important;
+  border-radius: inherit !important;
+}
+
+html body .app-shell .selection-overlay .discovery-hero-frame .capture-image-crest span {
+  font-size: 0 !important;
+}
+
+html body .app-shell .selection-overlay .discovery-photo-rarity {
+  z-index: 5 !important;
+}
+
+/* Quests: keep the deck background open; only individual quest cards get panels. */
+html body .app-shell .quests-card-list,
+html[data-wild-theme='dark'] body .app-shell .quests-card-list {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+html body .app-shell .quest-season-strip,
+html[data-wild-theme='dark'] body .app-shell .quest-season-strip {
+  min-height: 44px !important;
+  margin: -4px 0 12px !important;
+  padding: 9px 12px !important;
+  border: 1px solid rgba(77, 56, 32, 0.08) !important;
+  border-radius: 14px !important;
+  background: rgba(255, 250, 240, 0.46) !important;
+  box-shadow: none !important;
+}
+
+html body .app-shell .quest-season-strip span,
+html[data-wild-theme='dark'] body .app-shell .quest-season-strip span {
+  color: rgba(71, 54, 36, 0.72) !important;
+  font-size: 0.7rem !important;
+  font-weight: 900 !important;
+}
+
+html body .app-shell .quest-season-strip strong,
+html[data-wild-theme='dark'] body .app-shell .quest-season-strip strong {
+  margin-top: 1px !important;
+  color: #23633f !important;
+  font-size: 0.84rem !important;
+  line-height: 1.05 !important;
+}
+
+html body .app-shell .quest-season-strip small,
+html[data-wild-theme='dark'] body .app-shell .quest-season-strip small {
+  color: rgba(71, 54, 36, 0.68) !important;
+  font-size: 0.68rem !important;
+  line-height: 1.1 !important;
+}
+
+html body .app-shell .quest-cadence-tabs,
+html[data-wild-theme='dark'] body .app-shell .quest-cadence-tabs {
+  width: auto !important;
+  height: 42px !important;
+  margin: 0 2px 14px !important;
+  padding: 4px !important;
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 4px !important;
+  border: 1px solid rgba(77, 56, 32, 0.09) !important;
+  border-radius: 999px !important;
+  background: rgba(255, 250, 240, 0.62) !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+}
+
+html body .app-shell .quest-cadence-btn,
+html[data-wild-theme='dark'] body .app-shell .quest-cadence-btn {
+  width: 100% !important;
+  height: 34px !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  padding: 0 6px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  color: rgba(74, 56, 38, 0.76) !important;
+  font-size: 0.68rem !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
+  text-align: center !important;
+  box-shadow: none !important;
+}
+
+html body .app-shell .quest-cadence-btn.active,
+html[data-wild-theme='dark'] body .app-shell .quest-cadence-btn.active {
+  background: #28764b !important;
+  color: #fffaf0 !important;
+  box-shadow: 0 8px 16px rgba(40, 118, 75, 0.18) !important;
+}
+
+html body .app-shell .quest-loop-empty,
+html[data-wild-theme='dark'] body .app-shell .quest-loop-empty {
+  display: grid !important;
+  place-items: center !important;
+  gap: 9px !important;
+  min-height: 176px !important;
+  padding: 22px 18px !important;
+  border: 1px solid rgba(77, 56, 32, 0.08) !important;
+  border-radius: 18px !important;
+  background: rgba(255, 250, 240, 0.5) !important;
+  box-shadow: none !important;
+  text-align: center !important;
+}
+
+html body .app-shell .quest-loop-empty svg,
+html[data-wild-theme='dark'] body .app-shell .quest-loop-empty svg {
+  width: 24px !important;
+  height: 24px !important;
+  color: #28764b !important;
+}
+
+html body .app-shell .quest-loop-empty h2,
+html[data-wild-theme='dark'] body .app-shell .quest-loop-empty h2 {
+  margin: 0 !important;
+  font-size: 1rem !important;
+  line-height: 1.1 !important;
+}
+
+html body .app-shell .quest-loop-empty p,
+html[data-wild-theme='dark'] body .app-shell .quest-loop-empty p {
+  max-width: 260px !important;
+  margin: 0 !important;
+  color: rgba(71, 54, 36, 0.72) !important;
+  font-size: 0.8rem !important;
+  line-height: 1.3 !important;
+}
+
+html body .app-shell .quest-loop-empty .quest-card-action,
+html[data-wild-theme='dark'] body .app-shell .quest-loop-empty .quest-card-action {
+  grid-area: auto !important;
+  min-width: 128px !important;
+  height: 38px !important;
+  margin-top: 2px !important;
+}
+
+/* Community feed: photo-first cards and a denser social comment thread. */
+html body .app-shell .post-photo-wrap,
+html[data-wild-theme='dark'] body .app-shell .post-photo-wrap {
+  position: relative !important;
+  height: 238px !important;
+  min-height: 238px !important;
+  background: #d7c7ad !important;
+  overflow: hidden !important;
+}
+
+html body .app-shell .post-photo-wrap .capture-image,
+html body .app-shell .post-photo-wrap .capture-image-photo,
+html body .app-shell .post-photo-wrap img,
+html[data-wild-theme='dark'] body .app-shell .post-photo-wrap .capture-image,
+html[data-wild-theme='dark'] body .app-shell .post-photo-wrap .capture-image-photo,
+html[data-wild-theme='dark'] body .app-shell .post-photo-wrap img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+html body .app-shell .post-photo-rating,
+html[data-wild-theme='dark'] body .app-shell .post-photo-rating {
+  position: absolute !important;
+  right: 14px !important;
+  bottom: 14px !important;
+  height: 30px !important;
+  padding: 0 11px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  border-radius: 999px !important;
+  background: rgba(255, 250, 240, 0.9) !important;
+  color: #2f2116 !important;
+  font-size: 0.78rem !important;
+  font-weight: 950 !important;
+  box-shadow: 0 10px 22px rgba(30, 20, 10, 0.18) !important;
+}
+
+html body .app-shell .post-comment-thread,
+html[data-wild-theme='dark'] body .app-shell .post-comment-thread {
+  margin-top: 12px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+html body .app-shell .post-comment-list,
+html[data-wild-theme='dark'] body .app-shell .post-comment-list {
+  gap: 10px !important;
+  margin: 0 0 12px !important;
+}
+
+html body .app-shell .post-comment,
+html[data-wild-theme='dark'] body .app-shell .post-comment {
+  display: grid !important;
+  grid-template-columns: 30px minmax(0, 1fr) !important;
+  gap: 9px !important;
+  align-items: start !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+}
+
+html body .app-shell .post-comment-avatar,
+html[data-wild-theme='dark'] body .app-shell .post-comment-avatar {
+  width: 30px !important;
+  height: 30px !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, #baf2bf, #74c69d) !important;
+  color: #173522 !important;
+  font-size: 0.62rem !important;
+  font-weight: 950 !important;
+}
+
+html body .app-shell .post-comment-bubble,
+html[data-wild-theme='dark'] body .app-shell .post-comment-bubble {
+  min-width: 0 !important;
+  padding: 8px 11px !important;
+  border-radius: 15px !important;
+  background: rgba(255, 250, 240, 0.78) !important;
+  box-shadow: inset 0 0 0 1px rgba(77, 56, 32, 0.07) !important;
+}
+
+html body .app-shell .post-comment-bubble > div,
+html[data-wild-theme='dark'] body .app-shell .post-comment-bubble > div {
+  display: flex !important;
+  align-items: baseline !important;
+  gap: 7px !important;
+  min-width: 0 !important;
+}
+
+html body .app-shell .post-comment-bubble strong,
+html[data-wild-theme='dark'] body .app-shell .post-comment-bubble strong {
+  color: #2e2116 !important;
+  font-size: 0.76rem !important;
+  font-weight: 950 !important;
+}
+
+html body .app-shell .post-comment-bubble small,
+html[data-wild-theme='dark'] body .app-shell .post-comment-bubble small {
+  color: rgba(71, 54, 36, 0.56) !important;
+  font-size: 0.68rem !important;
+  font-weight: 800 !important;
+}
+
+html body .app-shell .post-comment-bubble p,
+html[data-wild-theme='dark'] body .app-shell .post-comment-bubble p {
+  margin: 3px 0 0 !important;
+  color: #3b2b1e !important;
+  font-size: 0.84rem !important;
+  line-height: 1.28 !important;
+}
+
+html body .app-shell .post-comment-form,
+html[data-wild-theme='dark'] body .app-shell .post-comment-form {
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  gap: 8px !important;
+  margin-top: 8px !important;
+  padding-left: 39px !important;
+}
+
+/* Community top navigation: quiet app tabs instead of a heavy segmented pill. */
+html body .app-shell .community-tabs-bar,
+html[data-wild-theme='dark'] body .app-shell .community-tabs-bar {
+  width: auto !important;
+  height: 50px !important;
+  margin: 0 8px 14px !important;
+  padding: 0 !important;
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 0 !important;
+  border: 0 !important;
+  border-bottom: 1px solid rgba(77, 56, 32, 0.1) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+
+html body .app-shell .community-tab-btn,
+html[data-wild-theme='dark'] body .app-shell .community-tab-btn {
+  position: relative !important;
+  width: 100% !important;
+  height: 50px !important;
+  min-width: 0 !important;
+  padding: 0 6px 8px !important;
+  display: inline-flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 3px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: rgba(75, 56, 36, 0.68) !important;
+  box-shadow: none !important;
+  font-size: 0.72rem !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+}
+
+html body .app-shell .community-tab-btn svg,
+html[data-wild-theme='dark'] body .app-shell .community-tab-btn svg {
+  width: 17px !important;
+  height: 17px !important;
+  color: currentColor !important;
+}
+
+html body .app-shell .community-tab-btn::after,
+html[data-wild-theme='dark'] body .app-shell .community-tab-btn::after {
+  content: "" !important;
+  position: absolute !important;
+  right: 18px !important;
+  bottom: -1px !important;
+  left: 18px !important;
+  height: 3px !important;
+  border-radius: 999px 999px 0 0 !important;
+  background: transparent !important;
+  transform: scaleX(0.6) !important;
+  opacity: 0 !important;
+  transition: opacity 160ms ease, transform 160ms ease !important;
+}
+
+html body .app-shell .community-tab-btn.active,
+html[data-wild-theme='dark'] body .app-shell .community-tab-btn.active,
+html body .app-shell .community-tabs-bar button.active,
+html[data-wild-theme='dark'] body .app-shell .community-tabs-bar button.active {
+  background: transparent !important;
+  color: #155f39 !important;
+  box-shadow: none !important;
+}
+
+html body .app-shell .community-tab-btn.active *,
+html[data-wild-theme='dark'] body .app-shell .community-tab-btn.active *,
+html body .app-shell .community-tabs-bar button.active *,
+html[data-wild-theme='dark'] body .app-shell .community-tabs-bar button.active * {
+  color: #155f39 !important;
+  -webkit-text-fill-color: #155f39 !important;
+}
+
+html body .app-shell .community-tab-btn.active::after,
+html[data-wild-theme='dark'] body .app-shell .community-tab-btn.active::after {
+  background: #28764b !important;
+  opacity: 1 !important;
+  transform: scaleX(1) !important;
 }

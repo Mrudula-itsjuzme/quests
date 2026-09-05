@@ -127,6 +127,25 @@ function locationLabel(gps) {
   return gps ? `${gps.lat.toFixed(3)}, ${gps.lng.toFixed(3)}` : null;
 }
 
+function guestQuestMutationResult(assignmentId, value) {
+  const current = GUEST_ACTIVE_QUESTS.find((quest) => quest.id === assignmentId) || GUEST_ACTIVE_QUESTS[0];
+  const progressValue = Math.min(Number(value ?? current.targetValue ?? 1), Number(current.targetValue ?? 1));
+  const completed = progressValue >= Number(current.targetValue ?? 1);
+  const assignment = {
+    ...current,
+    progressValue,
+    status: completed ? 'completed' : current.status,
+  };
+  return {
+    assignment,
+    completed,
+    status: assignment.status,
+    xpCredited: completed ? Number(current.xpReward || 0) : 0,
+    bonusXp: 0,
+    proofsRemaining: completed ? 0 : Math.max(0, Number(current.targetValue || 1) - progressValue),
+  };
+}
+
 function guestCaptureList() {
   if (!guestCaptures) {
     const seededById = new Map(GUEST_CAPTURES.map((capture) => [capture.id, capture]));
@@ -148,7 +167,11 @@ function setGuestCaptures(next) {
 }
 
 function guestPostList() {
-  if (!guestCommunityPosts) guestCommunityPosts = readGuestList(GUEST_POSTS_KEY, GUEST_COMMUNITY_POSTS);
+  if (!guestCommunityPosts) {
+    guestCommunityPosts = readGuestList(GUEST_POSTS_KEY, GUEST_COMMUNITY_POSTS)
+      .filter((post) => Number(post.discovery?.rarityStars || 0) > 1);
+    writeGuestList(GUEST_POSTS_KEY, guestCommunityPosts);
+  }
   return guestCommunityPosts;
 }
 
@@ -296,12 +319,12 @@ export function createApiClient(getToken) {
     },
     postProgress: async (assignmentId, value, idempotencyKey) => {
       const token = await getToken();
-      if (token === 'guest') return guestDelay(GUEST_ACTIVE_QUESTS[0], 200);
+      if (token === 'guest') return guestDelay(guestQuestMutationResult(assignmentId, value), 200);
       return request(`/quests/${assignmentId}/progress`, { method: 'POST', body: { value }, idempotencyKey, token });
     },
     submitProof: async (assignmentId, payload, idempotencyKey) => {
       const token = await getToken();
-      if (token === 'guest') return guestDelay(GUEST_ACTIVE_QUESTS[0], 200);
+      if (token === 'guest') return guestDelay(guestQuestMutationResult(assignmentId), 200);
       return request(`/quests/${assignmentId}/submissions`, { method: 'POST', body: payload, idempotencyKey, token });
     },
     getWorldHotspots: async (filters = {}, signal) => {
@@ -323,7 +346,11 @@ export function createApiClient(getToken) {
       if (token === 'guest') {
         const discovery = guestCaptureList().find((item) => item.id === payload.cardId);
         if (!discovery) throw new ApiError(404, 'capture_not_found');
-        if (discovery.status === 'rejected' || discovery.status === 'provisional') {
+        if (
+          discovery.status === 'rejected' ||
+          discovery.status === 'provisional' ||
+          Number(discovery.rarityStars || 0) <= 1
+        ) {
           throw new ApiError(400, 'capture_not_shareable');
         }
         const hashtags = Array.isArray(payload.hashtags)

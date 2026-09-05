@@ -37,6 +37,16 @@ const navItemsRight = [
   { to: '/app/community', label: 'Community', icon: 'user' },
 ];
 
+const routeLoaders = {
+  '/app': () => import('../features/world/WorldScreen'),
+  '/app/quests': () => import('../features/quests/QuestsPage'),
+  '/app/community': () => import('../features/guild/GuildPage'),
+  '/app/rewards': () => import('../features/rewards/RewardsPage'),
+  '/app/collection': () => import('../features/gallery/GalleryPage'),
+  '/app/library': () => import('../features/gallery/GalleryPage'),
+  '/app/profile': () => import('../features/profile/ProfilePage'),
+};
+
 export function AppShell() {
   const location = useLocation();
   const { signOut, devMode } = useAuth();
@@ -54,6 +64,13 @@ export function AppShell() {
     playTap();
     setCaptureOpen(true);
   };
+
+  const prefetchRoute = useCallback((routePath) => {
+    const loader = routeLoaders[routePath];
+    if (loader) {
+      void loader();
+    }
+  }, []);
 
   useEffect(() => {
     let noticeTimer;
@@ -142,7 +159,7 @@ export function AppShell() {
               className={({ isActive }) => `round-action topbar-profile-link ${isActive ? 'active' : ''}`}
               aria-label="Profile"
               onClick={playTap}
-              onMouseEnter={playHover}
+              onMouseEnter={() => { playHover(); prefetchRoute('/app/profile'); }}
             >
               <Icon name="user" />
             </NavLink>
@@ -181,7 +198,7 @@ export function AppShell() {
               end={item.end}
               className={({ isActive }) => `dock-item ${isActive ? 'active' : ''}`}
               onClick={playTap}
-              onMouseEnter={playHover}
+              onMouseEnter={() => { playHover(); prefetchRoute(item.to); }}
             >
               <Icon name={item.icon} />
               <span>{item.label}</span>
@@ -209,7 +226,10 @@ export function AppShell() {
               end={item.end}
               className={({ isActive }) => `dock-item ${isActive ? 'active' : ''}`}
               onClick={playTap}
-              onMouseEnter={playHover}
+              onMouseEnter={() => {
+                playHover();
+                prefetchRoute(item.to);
+              }}
             >
               <Icon name={item.icon} />
               <span>{item.label}</span>

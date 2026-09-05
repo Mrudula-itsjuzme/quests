@@ -72,6 +72,12 @@ export function WorldCanvas({ hotspots = [], onSelectHotspot, userPosition }) {
 
       mapRef.current = map;
       setMapReady(true);
+      window.requestAnimationFrame(() => {
+        if (!destroyed) map.invalidateSize();
+      });
+      window.setTimeout(() => {
+        if (!destroyed) map.invalidateSize();
+      }, 250);
     });
 
     return () => {
@@ -83,6 +89,17 @@ export function WorldCanvas({ hotspots = [], onSelectHotspot, userPosition }) {
       setMapReady(false);
     };
   }, [offlineNative]);
+
+  useEffect(() => {
+    if (!mapReady || !mapRef.current) return undefined;
+    const resize = () => mapRef.current?.invalidateSize();
+    window.addEventListener('resize', resize);
+    const timer = window.setTimeout(resize, 350);
+    return () => {
+      window.removeEventListener('resize', resize);
+      window.clearTimeout(timer);
+    };
+  }, [mapReady]);
 
   // Update user position marker
   useEffect(() => {

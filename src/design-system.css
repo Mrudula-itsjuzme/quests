@@ -4291,9 +4291,9 @@ body,
     justify-self: center;
     padding-top: 7px;
     color: var(--wr-app-cream);
-    font-family: Georgia, 'Times New Roman', serif;
+    font-family: var(--font-display, 'Manrope', sans-serif);
     font-size: clamp(1.65rem, 8vw, 2.55rem);
-    font-weight: 500;
+    font-weight: 600;
     line-height: 1;
     text-shadow: 0 3px 18px rgba(0, 0, 0, 0.34);
     white-space: nowrap;

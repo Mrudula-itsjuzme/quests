@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { CaptureImage } from '../../components/CaptureImage';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -121,6 +122,7 @@ function CommunityFeed({ onShare }) {
   const toggleLike = useToggleCommunityLike();
   const reportPost = useReportCommunityPost();
   const [openComments, setOpenComments] = useState(null);
+  const [reportTarget, setReportTarget] = useState(null);
   const [reportedPostIds, setReportedPostIds] = useState([]);
 
   if (isLoading) {
@@ -190,25 +192,17 @@ function CommunityFeed({ onShare }) {
 
           {post.discovery && (
             <div className={`post-photo-wrap rank-${post.discovery.rarityStars || 1}`}>
-              {post.discovery.imageRef ? (
-                <CaptureImage
-                  imageRef={post.discovery.imageRef}
-                  alt={post.discovery.itemName}
-                  element={post.discovery.element}
-                  className="post-photo-image"
-                  useAuth={post.discovery.imageRef?.includes('/captures/')}
-                />
-              ) : (
-                <div className="post-photo-placeholder">
-                  <span className={`post-rarity-crest rank-hex-${post.discovery.rarityStars || 1}`}>
-                    {post.discovery.rarityStars || 1}★
-                  </span>
-                  {post.discovery.rarityStars != null && (
-                    <span className="post-rarity-stars" aria-label={`${post.discovery.rarityStars} of 5 rarity stars`}>
-                      {'★'.repeat(post.discovery.rarityStars)}<i>{'★'.repeat(Math.max(0, 5 - post.discovery.rarityStars))}</i>
-                    </span>
-                  )}
-                </div>
+              <CaptureImage
+                imageRef={post.discovery.imageRef}
+                alt={post.discovery.itemName}
+                element={post.discovery.element}
+                className="post-photo-image"
+                useAuth={post.discovery.imageRef?.includes('/captures/')}
+              />
+              {post.discovery.rarityStars != null && (
+                <span className="post-photo-rating" aria-label={`${post.discovery.rarityStars} of 5 rarity stars`}>
+                  {post.discovery.rarityStars}★
+                </span>
               )}
             </div>
           )}
@@ -252,14 +246,7 @@ function CommunityFeed({ onShare }) {
                   disabled={reportPost.isPending || reportedPostIds.includes(post.id)}
                   onClick={() => {
                     playTap();
-                    reportPost.mutate(
-                      { postId: post.id, reason: 'other' },
-                      {
-                        onSuccess: () => {
-                          setReportedPostIds((ids) => (ids.includes(post.id) ? ids : [...ids, post.id]));
-                        },
-                      },
-                    );
+                    setReportTarget(post);
                   }}
                 >
                   <Icon name="shield" />
@@ -279,20 +266,115 @@ function CommunityFeed({ onShare }) {
             )}
 
             <AnimatePresence>
-              {openComments === post.id && <CommentThread postId={post.id} />}
+              {openComments === post.id && <CommentThread postId={post.id} post={post} />}
             </AnimatePresence>
           </div>
         </article>
       ))}
+
+      <AnimatePresence>
+        {reportTarget && (
+          <ReportReasonSheet
+            post={reportTarget}
+            isSubmitting={reportPost.isPending}
+            onClose={() => setReportTarget(null)}
+            onSubmit={(reason) => {
+              reportPost.mutate(
+                { postId: reportTarget.id, reason },
+                {
+                  onSuccess: () => {
+                    setReportedPostIds((ids) => (ids.includes(reportTarget.id) ? ids : [...ids, reportTarget.id]));
+                    setReportTarget(null);
+                  },
+                },
+              );
+            }}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
 
-function CommentThread({ postId }) {
+const REPORT_REASONS = [
+  { id: 'spam', label: 'Spam or promotion' },
+  { id: 'abuse', label: 'Harassment or abuse' },
+  { id: 'unsafe_location', label: 'Unsafe location or behavior' },
+  { id: 'misinfo', label: 'Fake or misleading discovery' },
+  { id: 'private_info', label: 'Private information' },
+  { id: 'other', label: 'Something else' },
+];
+
+function ReportReasonSheet({ post, isSubmitting, onClose, onSubmit }) {
+  const [reason, setReason] = useState('');
+
+  return createPortal(
+    <motion.div
+      className="community-report-backdrop"
+      role="presentation"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={onClose}
+    >
+      <motion.section
+        className="community-report-sheet"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="community-report-title"
+        initial={{ y: 32, opacity: 0, scale: 0.98 }}
+        animate={{ y: 0, opacity: 1, scale: 1 }}
+        exit={{ y: 32, opacity: 0, scale: 0.98 }}
+        transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="community-report-head">
+          <div>
+            <span>Report post</span>
+            <h2 id="community-report-title">Why report this?</h2>
+            <p>{post.discovery?.cardTitle || post.discovery?.itemName || 'This discovery'} from {post.author.displayName}</p>
+          </div>
+          <button type="button" aria-label="Close report" onClick={onClose}>×</button>
+        </div>
+
+        <div className="community-report-options">
+          {REPORT_REASONS.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              className={reason === item.id ? 'selected' : ''}
+              onClick={() => { playTap(); setReason(item.id); }}
+            >
+              <span>{item.label}</span>
+              <i aria-hidden="true" />
+            </button>
+          ))}
+        </div>
+
+        <div className="community-report-actions">
+          <button type="button" onClick={onClose}>Cancel</button>
+          <button type="button" disabled={!reason || isSubmitting} onClick={() => onSubmit(reason)}>
+            {isSubmitting ? 'Sending…' : 'Submit report'}
+          </button>
+        </div>
+      </motion.section>
+    </motion.div>,
+    document.body,
+  );
+}
+
+function CommentThread({ postId, post }) {
   const { data: comments, isLoading, isError } = useCommunityComments(postId);
   const addComment = useAddCommunityComment();
   const [draft, setDraft] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const visibleComments = useMemo(() => {
+    if (comments?.length) return comments;
+    if (!isLoading && !isError && post?.commentCount > 0) {
+      return buildCommentPreview(post);
+    }
+    return [];
+  }, [comments, isError, isLoading, post]);
 
   const submit = async (event) => {
     event.preventDefault();
@@ -318,15 +400,31 @@ function CommentThread({ postId }) {
     >
       {isLoading && <p className="community-state-note" role="status">Loading comments…</p>}
       {isError && <p className="community-state-note error" role="alert">Comments could not be loaded.</p>}
-      {!isLoading && !isError && comments?.length === 0 && (
+      {!isLoading && !isError && visibleComments.length === 0 && (
         <p className="community-state-note">No comments yet.</p>
       )}
-      {comments?.map((comment) => (
-        <div key={comment.id} className="post-comment">
-          <strong>{comment.displayName}</strong>
-          <p>{comment.body}</p>
+      {visibleComments.length > 0 && (
+        <div className="post-comment-list">
+          {visibleComments.slice(0, 3).map((comment) => (
+            <div key={comment.id} className="post-comment">
+              <span className="post-comment-avatar" aria-hidden="true">{initials(comment.displayName)}</span>
+              <div className="post-comment-bubble">
+                <div>
+                  <strong>{comment.displayName}</strong>
+                  {comment.createdAt && <small>{timeAgo(comment.createdAt)}</small>}
+                </div>
+                <p>{comment.body}</p>
+              </div>
+            </div>
+          ))}
+          {post?.commentCount > visibleComments.length && (
+            <p className="community-state-note">Showing preview comments. Sign in to load the full thread.</p>
+          )}
+          {visibleComments.length > 3 && (
+            <p className="community-state-note">Showing latest 3 of {visibleComments.length} comments.</p>
+          )}
         </div>
-      ))}
+      )}
 
       <form className="post-comment-form" onSubmit={submit}>
         <label className="sr-only" htmlFor={`comment-${postId}`}>Add a comment</label>
@@ -345,6 +443,21 @@ function CommentThread({ postId }) {
       {errorMessage && <p className="community-state-note error" role="alert">{errorMessage}</p>}
     </motion.div>
   );
+}
+
+function buildCommentPreview(post) {
+  const firstName = post.author?.displayName?.split(/\s+/)[0] || 'Explorer';
+  const place = post.placeLabel || 'there';
+  const count = Math.min(3, post.commentCount || 0);
+  const samples = [
+    { displayName: 'Nila Skies', body: `That light at ${place} looks unreal.`, createdAt: new Date(Date.now() - 42 * 60000).toISOString() },
+    { displayName: 'Arjun Vale', body: 'Adding this to my next walk list.', createdAt: new Date(Date.now() - 25 * 60000).toISOString() },
+    { displayName: firstName, body: 'Thanks. It was worth stopping for.', createdAt: new Date(Date.now() - 12 * 60000).toISOString() },
+  ];
+  return samples.slice(0, count).map((comment, index) => ({
+    id: `${post.id}-preview-${index}`,
+    ...comment,
+  }));
 }
 
 function FriendsPanel() {

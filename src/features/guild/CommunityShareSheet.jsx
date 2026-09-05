@@ -32,13 +32,14 @@ export function CommunityShareSheet({ onClose, onShared }) {
   const [hashtagInput, setHashtagInput] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
-  // A capture can only back one post. One-star discoveries are valid shares,
-  // but rejected or still-provisional captures are not community-safe content.
+  // A capture can only back one post. Community shares start at two stars so
+  // low-confidence captures stay private to the player's Library.
   const sharedCardIds = useMemo(() => new Set((posts || []).map((post) => post.cardId).filter(Boolean)), [posts]);
   const shareable = useMemo(
     () => (captures || []).filter((card) =>
       card.status !== 'rejected' &&
       card.status !== 'provisional' &&
+      Number(card.rarityStars || 0) > 1 &&
       !sharedCardIds.has(card.id)),
     [captures, sharedCardIds],
   );
@@ -63,7 +64,7 @@ export function CommunityShareSheet({ onClose, onShared }) {
         error?.code === 'guest_write_unavailable'
           ? 'Guest mode is read-only. Sign in to share your discoveries.'
           : error?.code === 'capture_not_shareable'
-            ? 'That capture failed verification and cannot be shared.'
+            ? 'That capture is not eligible for community sharing.'
             : 'Could not publish your post. Please try again.',
       );
     }

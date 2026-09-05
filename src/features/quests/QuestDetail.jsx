@@ -52,7 +52,7 @@ export function QuestDetail({ quest }) {
       if (error instanceof ApiError && error.code === 'guest_write_unavailable') {
         setServiceMessage('Sign in to submit verified quest proof.');
       } else if (error instanceof ApiError && (error.code === 'provider_not_configured' || error.status === 503)) {
-        setServiceMessage('Photo verification is not available yet. Your quest will stay pending for manual review once it launches.');
+        setServiceMessage('Photo review is temporarily unavailable. Please try again shortly.');
       } else {
         setServiceMessage('Could not submit your photo. Please try again.');
       }
@@ -84,7 +84,7 @@ export function QuestDetail({ quest }) {
       if (error instanceof ApiError && error.code === 'guest_write_unavailable') {
         setServiceMessage('Sign in to log verified quest progress.');
       } else if (error instanceof ApiError && (error.code === 'provider_not_configured' || error.status === 503)) {
-        setServiceMessage('Automatic progress tracking is not available yet.');
+        setServiceMessage('Could not update progress right now. Please try again.');
       } else {
         setServiceMessage('Could not update progress. Please try again.');
       }

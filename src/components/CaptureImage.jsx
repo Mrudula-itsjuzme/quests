@@ -19,7 +19,7 @@ import { Icon } from './Icon';
  * crest is already the right shape and colour, so the photo simply resolves
  * into place.
  */
-export function CaptureImage({ imageRef, alt, element, className = '', eager = false, useAuth = false }) {
+export function CaptureImage({ imageRef, alt, element, className = '', eager = false, useAuth = false, style }) {
   const [state, setState] = useState('loading'); // loading | loaded | failed
   const [localSrc, setLocalSrc] = useState(null);
   const elementKey = (element || 'Earth').toLowerCase();
@@ -65,7 +65,7 @@ export function CaptureImage({ imageRef, alt, element, className = '', eager = f
   const visualState = state === 'failed' ? 'loaded' : (showPhoto ? state : 'crest');
 
   return (
-    <div className={`capture-image ${className}`.trim()} data-state={visualState}>
+    <div className={`capture-image ${className}`.trim()} data-state={visualState} style={style}>
       {/* Always rendered: it is both the fallback and the loading ground. */}
       <div className={`capture-image-crest element-${elementKey}`} aria-hidden="true">
         {state === 'loading' ? (

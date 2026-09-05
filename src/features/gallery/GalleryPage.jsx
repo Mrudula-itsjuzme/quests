@@ -94,20 +94,26 @@ export function GalleryPage() {
       </div>
 
       {/* ── Stats strip ── */}
-      <div className="gallery-v2-stats">
-        <div className="gallery-v2-stat">
-          <strong>{collection.length}</strong>
-          <small>Captures</small>
+      <section className="library-hero-panel" aria-label="Library summary">
+        <div>
+          <span className="library-kicker">Field archive</span>
+          <p>{collection.length} captures logged across your Wild Realm finds.</p>
         </div>
-        <div className="gallery-v2-stat gold">
-          <strong>{sRankCount}</strong>
-          <small>5 Star</small>
-        </div>
-        <div className="gallery-v2-stat">
-          <strong>{totalXp.toLocaleString()}</strong>
-          <small>XP Earned</small>
-        </div>
-      </div>
+        <dl className="gallery-v2-stats">
+          <div className="gallery-v2-stat">
+            <dt>Captures</dt>
+            <dd>{collection.length}</dd>
+          </div>
+          <div className="gallery-v2-stat gold">
+            <dt>5 Star</dt>
+            <dd>{sRankCount}</dd>
+          </div>
+          <div className="gallery-v2-stat">
+            <dt>XP</dt>
+            <dd>{totalXp.toLocaleString()}</dd>
+          </div>
+        </dl>
+      </section>
 
       {/* ── Element filter tabs ── */}
       <div className="gallery-v2-tabs">
@@ -180,7 +186,7 @@ export function GalleryPage() {
                 <motion.button
                   key={card.id}
                   type="button"
-                  className={`gallery-v2-card rank-${stars}`}
+                  className={`gallery-v2-card rank-${stars} ${i === 0 ? 'gallery-v2-card-featured' : ''}`}
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}

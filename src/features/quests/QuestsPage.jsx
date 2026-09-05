@@ -44,6 +44,7 @@ export function QuestsPage() {
     () => quests.filter((q) => !tab || (q.cadence && q.cadence.toLowerCase() === tab.toLowerCase())),
     [quests, tab],
   );
+  const currentGenerate = tab === 'daily' ? generateDaily : tab === 'weekly' ? generateWeekly : generateMonthly;
 
   const selected = quests.find((q) => q.id === selectedId) || null;
   const completedVisibleCount = visibleQuests.filter((quest) => quest.status === 'completed').length;
@@ -86,7 +87,7 @@ export function QuestsPage() {
         </div>
         <div className="quest-season-strip">
           <div>
-            <span style={{ color: 'var(--wr-walnut)', fontWeight: 800 }}>Verdant Season</span>
+            <span style={{ color: 'var(--wr-walnut)', fontWeight: 800 }}>Rank Progress</span>
             <strong style={{ color: 'var(--wr-forest)', fontWeight: 900 }}>{me?.tierLabel || `${me?.tier || 'Bronze'} Explorer`}</strong>
           </div>
           <div style={{ textAlign: 'right' }}>
@@ -120,10 +121,22 @@ export function QuestsPage() {
           <h2>{CADENCE_LABEL[tab]}</h2>
           <span>{completedVisibleCount}/{visibleQuests.length}</span>
         </div>
-        {activeQuery.isLoading ? (
+        {activeQuery.isLoading || currentGenerate.isPending ? (
           <QuestLoadingStack />
+        ) : activeQuery.isError ? (
+          <QuestListState
+            title="Quests could not load"
+            message="Check your connection and try again."
+            actionLabel="Retry"
+            onAction={() => activeQuery.refetch()}
+          />
         ) : visibleQuests.length === 0 ? (
-          <QuestLoadingStack />
+          <QuestListState
+            title={`No ${tab} quests yet`}
+            message="Generate a fresh set when you are ready to explore."
+            actionLabel={`Generate ${tab}`}
+            onAction={() => currentGenerate.mutate()}
+          />
         ) : (
           <>
             {visibleQuests.map((quest) => {
@@ -187,6 +200,19 @@ export function QuestsPage() {
         )}
       </AnimatePresence>
     </main>
+  );
+}
+
+function QuestListState({ title, message, actionLabel, onAction }) {
+  return (
+    <div className="quest-loop-empty" role="status">
+      <Icon name="scroll" />
+      <h2>{title}</h2>
+      <p>{message}</p>
+      <button type="button" className="quest-card-action" onClick={onAction}>
+        {actionLabel}
+      </button>
+    </div>
   );
 }
 

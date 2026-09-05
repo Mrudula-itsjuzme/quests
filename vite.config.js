@@ -16,6 +16,32 @@ if (process.env.VITE_NATIVE_BUILD === 'true' && process.env.VITE_OFFLINE_NATIVE 
 export default defineConfig({
   base: './',
   plugins: [react()],
+  build: {
+    chunkSizeWarningLimit: 700,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('scheduler') || id.includes('use-sync-external-store')) return 'react-vendor';
+            if (id.includes('@tanstack')) return 'query-vendor';
+            if (id.includes('framer-motion')) return 'motion-vendor';
+            if (id.includes('leaflet')) return 'map-vendor';
+            return 'vendor';
+          }
+
+          if (id.includes('/src/features/world/')) return 'world-route';
+          if (id.includes('/src/features/quests/')) return 'quests-route';
+          if (id.includes('/src/features/gallery/')) return 'gallery-route';
+          if (id.includes('/src/features/guild/')) return 'guild-route';
+          if (id.includes('/src/features/profile/')) return 'profile-route';
+          if (id.includes('/src/features/rewards/')) return 'rewards-route';
+          if (id.includes('/src/features/auth/') || id.includes('/src/features/onboarding/')) return 'auth-route';
+
+          return 'app-shell';
+        },
+      },
+    },
+  },
   server: {
     // Defaults to all interfaces so a phone on the same network can reach the
     // dev server; VITE_DEV_HOST narrows it (e.g. to 127.0.0.1).
