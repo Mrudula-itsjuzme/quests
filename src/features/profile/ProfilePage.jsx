@@ -5,6 +5,7 @@ import { useMe, useCaptures } from '../quests/queries';
 import { coinBalance } from '../../lib/playerEconomy';
 import { playTap } from '../../lib/useSoundEffects';
 import { SettingsModal } from '../../components/SettingsModal';
+import { Icon } from '../../components/Icon';
 
 // Use 1-5 numeric ranks instead of legacy grades
 const RANK_COLORS = {
@@ -75,6 +76,14 @@ export function ProfilePage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: 'spring', stiffness: 300, damping: 26 }}
       >
+        <button
+          type="button"
+          className="profile-hero-settings"
+          aria-label="Open profile settings"
+          onClick={() => handleMenuItem({ id: 'settings' })}
+        >
+          <Icon name="gear" />
+        </button>
         {/* Avatar */}
         <div className="profile-avatar-v2" aria-hidden="true">
           {(me?.displayName || 'A').charAt(0).toUpperCase()}

@@ -13,6 +13,17 @@ describe('configuration security', () => {
     }));
   });
 
+  it('adds the Vite API origin to development CORS for local phone testing', () => {
+    const config = loadConfig({
+      NODE_ENV: 'development',
+      CORS_ORIGINS: 'http://localhost:3000',
+      VITE_API_BASE_URL: 'http://10.12.71.162:3001',
+    });
+
+    expect(config.corsOrigins).toContain('http://localhost:3000');
+    expect(config.corsOrigins).toContain('http://10.12.71.162:3001');
+  });
+
   it('rejects development authentication, local providers, and ephemeral storage in production', () => {
     expect(() => loadConfig({ NODE_ENV: 'production' })).toThrow(/Production requires a valid PostgreSQL/);
   });

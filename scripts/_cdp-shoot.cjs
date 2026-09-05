@@ -8,6 +8,7 @@ const CHROME = '/home/mrudula/.cache/ms-playwright/chromium-1234/chrome-linux64/
 const OUT = '/tmp/wr-screenshots';
 const PROFILE = '/tmp/wr-chrome-profile';
 const PORT = 9333;
+const BASE_URL = process.env.BASE_URL || 'http://127.0.0.1:3000';
 
 function listTargets() {
   return new Promise((resolve, reject) => {
@@ -70,12 +71,12 @@ async function main() {
   // Prime localStorage on the app origin BEFORE the app's first mount runs,
   // by navigating to a same-origin page first, then setting storage, then
   // navigating again so DawnMoment's useEffect sees it already set.
-  await send('Page.navigate', { url: 'http://127.0.0.1:3000/app' });
+  await send('Page.navigate', { url: `${BASE_URL}/app` });
   await new Promise((r) => setTimeout(r, 400));
   await send('Runtime.evaluate', {
     expression: `localStorage.setItem('habbit-dawn-moment-seen', new Date().toISOString().slice(0,10)); localStorage.setItem('habbit_guest_mode','true');`,
   });
-  await send('Page.navigate', { url: 'http://127.0.0.1:3000/app' });
+  await send('Page.navigate', { url: `${BASE_URL}/app` });
   await new Promise((r) => setTimeout(r, 1500));
 
   const routes = [
@@ -94,7 +95,7 @@ async function main() {
   for (const [sizeName, w, h, scale] of sizes) {
     await send('Emulation.setDeviceMetricsOverride', { width: w, height: h, deviceScaleFactor: scale, mobile: sizeName === 'mobile' });
     for (const [name, route] of routes) {
-      await send('Page.navigate', { url: `http://127.0.0.1:3000${route}` });
+      await send('Page.navigate', { url: `${BASE_URL}${route}` });
       await new Promise((r) => setTimeout(r, 1800));
       const resp = await send('Page.captureScreenshot', { format: 'png' });
       if (!resp.result) {

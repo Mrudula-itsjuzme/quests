@@ -171,7 +171,7 @@ export function GalleryPage() {
       ) : (
         /* ── Instagram-style photo grid ── */
         <div className="gallery-v2-grid">
-          <AnimatePresence mode="popLayout">
+          <>
             {displayList.map((card, i) => {
               const stars = card.rarityStars ?? 1;
               const speciesEntry = (species || []).find((s) => s.id === card.speciesId);
@@ -217,7 +217,7 @@ export function GalleryPage() {
                 </motion.button>
               );
             })}
-          </AnimatePresence>
+          </>
         </div>
       )}
 

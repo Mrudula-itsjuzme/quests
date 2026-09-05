@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -74,6 +74,7 @@ export function CaptureFlow({ onClose }) {
   const navigate = useNavigate();
   const isNative = Capacitor.isNativePlatform();
   const inputRef = useRef(null);
+  const filterChipRefs = useRef(new Map());
   const [stage, setStage] = useState('prompt'); // prompt | scanning | candidates | reveal | error
   const [card, setCard] = useState(null);
   const [name, setName] = useState('');
@@ -92,6 +93,16 @@ export function CaptureFlow({ onClose }) {
   const { data: species } = useSpecies();
 
   const currentFilter = CAPTURE_FILTERS.find((f) => f.id === activeFilter) || CAPTURE_FILTERS[0];
+
+  useEffect(() => {
+    if (stage !== 'prompt') return undefined;
+    const frame = window.requestAnimationFrame(() => {
+      filterChipRefs.current
+        .get(activeFilter)
+        ?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [activeFilter, stage]);
 
   const cycleFilter = () => {
     const currentIndex = CAPTURE_FILTERS.findIndex((filter) => filter.id === activeFilter);
@@ -338,6 +349,10 @@ export function CaptureFlow({ onClose }) {
                 {CAPTURE_FILTERS.map((filter) => (
                   <button
                     key={filter.id}
+                    ref={(node) => {
+                      if (node) filterChipRefs.current.set(filter.id, node);
+                      else filterChipRefs.current.delete(filter.id);
+                    }}
                     type="button"
                     className={`capture-filter-chip ${activeFilter === filter.id ? 'active' : ''}`}
                     aria-pressed={activeFilter === filter.id}

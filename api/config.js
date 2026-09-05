@@ -59,6 +59,16 @@ export function loadConfig(env = process.env, options = {}) {
   }
   config.databaseUrl = config.DATABASE_URL || config.POSTGRES_URL;
   config.corsOrigins = config.CORS_ORIGINS.split(',').map((origin) => origin.trim()).filter(Boolean);
+  if (config.NODE_ENV !== 'production' && env.VITE_API_BASE_URL) {
+    try {
+      const viteApiOrigin = new URL(env.VITE_API_BASE_URL).origin;
+      if (!config.corsOrigins.includes(viteApiOrigin)) {
+        config.corsOrigins.push(viteApiOrigin);
+      }
+    } catch {
+      // Vite validates native build API URLs separately; ignore relative values here.
+    }
+  }
   config.selfOrigin = config.RENDER_EXTERNAL_URL?.replace(/\/$/, '') || null;
   config.listenHost = config.HOST || (config.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1');
 

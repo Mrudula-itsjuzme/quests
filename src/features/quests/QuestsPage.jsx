@@ -69,36 +69,35 @@ export function QuestsPage() {
     <main className="quests-shell">
       <h1 className="sr-only">Quests</h1>
       {/* Explorer Profile */}
-      <div style={{ marginBottom: '24px' }}>
-        <h2 style={{ fontSize: '0.85rem', fontWeight: '800', letterSpacing: '0.05em', color: 'var(--quest-muted)', marginBottom: '12px', textTransform: 'uppercase' }}>Explorer Profile</h2>
-        <div className="quest-user-topbar" style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '16px', alignItems: 'center' }}>
-          <div className="quest-user-avatar" aria-hidden="true" style={{ width: '64px', height: '64px', borderRadius: '50%', border: '2px solid var(--quest-gold-dim)', display: 'grid', placeItems: 'center', background: 'var(--quest-ink-2)', color: 'var(--quest-gold-bright)', fontSize: '1.4rem' }}>
+      <section className="quest-explorer-card" aria-label="Explorer progression">
+        <div className="quest-user-topbar">
+          <div className="quest-user-avatar" aria-hidden="true">
             <span>{(me?.displayName || 'Adventurer').split(/\s+/).slice(0, 2).map((part) => part[0]?.toUpperCase() || '').join('')}</span>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px' }}>
-              <div>
-                <h3 style={{ fontSize: '1.2rem', margin: '0 0 2px', color: 'var(--quest-cream)' }}>{me?.displayName || 'Adventurer'}</h3>
-                {me && (
-                  <small style={{ color: 'var(--quest-muted)', fontSize: '0.85rem' }}>
-                    Aspiring Naturalist | Level {me.level || 1}
-                  </small>
-                )}
-              </div>
-              {me && (
-                <div style={{ minWidth: '140px', textAlign: 'right' }}>
-                  <div style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--quest-cream)', textTransform: 'uppercase', marginBottom: '4px' }}>Rank: {me.tierLabel || `${me.tier} Explorer`}</div>
-                  <ProgressBar value={xpProgress} compact />
-                  <div style={{ fontSize: '0.75rem', color: 'var(--quest-muted)', marginTop: '4px' }}>{me.xpIntoLevel} / {me.xpForCurrentLevel} XP</div>
-                </div>
-              )}
-            </div>
+          <div className="quest-user-identity">
+            <h3>{me?.displayName || 'Adventurer'}</h3>
+            <small>{me?.tierLabel || `${me?.tier || 'Bronze'} Explorer`} · Level {me?.level || 1}</small>
+            <ProgressBar value={xpProgress} compact />
+          </div>
+          <div className="quest-user-economy">
+            <span>{gold.toLocaleString()}</span>
+            <small>coins</small>
           </div>
         </div>
-      </div>
+        <div className="quest-season-strip">
+          <div>
+            <span style={{ color: 'var(--wr-walnut)', fontWeight: 800 }}>Verdant Season</span>
+            <strong style={{ color: 'var(--wr-forest)', fontWeight: 900 }}>{me?.tierLabel || `${me?.tier || 'Bronze'} Explorer`}</strong>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <span style={{ color: 'var(--wr-walnut)', fontWeight: 800 }}>{xpIntoLevel} / {xpForCurrentLevel || 250} XP</span>
+            {xpRemaining > 0 && <small style={{ display: 'block', color: 'var(--wr-walnut-muted)', fontWeight: 700 }}>{xpRemaining} XP to next rank</small>}
+          </div>
+        </div>
+      </section>
 
       {/* Cadence Filter Tabs */}
-      <div className="quest-cadence-tabs" style={{ position: 'relative' }}>
+      <div className="quest-cadence-tabs">
         {['daily', 'weekly', 'monthly'].map((t) => {
           const isActive = tab === t;
           return (
@@ -108,23 +107,8 @@ export function QuestsPage() {
               className={`quest-cadence-btn ${isActive ? 'active' : ''}`}
               onClick={() => { playTap(); setTab(t); }}
               whileTap={{ scale: 0.95 }}
-              style={{ position: 'relative', zIndex: 1 }}
             >
-              {isActive && (
-                <motion.div
-                  layoutId="quests-tab-indicator"
-                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                  style={{
-                    position: 'absolute',
-                    inset: 0,
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    borderRadius: '999px',
-                    zIndex: -1,
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
-                  }}
-                />
-              )}
-              <span style={{ position: 'relative', zIndex: 2 }}>{t.toUpperCase()}</span>
+              {t.toUpperCase()}
             </motion.button>
           );
         })}
@@ -132,11 +116,9 @@ export function QuestsPage() {
 
       {/* Quests List */}
       <div className="quests-card-list">
-        <div className="quests-section-header" style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: '800', letterSpacing: '0.05em', color: 'var(--quest-cream)', textTransform: 'uppercase', margin: 0 }}>
-            {tab === 'daily' ? 'Daily Nature Quests' : CADENCE_LABEL[tab]}
-          </h2>
-          <span style={{ fontSize: '0.85rem', color: 'var(--quest-muted)', fontWeight: '700' }}>{completedVisibleCount}/{visibleQuests.length}</span>
+        <div className="quests-section-header">
+          <h2>{CADENCE_LABEL[tab]}</h2>
+          <span>{completedVisibleCount}/{visibleQuests.length}</span>
         </div>
         {activeQuery.isLoading ? (
           <QuestLoadingStack />
@@ -149,33 +131,36 @@ export function QuestsPage() {
               return (
                 <motion.div
                   key={quest.id}
-                  className={`quest-item-card ${state} rarity-${(quest.rarity || 'Common').toLowerCase()} with-photo`}
+                  className={`quest-item-card ${state} rarity-${(quest.rarity || 'Common').toLowerCase()}`}
                   whileHover={{ scale: 1.01 }}
                   onClick={() => { playTap(); setSelectedId(quest.id); }}
                 >
-                  <div className="quest-card-content" style={{ display: 'grid', gridTemplateColumns: '72px 1fr', gap: '16px', padding: '16px' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-                      <div className="quest-rarity-mark" style={{ width: '48px', height: '48px', borderRadius: '50%', display: 'grid', placeItems: 'center', background: 'var(--quest-ink-2)', color: 'var(--quest-gold-bright)', border: '1px solid var(--quest-line)' }}>
-                        <Icon name={categoryIcon(quest.category)} style={{ fontSize: '1.4rem' }} />
-                      </div>
-                      <span className="quest-xp-reward" style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--quest-cream)' }}>{quest.xpReward} XP</span>
+                  <div className="quest-card-content">
+                    <div className="quest-card-topline">
+                      <span className="quest-rarity-mark">
+                        <Icon name={categoryIcon(quest.category)} />
+                        {quest.rarity || 'Common'}
+                      </span>
+                      <span className="quest-xp-reward">+{quest.xpReward} XP</span>
                     </div>
-                    <div className="quest-row-main" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                      <h4 className="quest-item-title" style={{ textTransform: 'uppercase', letterSpacing: '0.02em', marginBottom: '8px' }}>{quest.title}</h4>
-                      
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--quest-cream)' }}>
-                        <div style={{ width: '18px', height: '18px', border: '2px solid var(--quest-gold-dim)', borderRadius: '4px', background: state === 'completed' ? 'var(--quest-gold)' : 'transparent', display: 'grid', placeItems: 'center' }}>
-                          {state === 'completed' && <Icon name="check" style={{ color: '#fff', fontSize: '12px' }} />}
-                        </div>
-                        {state === 'completed' ? 'COMPLETED' : 'Mark found'}
-                      </label>
-                      
-                      <p className="quest-item-instruction" style={{ color: 'var(--quest-muted)', fontSize: '0.85rem', lineHeight: '1.4', margin: 0 }}>
+                    <div className={`quest-row-thumb category-${(quest.category || 'Discovery').toLowerCase()}`}>
+                      <img src={questThumbSrc(quest)} alt="" loading="lazy" decoding="async" />
+                    </div>
+                    <div className="quest-row-main">
+                      <h4 className="quest-item-title">{quest.title}</h4>
+                      <p className="quest-item-instruction">
                         {quest.description || `Capture ${quest.targetValue} ${quest.unit || 'finds'} to complete this quest.`}
                       </p>
+                      <div className="quest-row-meta">
+                        <ProgressBar value={questProgressRatio(quest)} compact />
+                        <span className="quest-progress-num">
+                          {quest.progressValue || 0}/{quest.targetValue || 1}
+                        </span>
+                      </div>
                     </div>
-
-
+                    <button type="button" className="quest-card-action" aria-label="View" title={`View ${quest.title}`}>
+                      {questActionLabel(quest)}
+                    </button>
                   </div>
                 </motion.div>
               );
@@ -234,10 +219,18 @@ function questState(quest) {
   return 'not-started';
 }
 
+function questThumbSrc(quest) {
+  const text = `${quest.category || ''} ${quest.title || ''} ${quest.description || ''}`.toLowerCase();
+  if (/bird|watch|observe|wildlife|fauna|quiet/.test(text)) return '/assets/blue-billed-cuckoo.png';
+  if (/water|drink|hydration|waterfall|lake|river/.test(text)) return '/assets/verdant-explorer-banner.png';
+  if (/season|reward|rank|gold/.test(text)) return '/assets/mystery-chest.png';
+  if (/mind|journal|reflect|note/.test(text)) return '/quest-scholar-hero.png';
+  return '/assets/verdant-explorer-banner.png';
+}
+
 function questActionLabel(quest) {
   if (quest.status === 'completed') return 'DONE';
   if (quest.status === 'pending_verification') return 'REVIEW';
   if (quest.status === 'rejected') return 'RETRY';
   return quest.progressValue > 0 ? 'OPEN' : 'START';
 }
-

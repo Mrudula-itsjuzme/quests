@@ -205,7 +205,7 @@ function RewardsContent({
               try {
                 const claimed = await claimRewards.mutateAsync(); 
                 setTimeout(() => setNotice(claimed.length ? `${claimed.length} milestone reward${claimed.length === 1 ? '' : 's'} claimed.` : 'No rewards are ready yet.'), 600); 
-              } catch (error) {
+              } catch {
                 setTimeout(() => setNotice('Failed to claim rewards. Please try again.'), 600);
               }
             }}

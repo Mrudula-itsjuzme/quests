@@ -213,6 +213,28 @@
     height: 54px !important;
     border-radius: 20px !important;
   }
+
+  html[data-wild-theme='dark'] body .app-shell .guild-page {
+    display: block !important;
+    padding-top: calc(18px + env(safe-area-inset-top, 0px)) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .guild-page > div[role='tabpanel'] {
+    margin-top: 14px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-tabs-bar {
+    position: relative !important;
+    top: auto !important;
+    width: 100% !important;
+    height: 54px !important;
+    margin: 0 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-chats-hero {
+    min-height: 136px !important;
+    margin-top: 0 !important;
+  }
 }
 
 .app-route-loading {
@@ -289,9 +311,9 @@
     min-height: 68px !important;
     padding: 8px 10px !important;
     border-radius: 28px !important;
-    border: 1px solid rgba(255, 248, 235, 0.13) !important;
-    background: rgba(2, 5, 4, 0.78) !important;
-    box-shadow: 0 22px 60px rgba(0, 0, 0, 0.5) !important;
+    border: 1px solid rgba(74, 50, 26, 0.16) !important;
+    background: rgba(255, 248, 232, 0.96) !important;
+    box-shadow: 0 16px 48px rgba(68, 43, 19, 0.18) !important;
     backdrop-filter: blur(24px) saturate(1.2) !important;
     -webkit-backdrop-filter: blur(24px) saturate(1.2) !important;
   }
@@ -300,18 +322,21 @@
     min-width: 0 !important;
     height: 50px !important;
     gap: 3px !important;
-    color: rgba(255, 248, 235, 0.55) !important;
+    color: rgba(74, 50, 26, 0.75) !important;
     font-size: 0.68rem !important;
   }
 
-  html[data-wild-theme='dark'] body .app-shell .mobile-bottom-dock .dock-item.active {
-    color: #f0ce70 !important;
-    background: transparent !important;
+  html[data-wild-theme='dark'] body .app-shell .mobile-bottom-dock .dock-item svg,
+  html[data-wild-theme='dark'] body .app-shell .mobile-bottom-dock .dock-item span {
+    color: rgba(74, 50, 26, 0.75) !important;
   }
 
-  html[data-wild-theme='dark'] body .app-shell .mobile-bottom-dock .dock-item svg {
-    width: 20px !important;
-    height: 20px !important;
+  html[data-wild-theme='dark'] body .app-shell .mobile-bottom-dock .dock-item.active,
+  html[data-wild-theme='dark'] body .app-shell .mobile-bottom-dock .dock-item.active svg,
+  html[data-wild-theme='dark'] body .app-shell .mobile-bottom-dock .dock-item.active span {
+    color: var(--wr-forest, #1f4f34) !important;
+    background: transparent !important;
+    font-weight: 900 !important;
   }
 
   html[data-wild-theme='dark'] body .app-shell .dock-shutter-item {
@@ -1914,12 +1939,15 @@
   }
 
   html[data-wild-theme='dark'] body .app-shell .quest-season-rank span,
-  html[data-wild-theme='dark'] body .app-shell .quest-season-strip p {
+  html[data-wild-theme='dark'] body .app-shell .quest-season-strip p,
+  html[data-wild-theme='dark'] body .app-shell .quest-season-strip span,
+  html[data-wild-theme='dark'] body .app-shell .quest-season-strip small {
     margin: 0 !important;
-    color: rgba(255, 248, 235, 0.55) !important;
-    font-size: 0.72rem !important;
+    color: var(--wr-walnut) !important;
+    font-size: 0.78rem !important;
     line-height: 1.15 !important;
-    font-weight: 760 !important;
+    font-weight: 800 !important;
+    opacity: 1 !important;
   }
 
   html[data-wild-theme='dark'] body .app-shell .quest-season-strip .progress-bar {
@@ -2048,6 +2076,54 @@
     color: rgba(240, 206, 112, 0.78) !important;
   }
 
+  html[data-wild-theme='dark'] body .app-shell .quest-user-economy span {
+    color: #f0ce70 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-season-strip > div {
+    display: grid !important;
+    gap: 4px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-season-strip > div:last-child {
+    justify-items: end !important;
+    text-align: right !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-season-strip strong {
+    color: var(--wr-forest) !important;
+    font-size: 0.9rem !important;
+    font-weight: 900 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-card-content {
+    grid-template-columns: 42px minmax(0, 1fr) auto !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-card-content::before,
+  html[data-wild-theme='dark'] body .app-shell .quest-card-content::after {
+    display: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-item-instruction {
+    color: rgba(255, 248, 235, 0.72) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-card-action {
+    min-width: 64px !important;
+    min-height: 34px !important;
+    border: 1px solid rgba(46, 214, 139, 0.34) !important;
+    border-radius: 999px !important;
+    background: rgba(46, 214, 139, 0.12) !important;
+    color: #dfffea !important;
+    font-size: 0.72rem !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.04em !important;
+  }
+
   @keyframes quest-skeleton-sheen {
     0% { background-position: 120% 0; }
     100% { background-position: -80% 0; }
@@ -2135,4 +2211,28 @@ html[data-wild-theme='dark'] body .app-status-screen .ambient-action-btn {
   background: #fff8eb !important;
   color: #050706 !important;
   box-shadow: none !important;
+}
+
+@media (max-width: 780px) {
+  html[data-wild-theme='dark'] body .app-shell .guild-page {
+    display: block !important;
+    padding-top: calc(18px + env(safe-area-inset-top, 0px)) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .guild-page > div[role='tabpanel'] {
+    margin-top: 14px !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-tabs-bar {
+    position: relative !important;
+    top: auto !important;
+    width: 100% !important;
+    height: 54px !important;
+    margin: 0 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-chats-hero {
+    min-height: 136px !important;
+    margin-top: 0 !important;
+  }
 }

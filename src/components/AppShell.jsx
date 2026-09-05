@@ -6,7 +6,6 @@ import { useMe } from '../features/quests/queries';
 import { OfflineSanctuary } from './OfflineSanctuary';
 import { SettingsModal } from './SettingsModal';
 import { LogoutDialog } from './LogoutDialog';
-import { JournalTransition } from './motion/JournalTransition';
 import { WaxSealCeremony } from './motion/WaxSealCeremony';
 import { Icon } from './Icon';
 import { playHover, playLevelUp, playTap } from '../lib/useSoundEffects';
@@ -18,7 +17,7 @@ import { DesktopSidebar } from './DesktopSidebar';
 const THEME_KEY = 'wild-realm-theme';
 
 function readThemePreference() {
-  return 'light';
+  return 'dark';
 }
 
 // Capture is the core verb of the product, so the shell owns the flow: the
@@ -46,7 +45,7 @@ export function AppShell() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const [levelUp, setLevelUp] = useState(null);
-  const [captureOpen, setCaptureOpen] = useState(() => location.pathname === '/app');
+  const [captureOpen, setCaptureOpen] = useState(false);
   const [themeMode] = useState(readThemePreference);
 
   const isWorldRoute = location.pathname === '/app';
@@ -97,7 +96,7 @@ export function AppShell() {
     const root = document.documentElement;
     root.dataset.wildTheme = themeMode;
     try {
-      localStorage.setItem(THEME_KEY, 'light');
+      localStorage.setItem(THEME_KEY, themeMode);
     } catch {
       // Ignore storage failures; the visual state still applies for this run.
     }
@@ -169,11 +168,9 @@ export function AppShell() {
         </header>
 
       <div className={`mobile-content-area ${isWorldRoute ? 'mobile-content-area-world' : ''}`}>
-        <AnimatePresence initial={false} mode="wait">
-          <JournalTransition key={location.pathname} className="route-stage">
-            <Outlet />
-          </JournalTransition>
-        </AnimatePresence>
+        <div className="journal-page-transition route-stage">
+          <Outlet />
+        </div>
 
         {/* Floating Glass Bottom HUD Dock */}
         <nav className="mobile-bottom-dock" aria-label="Primary Navigation">

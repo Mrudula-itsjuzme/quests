@@ -16,7 +16,10 @@ suite('PostgreSQL quest repository', () => {
   const identity = { id: 'integration-user', displayName: 'Integration', timezone: 'UTC' };
 
   beforeAll(async () => {
-    pool = new Pool({ connectionString: databaseUrl });
+    pool = new Pool({
+      connectionString: databaseUrl,
+      ssl: process.env.DATABASE_SSL === 'true' ? { rejectUnauthorized: false } : false,
+    });
     await runMigrations({ pool });
     await runMigrations({ pool });
     repository = new PostgresQuestRepository(pool);

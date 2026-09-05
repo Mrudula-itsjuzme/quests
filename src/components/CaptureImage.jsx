@@ -23,28 +23,49 @@ export function CaptureImage({ imageRef, alt, element, className = '', eager = f
   const [state, setState] = useState('loading'); // loading | loaded | failed
   const [localSrc, setLocalSrc] = useState(null);
   const elementKey = (element || 'Earth').toLowerCase();
-  const imageSrc = localSrc || imageRef;
+  const remoteLikelyUnavailable = typeof navigator !== 'undefined' && navigator.onLine === false && /^https?:\/\//i.test(imageRef || '');
+  const fallbackSrc = fallbackForCapture(alt, element);
+  const imageSrc = state === 'failed' || remoteLikelyUnavailable ? fallbackSrc : (localSrc || imageRef || fallbackSrc);
   const showPhoto = Boolean(imageSrc) && state !== 'failed';
 
   useEffect(() => {
     let active = true;
+    if (!imageRef) {
+      setState('loaded');
+      return;
+    }
     setState('loading');
     setLocalSrc(null);
-    if (!isLocalCaptureRef(imageRef)) return () => { active = false; };
+    const timeout = setTimeout(() => {
+      if (active) setState('failed');
+    }, 2800);
+    if (!isLocalCaptureRef(imageRef)) {
+      return () => {
+        active = false;
+        clearTimeout(timeout);
+      };
+    }
     readLocalCaptureImage(imageRef)
       .then((src) => {
         if (!active) return;
-        if (src) setLocalSrc(src);
-        else setState('failed');
+        if (src) {
+          setLocalSrc(src);
+          setState('loaded');
+        } else setState('failed');
       })
       .catch(() => {
         if (active) setState('failed');
       });
-    return () => { active = false; };
+    return () => {
+      active = false;
+      clearTimeout(timeout);
+    };
   }, [imageRef]);
 
+  const visualState = state === 'failed' ? 'loaded' : (showPhoto ? state : 'crest');
+
   return (
-    <div className={`capture-image ${className}`.trim()} data-state={showPhoto ? state : 'crest'}>
+    <div className={`capture-image ${className}`.trim()} data-state={visualState}>
       {/* Always rendered: it is both the fallback and the loading ground. */}
       <div className={`capture-image-crest element-${elementKey}`} aria-hidden="true">
         {state === 'loading' ? (
@@ -56,7 +77,7 @@ export function CaptureImage({ imageRef, alt, element, className = '', eager = f
         )}
       </div>
 
-      {showPhoto && (
+      {(showPhoto || state === 'failed') && (
         <AuthImage
           className="capture-image-photo"
           src={imageSrc}
@@ -70,4 +91,14 @@ export function CaptureImage({ imageRef, alt, element, className = '', eager = f
       )}
     </div>
   );
+}
+
+function fallbackForCapture(alt, element) {
+  const text = `${alt || ''} ${element || ''}`.toLowerCase();
+  if (/bird|parrot|cuckoo|fauna|fern|grass/.test(text)) return '/assets/blue-billed-cuckoo.png';
+  if (/sky|cloud|northern|aurora|light/.test(text)) return '/auth-celestial-aperture.png';
+  if (/dog|retriever|cat|animal|horse/.test(text)) return '/dashboard-castle-panorama.png';
+  if (/mountain|ridge|earth|stone|desert/.test(text)) return '/assets/quest-compass-poster.png';
+  if (/water|lake|river|falls/.test(text)) return '/assets/verdant-explorer-banner.png';
+  return '/assets/verdant-explorer-banner.png';
 }

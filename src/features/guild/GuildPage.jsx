@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { CaptureImage } from '../../components/CaptureImage';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Icon } from '../../components/Icon';
@@ -8,14 +9,14 @@ import {
   useCommunityPosts,
   useFriends,
   useToggleCommunityLike,
-  useReportCommunityPost
+  useReportCommunityPost,
 } from '../quests/queries';
 import { playTap } from '../../lib/useSoundEffects';
 import { CommunityShareSheet } from './CommunityShareSheet';
 
 const TABS = [
+  { id: 'FEED', label: 'Feed', icon: 'star' },
   { id: 'FRIENDS', label: 'Chats', icon: 'user' },
-  { id: 'FEED', label: 'Realm', icon: 'star' },
   { id: 'MAP', label: 'Places', icon: 'compass' },
 ];
 
@@ -40,7 +41,7 @@ function initials(name) {
 }
 
 export function GuildPage() {
-  const [tab, setTab] = useState('FRIENDS');
+  const [tab, setTab] = useState('FEED');
   const [shareOpen, setShareOpen] = useState(false);
   const [notice, setNotice] = useState('');
 
@@ -115,10 +116,12 @@ export function GuildPage() {
 }
 
 function CommunityFeed({ onShare }) {
+  const navigate = useNavigate();
   const { data: posts, isLoading, isError, refetch } = useCommunityPosts('public');
   const toggleLike = useToggleCommunityLike();
   const reportPost = useReportCommunityPost();
   const [openComments, setOpenComments] = useState(null);
+  const [reportedPostIds, setReportedPostIds] = useState([]);
 
   if (isLoading) {
     return (
@@ -169,7 +172,14 @@ function CommunityFeed({ onShare }) {
         <article key={post.id} className="community-post-card">
           <div className="post-header-row">
             <div className="post-author-block">
-              <span className="post-author-avatar" aria-hidden="true">{initials(post.author.displayName)}</span>
+              <button
+                type="button"
+                className="post-author-avatar post-author-profile-btn"
+                aria-label={`Open ${post.author.displayName}'s profile`}
+                onClick={() => { playTap(); navigate('/app/profile'); }}
+              >
+                {initials(post.author.displayName)}
+              </button>
               <div>
                 <h4>{post.author.displayName}</h4>
                 <small>{timeAgo(post.createdAt)}</small>
@@ -221,7 +231,9 @@ function CommunityFeed({ onShare }) {
                   disabled={toggleLike.isPending}
                   onClick={() => { playTap(); toggleLike.mutate({ postId: post.id, liked: !post.viewerLiked }); }}
                 >
-                  <Icon name="star" /> {post.likeCount}
+                  <Icon name="star" />
+                  <span>{post.viewerLiked ? 'Liked' : 'Like'}</span>
+                  <strong>{post.likeCount}</strong>
                 </button>
                 <button
                   type="button"
@@ -229,25 +241,42 @@ function CommunityFeed({ onShare }) {
                   aria-expanded={openComments === post.id}
                   onClick={() => { playTap(); setOpenComments(openComments === post.id ? null : post.id); }}
                 >
-                  <Icon name="scroll" /> {post.commentCount}
+                  <Icon name="scroll" />
+                  <span>Comment</span>
+                  <strong>{post.commentCount}</strong>
                 </button>
                 <button
                   type="button"
-                  className="post-action"
-                  aria-label="Report post"
-                  disabled={reportPost.isPending}
+                  className={`post-action post-report-action ${reportedPostIds.includes(post.id) ? 'reported' : ''}`}
+                  aria-label={reportedPostIds.includes(post.id) ? 'Post reported' : 'Report post'}
+                  disabled={reportPost.isPending || reportedPostIds.includes(post.id)}
                   onClick={() => {
-                    if (window.confirm('Report this post?')) {
-                      playTap();
-                      reportPost.mutate({ postId: post.id, reason: 'inappropriate' });
-                      alert('Thank you, this post has been reported.');
-                    }
+                    playTap();
+                    reportPost.mutate(
+                      { postId: post.id, reason: 'other' },
+                      {
+                        onSuccess: () => {
+                          setReportedPostIds((ids) => (ids.includes(post.id) ? ids : [...ids, post.id]));
+                        },
+                      },
+                    );
                   }}
                 >
                   <Icon name="shield" />
+                  <span>{reportedPostIds.includes(post.id) ? 'Reported' : 'Report'}</span>
                 </button>
               </div>
             </div>
+
+            {post.commentCount > 0 && openComments !== post.id && (
+              <button
+                type="button"
+                className="post-view-comments"
+                onClick={() => { playTap(); setOpenComments(post.id); }}
+              >
+                View {post.commentCount} {post.commentCount === 1 ? 'comment' : 'comments'}
+              </button>
+            )}
 
             <AnimatePresence>
               {openComments === post.id && <CommentThread postId={post.id} />}

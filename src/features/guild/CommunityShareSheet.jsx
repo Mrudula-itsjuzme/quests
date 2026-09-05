@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { useCaptures, useCommunityPosts, useShareDiscovery } from '../quests/queries';
 import { playSuccess, playTap } from '../../lib/useSoundEffects';
+import { CaptureImage } from '../../components/CaptureImage';
 
 const MAX_HASHTAGS = 8;
 
@@ -31,11 +32,14 @@ export function CommunityShareSheet({ onClose, onShared }) {
   const [hashtagInput, setHashtagInput] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
-  // A capture can only back one post, so already-shared and rejected captures
-  // are filtered out instead of being offered and then refused.
+  // A capture can only back one post. One-star discoveries are valid shares,
+  // but rejected or still-provisional captures are not community-safe content.
   const sharedCardIds = useMemo(() => new Set((posts || []).map((post) => post.cardId).filter(Boolean)), [posts]);
   const shareable = useMemo(
-    () => (captures || []).filter((card) => card.status !== 'rejected' && !sharedCardIds.has(card.id)),
+    () => (captures || []).filter((card) =>
+      card.status !== 'rejected' &&
+      card.status !== 'provisional' &&
+      !sharedCardIds.has(card.id)),
     [captures, sharedCardIds],
   );
 
@@ -113,6 +117,14 @@ export function CommunityShareSheet({ onClose, onShared }) {
                       checked={selectedId === card.id}
                       onChange={() => { playTap(); setSelectedId(card.id); }}
                     />
+                    <span className="community-share-thumb" aria-hidden="true">
+                      <CaptureImage
+                        imageRef={card.imageRef}
+                        alt={card.itemName}
+                        element={card.element}
+                        useAuth={card.imageRef?.includes('/captures/')}
+                      />
+                    </span>
                     <span className={`community-share-rank rank-badge-${card.rarityStars || 1}`}>
                       {card.rarityStars || 1}★
                     </span>

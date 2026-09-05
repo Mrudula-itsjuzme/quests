@@ -166,6 +166,33 @@ export const GUEST_FEED = [
   },
 ];
 
+export const GUEST_FRIENDS = [
+  {
+    userId: 'u-mira',
+    displayName: 'Mira Fern',
+    totalXp: 2840,
+    streakDays: 12,
+    rankTitle: 'Bronze Explorer IV',
+    status: 'accepted',
+  },
+  {
+    userId: 'u-arjun',
+    displayName: 'Arjun Vale',
+    totalXp: 760,
+    streakDays: 4,
+    rankTitle: 'Bronze Explorer I',
+    status: 'accepted',
+  },
+  {
+    userId: 'u-nila',
+    displayName: 'Nila Skies',
+    totalXp: 5320,
+    streakDays: 21,
+    rankTitle: 'Silver Explorer III',
+    status: 'accepted',
+  },
+];
+
 // Guest mode has no backend, so it serves a small slice of the same curated
 // hotspots the API returns. Signed-in sessions always read the real table.
 export const GUEST_WORLD_HOTSPOTS = [
@@ -180,35 +207,67 @@ export const GUEST_WORLD_HOTSPOTS = [
 export const GUEST_COMMUNITY_POSTS = [
   {
     id: 'gp-1',
-    userId: 'u-101',
-    author: { userId: 'u-101', displayName: 'Lyra Moonweaver', totalXp: 24800, rankTitle: 'Pathfinder' },
+    userId: 'u-mira',
+    author: { userId: 'u-mira', displayName: 'Mira Fern', totalXp: 2840, rankTitle: 'Bronze Explorer IV' },
     cardId: 'gc-1',
-    discovery: { itemName: 'Malabar Trogon', cardTitle: 'Malabar Trogon', rarityTier: 'S', rarityGrade: 'S', rarityStars: 5, speciesId: 'malabar-trogon', imageRef: null, capturedAt: new Date(Date.now() - 5400000).toISOString() },
-    caption: 'Held still just long enough at first light.',
-    hashtags: ['#birding', '#westernghats'],
-    placeLabel: 'Silent Valley',
-    gps: { lat: 11.08, lng: 76.44 },
+    discovery: { itemName: 'Rain-wet Fern', cardTitle: 'Rain-wet Fern', rarityTier: 'B', rarityGrade: 'B', rarityStars: 3, speciesId: 'grass-fern', imageRef: null, capturedAt: new Date(Date.now() - 5400000).toISOString() },
+    caption: 'Tiny new fronds after the rain.',
+    hashtags: ['#plants', '#walk'],
+    placeLabel: 'Cubbon Park',
+    gps: { lat: 12.976, lng: 77.592 },
     visibility: 'public',
-    likeCount: 42,
-    commentCount: 6,
+    likeCount: 12,
+    commentCount: 3,
     viewerLiked: false,
     createdAt: new Date(Date.now() - 5400000).toISOString(),
   },
   {
     id: 'gp-2',
-    userId: 'u-102',
-    author: { userId: 'u-102', displayName: 'Theron Ironheart', totalXp: 11200, rankTitle: 'Guardian' },
+    userId: 'u-arjun',
+    author: { userId: 'u-arjun', displayName: 'Arjun Vale', totalXp: 760, rankTitle: 'Bronze Explorer I' },
     cardId: 'gc-2',
-    discovery: { itemName: 'Indian Paradise Flycatcher', cardTitle: 'Indian Paradise Flycatcher', rarityTier: 'A', rarityGrade: 'A', rarityStars: 4, speciesId: 'paradise-flycatcher', imageRef: null, capturedAt: new Date(Date.now() - 18000000).toISOString() },
-    caption: 'Ribbon tail caught the light on the way past.',
-    hashtags: ['#wildrealm'],
-    placeLabel: 'Cauvery Bank',
-    gps: { lat: 12.42, lng: 77.18 },
+    discovery: { itemName: 'Street Cat Nap', cardTitle: 'Street Cat Nap', rarityTier: 'D', rarityGrade: 'D', rarityStars: 1, speciesId: 'earth-cat', imageRef: null, capturedAt: new Date(Date.now() - 18000000).toISOString() },
+    caption: 'One-star still counts when it is a real moment.',
+    hashtags: ['#dailyfind', '#cat'],
+    placeLabel: 'Indiranagar',
+    gps: { lat: 12.971, lng: 77.641 },
     visibility: 'public',
-    likeCount: 18,
-    commentCount: 2,
+    likeCount: 5,
+    commentCount: 1,
     viewerLiked: true,
     createdAt: new Date(Date.now() - 18000000).toISOString(),
+  },
+  {
+    id: 'gp-3',
+    userId: 'u-nila',
+    author: { userId: 'u-nila', displayName: 'Nila Skies', totalXp: 5320, rankTitle: 'Silver Explorer III' },
+    cardId: 'gc-3',
+    discovery: { itemName: 'Evening Cloudbreak', cardTitle: 'Evening Cloudbreak', rarityTier: 'A', rarityGrade: 'A', rarityStars: 4, speciesId: 'sky-cloudbreak', imageRef: null, capturedAt: new Date(Date.now() - 27000000).toISOString() },
+    caption: 'Sky went gold for about thirty seconds.',
+    hashtags: ['#sky', '#sunset'],
+    placeLabel: 'Nandi Hills',
+    gps: { lat: 13.37, lng: 77.683 },
+    visibility: 'public',
+    likeCount: 23,
+    commentCount: 4,
+    viewerLiked: false,
+    createdAt: new Date(Date.now() - 27000000).toISOString(),
+  },
+  {
+    id: 'gp-4',
+    userId: 'u-mira',
+    author: { userId: 'u-mira', displayName: 'Mira Fern', totalXp: 2840, rankTitle: 'Bronze Explorer IV' },
+    cardId: 'gc-4',
+    discovery: { itemName: 'Lake Reflection', cardTitle: 'Lake Reflection', rarityTier: 'C', rarityGrade: 'C', rarityStars: 2, speciesId: 'water-lake', imageRef: null, capturedAt: new Date(Date.now() - 42000000).toISOString() },
+    caption: 'Quiet water, loud insects.',
+    hashtags: ['#lake', '#evening'],
+    placeLabel: 'Hebbal Lake',
+    gps: { lat: 13.036, lng: 77.591 },
+    visibility: 'public',
+    likeCount: 9,
+    commentCount: 0,
+    viewerLiked: false,
+    createdAt: new Date(Date.now() - 42000000).toISOString(),
   },
 ];
 
@@ -229,7 +288,7 @@ export const GUEST_CAPTURES = [
     rarityTier: 'S',
     rarityStars: 5,
     description: 'A beautiful golden retriever resting in the afternoon sun.',
-    imageRef: 'https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=800&q=80',
+    imageRef: '/dashboard-castle-panorama.png',
     capturedAt: new Date(Date.now() - 86400000 * 1).toISOString(),
   },
   {
@@ -241,7 +300,7 @@ export const GUEST_CAPTURES = [
     rarityTier: 'A',
     rarityStars: 4,
     description: 'A Bengal tiger patrolling its territory.',
-    imageRef: 'https://images.unsplash.com/photo-1549366021-9f761d450615?auto=format&fit=crop&w=800&q=80',
+    imageRef: '/assets/african-grey-parrot.png',
     capturedAt: new Date(Date.now() - 86400000 * 2).toISOString(),
   },
   {
@@ -253,7 +312,7 @@ export const GUEST_CAPTURES = [
     rarityTier: 'S',
     rarityStars: 5,
     description: 'Jagged peaks piercing through the morning mist.',
-    imageRef: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80',
+    imageRef: '/assets/quest-compass-poster.png',
     capturedAt: new Date(Date.now() - 86400000 * 3).toISOString(),
   },
   {
@@ -265,7 +324,7 @@ export const GUEST_CAPTURES = [
     rarityTier: 'A',
     rarityStars: 4,
     description: 'A secret waterfall deep in the ancient forest.',
-    imageRef: 'https://images.unsplash.com/photo-1432405972618-fc027f58c749?auto=format&fit=crop&w=800&q=80',
+    imageRef: '/assets/verdant-explorer-banner.png',
     capturedAt: new Date(Date.now() - 86400000 * 4).toISOString(),
   },
   {
@@ -277,7 +336,7 @@ export const GUEST_CAPTURES = [
     rarityTier: 'B',
     rarityStars: 3,
     description: 'Resting gently on a spring blossom.',
-    imageRef: 'https://images.unsplash.com/photo-1534265111162-cebbf5287f32?auto=format&fit=crop&w=800&q=80',
+    imageRef: '/assets/blue-billed-cuckoo.png',
     capturedAt: new Date(Date.now() - 86400000 * 5).toISOString(),
   },
   {
@@ -289,7 +348,7 @@ export const GUEST_CAPTURES = [
     rarityTier: 'A',
     rarityStars: 4,
     description: 'A quick glimpse of red against the green undergrowth.',
-    imageRef: 'https://images.unsplash.com/photo-1474511320723-9a56873867b5?auto=format&fit=crop&w=800&q=80',
+    imageRef: '/dashboard-castle-panorama.png',
     capturedAt: new Date(Date.now() - 86400000 * 6).toISOString(),
   },
   {
@@ -301,7 +360,7 @@ export const GUEST_CAPTURES = [
     rarityTier: 'S',
     rarityStars: 5,
     description: 'The sky dancing in green and purple ribbons.',
-    imageRef: 'https://images.unsplash.com/photo-1531366936337-7793249eb374?auto=format&fit=crop&w=800&q=80',
+    imageRef: '/auth-celestial-aperture.png',
     capturedAt: new Date(Date.now() - 86400000 * 7).toISOString(),
   },
   {
@@ -313,7 +372,7 @@ export const GUEST_CAPTURES = [
     rarityTier: 'C',
     rarityStars: 2,
     description: 'Looking up through the dense tropical foliage.',
-    imageRef: 'https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&w=800&q=80',
+    imageRef: '/assets/blue-billed-cuckoo.png',
     capturedAt: new Date(Date.now() - 86400000 * 8).toISOString(),
   },
   {
@@ -325,7 +384,7 @@ export const GUEST_CAPTURES = [
     rarityTier: 'B',
     rarityStars: 3,
     description: 'Vibrant red leaves catching the autumn light.',
-    imageRef: 'https://images.unsplash.com/photo-1507371341162-763b5e419408?auto=format&fit=crop&w=800&q=80',
+    imageRef: '/assets/quest-compass-poster.png',
     capturedAt: new Date(Date.now() - 86400000 * 9).toISOString(),
   },
   {
@@ -337,7 +396,7 @@ export const GUEST_CAPTURES = [
     rarityTier: 'B',
     rarityStars: 3,
     description: 'Endless rolling dunes under a harsh sun.',
-    imageRef: 'https://images.unsplash.com/photo-1509316785289-025f5b846b35?auto=format&fit=crop&w=800&q=80',
+    imageRef: '/dashboard-castle-panorama.png',
     capturedAt: new Date(Date.now() - 86400000 * 10).toISOString(),
   },
   {
@@ -349,7 +408,7 @@ export const GUEST_CAPTURES = [
     rarityTier: 'A',
     rarityStars: 4,
     description: 'A perfectly curling wave breaking on the shore.',
-    imageRef: 'https://images.unsplash.com/photo-1505118380757-91f5f5632de0?auto=format&fit=crop&w=800&q=80',
+    imageRef: '/assets/verdant-explorer-banner.png',
     capturedAt: new Date(Date.now() - 86400000 * 11).toISOString(),
   },
   {
@@ -361,7 +420,7 @@ export const GUEST_CAPTURES = [
     rarityTier: 'S',
     rarityStars: 5,
     description: 'A herd of wild horses running across the plains.',
-    imageRef: 'https://images.unsplash.com/photo-1534067783941-51c9c23ecefd?auto=format&fit=crop&w=800&q=80',
+    imageRef: '/assets/quest-compass-poster.png',
     capturedAt: new Date(Date.now() - 86400000 * 12).toISOString(),
   },
   {
@@ -373,7 +432,7 @@ export const GUEST_CAPTURES = [
     rarityTier: 'A',
     rarityStars: 4,
     description: 'A great horned owl watching from a branch.',
-    imageRef: 'https://images.unsplash.com/photo-1534443729916-2a744cbde549?auto=format&fit=crop&w=800&q=80',
+    imageRef: '/assets/african-grey-parrot.png',
     capturedAt: new Date(Date.now() - 86400000 * 13).toISOString(),
   },
   {
@@ -385,7 +444,7 @@ export const GUEST_CAPTURES = [
     rarityTier: 'C',
     rarityStars: 2,
     description: 'Tiny fungi growing on a fallen log.',
-    imageRef: 'https://images.unsplash.com/photo-1616428414328-9842bf2727c9?auto=format&fit=crop&w=800&q=80',
+    imageRef: '/assets/blue-billed-cuckoo.png',
     capturedAt: new Date(Date.now() - 86400000 * 14).toISOString(),
   }
 ];

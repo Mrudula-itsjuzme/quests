@@ -129,24 +129,22 @@
 .wild-loader-title {
   margin: 0;
   font-size: 1.75rem;
-  font-weight: 700;
-  color: #ffffff;
+  font-weight: 800;
+  color: #ffffff !important;
   letter-spacing: -0.02em;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
 }
 
 .wild-loader-subtitle {
   font-size: 1.125rem;
-  color: #a7f3d0;
-  font-weight: 400;
+  color: #e2f8ee !important;
+  font-weight: 600;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
 }
 
 .wild-shimmer-text {
-  background: linear-gradient(90deg, #a7f3d0 0%, #ffffff 50%, #a7f3d0 100%);
-  background-size: 200% auto;
-  color: transparent;
-  -webkit-background-clip: text;
-  background-clip: text;
-  animation: shimmer 2.5s linear infinite;
+  color: #ffffff !important;
+  font-weight: 700 !important;
 }
 
 @keyframes shimmer {

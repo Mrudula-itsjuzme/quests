@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useActiveQuests, useCaptures, useCollectibles, useMarkNotificationRead, useMe, useNotifications, useSpecies, useWorldHotspots } from '../quests/queries';
@@ -163,6 +163,7 @@ export function WorldScreen() {
         energy={energy}
         gold={gold}
         gems={gems}
+        onOpenProfile={() => { playTap(); navigate('/app/profile'); }}
         onOpenNotifications={() => { playTap(); setNotificationsOpen((open) => !open); }}
       />
 
