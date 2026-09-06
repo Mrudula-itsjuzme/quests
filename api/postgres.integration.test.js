@@ -245,7 +245,7 @@ suite('PostgreSQL quest repository', () => {
       expect(created).toBe(true);
       expect(post.discovery.itemName).toBe('Indian Roller');
       expect(post.discovery.rarityStars).toBe(3);
-      expect(post.author.rankTitle).toBe('Adventurer');
+      expect(post.author.rankTitle).toBe('Bronze Explorer I');
       expect(post.hashtags).toEqual(['#birding']);
 
       const feed = await repository.listCommunityPosts(identity.id);

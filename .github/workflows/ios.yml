@@ -24,6 +24,10 @@ jobs:
         run: npm ci
 
       - name: Build Web
+        # CI has no backend URL to point a native client at, so build the
+        # offline-native bundle; this step only verifies the app compiles.
+        env:
+          VITE_OFFLINE_NATIVE: 'true'
         run: npm run build:native
 
       - name: Sync Capacitor
