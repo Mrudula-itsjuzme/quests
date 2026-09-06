@@ -77,9 +77,11 @@ jobs:
         working-directory: ios/App
         run: |
           xcodebuild -project App.xcodeproj -scheme App -configuration Release CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO -derivedDataPath build build
-          # Archive the app bundle to a zip file for the release
+          # Archive the app bundle to a zip file for the release. Products are
+          # at build/Build/Products/Release-iphoneos under ios/App, so 4 levels
+          # up lands at ios/App/App-iOS-Unsigned.zip (matching the upload path).
           cd build/Build/Products/Release-iphoneos
-          zip -r ../../../App-iOS-Unsigned.zip App.app
+          zip -r ../../../../App-iOS-Unsigned.zip App.app
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
