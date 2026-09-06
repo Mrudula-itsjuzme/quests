@@ -35,12 +35,14 @@ jobs:
 
       # To build an IPA you need provisioning profiles and certificates,
       # which are typically passed via secrets.
-      # This step does a basic xcodebuild to ensure the workspace compiles.
-      - name: Build iOS Workspace
+      # This step does a basic xcodebuild to ensure the project compiles.
+      # Capacitor projects ship App.xcodeproj (not a top-level workspace);
+      # xcodebuild auto-generates the scheme from the App target.
+      - name: Build iOS Project
         working-directory: ios/App
         run: |
           xcodebuild \
-            -workspace App.xcworkspace \
+            -project App.xcodeproj \
             -scheme App \
             -sdk iphonesimulator \
             -destination 'platform=iOS Simulator,name=iPhone 15' \
