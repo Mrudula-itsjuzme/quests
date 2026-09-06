@@ -5,6 +5,12 @@ on:
     tags:
       - 'v*'
 
+# Tag pushes are one-shot releases; never cancel a run that is in progress.
+# Grouping on the tag still serializes re-pushes of the same tag.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   build-android:
     name: Build Android APK

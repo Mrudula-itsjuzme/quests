@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [ "main" ]
 
+# Cancel superseded runs so rapid pushes don't stack billable macOS time.
+concurrency:
+  group: ios-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-ios:
     name: Build iOS App
