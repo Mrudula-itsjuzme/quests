@@ -32,10 +32,11 @@ jobs:
         run: npm run build
 
       - name: Setup Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
-          java-version: '17'
+          # Capacitor Android compiles with Java 21 (source/target VERSION_21).
+          java-version: '21'
 
       - name: Sync Capacitor
         run: npx cap sync android
@@ -75,9 +76,9 @@ jobs:
       - name: Build iOS App (Unsigned)
         working-directory: ios/App
         run: |
-          xcodebuild -project App.xcodeproj -scheme App -configuration Release CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO build
+          xcodebuild -project App.xcodeproj -scheme App -configuration Release CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO -derivedDataPath build build
           # Archive the app bundle to a zip file for the release
-          cd build/Release-iphoneos
+          cd build/Build/Products/Release-iphoneos
           zip -r ../../../App-iOS-Unsigned.zip App.app
 
       - name: Upload Artifact
