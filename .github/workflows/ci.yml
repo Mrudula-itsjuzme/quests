@@ -81,9 +81,12 @@ jobs:
     runs-on: ubuntu-latest
     # Only runs once production secrets are configured, so it becomes a real
     # gate then; until wired, CI stays green instead of failing every push.
+    # (secrets cannot be referenced in `if`, so evaluate it via env first.)
     if: >-
       github.ref == 'refs/heads/main' && github.event_name == 'push'
-      && secrets.DATABASE_URL != ''
+      && env.PROD_SECRETS_READY == 'true'
+    env:
+      PROD_SECRETS_READY: ${{ secrets.DATABASE_URL != '' }}
     steps:
       - uses: actions/checkout@v7
       - name: Use Node.js 22
