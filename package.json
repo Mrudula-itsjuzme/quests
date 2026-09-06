@@ -7,11 +7,11 @@
     "node": ">=22"
   },
   "scripts": {
-    "start": "node --env-file=.env api/server.js",
+    "start": "node --env-file-if-exists=.env api/server.js",
     "dev": "vite",
-    "dev:api": "node --env-file=.env api/server.js",
+    "dev:api": "node --env-file-if-exists=.env api/server.js",
     "dev:full": "sh scripts/start-dev.sh",
-    "migrate": "node --env-file=.env api/migrate.js",
+    "migrate": "node --env-file-if-exists=.env api/migrate.js",
     "build": "vite build",
     "build:native": "VITE_NATIVE_BUILD=true vite build",
     "preview": "vite preview",

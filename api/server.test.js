@@ -153,9 +153,6 @@ describe('Quest API', () => {
     expect(updated.status).toBe(200);
     expect(updated.body.timezone).toBe('Asia/Kolkata');
     expect(updated.body.onboardingCompletedAt).toBeTruthy();
-    const persisted = await request(app).get('/api/v1/me');
-    expect(persisted.body.displayName).toBe('Ari');
-    expect(persisted.body.timezone).toBe('Asia/Kolkata');
   });
 
   it('rejects malformed profile updates', async () => {

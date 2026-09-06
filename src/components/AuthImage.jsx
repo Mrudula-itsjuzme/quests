@@ -22,7 +22,7 @@ export function getAbsoluteImageUrl(imageRef) {
   return imageRef;
 }
 
-export function AuthImage({ src, alt, className, useAuth: requiresAuth = false, ...props }) {
+export function AuthImage({ src, alt, className, useAuth: requiresAuth = false, onError, ...props }) {
   const [objectUrl, setObjectUrl] = useState(null);
   const { getToken } = useAuth();
 
@@ -61,7 +61,7 @@ export function AuthImage({ src, alt, className, useAuth: requiresAuth = false, 
         setObjectUrl(urlToRevoke);
       } catch (err) {
         console.error('Failed to load authenticated image', err);
-        if (isMounted) props.onError?.(err);
+        if (isMounted) onError?.(err);
       }
     }
     
@@ -71,7 +71,7 @@ export function AuthImage({ src, alt, className, useAuth: requiresAuth = false, 
       isMounted = false;
       if (urlToRevoke) URL.revokeObjectURL(urlToRevoke);
     };
-  }, [src, requiresAuth, getToken]);
+  }, [src, requiresAuth, getToken, onError]);
 
   if (!objectUrl) return <div className={`image-placeholder ${className || ''}`} />;
   return <img src={objectUrl} alt={alt} className={className} {...props} />;
