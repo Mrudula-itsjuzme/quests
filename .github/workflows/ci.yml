@@ -80,9 +80,7 @@ jobs:
     name: Production env checks (main pushes only)
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    # Requires production secrets (DATABASE_URL, PROVIDER_MODE, etc.); keep the
-    # run green when they are not configured so CI does not go permanently red.
-    continue-on-error: true
+    # Requires production secrets (DATABASE_URL, PROVIDER_MODE, etc.) to pass.
     steps:
       - uses: actions/checkout@v7
       - name: Use Node.js 22

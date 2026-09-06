@@ -14,12 +14,16 @@ jobs:
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'javascript-typescript', 'python' ]
     steps:
       - uses: actions/checkout@v7
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
         with:
-          languages: javascript
+          languages: ${{ matrix.language }}
       - name: Build
         run: npm ci
       - name: Perform CodeQL Analysis
