@@ -231,6 +231,12 @@ export function CaptureFlow({ onClose }) {
 
     if (isNative) {
       try {
+        const permissions = await Camera.requestPermissions({ permissions: ['camera'] });
+        if (permissions.camera !== 'granted') {
+          setErrorMessage('Camera permission is required to capture a discovery.');
+          setStage('error');
+          return;
+        }
         const image = await Camera.getPhoto({
           quality: 90,
           allowEditing: false,

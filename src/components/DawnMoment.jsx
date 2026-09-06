@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { springConfig } from './motion/MotionVariants';
 import { playTap } from '../lib/useSoundEffects';
+import { Icon } from './Icon';
 
 const STORAGE_KEY = 'habbit-dawn-moment-seen';
 
@@ -59,11 +60,14 @@ export function DawnMoment({ onDismiss }) {
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: -8, scale: 0.98 }}
         transition={springConfig.cinematic}
+        onClick={(e) => e.stopPropagation()}
       >
-        <span className="dawn-moment-mark" aria-hidden="true">✦</span>
-        <p>{flavorText}</p>
+        <div className="dawn-moment-icon-wrap">
+          <Icon name="compass" />
+        </div>
+        <p className="dawn-moment-text">{flavorText}</p>
         <button type="button" className="dawn-moment-continue" onClick={handleDismiss}>
-          Continue
+          Continue Journey
         </button>
       </motion.div>
     </motion.div>

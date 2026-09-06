@@ -11,6 +11,7 @@ describe('configuration security', () => {
       listenHost: '127.0.0.1',
       REQUEST_BODY_LIMIT: '10mb',
     }));
+    expect(config.corsOrigins).toContain('capacitor://localhost');
   });
 
   it('adds the Vite API origin to development CORS for local phone testing', () => {
