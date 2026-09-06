@@ -84,6 +84,7 @@ export function CaptureFlow({ onClose }) {
   const [previewUrl, setPreviewUrl] = useState('');
   const [notes, setNotes] = useState('');
   const [activeFilter, setActiveFilter] = useState('Auto');
+  const [torchOn, setTorchOn] = useState(false);
   const { videoRef, status: cameraStatus } = useCameraPreview(stage === 'prompt');
   const captureItem = useCaptureItem();
   const addCardToLibrary = useAddCardToLibrary();
@@ -97,9 +98,10 @@ export function CaptureFlow({ onClose }) {
   useEffect(() => {
     if (stage !== 'prompt') return undefined;
     const frame = window.requestAnimationFrame(() => {
-      filterChipRefs.current
-        .get(activeFilter)
-        ?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      const activeChip = filterChipRefs.current.get(activeFilter);
+      if (typeof activeChip?.scrollIntoView === 'function') {
+        activeChip.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      }
     });
     return () => window.cancelAnimationFrame(frame);
   }, [activeFilter, stage]);
@@ -109,6 +111,24 @@ export function CaptureFlow({ onClose }) {
     const next = CAPTURE_FILTERS[(currentIndex + 1) % CAPTURE_FILTERS.length];
     setActiveFilter(next.id);
     triggerHaptic([8]);
+  };
+
+  const toggleTorch = async () => {
+    playTap();
+    const track = videoRef.current?.srcObject?.getVideoTracks?.()[0];
+    const capabilities = track?.getCapabilities?.();
+    if (!track || !capabilities?.torch) {
+      window.dispatchEvent(new CustomEvent('habbit-notice', { detail: 'Torch is not available on this camera.' }));
+      return;
+    }
+    const next = !torchOn;
+    try {
+      await track.applyConstraints({ advanced: [{ torch: next }] });
+      setTorchOn(next);
+      triggerHaptic([8]);
+    } catch {
+      window.dispatchEvent(new CustomEvent('habbit-notice', { detail: 'Torch could not be changed on this device.' }));
+    }
   };
 
   const openLibrary = () => {
@@ -332,8 +352,26 @@ export function CaptureFlow({ onClose }) {
             </div>
 
             <div className="capture-social-rail" aria-label="Camera quick actions">
+              <button
+                type="button"
+                className={`capture-rail-btn ${torchOn ? 'active' : ''}`}
+                aria-label={torchOn ? 'Turn torch off' : 'Turn torch on'}
+                title={torchOn ? 'Torch off' : 'Torch on'}
+                onClick={toggleTorch}
+              >
+                <Icon name="bolt" />
+              </button>
               <button type="button" className="capture-rail-btn" aria-label="Next filter" title="Next filter" onClick={() => { playTap(); cycleFilter(); }}>
                 <Icon name="rotate" />
+              </button>
+              <button
+                type="button"
+                className="capture-rail-btn"
+                aria-label="Open your library"
+                title="Library"
+                onClick={openLibrary}
+              >
+                <Icon name="book" />
               </button>
             </div>
 
@@ -379,27 +417,6 @@ export function CaptureFlow({ onClose }) {
                   </button>
                 ))}
               </div>
-
-              <div className="capture-corner-controls">
-                <button
-                  type="button"
-                  className="capture-side-btn"
-                  aria-label="Close capture"
-                  onClick={() => { playTap(); onClose(); }}
-                >
-                  <Icon name="plus" />
-                </button>
-
-                <button
-                  type="button"
-                  className="capture-side-btn"
-                  aria-label="Open your library"
-                  onClick={openLibrary}
-                >
-                  <Icon name="book" />
-                </button>
-              </div>
-
             </div>
 
             <input

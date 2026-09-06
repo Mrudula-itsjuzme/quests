@@ -1,4 +1,7 @@
 import { randomUUID } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { progressionEngine } from './progression-engine.js';
 
 export class PostgresQuestRepository {
@@ -360,7 +363,8 @@ export class PostgresQuestRepository {
           card.status || 'final', card.gps?.lat ?? null, card.gps?.lng ?? null, card.gps?.accuracyM ?? null, card.gps?.altitude ?? null,
           card.heading ?? null, card.capturedAt || new Date(), card.serverReceivedAt || new Date(),
           card.antiCheatVerdict || null, card.antiCheatReason || null, JSON.stringify(card.antiCheatDetail || []), card.rejectReason || null,
-          card.speciesId || null, card.confidence ?? null, card.rarityGrade || null, card.rarityStars ?? null,
+          card.speciesId || null, card.confidence ?? null, card.rarityGrade || null,
+          card.rarityStars ?? Math.max(1, Math.round(Number(card.rarityScore || 0) * 5)),
           card.rarityWeightSetVersion ?? null, JSON.stringify(card.rarityFactorBreakdown || {}), card.xpAwarded || 0, card.coinsAwarded || 0,
         ],
       );
@@ -588,6 +592,11 @@ export class PostgresQuestRepository {
       // Sharing the same capture twice is a no-op that returns the original
       // post, so a double-tap on Share can't create duplicate feed entries.
       if (post.cardId) {
+        const shareable = await client.query(
+          "SELECT id FROM captured_cards WHERE id = $1 AND user_id = $2 AND status = 'final' AND COALESCE(rarity_stars, 0) > 1",
+          [post.cardId, post.userId],
+        );
+        if (!shareable.rows[0]) throw conflict('capture_not_shareable');
         const existing = await client.query('SELECT id FROM community_posts WHERE card_id = $1', [post.cardId]);
         if (existing.rows[0]) {
           await client.query('COMMIT');
@@ -614,7 +623,7 @@ export class PostgresQuestRepository {
     }
   }
 
-  async listCommunityPosts(viewerId, { scope = 'public', limit = 50 } = {}) {
+  async listCommunityPosts(viewerId, { scope = 'public', limit = 50, authorUserId = null } = {}) {
     const values = [viewerId, Math.min(Number(limit) || 50, 100)];
     const visibleClause = communityVisibleClause('$1');
     const scopeClause = scope === 'friends'
@@ -625,8 +634,11 @@ export class PostgresQuestRepository {
                OR (f.addressee_id = $1 AND f.requester_id = p.user_id))
          )`
       : "AND p.visibility = 'public'";
+    const authorClause = authorUserId ? 'AND p.user_id = $3' : '';
+    if (authorUserId) values.push(authorUserId);
     const { rows } = await this.pool.query(
-      `${COMMUNITY_POST_SELECT} WHERE ${visibleClause} ${scopeClause}
+      `${COMMUNITY_POST_SELECT} WHERE ${visibleClause} ${scopeClause} ${authorClause}
+         AND (p.card_id IS NULL OR COALESCE(c.rarity_stars, 0) > 1)
        ORDER BY p.created_at DESC LIMIT $2`,
       values,
     );
@@ -634,8 +646,47 @@ export class PostgresQuestRepository {
   }
 
   async getCommunityPost(viewerId, postId) {
-    const { rows } = await this.pool.query(`${COMMUNITY_POST_SELECT} WHERE p.id = $2 AND ${communityVisibleClause('$1')}`, [viewerId, postId]);
+    const { rows } = await this.pool.query(
+      `${COMMUNITY_POST_SELECT} WHERE p.id = $2 AND ${communityVisibleClause('$1')} AND (p.card_id IS NULL OR COALESCE(c.rarity_stars, 0) > 1)`,
+      [viewerId, postId],
+    );
     return rows[0] ? mapCommunityPost(rows[0]) : null;
+  }
+
+  async listCommunityStories(viewerId, { limit = 20 } = {}) {
+    const { rows } = await this.pool.query(
+      `${COMMUNITY_POST_SELECT}
+       WHERE ${communityVisibleClause('$1')}
+         AND p.created_at >= NOW() - INTERVAL '24 hours'
+         AND p.card_id IS NOT NULL
+         AND COALESCE(c.rarity_stars, 0) > 1
+       ORDER BY p.created_at DESC LIMIT $2`,
+      [viewerId, Math.min(Number(limit) || 20, 50)],
+    );
+    return rows.map((row) => {
+      const post = mapCommunityPost(row);
+      return {
+        id: post.id,
+        postId: post.id,
+        author: post.author,
+        discovery: post.discovery,
+        placeLabel: post.placeLabel,
+        createdAt: post.createdAt,
+        viewed: Boolean(row.story_viewed),
+      };
+    });
+  }
+
+  async markCommunityStoryViewed(viewerId, postId) {
+    const post = await this.getCommunityPost(viewerId, postId);
+    if (!post) return null;
+    await this.pool.query(
+      `INSERT INTO community_story_views (post_id, viewer_id, viewed_at)
+       VALUES ($1,$2,NOW())
+       ON CONFLICT (post_id, viewer_id) DO UPDATE SET viewed_at = EXCLUDED.viewed_at`,
+      [postId, viewerId],
+    );
+    return { postId, viewerId, viewed: true };
   }
   async getCommunityPostMedia(viewerId, postId) {
     const { rows } = await this.pool.query(
@@ -760,6 +811,198 @@ export class PostgresQuestRepository {
     }));
   }
 
+  async getCommunityProfile(viewerId, profileUserId) {
+    const [aggregate, recentPosts] = await Promise.all([
+      this.pool.query(
+        `SELECT u.id, u.display_name, u.total_xp, u.streak_days, u.primary_path,
+                COUNT(DISTINCT p.id) FILTER (WHERE p.id IS NOT NULL AND (p.card_id IS NULL OR COALESCE(c.rarity_stars, 0) > 1))::int AS post_count,
+                COUNT(DISTINCT followers.follower_id)::int AS follower_count,
+                COUNT(DISTINCT following.following_id)::int AS following_count,
+                COUNT(DISTINCT f.requester_id || ':' || f.addressee_id)::int AS friend_count,
+                EXISTS (SELECT 1 FROM community_follows vf WHERE vf.follower_id = $1 AND vf.following_id = u.id) AS viewer_following,
+                EXISTS (
+                  SELECT 1 FROM community_friendships vf
+                  WHERE vf.status = 'accepted'
+                    AND ((vf.requester_id = $1 AND vf.addressee_id = u.id)
+                      OR (vf.addressee_id = $1 AND vf.requester_id = u.id))
+                ) AS viewer_friend
+         FROM quest_users u
+         LEFT JOIN community_posts p ON p.user_id = u.id AND ${communityVisibleClause('$1')}
+         LEFT JOIN captured_cards c ON c.id = p.card_id
+         LEFT JOIN community_follows followers ON followers.following_id = u.id
+         LEFT JOIN community_follows following ON following.follower_id = u.id
+         LEFT JOIN community_friendships f ON f.status = 'accepted' AND (f.requester_id = u.id OR f.addressee_id = u.id)
+         WHERE u.id = $2
+         GROUP BY u.id`,
+        [viewerId, profileUserId],
+      ),
+      // The author's recent posts are independent of the aggregate above, so
+      // fetch them concurrently and only for this author instead of pulling
+      // the whole public feed and filtering.
+      this.listCommunityPosts(viewerId, { scope: 'public', limit: 9, authorUserId: profileUserId }),
+    ]);
+    if (!aggregate.rows[0]) return null;
+    return mapCommunityProfile(aggregate.rows[0], viewerId, recentPosts);
+  }
+
+  async setCommunityFollow(viewerId, profileUserId, following) {
+    if (viewerId === profileUserId) return null;
+    const exists = await this.pool.query('SELECT id FROM quest_users WHERE id = $1', [profileUserId]);
+    if (!exists.rows[0]) return null;
+    if (following) {
+      await this.pool.query(
+        'INSERT INTO community_follows (follower_id, following_id) VALUES ($1,$2) ON CONFLICT DO NOTHING',
+        [viewerId, profileUserId],
+      );
+    } else {
+      await this.pool.query('DELETE FROM community_follows WHERE follower_id = $1 AND following_id = $2', [viewerId, profileUserId]);
+    }
+    return this.getCommunityProfile(viewerId, profileUserId);
+  }
+
+  // Dev-only community seed (see api/server.js — invoked when NODE_ENV is
+  // development). Idempotent: users/cards/posts are inserted once with fixed
+  // ids, while friendships/likes/follows are ensured per viewer on every call.
+  async seedDemoSocial(viewerId) {
+    if (!viewerId) return;
+    const now = Date.now();
+    const hoursAgo = (hours) => new Date(now - hours * 3600_000).toISOString();
+    const postId = (cardId) => cardId.replace('20000000', '30000000');
+
+    const demoUsers = [
+      { id: '10000000-0000-4000-8000-000000000101', displayName: 'Mira Fern', totalXp: 2840, streakDays: 12, primaryPath: 'Discovery' },
+      { id: '10000000-0000-4000-8000-000000000102', displayName: 'Arjun Vale', totalXp: 760, streakDays: 4, primaryPath: 'Body' },
+      { id: '10000000-0000-4000-8000-000000000103', displayName: 'Nila Skies', totalXp: 5320, streakDays: 21, primaryPath: 'Discovery' },
+      { id: '10000000-0000-4000-8000-000000000104', displayName: 'Lyra Moonweaver', totalXp: 9840, streakDays: 34, primaryPath: 'Mind' },
+      { id: '10000000-0000-4000-8000-000000000105', displayName: 'Theron Ironheart', totalXp: 1640, streakDays: 9, primaryPath: 'Body' },
+      { id: '10000000-0000-4000-8000-000000000106', displayName: 'Aria Sunwalker', totalXp: 305, streakDays: 1, primaryPath: 'Mind' },
+    ];
+    // Card rows: species names/categories are copied from the catalog so the
+    // seed never depends on catalog ordering at runtime.
+    const demoCards = [
+      { id: '20000000-0000-4000-8000-000000000201', userId: demoUsers[0].id, speciesId: 'water-waterfall', itemName: 'Forest Waterfall', category: 'Landscape', cardTitle: 'Hidden Monsoon Falls', rarityTier: 'A', rarityStars: 4, description: 'A trail-side cascade running full after the rain.', gpsLat: 13.0356, gpsLng: 77.5913, caption: 'Mira found a waterfall trail after the rain cleared.', placeLabel: 'Hebbal morning loop', hashtags: ['#waterfall', '#afterrain'], hoursAgo: 6 },
+      { id: '20000000-0000-4000-8000-000000000202', userId: demoUsers[1].id, speciesId: 'sky-indian-roller', itemName: 'Indian Roller', category: 'Fauna', cardTitle: 'Blue Flash Over Lalbagh', rarityTier: 'B', rarityStars: 3, description: 'A roller perched on the old rain trees at dusk.', gpsLat: 12.9507, gpsLng: 77.5848, caption: 'Arjun caught the blue wing flash right before sunset.', placeLabel: 'Lalbagh Botanical Garden', hashtags: ['#birding', '#lalbagh'], hoursAgo: 9 },
+      { id: '20000000-0000-4000-8000-000000000203', userId: demoUsers[2].id, speciesId: 'fire-rainbow', itemName: 'Rainbow', category: 'Landscape', cardTitle: 'Double Rainbow Break', rarityTier: 'S', rarityStars: 5, description: 'Two full arcs over the valley after a squall.', gpsLat: 13.3702, gpsLng: 77.6835, caption: 'Nila found a rare sky card on the walk home.', placeLabel: 'Nandi Hills outlook', hashtags: ['#rare', '#skycard'], hoursAgo: 26 },
+      { id: '20000000-0000-4000-8000-000000000204', userId: demoUsers[0].id, speciesId: 'earth-domestic-cat', itemName: 'Domestic Cat', category: 'Fauna', cardTitle: 'Canteen Cat Watch', rarityTier: 'D', rarityStars: 2, description: 'A very serious snack inspector on the lane.', gpsLat: 12.9718, gpsLng: 77.6412, caption: 'Daily quest proof: a very serious snack inspector.', placeLabel: 'Neighborhood lane', hashtags: ['#dailyquest', '#citynature'], hoursAgo: 30 },
+      { id: '20000000-0000-4000-8000-000000000205', userId: demoUsers[3].id, speciesId: 'fire-sunrise', itemName: 'Sunrise', category: 'Landscape', cardTitle: 'First Light Over the Escarpment', rarityTier: 'A', rarityStars: 4, description: 'The cloud layer glowed gold for about five minutes.', gpsLat: 13.3702, gpsLng: 77.6835, caption: 'Worth the 4 a.m. alarm — every time.', placeLabel: 'Nandi Hills summit', hashtags: ['#sunrise', '#goldenhour'], hoursAgo: 3 },
+      { id: '20000000-0000-4000-8000-000000000206', userId: demoUsers[4].id, speciesId: 'sky-kingfisher', itemName: 'Common Kingfisher', category: 'Fauna', cardTitle: 'Kingfisher on the Reeds', rarityTier: 'C', rarityStars: 2, description: 'Waited forty minutes; it posed for three seconds.', gpsLat: 13.0033, gpsLng: 77.5806, caption: 'Forty patient minutes for one perfect frame.', placeLabel: 'Sankey Tank', hashtags: ['#birding', '#patience'], hoursAgo: 12 },
+      { id: '20000000-0000-4000-8000-000000000207', userId: demoUsers[3].id, speciesId: 'water-lake', itemName: 'Still Lake', category: 'Landscape', cardTitle: 'Mirror at Ulsoor', rarityTier: 'B', rarityStars: 3, description: 'Glass-calm water doubled the evening sky.', gpsLat: 12.9833, gpsLng: 77.6157, caption: 'The lake doubled the sky tonight.', placeLabel: 'Ulsoor Lake', hashtags: ['#lake', '#evening'], hoursAgo: 22 },
+      { id: '20000000-0000-4000-8000-000000000208', userId: demoUsers[5].id, speciesId: 'grass-fern', itemName: 'Fiddlehead Fern', category: 'Flora', cardTitle: 'Unfurling Fern', rarityTier: 'C', rarityStars: 2, description: 'A young frond unfurling in the understory.', gpsLat: 12.9763, gpsLng: 77.5924, caption: 'My first fern find — tiny and perfect.', placeLabel: 'Cubbon Park', hashtags: ['#plants', '#firstfind'], hoursAgo: 7 },
+    ];
+
+    const seeded = await this.pool.query('SELECT 1 FROM quest_users WHERE id = $1 LIMIT 1', [demoUsers[0].id]);
+    if (seeded.rowCount === 0) {
+      const client = await this.pool.connect();
+      try {
+        await client.query('BEGIN');
+        for (const user of demoUsers) {
+          await client.query(
+            `INSERT INTO quest_users (id, display_name, timezone, total_xp, streak_days, last_streak_period, primary_path, onboarding_completed_at)
+             VALUES ($1,$2,'Asia/Kolkata',$3,$4,to_char(NOW() - INTERVAL '1 day', 'YYYY-MM-DD'),$5,NOW() - INTERVAL '30 days')
+             ON CONFLICT (id) DO NOTHING`,
+            [user.id, user.displayName, user.totalXp, user.streakDays, user.primaryPath],
+          );
+        }
+        const mediaData = demoCaptureMediaData();
+        for (const card of demoCards) {
+          await client.query(
+            `INSERT INTO captured_cards
+              (id, user_id, item_name, category, card_title, rarity_tier, rarity_score, description, status,
+               species_id, rarity_stars, rarity_grade, gps_lat, gps_lng, captured_at, server_received_at,
+               anti_cheat_verdict, anti_cheat_detail, image_hash, rarity_weight_set_version, rarity_factor_breakdown)
+             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'final',$9,$10,$11,$12,$13,$14,$14,'demo_seed','[]','demo-seed',1,'{}')
+             ON CONFLICT (id) DO NOTHING`,
+            [card.id, card.userId, card.itemName, card.category, card.cardTitle, card.rarityTier,
+              (card.rarityStars / 5).toFixed(4), card.description, card.speciesId, card.rarityStars, card.rarityTier,
+              card.gpsLat, card.gpsLng, hoursAgo(card.hoursAgo)],
+          );
+          await client.query(
+            `INSERT INTO capture_media (card_id, user_id, content_type, media_data, public_safe)
+             VALUES ($1,$2,'image/png',$3,TRUE)
+             ON CONFLICT (card_id) DO NOTHING`,
+            [card.id, card.userId, mediaData],
+          );
+          await client.query(
+            `INSERT INTO community_posts (id, user_id, card_id, caption, hashtags, place_label, gps_lat, gps_lng, visibility)
+             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'public')
+             ON CONFLICT (id) DO NOTHING`,
+            [card.id.replace('20000000', '30000000'), card.userId, card.id, card.caption, JSON.stringify(card.hashtags),
+              card.placeLabel, card.gpsLat, card.gpsLng],
+          );
+        }
+        const likes = [
+          { post: postId(demoCards[0].id), user: demoUsers[1].id },
+          { post: postId(demoCards[2].id), user: demoUsers[0].id },
+          { post: postId(demoCards[2].id), user: demoUsers[1].id },
+          { post: postId(demoCards[2].id), user: demoUsers[4].id },
+          { post: postId(demoCards[4].id), user: demoUsers[5].id },
+          { post: postId(demoCards[5].id), user: demoUsers[3].id },
+          { post: postId(demoCards[6].id), user: demoUsers[0].id },
+          { post: postId(demoCards[7].id), user: demoUsers[4].id },
+        ];
+        for (const like of likes) {
+          await client.query(
+            'INSERT INTO community_post_likes (post_id, user_id) VALUES ($1,$2) ON CONFLICT DO NOTHING',
+            [like.post, like.user],
+          );
+        }
+        const comments = [
+          { post: postId(demoCards[0].id), user: demoUsers[2].id, body: 'This trail deserves a spot on the map.', hoursAgo: 5.5 },
+          { post: postId(demoCards[1].id), user: demoUsers[0].id, body: 'Adding this to tomorrow morning route.', hoursAgo: 8.5 },
+          { post: postId(demoCards[2].id), user: demoUsers[1].id, body: 'S rank deserved!', hoursAgo: 25 },
+          { post: postId(demoCards[4].id), user: demoUsers[2].id, body: 'The colours in this are unreal.', hoursAgo: 2.5 },
+          { post: postId(demoCards[6].id), user: demoUsers[4].id, body: 'Great mirror shot.', hoursAgo: 21 },
+        ];
+        for (const comment of comments) {
+          await client.query(
+            `INSERT INTO community_post_comments (id, post_id, user_id, body, created_at)
+             VALUES (gen_random_uuid(), $1, $2, $3, $4) ON CONFLICT DO NOTHING`,
+            [comment.post, comment.user, comment.body, hoursAgo(comment.hoursAgo)],
+          );
+        }
+        // Demo users follow one another so profiles have real follower counts.
+        const follows = [
+          [demoUsers[2].id, demoUsers[3].id],
+          [demoUsers[3].id, demoUsers[2].id],
+          [demoUsers[0].id, demoUsers[3].id],
+          [demoUsers[4].id, demoUsers[0].id],
+          [demoUsers[5].id, demoUsers[3].id],
+        ];
+        for (const [followerId, followingId] of follows) {
+          await client.query(
+            'INSERT INTO community_follows (follower_id, following_id) VALUES ($1,$2) ON CONFLICT DO NOTHING',
+            [followerId, followingId],
+          );
+        }
+        await client.query('COMMIT');
+      } catch (error) {
+        await client.query('ROLLBACK');
+        throw error;
+      } finally {
+        client.release();
+      }
+    }
+
+    // Per-viewer wiring: friendships and a light touch of likes/follows so a
+    // brand-new dev account sees a populated friends list and community.
+    for (const user of demoUsers) {
+      await this.pool.query(
+        `INSERT INTO community_friendships (requester_id, addressee_id, status)
+         VALUES ($1,$2,'accepted') ON CONFLICT DO NOTHING`,
+        [user.id, viewerId],
+      );
+    }
+    const viewerLiked = [postId(demoCards[2].id), postId(demoCards[5].id)];
+    for (const post of viewerLiked) {
+      await this.pool.query('INSERT INTO community_post_likes (post_id, user_id) VALUES ($1,$2) ON CONFLICT DO NOTHING', [post, viewerId]);
+    }
+    for (const followingId of [demoUsers[0].id, demoUsers[3].id]) {
+      if (followingId !== viewerId) {
+        await this.pool.query('INSERT INTO community_follows (follower_id, following_id) VALUES ($1,$2) ON CONFLICT DO NOTHING', [viewerId, followingId]);
+      }
+    }
+  }
+
   async getCoinBalance(userId) {
     const { rows } = await this.pool.query('SELECT COALESCE(SUM(amount), 0)::int AS balance FROM coin_ledger WHERE user_id = $1', [userId]);
     return rows[0].balance;
@@ -862,7 +1105,8 @@ const COMMUNITY_POST_SELECT = `
          u.display_name, u.total_xp,
          c.item_name, c.card_title, c.rarity_tier, c.rarity_grade, c.rarity_stars,
          c.species_id, c.image_ref, c.captured_at,
-         EXISTS (SELECT 1 FROM community_post_likes l WHERE l.post_id = p.id AND l.user_id = $1) AS viewer_liked
+         EXISTS (SELECT 1 FROM community_post_likes l WHERE l.post_id = p.id AND l.user_id = $1) AS viewer_liked,
+         EXISTS (SELECT 1 FROM community_story_views sv WHERE sv.post_id = p.id AND sv.viewer_id = $1) AS story_viewed
   FROM community_posts p
   JOIN quest_users u ON u.id = p.user_id
   LEFT JOIN captured_cards c ON c.id = p.card_id`;
@@ -933,6 +1177,30 @@ function mapCommunityComment(row) {
 }
 function mapCommunityReport(row) { return { id: row.id, postId: row.post_id, userId: row.user_id, reason: row.reason, details: row.details || '', status: row.status, createdAt: row.created_at }; }
 function mapAccountDeletionRequest(row) { return { id: row.id, userId: row.user_id, reason: row.reason, status: row.status, requestedAt: row.requested_at, retentionUntil: row.retention_until }; }
+
+function mapCommunityProfile(row, viewerId, recentPosts = []) {
+  const totalXp = Number(row.total_xp);
+  return {
+    userId: row.id,
+    displayName: row.display_name,
+    totalXp,
+    streakDays: Number(row.streak_days),
+    rankTitle: progressionEngine.rankTitleForXp(totalXp),
+    primaryPath: row.primary_path ?? null,
+    stats: {
+      posts: Number(row.post_count || 0),
+      followers: Number(row.follower_count || 0),
+      following: Number(row.following_count || 0),
+      friends: Number(row.friend_count || 0),
+    },
+    viewer: {
+      isSelf: row.id === viewerId,
+      isFollowing: Boolean(row.viewer_following),
+      isFriend: Boolean(row.viewer_friend),
+    },
+    recentPosts,
+  };
+}
 
 function mapUser(row) { return { id: row.id, displayName: row.display_name, timezone: row.timezone, totalXp: Number(row.total_xp), streakDays: Number(row.streak_days), lastStreakPeriod: row.last_streak_period, primaryPath: row.primary_path ?? null, reminderTime: row.reminder_time ? String(row.reminder_time).slice(0, 5) : null, motionPreference: row.motion_preference || 'system', onboardingCompletedAt: row.onboarding_completed_at ?? null, tourVersionSeen: Number(row.tour_version_seen || 0) }; }
 function mapDefinition(row) { return { id: row.id, title: row.title, description: row.description, category: row.category, rarity: row.rarity, cadence: row.cadence, verificationType: row.verification_type, subjectTag: row.subject_tag, targetValue: Number(row.target_value), unit: row.unit, cooldownDays: Number(row.cooldown_days), xpReward: Number(row.xp_reward), enabled: row.enabled, instructions: row.instructions || [] }; }
@@ -1018,3 +1286,12 @@ function hashSimilarity(left, right) {
   return equal / a.length;
 }
 function bitCount(value) { let bits = value; let count = 0; while (bits) { count += bits & 1; bits >>>= 1; } return count; }
+
+let _demoMediaData;
+function demoCaptureMediaData() {
+  if (!_demoMediaData) {
+    const iconPath = resolve(dirname(fileURLToPath(import.meta.url)), '../../public/icon-192.png');
+    _demoMediaData = `data:image/png;base64,${readFileSync(iconPath).toString('base64')}`;
+  }
+  return _demoMediaData;
+}

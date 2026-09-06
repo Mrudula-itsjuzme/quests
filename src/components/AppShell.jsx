@@ -17,7 +17,12 @@ import { DesktopSidebar } from './DesktopSidebar';
 const THEME_KEY = 'wild-realm-theme';
 
 function readThemePreference() {
-  return 'dark';
+  try {
+    const stored = localStorage.getItem(THEME_KEY);
+    return ['light', 'dark', 'system'].includes(stored) ? stored : 'light';
+  } catch {
+    return 'light';
+  }
 }
 
 // Capture is the core verb of the product, so the shell owns the flow: the
@@ -56,7 +61,7 @@ export function AppShell() {
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const [levelUp, setLevelUp] = useState(null);
   const [captureOpen, setCaptureOpen] = useState(false);
-  const [themeMode] = useState(readThemePreference);
+  const [themeMode, setThemeMode] = useState(readThemePreference);
 
   const isWorldRoute = location.pathname === '/app';
 
@@ -282,6 +287,8 @@ export function AppShell() {
         {settingsOpen && (
           <SettingsModal
             user={me}
+            themeMode={themeMode}
+            onThemeChange={setThemeMode}
             onClose={() => setSettingsOpen(false)}
             onLogout={() => {
               setSettingsOpen(false);

@@ -92,6 +92,47 @@ export function useCommunityPosts(scope = 'public') {
   });
 }
 
+export function useCommunityStories() {
+  const api = useApiClient();
+  return useQuery({
+    queryKey: ['community', 'stories'],
+    queryFn: ({ signal }) => api.getCommunityStories(signal),
+  });
+}
+
+export function useMarkCommunityStoryViewed() {
+  const api = useApiClient();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (postId) => api.markCommunityStoryViewed(postId),
+    onSuccess: ({ postId }) => {
+      queryClient.setQueryData(['community', 'stories'], (previous) =>
+        Array.isArray(previous) ? previous.map((story) => (story.postId === postId ? { ...story, viewed: true } : story)) : previous);
+    },
+  });
+}
+
+export function useCommunityProfile(userId) {
+  const api = useApiClient();
+  return useQuery({
+    queryKey: ['community', 'profile', userId],
+    queryFn: ({ signal }) => api.getCommunityProfile(userId, signal),
+    enabled: Boolean(userId),
+  });
+}
+
+export function useSetCommunityFollow() {
+  const api = useApiClient();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId, following }) => api.setCommunityFollow(userId, following),
+    onSuccess: (profile) => {
+      queryClient.setQueryData(['community', 'profile', profile.userId], profile);
+      queryClient.invalidateQueries({ queryKey: ['community', 'stories'] });
+    },
+  });
+}
+
 export function useFriends() {
   const api = useApiClient();
   return useQuery({ queryKey: ['community', 'friends'], queryFn: ({ signal }) => api.getFriends(signal) });
@@ -113,6 +154,7 @@ export function useShareDiscovery() {
     mutationFn: (payload) => api.createCommunityPost(payload, newIdempotencyKey()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['community', 'posts'] });
+      queryClient.invalidateQueries({ queryKey: ['community', 'stories'] });
       queryClient.invalidateQueries({ queryKey: ['captures'] });
       queryClient.invalidateQueries({ queryKey: ['world', 'hotspots'] });
     },
@@ -154,17 +196,17 @@ export function useReportCommunityPost() {
 
 export function useFeed() {
   const api = useApiClient();
-  return useQuery({ queryKey: ['feed'], queryFn: ({ signal }) => api.getFeed(signal) });
+  return useQuery({ queryKey: ['feed'], queryFn: ({ signal }) => api.getFeed(signal), staleTime: 30 * 1000 });
 }
 
 export function useLeaderboard() {
   const api = useApiClient();
-  return useQuery({ queryKey: ['leaderboard'], queryFn: ({ signal }) => api.getLeaderboard(signal) });
+  return useQuery({ queryKey: ['leaderboard'], queryFn: ({ signal }) => api.getLeaderboard(signal), staleTime: 30 * 1000 });
 }
 
 export function useRewards() {
   const api = useApiClient();
-  return useQuery({ queryKey: ['rewards'], queryFn: ({ signal }) => api.getRewards(signal) });
+  return useQuery({ queryKey: ['rewards'], queryFn: ({ signal }) => api.getRewards(signal), staleTime: 30 * 1000 });
 }
 
 export function useClaimRewards() {
@@ -182,7 +224,7 @@ export function useClaimRewards() {
 
 export function useNotifications() {
   const api = useApiClient();
-  return useQuery({ queryKey: ['notifications'], queryFn: ({ signal }) => api.getNotifications(signal) });
+  return useQuery({ queryKey: ['notifications'], queryFn: ({ signal }) => api.getNotifications(signal), staleTime: 30 * 1000 });
 }
 
 export function useMarkNotificationRead() {

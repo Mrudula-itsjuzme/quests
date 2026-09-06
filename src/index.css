@@ -9951,9 +9951,10 @@ span.post-author-avatar {
   aspect-ratio: 2 / 1;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 14px;
+  /* The glow follows the discoveries (--map-glow-* is set by CommunityMap) so
+     the wash sits behind the data instead of at a hard-coded map spot. */
   background:
-    radial-gradient(circle at 30% 40%, rgba(34, 197, 94, 0.12), transparent 55%),
-    radial-gradient(circle at 70% 60%, rgba(14, 165, 233, 0.1), transparent 55%),
+    radial-gradient(circle at var(--map-glow-x, 30%) var(--map-glow-y, 40%), rgba(34, 197, 94, 0.12), transparent 55%),
     linear-gradient(180deg, #08120d, #050807);
   overflow: hidden;
 }

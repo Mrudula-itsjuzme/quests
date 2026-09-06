@@ -259,6 +259,7 @@ export function WorldScreen() {
                 type="button"
                 key={place.id}
                 className={`explore-hotspot-card ${place.element ? `element-${place.element.toLowerCase()}` : `category-${place.category.toLowerCase()}`}`}
+                style={{ '--hotspot-image': `url(${place.imageRef || imageForHotspot(place)})` }}
                 whileHover={{ scale: 1.04, y: -4 }}
                 whileTap={{ scale: 0.96 }}
                 onClick={() => { playTap(); setSelectedHotspot(place); }}
@@ -356,4 +357,12 @@ export function WorldScreen() {
       </AnimatePresence>
     </motion.div>
   );
+}
+
+function imageForHotspot(place) {
+  const text = `${place?.category || ''} ${place?.title || ''}`.toLowerCase();
+  if (/bird|lake|hebbal/.test(text)) return '/assets/blue-billed-cuckoo.png';
+  if (/water|falls|jog|shivana|athirap/.test(text)) return '/assets/verdant-explorer-banner.png';
+  if (/park|cubbon|lalbagh|flower/.test(text)) return '/assets/verdant-explorer-banner.png';
+  return '/assets/quest-compass-poster.png';
 }

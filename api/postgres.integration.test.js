@@ -256,7 +256,7 @@ suite('PostgreSQL quest repository', () => {
       await repository.ensureUser(identity);
       const card = await repository.createCapturedCard({
         userId: identity.id, itemName: 'Common Myna', category: 'Fauna', cardTitle: 'Common Myna',
-        rarityTier: 'D', rarityScore: 0.1, description: '', status: 'final',
+        rarityTier: 'D', rarityScore: 0.6, rarityStars: 3, description: '', status: 'final',
       });
       const first = await repository.createCommunityPost({ userId: identity.id, cardId: card.id });
       const second = await repository.createCommunityPost({ userId: identity.id, cardId: card.id });
@@ -292,7 +292,7 @@ suite('PostgreSQL quest repository', () => {
       const { post } = await repository.createCommunityPost({ userId: identity.id, cardId: card.id });
       await repository.createCommunityComment(identity.id, post.id, 'Great find.');
 
-      expect(await repository.listCommunityComments(post.id)).toHaveLength(1);
+      expect(await repository.listCommunityComments(identity.id, post.id)).toHaveLength(1);
       expect((await repository.getCommunityPost(identity.id, post.id)).commentCount).toBe(1);
     });
 
@@ -300,7 +300,7 @@ suite('PostgreSQL quest repository', () => {
       await repository.ensureUser(identity);
       const card = await repository.createCapturedCard({
         userId: identity.id, itemName: 'Palm Squirrel', category: 'Fauna', cardTitle: 'Palm Squirrel',
-        rarityTier: 'D', rarityScore: 0.1, description: '', status: 'final',
+        rarityTier: 'D', rarityScore: 0.6, rarityStars: 3, description: '', status: 'final',
       });
       const { post } = await repository.createCommunityPost({ userId: identity.id, cardId: card.id });
 
@@ -315,7 +315,7 @@ suite('PostgreSQL quest repository', () => {
       await repository.ensureUser(identity);
       const card = await repository.createCapturedCard({
         userId: identity.id, itemName: 'Palm Squirrel', category: 'Fauna', cardTitle: 'Palm Squirrel',
-        rarityTier: 'D', rarityScore: 0.1, description: '', status: 'final',
+        rarityTier: 'D', rarityScore: 0.6, rarityStars: 3, description: '', status: 'final',
       });
       const { post } = await repository.createCommunityPost({ userId: identity.id, cardId: card.id });
 
@@ -339,6 +339,31 @@ suite('PostgreSQL quest repository', () => {
       expect(second.id).toBe(first.id);
       const user = await pool.query('SELECT account_status FROM quest_users WHERE id = $1', [identity.id]);
       expect(user.rows[0].account_status).toBe('deletion_requested');
+    });
+  });
+
+  describe('demo community seed', () => {
+    it('seeds six demo users with shareable posts and is idempotent', async () => {
+      await repository.ensureUser(identity);
+      await repository.seedDemoSocial(identity.id);
+
+      const friends = await repository.listFriends(identity.id);
+      expect(friends).toHaveLength(6);
+
+      const posts = await repository.listCommunityPosts(identity.id);
+      expect(posts.length).toBeGreaterThanOrEqual(8);
+      expect(posts.every((post) => Number(post.discovery.rarityStars) > 1)).toBe(true);
+
+      const authorProfile = await repository.getCommunityProfile(identity.id, '10000000-0000-4000-8000-000000000104');
+      expect(authorProfile).not.toBeNull();
+      expect(authorProfile.stats.posts).toBe(2);
+      expect(authorProfile.viewer.isFriend).toBe(true);
+
+      // A second call must not duplicate users, posts, or friendships.
+      await repository.seedDemoSocial(identity.id);
+      expect(await repository.listFriends(identity.id)).toHaveLength(6);
+      expect((await pool.query('SELECT COUNT(*)::int AS count FROM quest_users WHERE id LIKE \'10000000-%\'')).rows[0].count).toBe(6);
+      expect((await pool.query('SELECT COUNT(*)::int AS count FROM community_posts')).rows[0].count).toBe(8);
     });
   });
 });

@@ -1,6 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useNavigate } from 'react-router-dom';
 import { CaptureImage } from '../../components/CaptureImage';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Icon } from '../../components/Icon';
@@ -8,7 +7,11 @@ import {
   useAddCommunityComment,
   useCommunityComments,
   useCommunityPosts,
+  useCommunityProfile,
+  useCommunityStories,
   useFriends,
+  useMarkCommunityStoryViewed,
+  useSetCommunityFollow,
   useToggleCommunityLike,
   useReportCommunityPost,
 } from '../quests/queries';
@@ -117,13 +120,13 @@ export function GuildPage() {
 }
 
 function CommunityFeed({ onShare }) {
-  const navigate = useNavigate();
   const { data: posts, isLoading, isError, refetch } = useCommunityPosts('public');
   const toggleLike = useToggleCommunityLike();
   const reportPost = useReportCommunityPost();
   const [openComments, setOpenComments] = useState(null);
   const [reportTarget, setReportTarget] = useState(null);
   const [reportedPostIds, setReportedPostIds] = useState([]);
+  const [profileUserId, setProfileUserId] = useState(null);
 
   if (isLoading) {
     return (
@@ -170,6 +173,8 @@ function CommunityFeed({ onShare }) {
 
   return (
     <div className="community-feed-stream">
+      <CommunityStories onOpenProfile={setProfileUserId} />
+
       {posts.map((post) => (
         <article key={post.id} className="community-post-card">
           <div className="post-header-row">
@@ -178,14 +183,18 @@ function CommunityFeed({ onShare }) {
                 type="button"
                 className="post-author-avatar post-author-profile-btn"
                 aria-label={`Open ${post.author.displayName}'s profile`}
-                onClick={() => { playTap(); navigate('/app/profile'); }}
+                onClick={() => { playTap(); setProfileUserId(post.author.userId); }}
               >
                 {initials(post.author.displayName)}
               </button>
-              <div>
+              <button
+                type="button"
+                className="post-author-name-btn"
+                onClick={() => { playTap(); setProfileUserId(post.author.userId); }}
+              >
                 <h4>{post.author.displayName}</h4>
                 <small>{timeAgo(post.createdAt)}</small>
-              </div>
+              </button>
             </div>
             <span className="post-rank-badge">{post.author.rankTitle}</span>
           </div>
@@ -273,6 +282,12 @@ function CommunityFeed({ onShare }) {
       ))}
 
       <AnimatePresence>
+        {profileUserId && (
+          <CommunityProfileSheet userId={profileUserId} onClose={() => setProfileUserId(null)} />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
         {reportTarget && (
           <ReportReasonSheet
             post={reportTarget}
@@ -293,6 +308,255 @@ function CommunityFeed({ onShare }) {
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+function CommunityStories({ onOpenProfile }) {
+  const { data: stories, isLoading, isError } = useCommunityStories();
+  const markViewed = useMarkCommunityStoryViewed();
+  const [activeStoryIndex, setActiveStoryIndex] = useState(null);
+  const visibleStories = (stories || []).slice(0, 12);
+
+  if (isLoading) {
+    return (
+      <div className="community-stories-rail" aria-busy="true">
+        {[0, 1, 2, 3].map((item) => <span key={item} className="community-story-skeleton" />)}
+      </div>
+    );
+  }
+
+  if (isError || visibleStories.length === 0) return null;
+
+  return (
+    <>
+      <div className="community-stories-rail" aria-label="Recent community stories">
+        {visibleStories.map((story, index) => (
+          <button
+            key={story.id}
+            type="button"
+            className={`community-story-card ${story.viewed ? 'viewed' : ''}`}
+            onClick={() => {
+              playTap();
+              setActiveStoryIndex(index);
+              markViewed.mutate(story.postId);
+            }}
+          >
+            <span className="community-story-ring">
+              <CaptureImage
+                imageRef={story.discovery?.imageRef}
+                alt={story.discovery?.itemName || story.author.displayName}
+                element={story.discovery?.element}
+                className="community-story-photo"
+                useAuth={story.discovery?.imageRef?.includes('/captures/')}
+              />
+            </span>
+            <span>{story.author.displayName.split(/\s+/)[0]}</span>
+          </button>
+        ))}
+      </div>
+
+      <AnimatePresence>
+        {activeStoryIndex !== null && visibleStories[activeStoryIndex] && (
+          <StoryViewerSheet
+            stories={visibleStories}
+            activeIndex={activeStoryIndex}
+            onNavigate={(nextIndex) => {
+              const nextStory = visibleStories[nextIndex];
+              if (!nextStory) return;
+              playTap();
+              setActiveStoryIndex(nextIndex);
+              markViewed.mutate(nextStory.postId);
+            }}
+            onClose={() => setActiveStoryIndex(null)}
+            onOpenProfile={(userId) => {
+              setActiveStoryIndex(null);
+              onOpenProfile(userId);
+            }}
+          />
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
+
+function StoryViewerSheet({ stories, activeIndex, onNavigate, onClose, onOpenProfile }) {
+  const story = stories[activeIndex];
+  const pointerStart = useRef(null);
+  const goPrevious = () => activeIndex > 0 && onNavigate(activeIndex - 1);
+  const goNext = () => {
+    if (activeIndex < stories.length - 1) onNavigate(activeIndex + 1);
+    else onClose();
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'ArrowLeft') goPrevious();
+      if (event.key === 'ArrowRight') goNext();
+      if (event.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  });
+
+  return createPortal(
+    <motion.div
+      className="community-story-backdrop"
+      role="presentation"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={onClose}
+    >
+      <motion.section
+        className="community-story-viewer"
+        role="dialog"
+        aria-modal="true"
+        aria-label={`${story.author.displayName}'s story`}
+        initial={{ y: 20, opacity: 0, scale: 0.98 }}
+        animate={{ y: 0, opacity: 1, scale: 1 }}
+        exit={{ y: 20, opacity: 0, scale: 0.98 }}
+        transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+        onClick={(event) => event.stopPropagation()}
+        onPointerDown={(event) => { pointerStart.current = event.clientX; }}
+        onPointerUp={(event) => {
+          if (pointerStart.current === null) return;
+          const distance = event.clientX - pointerStart.current;
+          pointerStart.current = null;
+          if (Math.abs(distance) < 48) return;
+          if (distance < 0) goNext();
+          else goPrevious();
+        }}
+      >
+        <div
+          className="community-story-progress"
+          aria-label={`Story ${activeIndex + 1} of ${stories.length}`}
+          style={{ '--story-count': stories.length }}
+        >
+          {stories.map((item, index) => (
+            <span key={item.id} className={index <= activeIndex ? 'complete' : ''} />
+          ))}
+        </div>
+        <div className="community-story-view-head">
+          <button type="button" className="post-author-avatar" onClick={() => { playTap(); onOpenProfile(story.author.userId); }}>
+            {initials(story.author.displayName)}
+          </button>
+          <div>
+            <strong>{story.author.displayName}</strong>
+            <span>{timeAgo(story.createdAt)}</span>
+          </div>
+          <button type="button" aria-label="Close story" onClick={onClose}>×</button>
+        </div>
+        <CaptureImage
+          imageRef={story.discovery?.imageRef}
+          alt={story.discovery?.itemName || 'Community story'}
+          element={story.discovery?.element}
+          className="community-story-view-photo"
+          useAuth={story.discovery?.imageRef?.includes('/captures/')}
+        />
+        <button
+          type="button"
+          className="community-story-nav community-story-nav-previous"
+          aria-label="Previous story"
+          onClick={goPrevious}
+          disabled={activeIndex === 0}
+        />
+        <button
+          type="button"
+          className="community-story-nav community-story-nav-next"
+          aria-label={activeIndex === stories.length - 1 ? 'Close stories' : 'Next story'}
+          onClick={goNext}
+        />
+        <div className="community-story-view-copy">
+          <span>{story.discovery?.rarityStars || 0}★</span>
+          <h3>{story.discovery?.cardTitle || story.discovery?.itemName || 'Discovery'}</h3>
+          {story.placeLabel && <p>{story.placeLabel}</p>}
+        </div>
+      </motion.section>
+    </motion.div>,
+    document.body,
+  );
+}
+
+function CommunityProfileSheet({ userId, onClose }) {
+  const { data: profile, isLoading, isError } = useCommunityProfile(userId);
+  const followMutation = useSetCommunityFollow();
+
+  return createPortal(
+    <motion.div
+      className="community-profile-backdrop"
+      role="presentation"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={onClose}
+    >
+      <motion.section
+        className="community-profile-sheet"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="community-profile-title"
+        initial={{ y: 36, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: 36, opacity: 0 }}
+        transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button type="button" className="community-profile-close" aria-label="Close profile" onClick={onClose}>×</button>
+        {isLoading && <div className="community-profile-state" role="status">Loading profile…</div>}
+        {isError && <div className="community-profile-state" role="alert">Profile could not be loaded.</div>}
+        {profile && (
+          <>
+            <header className="community-profile-head">
+              <span className="post-author-avatar" aria-hidden="true">{initials(profile.displayName)}</span>
+              <div>
+                <h2 id="community-profile-title">{profile.displayName}</h2>
+                <p>{profile.rankTitle}</p>
+              </div>
+              {!profile.viewer?.isSelf && (
+                <button
+                  type="button"
+                  className={`community-follow-btn ${profile.viewer?.isFollowing ? 'following' : ''}`}
+                  disabled={followMutation.isPending}
+                  onClick={() => {
+                    playTap();
+                    followMutation.mutate({ userId: profile.userId, following: !profile.viewer?.isFollowing });
+                  }}
+                >
+                  {profile.viewer?.isFollowing ? 'Following' : 'Follow'}
+                </button>
+              )}
+            </header>
+            <div className="community-profile-stats" aria-label="Profile stats">
+              <span><strong>{profile.stats.posts}</strong>Posts</span>
+              <span><strong>{profile.stats.followers}</strong>Followers</span>
+              <span><strong>{profile.stats.following}</strong>Following</span>
+            </div>
+            <div className="community-profile-meta">
+              <span>{Number(profile.totalXp || 0).toLocaleString()} XP</span>
+              <span>{Number(profile.streakDays || 0)} day streak</span>
+              {profile.viewer?.isFriend && <span>Friend</span>}
+            </div>
+            <div className="community-profile-grid" aria-label={`${profile.displayName}'s recent posts`}>
+              {profile.recentPosts?.length ? profile.recentPosts.map((post) => (
+                <div key={post.id} className="community-profile-grid-item">
+                  <CaptureImage
+                    imageRef={post.discovery?.imageRef}
+                    alt={post.discovery?.itemName || 'Discovery'}
+                    element={post.discovery?.element}
+                    className="community-profile-grid-photo"
+                    useAuth={post.discovery?.imageRef?.includes('/captures/')}
+                  />
+                  <span>{post.discovery?.rarityStars || 0}★</span>
+                </div>
+              )) : (
+                <p>No public discoveries yet.</p>
+              )}
+            </div>
+          </>
+        )}
+      </motion.section>
+    </motion.div>,
+    document.body,
   );
 }
 
@@ -571,23 +835,52 @@ function CommunityMap() {
     );
   }
 
+  const positioned = useMemo(() => {
+    // Fit the map to the discoveries instead of a whole-world projection: at
+    // world scale an entire metro collapses into a single pixel, so every
+    // Bengaluru capture renders as one glowing dot. Equal padding on each side
+    // keeps a lone marker centred and stops edge points touching the frame.
+    const lats = located.map((post) => post.gps.lat);
+    const lngs = located.map((post) => post.gps.lng);
+    let minLat = Math.min(...lats);
+    let maxLat = Math.max(...lats);
+    let minLng = Math.min(...lngs);
+    let maxLng = Math.max(...lngs);
+    const padLat = Math.max((maxLat - minLat) * 0.22, 0.02);
+    const padLng = Math.max((maxLng - minLng) * 0.22, 0.02);
+    minLat -= padLat;
+    maxLat += padLat;
+    minLng -= padLng;
+    maxLng += padLng;
+    const spanLat = Math.max(maxLat - minLat, 1e-9);
+    const spanLng = Math.max(maxLng - minLng, 1e-9);
+    return {
+      glowX: (((minLng + maxLng) / 2 - minLng) / spanLng) * 100,
+      glowY: ((maxLat - (minLat + maxLat) / 2) / spanLat) * 100,
+      markers: located.map((post) => ({
+        post,
+        left: ((post.gps.lng - minLng) / spanLng) * 100,
+        top: ((maxLat - post.gps.lat) / spanLat) * 100,
+      })),
+    };
+  }, [located]);
+
   return (
     <div className="community-map-panel">
-      <div className="community-map-canvas" role="img" aria-label={`${located.length} shared discoveries with locations`}>
-        {located.map((post) => {
-          // Normalised world coordinates — the community view plots relative
-          // positions rather than embedding a tile provider.
-          const left = ((post.gps.lng + 180) / 360) * 100;
-          const top = ((90 - post.gps.lat) / 180) * 100;
-          return (
-            <span
-              key={post.id}
-              className={`community-map-marker rank-hex-${post.discovery?.rarityStars || 1}`}
-              style={{ left: `${left}%`, top: `${top}%` }}
-              title={`${post.discovery?.itemName || 'Discovery'} — ${post.placeLabel || 'Unnamed location'}`}
-            />
-          );
-        })}
+      <div
+        className="community-map-canvas"
+        role="img"
+        aria-label={`${located.length} shared discoveries with locations`}
+        style={{ '--map-glow-x': `${positioned.glowX.toFixed(2)}%`, '--map-glow-y': `${positioned.glowY.toFixed(2)}%` }}
+      >
+        {positioned.markers.map(({ post, left, top }) => (
+          <span
+            key={post.id}
+            className={`community-map-marker rank-hex-${post.discovery?.rarityStars || 1}`}
+            style={{ left: `${left}%`, top: `${top}%` }}
+            title={`${post.discovery?.itemName || 'Discovery'} — ${post.placeLabel || 'Unnamed location'}`}
+          />
+        ))}
       </div>
       <ul className="community-map-legend">
         {located.map((post) => (

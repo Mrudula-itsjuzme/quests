@@ -34,11 +34,12 @@ export function createAuthMiddleware(config, options = {}) {
         return res.status(401).json({ error: { code: 'authentication_required', requestId: req.id } });
       }
       if (!jwks) return res.status(503).json({ error: { code: 'oidc_not_configured', requestId: req.id } });
+      // The web app's guest mode is fully client-side (local fixtures in
+      // src/lib/api.js) and never sends a bearer token, so a literal "guest"
+      // token must not be honored here — accepting it would hand any caller a
+      // write-enabled shared identity without authentication.
       const token = authorization.slice(7);
-      if (token === 'guest') {
-        req.identity = { id: 'guest-wayfarer-777', displayName: 'Guest Wayfarer', timezone: 'UTC', isAdmin: false, totalXp: 0, streakDays: 0 };
-        return next();
-      }
+      if (token === 'guest') throw new Error('invalid_guest_token');
       const { payload } = await jwtVerify(token, jwks, { issuer: config.OIDC_ISSUER, audience: config.OIDC_AUDIENCE, algorithms: ['RS256', 'ES256'], clockTolerance: 5 });
       if (typeof payload.sub !== 'string' || payload.sub.length < 1 || payload.sub.length > 200) throw new Error('invalid_subject');
       if (config.SUPABASE_AUTH && payload.role !== 'authenticated') throw new Error('invalid_role');

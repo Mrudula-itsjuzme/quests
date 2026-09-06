@@ -661,6 +661,35 @@ describe('Community API', () => {
     expect(response.body.error.reason).toBe('pending_verification');
   });
 
+  it('does not publish one-star captures to the community feed', async () => {
+    const repository = new MemoryQuestRepository({ definitions: questDefinitions });
+    const app = createApp({ config: testConfig(), repository, visionProvider: highConfidenceVisionProvider() });
+    const userId = testConfig().DEV_USER_ID;
+    await repository.ensureUser({ id: userId, displayName: 'Local', timezone: 'UTC' });
+    const card = await repository.createCapturedCard({
+      userId,
+      itemName: 'Sidewalk Pebble',
+      category: 'Earth',
+      cardTitle: 'Sidewalk Pebble',
+      rarityTier: 'D',
+      rarityScore: 0.1,
+      rarityStars: 1,
+      description: '',
+      status: 'final',
+    });
+
+    const response = await request(app)
+      .post('/api/v1/community/posts')
+      .set('Idempotency-Key', 'community-post-one-star')
+      .send({ cardId: card.id });
+    const feed = await request(app).get('/api/v1/community/posts');
+
+    expect(response.status).toBe(422);
+    expect(response.body.error.code).toBe('capture_not_shareable');
+    expect(response.body.error.reason).toBe('rating_too_low');
+    expect(feed.body).toEqual([]);
+  });
+
   it('does not create duplicate posts when the same capture is shared twice', async () => {
     const app = createApp({ config: testConfig(), visionProvider: highConfidenceVisionProvider() });
     const card = await mintCapture(app, 'community-002');
@@ -704,6 +733,68 @@ describe('Community API', () => {
     expect(comments.body).toHaveLength(1);
     const feed = await request(app).get('/api/v1/community/posts');
     expect(feed.body[0].commentCount).toBe(1);
+  });
+
+  it('serves eligible community stories and records story views', async () => {
+    const app = createApp({ config: testConfig(), visionProvider: highConfidenceVisionProvider() });
+    const card = await mintCapture(app, 'community-story-001');
+    const post = await request(app).post('/api/v1/community/posts').set('Idempotency-Key', 'story-post').send({ cardId: card.body.id });
+
+    const stories = await request(app).get('/api/v1/community/stories');
+    expect(stories.status).toBe(200);
+    expect(stories.body).toEqual([
+      expect.objectContaining({
+        postId: post.body.id,
+        viewed: false,
+        discovery: expect.objectContaining({ rarityStars: expect.any(Number) }),
+      }),
+    ]);
+
+    const viewed = await request(app).post(`/api/v1/community/stories/${post.body.id}/view`).send({});
+    const refreshed = await request(app).get('/api/v1/community/stories');
+    expect(viewed.status).toBe(200);
+    expect(viewed.body).toEqual(expect.objectContaining({ postId: post.body.id, viewed: true }));
+    expect(refreshed.body[0].viewed).toBe(true);
+  });
+
+  it('returns public profiles and updates follow/follower counts', async () => {
+    const repository = new MemoryQuestRepository({ definitions: questDefinitions });
+    const app = createApp({ config: testConfig(), repository, visionProvider: highConfidenceVisionProvider() });
+    const viewerId = testConfig().DEV_USER_ID;
+    const authorId = 'profile-author';
+    await repository.ensureUser({ id: viewerId, displayName: 'Local', timezone: 'UTC' });
+    await repository.ensureUser({ id: authorId, displayName: 'Profile Author', timezone: 'UTC', totalXp: 1300, streakDays: 6 });
+    const card = await repository.createCapturedCard({
+      userId: authorId,
+      itemName: 'Golden Fern',
+      category: 'Flora',
+      cardTitle: 'Golden Fern',
+      rarityTier: 'A',
+      rarityScore: 0.8,
+      rarityStars: 4,
+      description: '',
+      status: 'final',
+      mediaData: PIXEL_PNG,
+      mediaContentType: 'image/png',
+    });
+    const { post } = await repository.createCommunityPost({ userId: authorId, cardId: card.id, visibility: 'public', caption: 'Profile grid item' });
+
+    const before = await request(app).get(`/api/v1/community/users/${authorId}`);
+    const followed = await request(app).post(`/api/v1/community/users/${authorId}/follow`).send({ following: true });
+    const unfollowed = await request(app).post(`/api/v1/community/users/${authorId}/follow`).send({ following: false });
+
+    expect(before.status).toBe(200);
+    expect(before.body).toEqual(expect.objectContaining({
+      userId: authorId,
+      displayName: 'Profile Author',
+      stats: expect.objectContaining({ posts: 1, followers: 0, following: 0 }),
+      viewer: expect.objectContaining({ isFollowing: false, isSelf: false }),
+      recentPosts: [expect.objectContaining({ id: post.id })],
+    }));
+    expect(followed.body.stats.followers).toBe(1);
+    expect(followed.body.viewer.isFollowing).toBe(true);
+    expect(unfollowed.body.stats.followers).toBe(0);
+    expect(unfollowed.body.viewer.isFollowing).toBe(false);
   });
 
   it('keeps friends-only community posts behind the friendship boundary', async () => {
@@ -1110,9 +1201,18 @@ describe('Media Contract', () => {
       .send({ imageBase64: PIXEL_PNG, liveness: { attested: false } });
 
     await repository.ensureUser({ id: testConfig().DEV_USER_ID, displayName: 'Local Adventurer', timezone: 'UTC' });
-    const post = await repository.createCommunityPost({ userId: testConfig().DEV_USER_ID, cardId: captured.body.id, visibility: 'public' });
+    const post = {
+      id: '11111111-1111-4111-8111-111111111116',
+      userId: testConfig().DEV_USER_ID,
+      cardId: captured.body.id,
+      visibility: 'public',
+      createdAt: new Date().toISOString(),
+      caption: '',
+      hashtags: [],
+    };
+    repository.communityPosts.push(post);
 
-    const response = await request(app).get(`/api/v1/community/posts/${post.post.id}/media`);
+    const response = await request(app).get(`/api/v1/community/posts/${post.id}/media`);
     expect(response.status).toBe(404);
   });
 
@@ -1126,9 +1226,18 @@ describe('Media Contract', () => {
 
     await repository.reviewCapturedCard(captured.body.id, { decision: 'reject', reviewerId: 'admin' });
     await repository.ensureUser({ id: testConfig().DEV_USER_ID, displayName: 'Local Adventurer', timezone: 'UTC' });
-    const post = await repository.createCommunityPost({ userId: testConfig().DEV_USER_ID, cardId: captured.body.id, visibility: 'public' });
+    const post = {
+      id: '11111111-1111-4111-8111-111111111117',
+      userId: testConfig().DEV_USER_ID,
+      cardId: captured.body.id,
+      visibility: 'public',
+      createdAt: new Date().toISOString(),
+      caption: '',
+      hashtags: [],
+    };
+    repository.communityPosts.push(post);
 
-    const response = await request(app).get(`/api/v1/community/posts/${post.post.id}/media`);
+    const response = await request(app).get(`/api/v1/community/posts/${post.id}/media`);
     expect(response.status).toBe(404);
   });
 

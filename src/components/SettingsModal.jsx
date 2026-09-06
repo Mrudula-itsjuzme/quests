@@ -4,9 +4,10 @@ import { Icon } from './Icon';
 import { playHover, playTap, SOUND_MUTED_KEY } from '../lib/useSoundEffects';
 import { isMotionReduced, setMotionReduced } from '../lib/useMotionPreference';
 
-export function SettingsModal({ onClose, user, onLogout }) {
+export function SettingsModal({ onClose, user, onLogout, themeMode = 'light', onThemeChange }) {
   const [soundEnabled, setSoundEnabled] = useState(() => localStorage.getItem(SOUND_MUTED_KEY) !== 'true');
   const [motionIntensity, setMotionIntensity] = useState(() => isMotionReduced() ? 'reduced' : 'full');
+  const isGuest = user?.id?.startsWith?.('guest-') || user?.email === 'guest@wildrealm.local';
 
   const toggleSound = () => {
     const next = !soundEnabled;
@@ -19,6 +20,11 @@ export function SettingsModal({ onClose, user, onLogout }) {
     playTap();
     setMotionIntensity(mode);
     setMotionReduced(mode === 'reduced');
+  };
+
+  const setTheme = (mode) => {
+    playTap();
+    onThemeChange?.(mode);
   };
 
   return (
@@ -45,6 +51,28 @@ export function SettingsModal({ onClose, user, onLogout }) {
             <h2>Settings</h2>
           </div>
           <button type="button" className="detail-close" onClick={() => { playTap(); onClose(); }} aria-label="Close settings">×</button>
+        </div>
+
+        <div className="settings-section">
+          <h3><Icon name="sun" /> Appearance</h3>
+          <div className="setting-options compact">
+            {[
+              ['light', 'Day', 'Warm readable palette'],
+              ['dark', 'Night', 'Higher contrast panels'],
+              ['system', 'Auto', 'Match device setting'],
+            ].map(([mode, label, description]) => (
+              <button
+                key={mode}
+                type="button"
+                className={`option-btn ${themeMode === mode ? 'active' : ''}`}
+                onClick={() => setTheme(mode)}
+                onMouseEnter={playHover}
+              >
+                <span>{label}</span>
+                <small>{description}</small>
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="settings-section">
@@ -94,7 +122,7 @@ export function SettingsModal({ onClose, user, onLogout }) {
           <div className="setting-row">
             <div>
               <strong>{user?.displayName || user?.email || 'Wayfarer'}</strong>
-              <p>Active Wild Realm session</p>
+              <p>{isGuest ? 'Guest mode saves on this device' : 'Signed-in Wild Realm account'}</p>
             </div>
             {onLogout && (
               <button
@@ -106,6 +134,10 @@ export function SettingsModal({ onClose, user, onLogout }) {
                 Sign Out
               </button>
             )}
+          </div>
+          <div className="setting-meta-grid" aria-label="Session details">
+            <span><strong>{isGuest ? 'Local' : 'Cloud'}</strong><small>Storage</small></span>
+            <span><strong>{user?.tierLabel || user?.rankTitle || 'Explorer'}</strong><small>Rank</small></span>
           </div>
         </div>
 

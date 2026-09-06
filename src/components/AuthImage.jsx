@@ -28,6 +28,7 @@ export function AuthImage({ src, alt, className, useAuth: requiresAuth = false, 
 
   useEffect(() => {
     if (!src) return;
+    setObjectUrl(null);
     
     const absoluteSrc = getAbsoluteImageUrl(src);
 
@@ -60,6 +61,7 @@ export function AuthImage({ src, alt, className, useAuth: requiresAuth = false, 
         setObjectUrl(urlToRevoke);
       } catch (err) {
         console.error('Failed to load authenticated image', err);
+        if (isMounted) props.onError?.(err);
       }
     }
     

@@ -27,11 +27,12 @@ export class QuestEngine {
   async getMe(identity) {
     const ensured = await this.repository.ensureUser(identity);
     const currentPeriod = dailyPeriod(this.providers.clock.now(), ensured.timezone);
-    await this.repository.reconcileStreak(ensured.id, currentPeriod.key);
-    const user = await this.repository.getUser(identity.id);
-    // Coins come from the ledger so every surface reads one authoritative
-    // balance instead of deriving its own from XP.
-    const coins = await this.repository.getCoinBalance(user.id);
+    // These three reads are independent — run them concurrently so /me costs
+    // one round trip instead of three on every profile load.
+    const [user, coins] = await Promise.all([
+      this.repository.reconcileStreak(ensured.id, currentPeriod.key).then(() => this.repository.getUser(identity.id)),
+      this.repository.getCoinBalance(ensured.id),
+    ]);
     return { ...user, ...calculateProgression(user.totalXp), coins };
   }
 

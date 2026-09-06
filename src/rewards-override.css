@@ -1,49 +1,119 @@
-/* --- WILD REALM REWARDS OVERRIDE --- */
+/* Rewards page color pass: warm, readable, and consistent with the mobile app. */
+.rewards-reference {
+  background:
+    linear-gradient(180deg, #fff9ed 0%, #f4ead8 46%, #eadabd 100%) !important;
+  color: #2f2116 !important;
+}
+
+.rewards-reference .quests-header h1 {
+  color: #2f2116 !important;
+  text-shadow: none !important;
+}
+
 .rewards-reference .reward-panel {
-  background: rgba(10, 25, 18, 0.6) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
-  border: 1px solid rgba(16, 185, 129, 0.2) !important;
-  color: #e5e7eb !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+  border: 1px solid rgba(96, 69, 38, 0.13) !important;
+  background: rgba(255, 251, 241, 0.9) !important;
+  color: #2f2116 !important;
+  box-shadow: 0 18px 42px rgba(78, 53, 25, 0.1) !important;
+  backdrop-filter: blur(10px) saturate(1.02) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(1.02) !important;
+}
+
+.rewards-reference .rewards-hero {
+  border-color: rgba(215, 166, 64, 0.28) !important;
+  background:
+    radial-gradient(circle at 50% 8%, rgba(244, 190, 83, 0.24), transparent 32%),
+    linear-gradient(180deg, #fff6df 0%, #fffaf0 54%, #f8ecd4 100%) !important;
+}
+
+.rewards-reference .rewards-hero-chest {
+  background:
+    radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.86), transparent 28%),
+    linear-gradient(145deg, #f5ce75, #ba7a32) !important;
+  color: #4c3219 !important;
+  box-shadow: 0 18px 38px rgba(181, 114, 42, 0.24) !important;
 }
 
 .rewards-reference .reward-panel h1,
 .rewards-reference .reward-panel h2,
 .rewards-reference .reward-panel h3,
 .rewards-reference .reward-panel strong {
-  color: #fff !important;
+  color: #2f2116 !important;
+  text-shadow: none !important;
 }
 
 .rewards-reference .reward-panel p,
 .rewards-reference .reward-panel span,
-.rewards-reference .reward-panel small,
-.rewards-reference .reward-panel .eyebrow {
-  color: #a7f3d0 !important;
+.rewards-reference .reward-panel small {
+  color: rgba(47, 33, 22, 0.72) !important;
+  text-shadow: none !important;
 }
 
-.rewards-reference .reward-panel .reward-empty {
-  color: rgba(167, 243, 208, 0.6) !important;
+.rewards-reference .reward-panel .eyebrow {
+  color: #1f7a4b !important;
+  letter-spacing: 0.06em !important;
+}
+
+.rewards-reference .season-progress {
+  border-color: rgba(96, 69, 38, 0.12) !important;
+  background: rgba(255, 250, 240, 0.78) !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.42) !important;
+}
+
+.rewards-reference .gold-progress {
+  background: rgba(30, 42, 35, 0.18) !important;
+}
+
+.rewards-reference .gold-progress i {
+  background: linear-gradient(90deg, #2fd884, #f0c45b) !important;
+  box-shadow: 0 0 0 1px rgba(31, 122, 75, 0.08) !important;
+}
+
+.rewards-reference .reward-level-shield {
+  background: linear-gradient(160deg, #163729, #081a13) !important;
+  color: #f6d36c !important;
+  box-shadow: 0 12px 24px rgba(12, 34, 24, 0.16) !important;
+}
+
+.rewards-reference .reward-level-shield strong,
+.rewards-reference .reward-level-shield span {
+  color: #f6d36c !important;
+}
+
+.rewards-reference .reward-banner {
+  background: linear-gradient(180deg, #f1d17b, #dc8d54) !important;
+  color: #5c3b1d !important;
+}
+
+.rewards-reference .reward-panel article {
+  border: 1px solid rgba(96, 69, 38, 0.1) !important;
+  background: rgba(255, 247, 232, 0.76) !important;
+  color: #2f2116 !important;
+  box-shadow: none !important;
+}
+
+.rewards-reference .round-emblem,
+.rewards-reference .rank-crest,
+.rewards-reference .store-balance > svg {
+  background: #28764b !important;
+  color: #fffaf0 !important;
 }
 
 .rewards-reference .reward-panel button,
 .rewards-reference .reward-panel a {
-  color: #fff !important;
-  background: rgba(16, 185, 129, 0.2) !important;
-  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+  border: 1px solid rgba(40, 118, 75, 0.2) !important;
+  background: #28764b !important;
+  color: #fffaf0 !important;
+  box-shadow: 0 12px 24px rgba(40, 118, 75, 0.16) !important;
 }
 
-.rewards-reference .reward-panel button:hover,
-.rewards-reference .reward-panel a:hover {
-  background: rgba(16, 185, 129, 0.3) !important;
+.rewards-reference .reward-panel button:disabled {
+  border-color: rgba(96, 69, 38, 0.12) !important;
+  background: rgba(47, 33, 22, 0.1) !important;
+  color: rgba(47, 33, 22, 0.52) !important;
+  box-shadow: none !important;
 }
 
-.rewards-reference .reward-panel article {
-  background: rgba(0, 0, 0, 0.2) !important;
-  border: 1px solid rgba(255, 255, 255, 0.05) !important;
-}
-
-.rewards-reference .reward-panel article:hover {
-  background: rgba(16, 185, 129, 0.1) !important;
-  border-color: rgba(16, 185, 129, 0.2) !important;
+.rewards-reference .reward-empty {
+  color: rgba(47, 33, 22, 0.58) !important;
 }

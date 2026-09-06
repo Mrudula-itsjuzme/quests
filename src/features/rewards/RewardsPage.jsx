@@ -97,7 +97,6 @@ function RewardsContent({
   const nextRewardLevel = rewards.find((reward) => reward.level > me.level)?.level ?? null;
   const seasonProgress = Math.min(1, Math.max(0, me.progressToNextLevel || 0));
   const currentRank = leaderboard.find((entry) => entry.isCurrentUser) || { position: '—', rankTitle: 'Adventurer', totalXp: me.totalXp };
-  const unavailable = (message) => { playTap(); setNotice(message); };
 
   return (
     <motion.main
@@ -152,7 +151,10 @@ function RewardsContent({
             {collection.slice(0, 4).map((item) => <motion.article key={item.assetId} whileHover={{ y: -3 }} onMouseEnter={playHover} transition={springConfig.tactile}><Icon name={categoryIcon(item.category)} /><strong>{item.title}</strong><span>{item.rarity}</span></motion.article>)}
             {collection.length === 0 && <p className="reward-empty">Complete verified quests to discover rare loot.</p>}
           </div>
-          <button type="button" onClick={() => unavailable('Inventory management is not connected yet.')}>View inventory <span>›</span></button>
+          {/* Inventory has no server endpoint yet, so the control is genuinely
+              disabled rather than faking a transaction (same pattern as store
+              redemption below). */}
+          <button type="button" disabled aria-describedby="store-availability">View inventory <span>›</span></button>
         </RewardPanel>
 
         <RewardPanel title="Store" className="store-panel">
@@ -226,7 +228,10 @@ function RewardsContent({
           {showLeaderboard && (
             <motion.div className="modal-backdrop" role="presentation" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onMouseDown={() => setShowLeaderboard(false)}>
               <motion.section className="quest-modal leaderboard-modal" role="dialog" aria-modal="true" aria-labelledby="leaderboard-title" initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} transition={springConfig.snappy} onMouseDown={(event) => event.stopPropagation()}>
-                <div className="section-title"><h2 id="leaderboard-title">Global Leaderboard</h2><button type="button" onClick={() => { playTap(); setShowLeaderboard(false); }} aria-label="Close leaderboard">×</button></div>
+                <div className="section-title rewards-modal-title">
+                  <button type="button" className="rewards-modal-back" onClick={() => { playTap(); setShowLeaderboard(false); }} aria-label="Back to rewards">‹ Back</button>
+                  <h2 id="leaderboard-title">Global Leaderboard</h2>
+                </div>
                 <div className="leaderboard-list">
                   {leaderboard.map((entry) => (
                     <motion.article key={entry.userId} className={entry.isCurrentUser ? 'current' : ''} whileHover={{ x: 4 }} onMouseEnter={playHover} transition={springConfig.tactile}>

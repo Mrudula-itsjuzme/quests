@@ -36,11 +36,12 @@ async function request(path, { method = 'GET', body, token, idempotencyKey, sign
       body: body !== undefined ? JSON.stringify(body) : undefined,
       signal,
       // Endpoints served via sendCachedJson set `Cache-Control: private,
-      // no-cache` and an ETag. Without an explicit cache mode the browser can
-      // hand back a bare 304 with no body, which is not `ok` and has no JSON
-      // to parse. Letting fetch manage revalidation means it resolves the 304
-      // against its own cache and always yields a complete response.
-      cache: 'no-store',
+      // no-cache` and an ETag. `no-cache` revalidates with If-None-Match and
+      // resolves 304s against the browser cache, so unchanged payloads cost
+      // one round trip instead of a full body download. (`default` mode is
+      // avoided: it can hand back a bare 304 with no body, which is not `ok`
+      // and has no JSON to parse.)
+      cache: 'no-cache',
     });
   } catch {
     throw new ApiError(0, 'network_unavailable');
@@ -83,9 +84,11 @@ import { deleteLocalCaptureImage, saveLocalCaptureImage } from './localCaptureSt
 
 let guestCaptures = null;
 let guestCommunityPosts = null;
+let guestFollows = null;
 
 const GUEST_CAPTURES_KEY = 'wild_realm_guest_captures_v1';
-const GUEST_POSTS_KEY = 'wild_realm_guest_posts_v2';
+const GUEST_POSTS_KEY = 'wild_realm_guest_posts_v3';
+const GUEST_FOLLOWS_KEY = 'wild_realm_guest_follows_v1';
 const MAX_GUEST_CAPTURES = 100;
 const MAX_GUEST_POSTS = 100;
 const MAX_TITLE_LENGTH = 80;
@@ -179,6 +182,74 @@ function setGuestPosts(next) {
   guestCommunityPosts = next;
   writeGuestList(GUEST_POSTS_KEY, next);
   return guestCommunityPosts;
+}
+
+function guestFollowList() {
+  if (!guestFollows) guestFollows = readGuestList(GUEST_FOLLOWS_KEY, []);
+  return guestFollows;
+}
+
+function setGuestFollows(next) {
+  guestFollows = next;
+  writeGuestList(GUEST_FOLLOWS_KEY, next);
+  return guestFollows;
+}
+
+function guestCommunityUsers() {
+  const users = new Map([[GUEST_USER.id, {
+    userId: GUEST_USER.id,
+    displayName: GUEST_USER.displayName,
+    totalXp: GUEST_USER.totalXp,
+    rankTitle: GUEST_USER.tierLabel,
+    streakDays: GUEST_USER.streakDays,
+    primaryPath: GUEST_USER.primaryPath,
+  }]]);
+  for (const friend of GUEST_FRIENDS) {
+    users.set(friend.userId, {
+      userId: friend.userId,
+      displayName: friend.displayName,
+      totalXp: friend.totalXp,
+      rankTitle: friend.rankTitle,
+      streakDays: friend.streakDays,
+      primaryPath: friend.primaryPath,
+    });
+  }
+  for (const post of guestPostList()) {
+    if (post.author?.userId) users.set(post.author.userId, {
+      userId: post.author.userId,
+      displayName: post.author.displayName,
+      totalXp: post.author.totalXp,
+      rankTitle: post.author.rankTitle,
+      streakDays: post.author.streakDays || 0,
+      primaryPath: post.author.primaryPath || null,
+    });
+  }
+  return users;
+}
+
+function guestCommunityProfile(profileUserId) {
+  const users = guestCommunityUsers();
+  const user = users.get(profileUserId);
+  if (!user) return null;
+  const posts = guestPostList().filter((post) => post.author?.userId === profileUserId);
+  const followers = guestFollowList().filter((follow) => follow.followingId === profileUserId).length;
+  const following = guestFollowList().filter((follow) => follow.followerId === profileUserId).length;
+  const isFriend = GUEST_FRIENDS.some((friend) => friend.userId === profileUserId);
+  return {
+    userId: profileUserId,
+    displayName: user.displayName,
+    totalXp: Number(user.totalXp || 0),
+    streakDays: Number(user.streakDays || 0),
+    rankTitle: user.rankTitle || GUEST_USER.tierLabel,
+    primaryPath: user.primaryPath || null,
+    stats: { posts: posts.length, followers, following, friends: isFriend ? 1 : 0 },
+    viewer: {
+      isSelf: profileUserId === GUEST_USER.id,
+      isFollowing: guestFollowList().some((follow) => follow.followerId === GUEST_USER.id && follow.followingId === profileUserId),
+      isFriend,
+    },
+    recentPosts: posts.slice(0, 9),
+  };
 }
 
 async function guestDelay(data, ms = 450) {
@@ -340,6 +411,51 @@ export function createApiClient(getToken) {
       const token = await getToken();
       if (token === 'guest') return guestDelay(guestPostList(), 200);
       return request(`/community/posts?scope=${encodeURIComponent(scope)}`, { signal, token });
+    },
+    getCommunityStories: async (signal) => {
+      const token = await getToken();
+      if (token === 'guest') {
+        const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+        return guestDelay(guestPostList()
+          .filter((post) => post.discovery?.imageRef)
+          .filter((post) => new Date(post.createdAt).getTime() >= cutoff)
+          .map((post) => ({
+            id: post.id,
+            postId: post.id,
+            author: post.author,
+            discovery: post.discovery,
+            placeLabel: post.placeLabel,
+            createdAt: post.createdAt,
+            viewed: false,
+          })), 180);
+      }
+      return request('/community/stories', { signal, token });
+    },
+    markCommunityStoryViewed: async (postId) => {
+      const token = await getToken();
+      if (token === 'guest') return guestDelay({ postId, viewerId: GUEST_USER.id, viewed: true }, 100);
+      return request(`/community/stories/${postId}/view`, { method: 'POST', token });
+    },
+    getCommunityProfile: async (userId, signal) => {
+      const token = await getToken();
+      if (token === 'guest') {
+        const profile = guestCommunityProfile(userId);
+        if (!profile) throw new ApiError(404, 'community_profile_not_found');
+        return guestDelay(profile, 180);
+      }
+      return request(`/community/users/${encodeURIComponent(userId)}`, { signal, token });
+    },
+    setCommunityFollow: async (userId, following) => {
+      const token = await getToken();
+      if (token === 'guest') {
+        const current = guestFollowList().filter((follow) => !(follow.followerId === GUEST_USER.id && follow.followingId === userId));
+        const next = following ? [{ followerId: GUEST_USER.id, followingId: userId, createdAt: new Date().toISOString() }, ...current] : current;
+        setGuestFollows(next);
+        const profile = guestCommunityProfile(userId);
+        if (!profile) throw new ApiError(404, 'community_profile_not_found');
+        return guestDelay(profile, 160);
+      }
+      return request(`/community/users/${encodeURIComponent(userId)}/follow`, { method: 'POST', body: { following }, token });
     },
     createCommunityPost: async (payload, idempotencyKey) => {
       const token = await getToken();

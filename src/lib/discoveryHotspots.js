@@ -62,6 +62,7 @@ export function mapCuratedHotspots(hotspots = [], origin = null) {
         title: item.name,
         category: item.category,
         description: item.description,
+        imageRef: item.imageRef || imageForCategory(item.category),
         region: item.region,
         featuredSpecies: item.featuredSpecies || [],
         source: 'curated',
@@ -72,6 +73,14 @@ export function mapCuratedHotspots(hotspots = [], origin = null) {
         y: ((90 - item.gps.lat) / 180) * 100,
       };
     });
+}
+
+function imageForCategory(category) {
+  const key = String(category || '').toLowerCase();
+  if (key.includes('bird')) return '/assets/blue-billed-cuckoo.png';
+  if (key.includes('water')) return '/assets/verdant-explorer-banner.png';
+  if (key.includes('park')) return '/assets/verdant-explorer-banner.png';
+  return '/assets/quest-compass-poster.png';
 }
 
 /**

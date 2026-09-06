@@ -39,6 +39,7 @@ const idempotencySchema = z.string().min(8).max(160).regex(/^[A-Za-z0-9._:-]+$/)
 const assignmentIdSchema = z.string().uuid();
 const notificationIdSchema = z.string().uuid();
 const submissionIdSchema = z.string().uuid();
+const communityUserIdSchema = z.string().min(1).max(200);
 const reviewSchema = z.object({ decision: z.enum(['approve', 'reject']), reason: z.string().trim().max(1000).optional() }).strict();
 const progressSchema = z.object({ value: z.coerce.number().finite().min(0).max(10_000_000) }).strict();
 const profileSchema = z.object({
@@ -110,6 +111,7 @@ const communityLikeSchema = z.object({ liked: z.boolean() }).strict();
 const communityCommentSchema = z.object({ body: z.string().trim().min(1).max(1000) }).strict();
 const communityReportSchema = z.object({ reason: z.enum(['abuse', 'misinfo', 'private_info', 'unsafe_location', 'spam', 'other']), details: z.string().trim().max(1000).optional() }).strict();
 const communityScopeSchema = z.enum(['public', 'friends']);
+const communityFollowSchema = z.object({ following: z.boolean() }).strict();
 const deleteAccountSchema = z.object({ reason: z.string().trim().max(1000).optional() }).strict().optional();
 const legacyQuestSchema = z.object({
   title: z.string().trim().min(1).max(160),
@@ -152,7 +154,7 @@ export function createApp(options = {}) {
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
-        imgSrc: ["'self'", 'data:', 'blob:'],
+        imgSrc: ["'self'", 'data:', 'blob:', 'https://images.unsplash.com'],
         connectSrc: ["'self'", 'https://*.supabase.co'],
         fontSrc: ["'self'", 'data:', 'https://fonts.gstatic.com'],
         objectSrc: ["'none'"],
@@ -205,11 +207,16 @@ export function createApp(options = {}) {
   app.use('/api', authLimiter);
   app.use('/api', authenticate);
   app.use('/api', readLimiter);
-  // Prometheus metrics (disabled in test by default)
+  // Prometheus metrics (disabled in test by default). Internal endpoint:
+  // runtime metrics leak dependency versions and request patterns, so require
+  // the same CRON_SECRET bearer credential the scheduler uses.
   if (config.NODE_ENV !== 'test') {
     const collectDefaultMetrics = clientMetrics.collectDefaultMetrics;
     collectDefaultMetrics({ timeout: 5000 });
-    app.get('/metrics', async (_req, res) => {
+    app.get('/metrics', async (req, res) => {
+      if (!config.CRON_SECRET || req.get('authorization') !== `Bearer ${config.CRON_SECRET}`) {
+        return res.status(401).json({ error: { code: 'invalid_cron_secret', requestId: req.id } });
+      }
       try {
         res.set('Content-Type', clientMetrics.register.contentType);
         res.end(await clientMetrics.register.metrics());
@@ -366,6 +373,27 @@ export function createApp(options = {}) {
     const scope = req.query.scope == null || req.query.scope === '' ? 'public' : parse(communityScopeSchema, req.query.scope);
     res.json(redactPublicPayload(await repository.listCommunityPosts(req.identity.id, { scope, limit: req.query.limit })));
   }));
+  app.get('/api/v1/community/stories', asyncRoute(async (req, res) => {
+    if (config.NODE_ENV === 'development') await repository.seedDemoSocial?.(req.identity.id);
+    res.json(redactPublicPayload(await repository.listCommunityStories(req.identity.id, { limit: req.query.limit })));
+  }));
+  app.post('/api/v1/community/stories/:postId/view', writeLimiter, asyncRoute(async (req, res) => {
+    const result = await repository.markCommunityStoryViewed(req.identity.id, parse(postIdSchema, req.params.postId));
+    if (!result) return res.status(404).json({ error: { code: 'story_not_found', requestId: req.id } });
+    res.json(redactPublicPayload(result));
+  }));
+  app.get('/api/v1/community/users/:userId', asyncRoute(async (req, res) => {
+    if (config.NODE_ENV === 'development') await repository.seedDemoSocial?.(req.identity.id);
+    const profile = await repository.getCommunityProfile(req.identity.id, parse(communityUserIdSchema, req.params.userId));
+    if (!profile) return res.status(404).json({ error: { code: 'community_profile_not_found', requestId: req.id } });
+    res.json(redactPublicPayload(profile));
+  }));
+  app.post('/api/v1/community/users/:userId/follow', writeLimiter, asyncRoute(async (req, res) => {
+    const body = parse(communityFollowSchema, req.body);
+    const profile = await repository.setCommunityFollow(req.identity.id, parse(communityUserIdSchema, req.params.userId), body.following);
+    if (!profile) return res.status(404).json({ error: { code: 'community_profile_not_found', requestId: req.id } });
+    res.json(redactPublicPayload(profile));
+  }));
   app.post('/api/v1/community/posts', writeLimiter, asyncRoute(async (req, res) => {
     const body = parse(communityPostSchema, req.body);
     const idempotencyKey = requireIdempotency(req);
@@ -375,6 +403,7 @@ export function createApp(options = {}) {
     if (!card) return res.status(404).json({ error: { code: 'capture_not_found', requestId: req.id } });
     if (card.status === 'rejected') return res.status(422).json({ error: { code: 'capture_not_shareable', requestId: req.id } });
     if (card.status === 'provisional') return res.status(422).json({ error: { code: 'capture_not_shareable', reason: 'pending_verification', requestId: req.id } });
+    if (Number(card.rarityStars || 0) <= 1) return res.status(422).json({ error: { code: 'capture_not_shareable', reason: 'rating_too_low', requestId: req.id } });
 
     // Sensitive species (poaching/stalking risk — blueprint §1/§10/§22/§27,
     // CRITICAL) get their coordinates jittered to a coarse grid cell before

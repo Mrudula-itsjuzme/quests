@@ -23,10 +23,12 @@ export function CaptureImage({ imageRef, alt, element, className = '', eager = f
   const [state, setState] = useState('loading'); // loading | loaded | failed
   const [localSrc, setLocalSrc] = useState(null);
   const elementKey = (element || 'Earth').toLowerCase();
-  const remoteLikelyUnavailable = typeof navigator !== 'undefined' && navigator.onLine === false && /^https?:\/\//i.test(imageRef || '');
   const fallbackSrc = fallbackForCapture(alt, element);
-  const imageSrc = state === 'failed' || remoteLikelyUnavailable ? fallbackSrc : (localSrc || imageRef || fallbackSrc);
-  const showPhoto = Boolean(imageSrc) && state !== 'failed';
+  const normalizedImageRef = normalizeImageRef(imageRef || fallbackSrc);
+  const remoteLikelyUnavailable = typeof navigator !== 'undefined' && navigator.onLine === false && /^https?:\/\//i.test(normalizedImageRef || '');
+  const imageSrc = state === 'failed' || remoteLikelyUnavailable ? fallbackSrc : (localSrc || normalizedImageRef || fallbackSrc);
+  const isFallbackImage = imageSrc === fallbackSrc;
+  const showPhoto = Boolean(imageSrc);
 
   useEffect(() => {
     let active = true;
@@ -62,7 +64,7 @@ export function CaptureImage({ imageRef, alt, element, className = '', eager = f
     };
   }, [imageRef]);
 
-  const visualState = state === 'failed' ? 'loaded' : (showPhoto ? state : 'crest');
+  const visualState = showPhoto ? (state === 'failed' ? 'loading' : state) : 'crest';
 
   return (
     <div className={`capture-image ${className}`.trim()} data-state={visualState} style={style}>
@@ -77,7 +79,7 @@ export function CaptureImage({ imageRef, alt, element, className = '', eager = f
         )}
       </div>
 
-      {(showPhoto || state === 'failed') && (
+      {showPhoto && (useAuth && !localSrc && !isFallbackImage ? (
         <AuthImage
           className="capture-image-photo"
           src={imageSrc}
@@ -86,19 +88,40 @@ export function CaptureImage({ imageRef, alt, element, className = '', eager = f
           decoding="async"
           onLoad={() => setState('loaded')}
           onError={() => setState('failed')}
-          useAuth={useAuth && !localSrc}
+          useAuth
         />
-      )}
+      ) : (
+        <img
+          className="capture-image-photo"
+          src={imageSrc}
+          alt={alt || ''}
+          loading={eager ? 'eager' : 'lazy'}
+          decoding="async"
+          onLoad={() => setState('loaded')}
+          onError={() => setState('failed')}
+        />
+      ))}
     </div>
   );
 }
 
+function normalizeImageRef(imageRef) {
+  if (!imageRef || typeof imageRef !== 'string') return null;
+  const value = imageRef.trim();
+  if (!value || value === 'null' || value === 'undefined') return null;
+  if (/^(https?:|blob:|data:)/i.test(value)) return value;
+  if (value.startsWith('/')) return value;
+  if (value.startsWith('assets/')) return `/${value}`;
+  return `/${value}`;
+}
+
 function fallbackForCapture(alt, element) {
   const text = `${alt || ''} ${element || ''}`.toLowerCase();
-  if (/bird|parrot|cuckoo|fauna|fern|grass/.test(text)) return '/assets/blue-billed-cuckoo.png';
-  if (/sky|cloud|northern|aurora|light/.test(text)) return '/auth-celestial-aperture.png';
-  if (/dog|retriever|cat|animal|horse/.test(text)) return '/dashboard-castle-panorama.png';
-  if (/mountain|ridge|earth|stone|desert/.test(text)) return '/assets/quest-compass-poster.png';
-  if (/water|lake|river|falls/.test(text)) return '/assets/verdant-explorer-banner.png';
+  if (/bird|parrot|cuckoo/.test(text)) return '/assets/blue-billed-cuckoo.png';
+  if (/fern|grass|leaf|leaves|mushroom|flora|canopy|plant/.test(text)) return '/assets/verdant-explorer-banner.png';
+  if (/sky|cloud|northern|aurora|light|celestial/.test(text)) return '/auth-celestial-aperture.png';
+  if (/dog|retriever|cat|animal|horse|golden/.test(text)) return '/dashboard-castle-panorama.png';
+  if (/mountain|ridge|earth|stone|desert|rock/.test(text)) return '/assets/quest-compass-poster.png';
+  if (/water|lake|river|falls|cascade/.test(text)) return '/assets/verdant-explorer-banner.png';
   return '/assets/verdant-explorer-banner.png';
 }

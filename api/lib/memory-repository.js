@@ -29,6 +29,8 @@ export class MemoryQuestRepository {
     this.communityComments = [];
     this.communityReports = [];
     this.friendships = [];
+    this.follows = [];
+    this.storyViews = [];
     this.accountDeletionRequests = [];
     this.demoSocialSeededFor = new Set();
   }
@@ -50,6 +52,9 @@ export class MemoryQuestRepository {
     // Sharing the same capture twice returns the original post rather than
     // creating a duplicate, matching the partial unique index in Postgres.
     if (post.cardId) {
+      const card = this.capturedCards.find((entry) => entry.id === post.cardId && entry.userId === post.userId);
+      const stars = card?.rarityStars ?? Math.max(1, Math.round(Number(card?.rarityScore || 0) * 5));
+      if (!card || card.status !== 'final' || Number(stars || 0) <= 1) throw conflict('capture_not_shareable');
       const existing = this.communityPosts.find((item) => item.cardId === post.cardId);
       if (existing) return { post: await this.getCommunityPost(post.userId, existing.id), created: false };
     }
@@ -73,9 +78,81 @@ export class MemoryQuestRepository {
 
   async listCommunityPosts(viewerId, { scope = 'public', limit = 50 } = {}) {
     let posts = this.communityPosts.filter((item) => this._canViewCommunityPost(viewerId, item));
+    posts = posts.filter((item) => {
+      const card = item.cardId ? this.capturedCards.find((entry) => entry.id === item.cardId) : null;
+      return !card || Number(card.rarityStars || 0) > 1;
+    });
     if (scope === 'public') posts = posts.filter((item) => item.visibility === 'public');
     if (scope === 'friends') posts = posts.filter((item) => item.userId !== viewerId);
     return posts.slice(0, Math.min(Number(limit) || 50, 100)).map((item) => this._decorateCommunityPost(viewerId, item));
+  }
+
+  async listCommunityStories(viewerId, { limit = 20 } = {}) {
+    const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+    return this.communityPosts
+      .filter((item) => new Date(item.createdAt).getTime() >= cutoff)
+      .filter((item) => this._canViewCommunityPost(viewerId, item))
+      .map((item) => this._decorateCommunityPost(viewerId, item))
+      .filter((post) => Number(post.discovery?.rarityStars || 0) > 1)
+      .slice(0, Math.min(Number(limit) || 20, 50))
+      .map((post) => ({
+        id: post.id,
+        postId: post.id,
+        author: post.author,
+        discovery: post.discovery,
+        placeLabel: post.placeLabel,
+        createdAt: post.createdAt,
+        viewed: this.storyViews.some((view) => view.postId === post.id && view.viewerId === viewerId),
+      }));
+  }
+
+  async markCommunityStoryViewed(viewerId, postId) {
+    const post = await this.getCommunityPost(viewerId, postId);
+    if (!post) return null;
+    if (!this.storyViews.some((view) => view.postId === postId && view.viewerId === viewerId)) {
+      this.storyViews.push({ postId, viewerId, viewedAt: new Date().toISOString() });
+    }
+    return { postId, viewerId, viewed: true };
+  }
+
+  async getCommunityProfile(viewerId, profileUserId) {
+    const user = this.users.get(profileUserId);
+    if (!user) return null;
+    const posts = this.communityPosts
+      .filter((post) => post.userId === profileUserId && this._canViewCommunityPost(viewerId, post))
+      .map((post) => this._decorateCommunityPost(viewerId, post))
+      .filter((post) => Number(post.discovery?.rarityStars || 0) > 1);
+    const followers = this.follows.filter((follow) => follow.followingId === profileUserId).length;
+    const following = this.follows.filter((follow) => follow.followerId === profileUserId).length;
+    const acceptedFriends = this.friendships.filter((friendship) =>
+      friendship.status === 'accepted'
+      && (friendship.requesterId === profileUserId || friendship.addresseeId === profileUserId)).length;
+    return clone({
+      userId: profileUserId,
+      displayName: user.displayName || 'Adventurer',
+      totalXp: Number(user.totalXp || 0),
+      streakDays: Number(user.streakDays || 0),
+      rankTitle: progressionEngine.rankTitleForXp(Number(user.totalXp || 0)),
+      primaryPath: user.primaryPath || null,
+      stats: { posts: posts.length, followers, following, friends: acceptedFriends },
+      viewer: {
+        isSelf: viewerId === profileUserId,
+        isFollowing: this.follows.some((follow) => follow.followerId === viewerId && follow.followingId === profileUserId),
+        isFriend: this.friendships.some((friendship) =>
+          friendship.status === 'accepted'
+          && ((friendship.requesterId === viewerId && friendship.addresseeId === profileUserId)
+            || (friendship.requesterId === profileUserId && friendship.addresseeId === viewerId))),
+      },
+      recentPosts: posts.slice(0, 9),
+    });
+  }
+
+  async setCommunityFollow(viewerId, profileUserId, following) {
+    if (viewerId === profileUserId || !this.users.has(profileUserId)) return null;
+    const existing = this.follows.findIndex((follow) => follow.followerId === viewerId && follow.followingId === profileUserId);
+    if (following && existing === -1) this.follows.push({ followerId: viewerId, followingId: profileUserId, createdAt: new Date().toISOString() });
+    if (!following && existing !== -1) this.follows.splice(existing, 1);
+    return this.getCommunityProfile(viewerId, profileUserId);
   }
 
   async getCommunityPost(viewerId, postId) {
@@ -200,6 +277,9 @@ export class MemoryQuestRepository {
       { id: '10000000-0000-4000-8000-000000000101', displayName: 'Mira Fern',  timezone: 'Asia/Kolkata', totalXp: 2840, streakDays: 12, primaryPath: 'Nature Observation', onboardingCompletedAt: '2026-08-30T00:00:00.000Z' },
       { id: '10000000-0000-4000-8000-000000000102', displayName: 'Arjun Vale', timezone: 'Asia/Kolkata', totalXp: 760,  streakDays: 4,  primaryPath: 'Outdoor Movement',    onboardingCompletedAt: '2026-08-30T00:00:00.000Z' },
       { id: '10000000-0000-4000-8000-000000000103', displayName: 'Nila Skies', timezone: 'Asia/Kolkata', totalXp: 5320, streakDays: 21, primaryPath: 'Discovery',           onboardingCompletedAt: '2026-08-30T00:00:00.000Z' },
+      { id: '10000000-0000-4000-8000-000000000104', displayName: 'Lyra Moonweaver',   timezone: 'Asia/Kolkata', totalXp: 9840, streakDays: 34, primaryPath: 'Mind',    onboardingCompletedAt: '2026-08-30T00:00:00.000Z' },
+      { id: '10000000-0000-4000-8000-000000000105', displayName: 'Theron Ironheart',  timezone: 'Asia/Kolkata', totalXp: 1640, streakDays: 9,  primaryPath: 'Body',    onboardingCompletedAt: '2026-08-30T00:00:00.000Z' },
+      { id: '10000000-0000-4000-8000-000000000106', displayName: 'Aria Sunwalker',    timezone: 'Asia/Kolkata', totalXp: 305,  streakDays: 1,  primaryPath: 'Mind',    onboardingCompletedAt: '2026-08-30T00:00:00.000Z' },
     ];
 
     for (const user of demoUsers) {
@@ -304,7 +384,8 @@ export class MemoryQuestRepository {
     ];
 
     for (const post of demoPosts) {
-      if (this.communityPosts.some((item) => item.id === post.id)) continue;
+      const card = demoCards.find((item) => item.id === post.cardId);
+      if (!card || Number(card.rarityStars || 0) <= 1 || this.communityPosts.some((item) => item.id === post.id)) continue;
       this.communityPosts.push({ ...post, visibility: 'public' });
     }
     this.communityPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -320,7 +401,6 @@ export class MemoryQuestRepository {
       { postId: demoPosts[0].id, userId: demoUsers[1].id },
       { postId: demoPosts[2].id, userId: demoUsers[0].id },
       { postId: demoPosts[2].id, userId: demoUsers[1].id },
-      { postId: demoPosts[3].id, userId: demoUsers[2].id },
     ];
     for (const like of crossLikes) {
       if (!this.communityLikes.some((l) => l.postId === like.postId && l.userId === like.userId)) {
@@ -547,6 +627,7 @@ export class MemoryQuestRepository {
       if (this.capturedCards.some((entry) => entry.captureId === card.captureId)) throw conflict('duplicate_capture_id');
     }
     const value = { id: randomUUID(), status: 'final', capturedAt: new Date().toISOString(), serverReceivedAt: new Date().toISOString(), humanVerified: false, ...card };
+    if (value.rarityStars == null) value.rarityStars = Math.max(1, Math.round(Number(value.rarityScore || 0) * 5));
     if (!value.imageRef && (value.mediaData || value.storageRef)) value.imageRef = `/api/v1/captures/${value.id}/media`;
     this.capturedCards.unshift(value);
     if (value.mediaData || value.storageRef) {

@@ -204,6 +204,24 @@ export const GUEST_WORLD_HOTSPOTS = [
 
 // Guest-mode only. Signed-in sessions always read real posts from
 // /api/v1/community/posts and show an empty state when there are none.
+const LIBRARY_IMAGES = {
+  retriever: 'https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=1100&q=80',
+  tiger: 'https://images.unsplash.com/photo-1549366021-9f761d040a94?auto=format&fit=crop&w=1100&q=80',
+  mountains: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1100&q=80',
+  waterfall: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1100&q=80',
+  butterfly: 'https://images.unsplash.com/photo-1452570053594-1b985d6ea890?auto=format&fit=crop&w=1100&q=80',
+  fox: 'https://images.unsplash.com/photo-1474511320723-9a56873867b5?auto=format&fit=crop&w=1100&q=80',
+  aurora: 'https://images.unsplash.com/photo-1483347756197-71ef80e95f73?auto=format&fit=crop&w=1100&q=80',
+  canopy: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1100&q=80',
+  maple: 'https://images.unsplash.com/photo-1503435980610-a51f3ddfee50?auto=format&fit=crop&w=1100&q=80',
+  dunes: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=1100&q=80',
+  wave: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1100&q=80',
+  lake: 'https://images.unsplash.com/photo-1439066615861-d1af74d74000?auto=format&fit=crop&w=1100&q=80',
+  horses: 'https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?auto=format&fit=crop&w=1100&q=80',
+  owl: 'https://images.unsplash.com/photo-1501706362039-c6e809fbb148?auto=format&fit=crop&w=1100&q=80',
+  mushrooms: 'https://images.unsplash.com/photo-1504545102780-26774c1bb073?auto=format&fit=crop&w=1100&q=80',
+};
+
 export const GUEST_COMMUNITY_POSTS = [
   {
     id: 'gp-1',
@@ -242,7 +260,7 @@ export const GUEST_COMMUNITY_POSTS = [
     userId: 'u-mira',
     author: { userId: 'u-mira', displayName: 'Mira Fern', totalXp: 2840, rankTitle: 'Bronze Explorer IV' },
     cardId: 'gc-4',
-    discovery: { itemName: 'Lake Reflection', cardTitle: 'Lake Reflection', rarityTier: 'C', rarityGrade: 'C', rarityStars: 2, speciesId: 'water-lake', element: 'Water', imageRef: '/assets/verdant-explorer-banner.png', capturedAt: new Date(Date.now() - 42000000).toISOString() },
+    discovery: { itemName: 'Lake Reflection', cardTitle: 'Lake Reflection', rarityTier: 'C', rarityGrade: 'C', rarityStars: 2, speciesId: 'water-lake', element: 'Water', imageRef: LIBRARY_IMAGES.lake, capturedAt: new Date(Date.now() - 42000000).toISOString() },
     caption: 'Quiet water, loud insects.',
     hashtags: ['#lake', '#evening'],
     placeLabel: 'Hebbal Lake',
@@ -272,7 +290,7 @@ export const GUEST_CAPTURES = [
     rarityTier: 'S',
     rarityStars: 5,
     description: 'A beautiful golden retriever resting in the afternoon sun.',
-    imageRef: '/dashboard-castle-panorama.png',
+    imageRef: LIBRARY_IMAGES.retriever,
     capturedAt: new Date(Date.now() - 86400000 * 1).toISOString(),
   },
   {
@@ -284,7 +302,7 @@ export const GUEST_CAPTURES = [
     rarityTier: 'A',
     rarityStars: 4,
     description: 'A Bengal tiger patrolling its territory.',
-    imageRef: '/assets/african-grey-parrot.png',
+    imageRef: LIBRARY_IMAGES.tiger,
     capturedAt: new Date(Date.now() - 86400000 * 2).toISOString(),
   },
   {
@@ -296,7 +314,7 @@ export const GUEST_CAPTURES = [
     rarityTier: 'S',
     rarityStars: 5,
     description: 'Jagged peaks piercing through the morning mist.',
-    imageRef: '/assets/quest-compass-poster.png',
+    imageRef: LIBRARY_IMAGES.mountains,
     capturedAt: new Date(Date.now() - 86400000 * 3).toISOString(),
   },
   {
@@ -308,7 +326,7 @@ export const GUEST_CAPTURES = [
     rarityTier: 'A',
     rarityStars: 4,
     description: 'A secret waterfall deep in the ancient forest.',
-    imageRef: '/assets/verdant-explorer-banner.png',
+    imageRef: LIBRARY_IMAGES.waterfall,
     capturedAt: new Date(Date.now() - 86400000 * 4).toISOString(),
   },
   {
@@ -320,7 +338,7 @@ export const GUEST_CAPTURES = [
     rarityTier: 'B',
     rarityStars: 3,
     description: 'Resting gently on a spring blossom.',
-    imageRef: '/assets/blue-billed-cuckoo.png',
+    imageRef: LIBRARY_IMAGES.butterfly,
     capturedAt: new Date(Date.now() - 86400000 * 5).toISOString(),
   },
   {
@@ -332,7 +350,7 @@ export const GUEST_CAPTURES = [
     rarityTier: 'A',
     rarityStars: 4,
     description: 'A quick glimpse of red against the green undergrowth.',
-    imageRef: '/dashboard-castle-panorama.png',
+    imageRef: LIBRARY_IMAGES.fox,
     capturedAt: new Date(Date.now() - 86400000 * 6).toISOString(),
   },
   {
@@ -344,7 +362,7 @@ export const GUEST_CAPTURES = [
     rarityTier: 'S',
     rarityStars: 5,
     description: 'The sky dancing in green and purple ribbons.',
-    imageRef: '/auth-celestial-aperture.png',
+    imageRef: LIBRARY_IMAGES.aurora,
     capturedAt: new Date(Date.now() - 86400000 * 7).toISOString(),
   },
   {
@@ -356,7 +374,7 @@ export const GUEST_CAPTURES = [
     rarityTier: 'C',
     rarityStars: 2,
     description: 'Looking up through the dense tropical foliage.',
-    imageRef: '/assets/blue-billed-cuckoo.png',
+    imageRef: LIBRARY_IMAGES.canopy,
     capturedAt: new Date(Date.now() - 86400000 * 8).toISOString(),
   },
   {
@@ -368,7 +386,7 @@ export const GUEST_CAPTURES = [
     rarityTier: 'B',
     rarityStars: 3,
     description: 'Vibrant red leaves catching the autumn light.',
-    imageRef: '/assets/quest-compass-poster.png',
+    imageRef: LIBRARY_IMAGES.maple,
     capturedAt: new Date(Date.now() - 86400000 * 9).toISOString(),
   },
   {
@@ -380,7 +398,7 @@ export const GUEST_CAPTURES = [
     rarityTier: 'B',
     rarityStars: 3,
     description: 'Endless rolling dunes under a harsh sun.',
-    imageRef: '/dashboard-castle-panorama.png',
+    imageRef: LIBRARY_IMAGES.dunes,
     capturedAt: new Date(Date.now() - 86400000 * 10).toISOString(),
   },
   {
@@ -392,7 +410,7 @@ export const GUEST_CAPTURES = [
     rarityTier: 'A',
     rarityStars: 4,
     description: 'A perfectly curling wave breaking on the shore.',
-    imageRef: '/assets/verdant-explorer-banner.png',
+    imageRef: LIBRARY_IMAGES.wave,
     capturedAt: new Date(Date.now() - 86400000 * 11).toISOString(),
   },
   {
@@ -404,7 +422,7 @@ export const GUEST_CAPTURES = [
     rarityTier: 'S',
     rarityStars: 5,
     description: 'A herd of wild horses running across the plains.',
-    imageRef: '/assets/quest-compass-poster.png',
+    imageRef: LIBRARY_IMAGES.horses,
     capturedAt: new Date(Date.now() - 86400000 * 12).toISOString(),
   },
   {
@@ -416,7 +434,7 @@ export const GUEST_CAPTURES = [
     rarityTier: 'A',
     rarityStars: 4,
     description: 'A great horned owl watching from a branch.',
-    imageRef: '/assets/african-grey-parrot.png',
+    imageRef: LIBRARY_IMAGES.owl,
     capturedAt: new Date(Date.now() - 86400000 * 13).toISOString(),
   },
   {
@@ -428,7 +446,7 @@ export const GUEST_CAPTURES = [
     rarityTier: 'C',
     rarityStars: 2,
     description: 'Tiny fungi growing on a fallen log.',
-    imageRef: '/assets/blue-billed-cuckoo.png',
+    imageRef: LIBRARY_IMAGES.mushrooms,
     capturedAt: new Date(Date.now() - 86400000 * 14).toISOString(),
   }
 ];

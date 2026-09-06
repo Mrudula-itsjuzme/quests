@@ -14,9 +14,10 @@ services:
           property: connectionString
       - key: CRON_SECRET
         generateValue: true
-      - key: ALLOW_STUB_VISION_IN_PRODUCTION
-        value: "true"
-
+      # NOTE: ALLOW_STUB_VISION_IN_PRODUCTION must stay unset here. The stub
+      # vision provider would silently mint fake species for every capture;
+      # production requires VISION_PROVIDER=openrouter with a real
+      # OPENROUTER_API_KEY set in the Render dashboard instead.
 
   - type: cron
     name: quests-scheduler
