@@ -525,6 +525,12 @@ export class PostgresQuestRepository {
     const { rowCount } = await this.pool.query('SELECT 1 FROM captured_cards WHERE species_id = $1 AND status <> $2 LIMIT 1', [speciesId, 'rejected']);
     return rowCount > 0;
   }
+  async getActiveRarityConfig() {
+    const { rows } = await this.pool.query('SELECT version, weights, grade_bands AS "gradeBands" FROM rarity_weight_sets WHERE active = TRUE LIMIT 1');
+    if (rows.length === 0) return null;
+    return rows[0];
+  }
+
   async getSpeciesDiscoveryStats(speciesId) {
     const [speciesCount, totalCount] = await Promise.all([
       this.pool.query("SELECT COUNT(*)::int AS count FROM captured_cards WHERE species_id = $1 AND status <> 'rejected'", [speciesId]),
@@ -1095,6 +1101,94 @@ export class PostgresQuestRepository {
       throw error;
     }
   }
+
+  // Store & Inventory
+  async getStoreCatalog() {
+    const { rows } = await this.pool.query('SELECT item_id as "itemId", name, type, price_coins as "priceCoins" FROM store_catalog ORDER BY price_coins ASC');
+    return rows;
+  }
+
+  async purchaseStoreItem(userId, itemId) {
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      const item = await client.query('SELECT price_coins FROM store_catalog WHERE item_id = $1', [itemId]);
+      if (item.rows.length === 0) throw new Error('Item not found');
+      
+      const price = item.rows[0].price_coins;
+      const balance = await client.query('SELECT COALESCE(SUM(amount), 0)::int AS balance FROM coin_ledger WHERE user_id = $1', [userId]);
+      if ((balance.rows[0]?.balance || 0) < price) throw new Error('INSUFFICIENT_FUNDS');
+
+      // Deduct coins
+      await client.query(`INSERT INTO coin_ledger (id, ledger_key, user_id, amount, reason) VALUES ($1, $2, $3, $4, 'store_purchase')`, 
+        [randomUUID(), `purchase:${itemId}:${Date.now()}`, userId, -price]);
+
+      // Add to inventory
+      await client.query(`INSERT INTO inventory (user_id, item_id, quantity) VALUES ($1, $2, 1) ON CONFLICT (user_id, item_id) DO UPDATE SET quantity = inventory.quantity + 1, updated_at = NOW()`,
+        [userId, itemId]);
+
+      await client.query('COMMIT');
+      return { success: true, itemId };
+    } catch (e) {
+      await client.query('ROLLBACK');
+      throw e;
+    } finally {
+      client.release();
+    }
+  }
+
+  async consumeInventoryItem(userId, itemId) {
+    const { rows } = await this.pool.query(`UPDATE inventory SET quantity = quantity - 1, updated_at = NOW() WHERE user_id = $1 AND item_id = $2 AND quantity > 0 RETURNING id`, [userId, itemId]);
+    return rows.length > 0;
+  }
+
+  async grantRewards(userId, loot) {
+    if (loot.coins > 0) {
+      await this.pool.query(`INSERT INTO coin_ledger (id, ledger_key, user_id, amount, reason) VALUES ($1, $2, $3, $4, 'chest_loot')`, 
+        [randomUUID(), `loot:${Date.now()}`, userId, loot.coins]);
+    }
+  }
+
+  async contributeToRegionalEvent(userId, chestId, regionId) {
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      let event = await client.query(`SELECT id, counter, threshold, state FROM regional_events WHERE region_id = $1 AND chest_id = $2 AND state = 'accumulating' FOR UPDATE`, [regionId, chestId]);
+      
+      if (event.rows.length === 0) {
+        event = await client.query(`INSERT INTO regional_events (region_id, chest_id) VALUES ($1, $2) RETURNING id, counter, threshold, state`, [regionId, chestId]);
+      }
+      
+      const evt = event.rows[0];
+      let justActivated = false;
+
+      // Try inserting into contributors (to enforce one per user)
+      const contrib = await client.query(`INSERT INTO regional_event_contributors (event_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING RETURNING user_id`, [evt.id, userId]);
+      
+      if (contrib.rows.length > 0) {
+        // User actually contributed
+        const update = await client.query(`UPDATE regional_events SET counter = counter + 1, updated_at = NOW() WHERE id = $1 RETURNING counter, threshold`, [evt.id]);
+        if (update.rows[0].counter >= update.rows[0].threshold) {
+          await client.query(`UPDATE regional_events SET state = 'active', active_until = NOW() + INTERVAL '24 hours' WHERE id = $1`, [evt.id]);
+          justActivated = true;
+        }
+        evt.counter = update.rows[0].counter;
+      }
+
+      await client.query('COMMIT');
+      return { eventId: evt.id, counter: evt.counter, threshold: evt.threshold, justActivated };
+    } catch (e) {
+      await client.query('ROLLBACK');
+      throw e;
+    } finally {
+      client.release();
+    }
+  }
+
+  async getRegionalEventStatus(regionId) {
+    const { rows } = await this.pool.query(`SELECT chest_id, counter, threshold, state, active_until FROM regional_events WHERE region_id = $1 ORDER BY created_at DESC LIMIT 10`, [regionId]);
+    return rows;
+  }
 }
 
 // Joins the author and the shared capture so a feed row is renderable in one
@@ -1294,3 +1388,4 @@ function demoCaptureMediaData() {
   }
   return _demoMediaData;
 }
+

@@ -19,6 +19,13 @@ async function getLeaflet() {
 
 // Custom pin HTML for hotspot markers
 function makePinHtml(pin) {
+  if (pin.obfuscated || pin.gps?.obfuscated) {
+    return `
+      <div class="map-leaflet-pin map-pin-obfuscated" title="Approximate Location: ${pin.title}">
+        <div class="map-leaflet-pin-inner" style="border-style: dashed; border-color: rgba(255,100,100,0.8); color: #ff6666;">?</div>
+      </div>
+    `;
+  }
   const grade = pin.grade || '';
   const gradeClass = grade ? `rank-hex-${grade.toLowerCase()}` : 'map-pin-curated';
   const label = grade || getCategoryEmoji(pin.category);

@@ -44,12 +44,7 @@ export class ProgressionEngine {
   }
 
   rankTitleForXp(totalXp = 0) {
-    if (totalXp >= 100_000) return 'Legend Circle';
-    if (totalXp >= 50_000) return 'Mythril Knight';
-    if (totalXp >= 20_000) return 'Pathfinder';
-    if (totalXp >= 10_000) return 'Guardian';
-    if (totalXp >= 5_000) return 'Scout';
-    return 'Adventurer';
+    return this.snapshot(totalXp).tierLabel;
   }
 
   xpForLevel(level) {

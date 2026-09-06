@@ -619,7 +619,7 @@ describe('Community API', () => {
 
     expect(created.status).toBe(201);
     expect(created.body.discovery.itemName).toBe('House Sparrow');
-    expect(created.body.author.rankTitle).toBe('Adventurer');
+    expect(created.body.author.rankTitle).toBe('Bronze Explorer I');
     expect(created.body.hashtags).toEqual(['#birding']);
     expect(created.body.likeCount).toBe(0);
 

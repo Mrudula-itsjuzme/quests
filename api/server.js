@@ -12,6 +12,8 @@ import { z } from 'zod';
 import { loadConfig } from './config.js';
 import { createAuthMiddleware } from './auth.js';
 import { QuestEngine } from './lib/quest-engine.js';
+import { StoreEngine } from './lib/store-engine.js';
+import { EventEngine } from './lib/event-engine.js';
 import { questDefinitions } from './lib/quest-definitions.js';
 import { createProviders, ProviderNotConfiguredError } from './lib/providers.js';
 import { MemoryQuestRepository } from './lib/memory-repository.js';
@@ -150,6 +152,8 @@ export function createApp(options = {}) {
   const repository = options.repository || new MemoryQuestRepository({ definitions: questDefinitions });
   const providers = options.providers || createProviders({ mode: config.PROVIDER_MODE, aiVerifyUrl: config.QUEST_AI_VERIFY_URL, providerSecret: config.QUEST_PROVIDER_SECRET, notificationUrl: config.QUEST_NOTIFICATION_URL });
   const engine = options.engine || new QuestEngine({ repository, providers });
+  const storeEngine = options.storeEngine || new StoreEngine(repository);
+  const eventEngine = options.eventEngine || new EventEngine(repository, providers.notifications);
   const visionProvider = options.visionProvider || resolveVisionProvider(config);
   const findScenicPlaces = options.findScenicPlaces || createScenicPlacesProvider();
   const app = express();
@@ -262,6 +266,20 @@ export function createApp(options = {}) {
   app.post('/api/v1/quests/generate-monthly', writeLimiter, asyncRoute(async (req, res) => res.status(201).json(await engine.generateMonthly(req.identity, requireIdempotency(req)))));
   app.post('/api/v1/quests/:assignmentId/progress', writeLimiter, asyncRoute(async (req, res) => res.json(await engine.progress(req.identity, parse(assignmentIdSchema, req.params.assignmentId), parse(progressSchema, req.body), requireIdempotency(req)))));
   app.post('/api/v1/quests/:assignmentId/submissions', writeLimiter, asyncRoute(async (req, res) => res.status(201).json(await engine.submit(req.identity, parse(assignmentIdSchema, req.params.assignmentId), parse(submissionSchema, req.body), requireIdempotency(req)))));
+
+  // Store & Regional Events (Milestone 5)
+  app.get('/api/v1/store/catalog', asyncRoute(async (req, res) => res.json(await storeEngine.getCatalog())));
+  app.post('/api/v1/store/purchase', writeLimiter, asyncRoute(async (req, res) => {
+    const { itemId } = req.body;
+    if (!itemId) throw new Error('Missing itemId');
+    res.json(await storeEngine.purchaseItem(req.identity.id, itemId));
+  }));
+  app.post('/api/v1/chests/:id/open', writeLimiter, asyncRoute(async (req, res) => {
+    const { regionId } = req.body; // Region ID for regional events
+    res.json(await eventEngine.openChest(req.identity.id, req.params.id, regionId));
+  }));
+  app.get('/api/v1/events/regional/:regionId', asyncRoute(async (req, res) => res.json(await eventEngine.getRegionalEventStatus(req.params.regionId))));
+
   app.get('/api/v1/collectibles', asyncRoute(async (req, res) => sendCachedJson(req, res, await repository.getCollectibles(req.identity.id))));
   app.get('/api/v1/species', asyncRoute(async (req, res) => sendCachedJson(req, res, PUBLIC_SPECIES_CATALOG)));
   app.post('/api/v1/captures', writeLimiter, asyncRoute(async (req, res) => {
@@ -303,6 +321,8 @@ export function createApp(options = {}) {
         : false;
       const discoveryStats = speciesMatch.id ? await repository.getSpeciesDiscoveryStats?.(speciesMatch.id) : null;
 
+      const rarityConfig = (await repository.getActiveRarityConfig?.()) || { version: 1, weights: DEFAULT_WEIGHTS, gradeBands: DEFAULT_GRADE_BANDS };
+
       const rarity = scoreDiscovery(
         {
           species: speciesMatch,
@@ -314,7 +334,7 @@ export function createApp(options = {}) {
           isFirstGlobal,
           discoveryStats,
         },
-        { version: 1, weights: DEFAULT_WEIGHTS, gradeBands: DEFAULT_GRADE_BANDS },
+        rarityConfig,
       );
 
       const card = await repository.createCapturedCard({

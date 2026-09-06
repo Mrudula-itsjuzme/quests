@@ -19,6 +19,7 @@ const GuildPage = React.lazy(() => import('./features/guild/GuildPage').then(m =
 const ProfilePage = React.lazy(() => import('./features/profile/ProfilePage').then(m => ({ default: m.ProfilePage })));
 const QuestsPage = React.lazy(() => import('./features/quests/QuestsPage').then(m => ({ default: m.QuestsPage })));
 const RewardsPage = React.lazy(() => import('./features/rewards/RewardsPage').then(m => ({ default: m.RewardsPage })));
+const ModerationQueue = React.lazy(() => import('./features/admin/ModerationQueue').then(m => ({ default: m.ModerationQueue })));
 
 function App() {
   const motionReduced = useMotionReducedPreference();
@@ -71,6 +72,7 @@ function App() {
                   <Route path="collection" element={<GalleryPage />} />
                   <Route path="library" element={<GalleryPage />} />
                   <Route path="profile" element={<ProfilePage />} />
+                  <Route path="admin/queue" element={<ModerationQueue />} />
                 </Route>
               </Route>
             </Route>

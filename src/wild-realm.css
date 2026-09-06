@@ -2296,27 +2296,39 @@ button[aria-disabled="true"] {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(ellipse 100% 60% at 50% -10%, rgba(16,185,129,0.2) 0%, transparent 60%), #050e0a;
+  background: radial-gradient(ellipse 120% 80% at 50% -20%, rgba(16,185,129,0.25) 0%, rgba(5,14,10,1) 70%);
+  background-color: #030806;
   overflow: hidden;
-  padding: 24px 20px calc(40px + env(safe-area-inset-bottom));
+  padding: 32px 24px calc(48px + env(safe-area-inset-bottom));
 }
 .landing-blob {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
+  filter: blur(100px);
   pointer-events: none;
   z-index: 0;
+  opacity: 0.8;
+  mix-blend-mode: screen;
 }
 .landing-blob-1 {
-  width: 400px; height: 400px;
-  top: -120px; left: -100px;
-  background: rgba(16,185,129,0.12);
+  width: 500px; height: 500px;
+  top: -150px; left: -150px;
+  background: rgba(16,185,129,0.3);
+  animation: float-slow 15s ease-in-out infinite alternate;
 }
 .landing-blob-2 {
-  width: 320px; height: 320px;
-  bottom: -60px; right: -80px;
-  background: rgba(245,158,11,0.08);
+  width: 400px; height: 400px;
+  bottom: -100px; right: -100px;
+  background: rgba(4,120,87,0.25);
+  animation: float-slow 18s ease-in-out infinite alternate-reverse;
 }
+
+@keyframes float-slow {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(30px, 40px) scale(1.05); }
+  100% { transform: translate(-20px, -20px) scale(0.95); }
+}
+
 .landing-v2-inner {
   position: relative;
   z-index: 1;
