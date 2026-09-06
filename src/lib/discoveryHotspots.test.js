@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { buildDiscoveryHotspots, distanceKm, formatDistance, mapCuratedHotspots, mergeHotspots } from './discoveryHotspots';
+import { buildCommunityHotspots, buildDiscoveryHotspots, distanceKm, formatDistance, mapCuratedHotspots, mergeHotspots } from './discoveryHotspots';
 
 const species = [
   { id: 'sky-house-sparrow', element: 'Sky' },
@@ -153,6 +153,22 @@ describe('mergeHotspots', () => {
   it('returns curated content even when the player has captured nothing', () => {
     const merged = mergeHotspots([{ id: 'curated-only', distanceKm: null }], []);
     expect(merged).toHaveLength(1);
+  });
+});
+
+describe('buildCommunityHotspots', () => {
+  it('groups public photo posts and preserves the authenticated photo reference', () => {
+    const posts = [{
+      id: 'p1', gps: { lat: 12.97, lng: 77.59 }, placeLabel: 'Garden lookout',
+      author: { displayName: 'Maya' }, discovery: { imageRef: '/api/v1/community/posts/p1/media', itemName: 'Fern' },
+    }];
+    const [spot] = buildCommunityHotspots(posts, { lat: 12.97, lng: 77.59 });
+    expect(spot).toMatchObject({ title: 'Garden lookout', source: 'community', contributor: 'Maya', imageRef: '/api/v1/community/posts/p1/media' });
+    expect(spot.distanceLabel).toBe('0 m');
+  });
+
+  it('does not map GPS-only posts without a shared photograph', () => {
+    expect(buildCommunityHotspots([{ id: 'p1', gps: { lat: 1, lng: 2 }, discovery: {} }])).toEqual([]);
   });
 });
 

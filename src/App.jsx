@@ -84,9 +84,17 @@ function App() {
 
 function AppLoading() {
   return (
-    <div className="app-route-loading" role="status" aria-live="polite">
-      <span />
-      <p>Opening Wild Realm</p>
+    <div className="startup-screen" role="status" aria-live="polite">
+      <div className="startup-logo-container">
+        <div className="startup-logo-pulse" />
+        <div className="startup-logo-icon">🌿</div>
+      </div>
+      <h1 className="startup-title">Wild Realm</h1>
+      <div className="startup-spinner">
+        <div className="startup-spinner-dot"></div>
+        <div className="startup-spinner-dot"></div>
+        <div className="startup-spinner-dot"></div>
+      </div>
     </div>
   );
 }

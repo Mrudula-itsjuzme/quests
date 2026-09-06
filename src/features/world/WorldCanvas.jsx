@@ -34,7 +34,7 @@ function getCategoryEmoji(category = '') {
   return map[category] || '📍';
 }
 
-export function WorldCanvas({ hotspots = [], onSelectHotspot, userPosition }) {
+export function WorldCanvas({ hotspots = [], onSelectHotspot, onPointMap, userPosition }) {
   const containerRef = useRef(null);
   const mapRef = useRef(null);
   const markersRef = useRef([]);
@@ -71,6 +71,7 @@ export function WorldCanvas({ hotspots = [], onSelectHotspot, userPosition }) {
       }
 
       mapRef.current = map;
+      map.on('click', (event) => onPointMap?.({ lat: event.latlng.lat, lng: event.latlng.lng }));
       setMapReady(true);
       window.requestAnimationFrame(() => {
         if (!destroyed) map.invalidateSize();
@@ -88,7 +89,7 @@ export function WorldCanvas({ hotspots = [], onSelectHotspot, userPosition }) {
       }
       setMapReady(false);
     };
-  }, [offlineNative]);
+  }, [offlineNative, onPointMap]);
 
   useEffect(() => {
     if (!mapReady || !mapRef.current) return undefined;
@@ -142,7 +143,7 @@ export function WorldCanvas({ hotspots = [], onSelectHotspot, userPosition }) {
       hotspots.forEach((pin) => {
         const lat = pin.lat ?? pin.gps?.lat;
         const lng = pin.lng ?? pin.gps?.lng;
-        if (!lat || !lng) return;
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
 
         const icon = Leaflet.divIcon({
           className: '',

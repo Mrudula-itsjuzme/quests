@@ -2417,6 +2417,70 @@ export const questDefinitions = Object.freeze(
       "Photograph Thirty Nature Observations",
       "Ensure the subject is clear and in focus."
     ]
+  },
+  {
+    "id": "discovery-local-heritage",
+    "title": "Local Landmark Hunt",
+    "description": "Explore a nearby landmark, heritage building, or public artwork and photograph one detail that gives it character.",
+    "category": "Discovery",
+    "rarity": "Common",
+    "verificationType": "PHOTO",
+    "subjectTag": "local_heritage",
+    "cadence": "daily",
+    "targetValue": 1,
+    "unit": "place",
+    "cooldownDays": 3,
+    "xpReward": 25,
+    "enabled": true,
+    "instructions": ["Visit the place safely and respectfully", "Capture a distinctive public detail"]
+  },
+  {
+    "id": "discovery-viewpoint-route",
+    "title": "Find a New Viewpoint",
+    "description": "Choose a mapped viewpoint, waterfront, garden, or overlook you have not visited and capture the view.",
+    "category": "Discovery",
+    "rarity": "Uncommon",
+    "verificationType": "PHOTO",
+    "subjectTag": "scenic_viewpoint",
+    "cadence": "daily",
+    "targetValue": 1,
+    "unit": "viewpoint",
+    "cooldownDays": 5,
+    "xpReward": 50,
+    "enabled": true,
+    "instructions": ["Pick a public, accessible place", "Photograph the view without entering restricted areas"]
+  },
+  {
+    "id": "body-explorer-walk",
+    "title": "Explorer Walk",
+    "description": "Take a 2,000-step walking route through a park, heritage district, waterfront, or other public place.",
+    "category": "Body",
+    "rarity": "Common",
+    "verificationType": "AUTO",
+    "subjectTag": "steps",
+    "cadence": "daily",
+    "targetValue": 2000,
+    "unit": "steps",
+    "cooldownDays": 2,
+    "xpReward": 25,
+    "enabled": true,
+    "instructions": ["Start the step counter from Explore", "Walk only where public access is allowed"]
+  },
+  {
+    "id": "mind-place-story",
+    "title": "Learn the Place Story",
+    "description": "Visit a local attraction and note one verified historical, cultural, or ecological fact about it.",
+    "category": "Mind",
+    "rarity": "Common",
+    "verificationType": "TEXT",
+    "subjectTag": "place_history",
+    "cadence": "daily",
+    "targetValue": 1,
+    "unit": "fact",
+    "cooldownDays": 3,
+    "xpReward": 25,
+    "enabled": true,
+    "instructions": ["Explore a public place", "Record the fact and where you learned it"]
   }
 ]
 );

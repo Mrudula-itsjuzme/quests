@@ -87,7 +87,7 @@ let guestCommunityPosts = null;
 let guestFollows = null;
 
 const GUEST_CAPTURES_KEY = 'wild_realm_guest_captures_v1';
-const GUEST_POSTS_KEY = 'wild_realm_guest_posts_v3';
+const GUEST_POSTS_KEY = 'wild_realm_guest_posts_v4';
 const GUEST_FOLLOWS_KEY = 'wild_realm_guest_follows_v1';
 const MAX_GUEST_CAPTURES = 100;
 const MAX_GUEST_POSTS = 100;
@@ -407,6 +407,11 @@ export function createApiClient(getToken) {
       const query = params.toString();
       return request(`/world/hotspots${query ? `?${query}` : ''}`, { signal, token });
     },
+    getScenicPlaces: async ({ lat, lng, radius = 5000 }, signal) => {
+      const token = await getToken();
+      const params = new URLSearchParams({ lat: String(lat), lng: String(lng), radius: String(radius) });
+      return request(`/world/scenic-places?${params}`, { signal, token: token === 'guest' ? undefined : token });
+    },
     getCommunityPosts: async (scope = 'public', signal) => {
       const token = await getToken();
       if (token === 'guest') return guestDelay(guestPostList(), 200);
@@ -504,7 +509,20 @@ export function createApiClient(getToken) {
     },
     setCommunityPostLike: async (postId, liked) => {
       const token = await getToken();
-      if (token === 'guest') throw new ApiError(403, 'guest_write_unavailable');
+      if (token === 'guest') {
+        const posts = guestPostList();
+        const index = posts.findIndex((post) => post.id === postId);
+        if (index === -1) throw new ApiError(404, 'community_post_not_found');
+        const current = posts[index];
+        const next = [...posts];
+        next[index] = {
+          ...current,
+          viewerLiked: Boolean(liked),
+          likeCount: Math.max(0, Number(current.likeCount || 0) + (liked ? 1 : -1)),
+        };
+        setGuestPosts(next);
+        return guestDelay(next[index], 120);
+      }
       return request(`/community/posts/${postId}/like`, { method: 'POST', body: { liked }, token });
     },
     reportCommunityPost: async (postId, reason) => {

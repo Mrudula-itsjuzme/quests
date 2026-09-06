@@ -84,6 +84,17 @@ export function useWorldHotspots(filters = {}) {
   });
 }
 
+export function useScenicPlaces(center) {
+  const api = useApiClient();
+  return useQuery({
+    queryKey: ['world', 'scenic-places', center?.lat, center?.lng],
+    queryFn: ({ signal }) => api.getScenicPlaces(center, signal),
+    enabled: Boolean(center),
+    staleTime: 5 * 60 * 1000,
+    retry: 1,
+  });
+}
+
 export function useCommunityPosts(scope = 'public') {
   const api = useApiClient();
   return useQuery({

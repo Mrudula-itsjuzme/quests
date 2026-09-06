@@ -177,6 +177,41 @@ describe('App (development auth mode)', () => {
     expect(screen.getByRole('button', { name: /like this discovery/i })).toBeInTheDocument();
   });
 
+  it('moves between community stories with the next control', async () => {
+    const stories = [
+      { ...mockCommunityPost, postId: mockCommunityPost.id, viewed: false },
+      {
+        ...mockCommunityPost,
+        id: '44444444-4444-4444-8444-444444444444',
+        postId: '44444444-4444-4444-8444-444444444444',
+        author: { ...mockCommunityPost.author, userId: 'u-102', displayName: 'Mira Wildwood' },
+        discovery: { ...mockCommunityPost.discovery, itemName: 'Lion-tailed Macaque', cardTitle: 'Canopy Watch' },
+        viewed: false,
+      },
+    ];
+    global.fetch = vi.fn((url, options = {}) => {
+      if (url.includes('/v1/me')) return jsonResponse(mockMe);
+      if (url.includes('/v1/community/stories/') && options.method === 'POST') return jsonResponse({ viewed: true });
+      if (url.includes('/v1/community/stories')) return jsonResponse(stories);
+      if (url.includes('/v1/community/posts')) return jsonResponse([mockCommunityPost]);
+      return jsonResponse([]);
+    });
+
+    renderApp('/app/community');
+    fireEvent.click(await screen.findByRole('button', { name: /Malabar Trogon/i }));
+    expect(await screen.findByRole('dialog', { name: /Lyra Moonweaver's story/i })).toBeInTheDocument();
+    expect(screen.getByLabelText('Story 1 of 2')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /next story/i }));
+
+    expect(await screen.findByRole('dialog', { name: /Mira Wildwood's story/i })).toBeInTheDocument();
+    expect(screen.getByLabelText('Story 2 of 2')).toBeInTheDocument();
+    expect(global.fetch).toHaveBeenCalledWith(
+      expect.stringContaining('/v1/community/stories/44444444-4444-4444-8444-444444444444/view'),
+      expect.objectContaining({ method: 'POST' }),
+    );
+  });
+
   it('surfaces a community error state instead of substituting fixture data', async () => {
     global.fetch = vi.fn((url) => {
       if (url.includes('/v1/me')) return jsonResponse(mockMe);

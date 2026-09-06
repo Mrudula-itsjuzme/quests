@@ -23,6 +23,7 @@ import { speciesCatalog } from './lib/species-catalog.js';
 import { protectedGps } from './lib/geo-privacy.js';
 import { redactPublicPayload } from './lib/public-redaction.js';
 import { auditLog } from './lib/audit-log.js';
+import { createScenicPlacesProvider } from './lib/scenic-places.js';
 import clientMetrics from 'prom-client';
 
 const PUBLIC_SPECIES_CATALOG = speciesCatalog
@@ -90,6 +91,11 @@ const captureRenameSchema = z.object({
 }).strict().refine((value) => Object.keys(value).length > 0, 'capture update cannot be empty');
 const postIdSchema = z.string().uuid();
 const hotspotCategorySchema = z.enum(['Hotspots', 'Parks', 'Waterfalls', 'Birding']);
+const scenicSearchSchema = z.object({
+  lat: z.coerce.number().min(-90).max(90),
+  lng: z.coerce.number().min(-180).max(180),
+  radius: z.coerce.number().int().min(250).max(20_000).default(5000),
+});
 // "minLng,minLat,maxLng,maxLat" — the GeoJSON/slippy-map ordering, so the
 // parser is the single place that decides which number is which axis.
 const bboxSchema = z.string().regex(/^-?\d+(\.\d+)?(,-?\d+(\.\d+)?){3}$/).transform((value, ctx) => {
@@ -129,6 +135,7 @@ export function createApp(options = {}) {
   const providers = options.providers || createProviders({ mode: config.PROVIDER_MODE, aiVerifyUrl: config.QUEST_AI_VERIFY_URL, providerSecret: config.QUEST_PROVIDER_SECRET, notificationUrl: config.QUEST_NOTIFICATION_URL });
   const engine = options.engine || new QuestEngine({ repository, providers });
   const visionProvider = options.visionProvider || resolveVisionProvider(config);
+  const findScenicPlaces = options.findScenicPlaces || createScenicPlacesProvider();
   const app = express();
 
   app.disable('x-powered-by');
@@ -367,6 +374,16 @@ export function createApp(options = {}) {
     // Curated content is identical for every player, so it is safe to cache
     // and revalidate the same way as the species catalog.
     sendCachedJson(req, res, await repository.listWorldHotspots({ category, bbox, limit: req.query.limit }));
+  }));
+  app.get('/api/v1/world/scenic-places', asyncRoute(async (req, res) => {
+    const search = parse(scenicSearchSchema, req.query);
+    try {
+      const places = await findScenicPlaces(search);
+      res.setHeader('Cache-Control', 'private, max-age=300');
+      res.json(places);
+    } catch (error) {
+      res.status(503).json({ error: { code: 'scenic_places_unavailable', requestId: req.id } });
+    }
   }));
   app.get('/api/v1/community/posts', asyncRoute(async (req, res) => {
     if (config.NODE_ENV === 'development') await repository.seedDemoSocial?.(req.identity.id);

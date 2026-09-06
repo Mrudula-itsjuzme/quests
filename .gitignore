@@ -30,3 +30,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 logs/
+
+# Local tool scratch (not project artifacts)
+ruvector.db
+agentdb.rvf
+agentdb.rvf.lock
+.claude-flow/

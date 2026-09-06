@@ -65,7 +65,9 @@ export function mapCuratedHotspots(hotspots = [], origin = null) {
         imageRef: item.imageRef || imageForCategory(item.category),
         region: item.region,
         featuredSpecies: item.featuredSpecies || [],
-        source: 'curated',
+        source: item.source || 'curated',
+        sourceUrl: item.sourceUrl,
+        attribution: item.attribution,
         gps: item.gps,
         distanceKm: km,
         distanceLabel: formatDistance(km),
@@ -91,6 +93,36 @@ export function mergeHotspots(curated = [], discovered = []) {
   return [...curated, ...discovered].sort(
     (left, right) => (left.distanceKm ?? Infinity) - (right.distanceKm ?? Infinity),
   );
+}
+
+/** Groups privacy-redacted public posts into photo-backed community hotspots. */
+export function buildCommunityHotspots(posts = [], origin = null) {
+  const clusters = new Map();
+  for (const post of posts || []) {
+    if (!post?.gps || !post.discovery?.imageRef) continue;
+    const key = cellKey(post.gps.lat, post.gps.lng);
+    if (!clusters.has(key)) clusters.set(key, []);
+    clusters.get(key).push(post);
+  }
+  return [...clusters.entries()].map(([key, entries]) => {
+    const first = entries[0];
+    const lat = entries.reduce((sum, item) => sum + item.gps.lat, 0) / entries.length;
+    const lng = entries.reduce((sum, item) => sum + item.gps.lng, 0) / entries.length;
+    const km = distanceKm(origin, { lat, lng });
+    return {
+      id: `community-${key}`,
+      title: first.placeLabel || first.discovery.cardTitle || first.discovery.itemName || 'Community hotspot',
+      category: 'Community',
+      description: `${entries.length} explorer photo${entries.length === 1 ? '' : 's'} shared here.`,
+      source: 'community',
+      discoveries: entries.length,
+      contributor: first.author?.displayName || 'Explorer',
+      imageRef: first.discovery.imageRef,
+      gps: { lat, lng },
+      distanceKm: km,
+      distanceLabel: formatDistance(km),
+    };
+  });
 }
 
 /**

@@ -16,6 +16,7 @@ import {
   useReportCommunityPost,
 } from '../quests/queries';
 import { playTap } from '../../lib/useSoundEffects';
+import { projectCommunityMarkers } from '../../lib/communityMapProjection';
 import { CommunityShareSheet } from './CommunityShareSheet';
 
 const TABS = [
@@ -812,6 +813,8 @@ function CommunityMap() {
   const { data: posts, isLoading, isError } = useCommunityPosts('public');
   const located = useMemo(() => (posts || []).filter((post) => post.gps), [posts]);
 
+  const positioned = useMemo(() => projectCommunityMarkers(posts), [posts]);
+
   if (isLoading) {
     return <div className="community-state-panel" aria-busy="true"><p role="status">Loading discovery locations…</p></div>;
   }
@@ -835,36 +838,6 @@ function CommunityMap() {
     );
   }
 
-  const positioned = useMemo(() => {
-    // Fit the map to the discoveries instead of a whole-world projection: at
-    // world scale an entire metro collapses into a single pixel, so every
-    // Bengaluru capture renders as one glowing dot. Equal padding on each side
-    // keeps a lone marker centred and stops edge points touching the frame.
-    const lats = located.map((post) => post.gps.lat);
-    const lngs = located.map((post) => post.gps.lng);
-    let minLat = Math.min(...lats);
-    let maxLat = Math.max(...lats);
-    let minLng = Math.min(...lngs);
-    let maxLng = Math.max(...lngs);
-    const padLat = Math.max((maxLat - minLat) * 0.22, 0.02);
-    const padLng = Math.max((maxLng - minLng) * 0.22, 0.02);
-    minLat -= padLat;
-    maxLat += padLat;
-    minLng -= padLng;
-    maxLng += padLng;
-    const spanLat = Math.max(maxLat - minLat, 1e-9);
-    const spanLng = Math.max(maxLng - minLng, 1e-9);
-    return {
-      glowX: (((minLng + maxLng) / 2 - minLng) / spanLng) * 100,
-      glowY: ((maxLat - (minLat + maxLat) / 2) / spanLat) * 100,
-      markers: located.map((post) => ({
-        post,
-        left: ((post.gps.lng - minLng) / spanLng) * 100,
-        top: ((maxLat - post.gps.lat) / spanLat) * 100,
-      })),
-    };
-  }, [located]);
-
   return (
     <div className="community-map-panel">
       <div
@@ -873,13 +846,19 @@ function CommunityMap() {
         aria-label={`${located.length} shared discoveries with locations`}
         style={{ '--map-glow-x': `${positioned.glowX.toFixed(2)}%`, '--map-glow-y': `${positioned.glowY.toFixed(2)}%` }}
       >
-        {positioned.markers.map(({ post, left, top }) => (
+        {positioned.clusters.map((cluster) => (
           <span
-            key={post.id}
-            className={`community-map-marker rank-hex-${post.discovery?.rarityStars || 1}`}
-            style={{ left: `${left}%`, top: `${top}%` }}
-            title={`${post.discovery?.itemName || 'Discovery'} — ${post.placeLabel || 'Unnamed location'}`}
-          />
+            key={cluster.posts.map((item) => item.id).join('+')}
+            className={`community-map-marker rank-hex-${Math.max(...cluster.posts.map((item) => item.discovery?.rarityStars || 1))}`}
+            style={{ left: `${cluster.x}%`, top: `${cluster.y}%` }}
+            title={cluster.posts
+              .map((item) => `${item.discovery?.itemName || 'Discovery'} — ${item.placeLabel || 'Unnamed location'}`)
+              .join('\n')}
+          >
+            {cluster.posts.length > 1 && (
+              <span className="community-map-cluster-count">{cluster.posts.length}</span>
+            )}
+          </span>
         ))}
       </div>
       <ul className="community-map-legend">

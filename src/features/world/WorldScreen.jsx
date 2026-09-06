@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useActiveQuests, useCaptures, useCollectibles, useMarkNotificationRead, useMe, useNotifications, useSpecies, useWorldHotspots } from '../quests/queries';
+import { useActiveQuests, useCaptures, useCollectibles, useCommunityPosts, useMarkNotificationRead, useMe, useNotifications, useScenicPlaces, useSpecies, useWorldHotspots } from '../quests/queries';
 import { coinBalance, deriveGems, getEnergy } from '../../lib/playerEconomy';
 import { derivePlayerPresentation } from '../../lib/playerPresentation';
 import { timeOfDayPhase } from '../../lib/worldTime';
-import { buildDiscoveryHotspots, mapCuratedHotspots, mergeHotspots } from '../../lib/discoveryHotspots';
+import { buildCommunityHotspots, buildDiscoveryHotspots, mapCuratedHotspots, mergeHotspots } from '../../lib/discoveryHotspots';
 import { WorldCanvas } from './WorldCanvas';
 import { WorldHud } from './WorldHud';
 import { pickWeather } from './WeatherLayer';
@@ -13,8 +13,10 @@ import { playTap } from '../../lib/useSoundEffects';
 import { Icon } from '../../components/Icon';
 import { Geolocation } from '@capacitor/geolocation';
 import { Capacitor } from '@capacitor/core';
+import { CaptureImage } from '../../components/CaptureImage';
+import { useStepCounter } from '../../lib/useStepCounter';
 
-const CATEGORIES = ['All', 'Hotspots', 'Parks', 'Waterfalls', 'Birding'];
+const CATEGORIES = ['All', 'Hotspots', 'Viewpoints', 'Culture', 'Parks', 'Waterfalls', 'Birding', 'Community'];
 
 export function WorldScreen() {
   const { data: me, isLoading: meLoading } = useMe();
@@ -23,6 +25,7 @@ export function WorldScreen() {
   const { data: notifications } = useNotifications();
   const { data: captures } = useCaptures();
   const { data: species } = useSpecies();
+  const { data: communityPosts } = useCommunityPosts('public');
   const {
     data: worldHotspots,
     isLoading: hotspotsLoading,
@@ -32,6 +35,9 @@ export function WorldScreen() {
   const markNotificationRead = useMarkNotificationRead();
   const navigate = useNavigate();
   const [lastKnownPosition, setLastKnownPosition] = useState(null);
+  const [searchCenter, setSearchCenter] = useState(null);
+  const { data: scenicPlaces, isFetching: scenicLoading, isError: scenicError } = useScenicPlaces(searchCenter);
+  const stepCounter = useStepCounter();
 
   const [selectedTag, setSelectedTag] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
@@ -41,6 +47,10 @@ export function WorldScreen() {
   const handleSelectHotspot = useCallback((hotspot) => {
     playTap();
     setSelectedHotspot(hotspot);
+  }, []);
+  const handlePointMap = useCallback((point) => {
+    playTap();
+    setSearchCenter(point);
   }, []);
 
   const phase = useMemo(() => timeOfDayPhase(new Date().getHours()), []);
@@ -98,7 +108,9 @@ export function WorldScreen() {
     () => buildDiscoveryHotspots(captures, species, lastKnownPosition),
     [captures, species, lastKnownPosition],
   );
-  const hotspots = useMemo(() => mergeHotspots(curated, discovered), [curated, discovered]);
+  const scenic = useMemo(() => mapCuratedHotspots(scenicPlaces, searchCenter || lastKnownPosition), [scenicPlaces, searchCenter, lastKnownPosition]);
+  const community = useMemo(() => buildCommunityHotspots(communityPosts, searchCenter || lastKnownPosition), [communityPosts, searchCenter, lastKnownPosition]);
+  const hotspots = useMemo(() => mergeHotspots([...scenic, ...community, ...curated], discovered), [scenic, community, curated, discovered]);
 
   const filteredHotspots = useMemo(() => {
     return hotspots.filter((item) => {
@@ -207,7 +219,17 @@ export function WorldScreen() {
         hotspots={filteredHotspots}
         userPosition={lastKnownPosition}
         onSelectHotspot={handleSelectHotspot}
+        onPointMap={handlePointMap}
       />
+
+      <div className="explore-map-tools" aria-live="polite">
+        <button type="button" className="explore-step-counter" onClick={stepCounter.status === 'active' ? stepCounter.stop : stepCounter.start}>
+          <span aria-hidden="true">👣</span>
+          <strong>{stepCounter.status === 'active' ? stepCounter.steps.toLocaleString() : 'Steps'}</strong>
+          <small>{stepCounter.status === 'active' ? 'this walk' : stepCounter.status === 'web' ? 'mobile app' : stepCounter.status === 'denied' ? 'permission off' : 'tap to start'}</small>
+        </button>
+        {searchCenter && <p>{scenicLoading ? 'Finding scenic places…' : scenicError ? 'Live scenic search is unavailable.' : `${scenic.length} places around your pin`}</p>}
+      </div>
 
       <button
         type="button"
@@ -233,7 +255,7 @@ export function WorldScreen() {
       {/* Bottom Sheet: Top Nature Hotspots Near You */}
       <div className="explore-bottom-sheet">
         <div className="explore-sheet-header">
-          <h3>Top Nature Hotspots Near You</h3>
+          <h3>{searchCenter ? 'Explore around your pin' : 'Places worth exploring'}</h3>
           <button type="button" className="explore-sheet-see-all" onClick={() => navigate('/app/collection')}>
             See all ›
           </button>
@@ -264,6 +286,9 @@ export function WorldScreen() {
                 whileTap={{ scale: 0.96 }}
                 onClick={() => { playTap(); setSelectedHotspot(place); }}
               >
+                {place.source === 'community' && (
+                  <CaptureImage className="explore-community-photo" imageRef={place.imageRef} alt={place.title} useAuth />
+                )}
                 <div className="explore-hotspot-overlay">
                   {/* Curated places carry a category chip; the player's own
                       capture clusters carry their best rarity grade. */}
@@ -277,6 +302,8 @@ export function WorldScreen() {
                     <span>
                       {place.source === 'discovered'
                         ? `${place.discoveries} discover${place.discoveries === 1 ? 'y' : 'ies'}`
+                        : place.source === 'community'
+                          ? `${place.discoveries} photo${place.discoveries === 1 ? '' : 's'} · ${place.contributor}`
                         : place.region || place.category}
                     </span>
                     {place.distanceLabel && <span className="explore-hotspot-rating">{place.distanceLabel}</span>}
@@ -338,6 +365,12 @@ export function WorldScreen() {
               <p className="explore-hotspot-detail-body">
                 {selectedHotspot.discoveries} of your discoveries came from here.
               </p>
+            )}
+            {selectedHotspot.source === 'community' && (
+              <p className="explore-hotspot-detail-body">Photo shared by {selectedHotspot.contributor}.</p>
+            )}
+            {selectedHotspot.attribution && (
+              <p className="explore-hotspot-attribution">{selectedHotspot.attribution}</p>
             )}
 
             <div className="explore-hotspot-detail-actions">

@@ -53,9 +53,10 @@ export function SettingsModal({ onClose, user, onLogout, themeMode = 'light', on
           <button type="button" className="detail-close" onClick={() => { playTap(); onClose(); }} aria-label="Close settings">×</button>
         </div>
 
-        <div className="settings-section">
-          <h3><Icon name="sun" /> Appearance</h3>
-          <div className="setting-options compact">
+        <div className="settings-scroll-body">
+          <div className="settings-section">
+            <h3><Icon name="sun" /> Appearance</h3>
+            <div className="setting-options compact">
             {[
               ['light', 'Day', 'Warm readable palette'],
               ['dark', 'Night', 'Higher contrast panels'],
@@ -72,77 +73,78 @@ export function SettingsModal({ onClose, user, onLogout, themeMode = 'light', on
                 <small>{description}</small>
               </button>
             ))}
-          </div>
-        </div>
-
-        <div className="settings-section">
-          <h3><Icon name="volume-2" /> Sound</h3>
-          <div className="setting-row">
-            <div>
-              <strong>Feedback sounds</strong>
-              <p>Play subtle cues when capturing, switching tabs, and claiming rewards</p>
             </div>
-            <button
-              type="button"
-              className={`toggle-switch ${soundEnabled ? 'active' : ''}`}
-              onClick={toggleSound}
-              aria-label="Toggle tactile sound effects"
-            >
-              <span className="toggle-thumb" />
-            </button>
           </div>
-        </div>
 
-        <div className="settings-section">
-          <h3><Icon name="sparkles" /> Motion</h3>
-          <div className="setting-options">
-            <button
-              type="button"
-              className={`option-btn ${motionIntensity === 'full' ? 'active' : ''}`}
-              onClick={() => setMotion('full')}
-              onMouseEnter={playHover}
-            >
-              <span>Full Motion</span>
-              <small>Responsive transitions and capture feedback</small>
-            </button>
-            <button
-              type="button"
-              className={`option-btn ${motionIntensity === 'reduced' ? 'active' : ''}`}
-              onClick={() => setMotion('reduced')}
-              onMouseEnter={playHover}
-            >
-              <span>Calm Motion</span>
-              <small>Reduced movement for quieter use</small>
-            </button>
-          </div>
-        </div>
-
-        <div className="settings-section">
-          <h3><Icon name="user" /> Account</h3>
-          <div className="setting-row">
-            <div>
-              <strong>{user?.displayName || user?.email || 'Wayfarer'}</strong>
-              <p>{isGuest ? 'Guest mode saves on this device' : 'Signed-in Wild Realm account'}</p>
-            </div>
-            {onLogout && (
+          <div className="settings-section">
+            <h3><Icon name="volume-2" /> Sound</h3>
+            <div className="setting-row">
+              <div>
+                <strong>Feedback sounds</strong>
+                <p>Play subtle cues when capturing, switching tabs, and claiming rewards</p>
+              </div>
               <button
                 type="button"
-                className="logout-btn"
-                onClick={() => { playTap(); onClose(); onLogout(); }}
+                className={`toggle-switch ${soundEnabled ? 'active' : ''}`}
+                onClick={toggleSound}
+                aria-label="Toggle tactile sound effects"
+              >
+                <span className="toggle-thumb" />
+              </button>
+            </div>
+          </div>
+
+          <div className="settings-section">
+            <h3><Icon name="sparkles" /> Motion</h3>
+            <div className="setting-options">
+              <button
+                type="button"
+                className={`option-btn ${motionIntensity === 'full' ? 'active' : ''}`}
+                onClick={() => setMotion('full')}
                 onMouseEnter={playHover}
               >
-                Sign Out
+                <span>Full Motion</span>
+                <small>Responsive transitions and capture feedback</small>
               </button>
-            )}
+              <button
+                type="button"
+                className={`option-btn ${motionIntensity === 'reduced' ? 'active' : ''}`}
+                onClick={() => setMotion('reduced')}
+                onMouseEnter={playHover}
+              >
+                <span>Calm Motion</span>
+                <small>Reduced movement for quieter use</small>
+              </button>
+            </div>
           </div>
-          <div className="setting-meta-grid" aria-label="Session details">
-            <span><strong>{isGuest ? 'Local' : 'Cloud'}</strong><small>Storage</small></span>
-            <span><strong>{user?.tierLabel || user?.rankTitle || 'Explorer'}</strong><small>Rank</small></span>
-          </div>
-        </div>
 
-        <div className="settings-footer">
-          <p>Wild Realm v1.4.0</p>
+          <div className="settings-section">
+            <h3><Icon name="user" /> Account</h3>
+            <div className="setting-row">
+              <div>
+                <strong>{user?.displayName || user?.email || 'Wayfarer'}</strong>
+                <p>{isGuest ? 'Guest mode saves on this device' : 'Signed-in Wild Realm account'}</p>
+              </div>
+              {onLogout && (
+                <button
+                  type="button"
+                  className="logout-btn"
+                  onClick={() => { playTap(); onClose(); onLogout(); }}
+                  onMouseEnter={playHover}
+                >
+                  Sign Out
+                </button>
+              )}
+            </div>
+            <div className="setting-meta-grid" aria-label="Session details">
+              <span><strong>{isGuest ? 'Local' : 'Cloud'}</strong><small>Storage</small></span>
+              <span><strong>{user?.tierLabel || user?.rankTitle || 'Explorer'}</strong><small>Rank</small></span>
+            </div>
+          </div>
+
+          <div className="settings-footer">
+            <p>Wild Realm v1.4.0</p>
+          </div>
         </div>
       </motion.div>
     </motion.div>
