@@ -79,12 +79,10 @@ jobs:
   preflight:
     name: Production env checks (main pushes only)
     runs-on: ubuntu-latest
-    # Only runs once production secrets are configured, so it becomes a real
-    # gate then; until wired, CI stays green instead of failing every push.
-    # (secrets cannot be referenced in `if`, so evaluate it via env first.)
-    if: >-
-      github.ref == 'refs/heads/main' && github.event_name == 'push'
-      && env.PROD_SECRETS_READY == 'true'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    # The check only runs once production secrets are configured: the step is
+    # skipped when PROD_SECRETS_READY is false, and skipped steps do not fail
+    # the job. Once secrets are wired this becomes a real gate.
     env:
       PROD_SECRETS_READY: ${{ secrets.DATABASE_URL != '' }}
     steps:
@@ -97,6 +95,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Run production env checks
+        if: env.PROD_SECRETS_READY == 'true'
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           PROVIDER_MODE: ${{ secrets.PROVIDER_MODE }}
