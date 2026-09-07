@@ -23,6 +23,13 @@ export class MemoryQuestRepository {
     this.userRewards = [];
     this.inventory = [];
     this.coinLedger = [];
+    this.storeCatalog = [
+      { itemId: 'bronze_chest', name: 'Bronze Chest', type: 'chest', priceCoins: 100 },
+      { itemId: 'silver_chest', name: 'Silver Chest', type: 'chest', priceCoins: 300 },
+      { itemId: 'gold_chest', name: 'Gold Chest', type: 'chest', priceCoins: 1000 },
+      { itemId: 'event_chest_1', name: 'Verdant Event Chest', type: 'chest', priceCoins: 500 },
+    ];
+    this.regionalEvents = [];
     this.worldHotspots = demoWorldHotspots.map((item) => ({ ...item }));
     this.communityPosts = [];
     this.communityLikes = [];
@@ -803,6 +810,84 @@ export class MemoryQuestRepository {
       this.idempotency.delete(compound);
       throw error;
     }
+  }
+
+  async getStoreCatalog() { return clone(this.storeCatalog); }
+  async purchaseStoreItem(userId, itemId, idempotencyKey) {
+    const operation = 'store_purchase';
+    const compound = `${userId}:${operation}:${idempotencyKey}`;
+    if (this.idempotency.has(compound)) {
+      const response = clone(await this.idempotency.get(compound));
+      if (response.itemId !== itemId) throw conflict('idempotency_key_reused');
+      return response;
+    }
+    const pending = Promise.resolve().then(() => {
+      const item = this.storeCatalog.find((entry) => entry.itemId === itemId);
+      if (!item) throw new Error('Item not found');
+      const balance = this.coinLedger.filter((entry) => entry.userId === userId).reduce((sum, entry) => sum + entry.amount, 0);
+      if (balance < item.priceCoins) throw new Error('INSUFFICIENT_FUNDS');
+      this.coinLedger.push({ ledgerKey: `store-purchase:${userId}:${idempotencyKey}`, userId, amount: -item.priceCoins, reason: 'store_purchase' });
+      const inventoryItem = this.inventory.find((entry) => entry.userId === userId && entry.itemId === itemId);
+      if (inventoryItem) inventoryItem.quantity += 1;
+      else this.inventory.push({ userId, itemId, quantity: 1 });
+      return { success: true, itemId, priceCoins: item.priceCoins, balance: balance - item.priceCoins };
+    });
+    this.idempotency.set(compound, pending);
+    try {
+      const response = await pending;
+      this.idempotency.set(compound, Promise.resolve(response));
+      return clone(response);
+    } catch (error) {
+      this.idempotency.delete(compound);
+      throw error;
+    }
+  }
+
+  async openChest(userId, chestId, regionId, idempotencyKey, loot) {
+    const operation = 'chest_open';
+    const compound = `${userId}:${operation}:${idempotencyKey}`;
+    if (this.idempotency.has(compound)) {
+      const response = clone(await this.idempotency.get(compound));
+      if (response.chestId !== chestId || (response.regionId || null) !== (regionId || null)) throw conflict('idempotency_key_reused');
+      return { ...response, _replayed: true };
+    }
+    const pending = Promise.resolve().then(() => {
+      const inventoryItem = this.inventory.find((entry) => entry.userId === userId && entry.itemId === chestId && entry.quantity > 0);
+      if (!inventoryItem) throw new Error('Chest not found in inventory');
+      inventoryItem.quantity -= 1;
+      if (Number(loot.coins) > 0) this.coinLedger.push({ ledgerKey: `chest-open:${userId}:${idempotencyKey}:coins`, userId, amount: Number(loot.coins), reason: 'chest_loot' });
+      let event = null;
+      if (chestId.startsWith('event_chest_') && regionId) {
+        let current = this.regionalEvents.find((entry) => entry.regionId === regionId && entry.chestId === chestId && entry.state === 'accumulating');
+        if (!current) {
+          current = { id: randomUUID(), regionId, chestId, counter: 0, threshold: 50, state: 'accumulating', contributors: new Set() };
+          this.regionalEvents.push(current);
+        }
+        let justActivated = false;
+        if (!current.contributors.has(userId)) {
+          current.contributors.add(userId);
+          current.counter += 1;
+          if (current.counter >= current.threshold) { current.state = 'active'; justActivated = true; }
+        }
+        event = { eventId: current.id, counter: current.counter, threshold: current.threshold, justActivated };
+      }
+      return { chestId, regionId: regionId || null, loot, event };
+    });
+    this.idempotency.set(compound, pending);
+    try {
+      const response = await pending;
+      this.idempotency.set(compound, Promise.resolve(response));
+      return clone(response);
+    } catch (error) {
+      this.idempotency.delete(compound);
+      throw error;
+    }
+  }
+
+  async getRegionalEventStatus(regionId) {
+    return this.regionalEvents.filter((entry) => entry.regionId === regionId).map((entry) => ({
+      chest_id: entry.chestId, counter: entry.counter, threshold: entry.threshold, state: entry.state, active_until: null,
+    }));
   }
 }
 

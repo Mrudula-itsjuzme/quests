@@ -27,7 +27,7 @@ suite('PostgreSQL quest repository', () => {
   });
 
   beforeEach(async () => {
-    await pool.query('TRUNCATE quest_idempotency_keys, quest_xp_ledger, quest_submissions, collectible_unlocks, quest_daily_states, quest_generation_runs, quest_assignments, coin_ledger, community_post_reports, community_post_likes, community_post_comments, community_posts, community_friendships, account_deletion_requests, quest_users CASCADE');
+    await pool.query('TRUNCATE quest_idempotency_keys, quest_xp_ledger, quest_submissions, collectible_unlocks, quest_daily_states, quest_generation_runs, quest_assignments, coin_ledger, inventory, regional_event_contributors, regional_events, community_post_reports, community_post_likes, community_post_comments, community_posts, community_friendships, account_deletion_requests, quest_users CASCADE');
   });
 
   afterAll(async () => { await pool?.end(); });
@@ -228,6 +228,131 @@ suite('PostgreSQL quest repository', () => {
         [`capture:${card.id}`, identity.id, card.id],
       );
       expect(await repository.getCoinBalance(identity.id)).toBe(40);
+    });
+
+    it('serializes concurrent approvals and credits provisional rewards once', async () => {
+      await repository.ensureUser(identity);
+      const card = await repository.createCapturedCard({
+        userId: identity.id, itemName: 'Snow Leopard', category: 'Fauna', cardTitle: 'Snow Leopard',
+        rarityTier: 'S', rarityScore: 0.99, description: '', status: 'provisional', xpAwarded: 1000, coinsAwarded: 250,
+      });
+      const [first, retry] = await Promise.all([
+        repository.reviewCapturedCard(card.id, { decision: 'approve', reviewerId: 'admin', reason: null }),
+        repository.reviewCapturedCard(card.id, { decision: 'approve', reviewerId: 'admin', reason: null }),
+      ]);
+      expect([first.status, retry.status]).toEqual(['final', 'final']);
+      expect(await repository.getCoinBalance(identity.id)).toBe(250);
+      expect((await repository.getUser(identity.id)).totalXp).toBe(1000);
+      expect((await pool.query('SELECT COUNT(*)::int AS count FROM capture_xp_ledger WHERE card_id = $1', [card.id])).rows[0].count).toBe(1);
+    });
+  });
+
+  describe('level rewards', () => {
+    it('serializes concurrent claims and credits an XP reward once', async () => {
+      await repository.ensureUser(identity);
+      await pool.query('INSERT INTO quest_user_rewards (user_id, level) VALUES ($1, 21)', [identity.id]);
+      const [first, retry] = await Promise.all([
+        repository.claimRewards(identity.id),
+        repository.claimRewards(identity.id),
+      ]);
+      expect(first.length + retry.length).toBe(1);
+      expect((await repository.getUser(identity.id)).totalXp).toBe(250);
+      expect((await pool.query("SELECT COUNT(*)::int AS count FROM quest_xp_ledger WHERE user_id = $1 AND reason = 'level_reward'", [identity.id])).rows[0].count).toBe(1);
+    });
+  });
+
+  describe('store purchase integrity', () => {
+    async function fund(amount = 1000) {
+      await repository.ensureUser(identity);
+      await pool.query(
+        "INSERT INTO coin_ledger (id, ledger_key, user_id, amount, reason) VALUES (gen_random_uuid(), $1, $2, $3, 'test_funding')",
+        [`fund:${identity.id}`, identity.id, amount],
+      );
+    }
+
+    it('atomically charges a normal purchase and creates one inventory row', async () => {
+      await fund();
+      const result = await repository.purchaseStoreItem(identity.id, 'bronze_chest', 'store-request-001');
+      expect(result).toEqual({ success: true, itemId: 'bronze_chest', priceCoins: 100, balance: 900 });
+      expect(await repository.getCoinBalance(identity.id)).toBe(900);
+      expect((await pool.query('SELECT quantity FROM inventory WHERE user_id=$1 AND item_id=$2', [identity.id, 'bronze_chest'])).rows).toEqual([{ quantity: 1 }]);
+    });
+
+    it('returns the original response for duplicate retry and later replay', async () => {
+      await fund();
+      const first = await repository.purchaseStoreItem(identity.id, 'bronze_chest', 'store-request-002');
+      const retry = await repository.purchaseStoreItem(identity.id, 'bronze_chest', 'store-request-002');
+      const laterReplay = await repository.purchaseStoreItem(identity.id, 'bronze_chest', 'store-request-002');
+      expect(retry).toEqual(first);
+      expect(laterReplay).toEqual(first);
+      expect(await repository.getCoinBalance(identity.id)).toBe(900);
+    });
+
+    it('coalesces concurrent duplicate purchases into one charge and grant', async () => {
+      await fund();
+      const [first, retry] = await Promise.all([
+        repository.purchaseStoreItem(identity.id, 'silver_chest', 'store-request-003'),
+        repository.purchaseStoreItem(identity.id, 'silver_chest', 'store-request-003'),
+      ]);
+      expect(retry).toEqual(first);
+      expect(await repository.getCoinBalance(identity.id)).toBe(700);
+      expect((await pool.query('SELECT quantity FROM inventory WHERE user_id=$1 AND item_id=$2', [identity.id, 'silver_chest'])).rows[0].quantity).toBe(1);
+    });
+
+    it('rolls back an insufficient-funds purchase without ledger, inventory, or stale request state', async () => {
+      await fund(50);
+      await expect(repository.purchaseStoreItem(identity.id, 'bronze_chest', 'store-request-004')).rejects.toThrow('INSUFFICIENT_FUNDS');
+      expect(await repository.getCoinBalance(identity.id)).toBe(50);
+      expect((await pool.query('SELECT COUNT(*)::int AS count FROM inventory WHERE user_id=$1', [identity.id])).rows[0].count).toBe(0);
+      expect((await pool.query("SELECT COUNT(*)::int AS count FROM quest_idempotency_keys WHERE user_id=$1 AND operation='store_purchase'", [identity.id])).rows[0].count).toBe(0);
+    });
+
+    it('enforces one ledger event and one inventory row per idempotent purchase', async () => {
+      await fund();
+      await repository.purchaseStoreItem(identity.id, 'bronze_chest', 'store-request-005');
+      await repository.purchaseStoreItem(identity.id, 'bronze_chest', 'store-request-005');
+      expect((await pool.query("SELECT COUNT(*)::int AS count FROM coin_ledger WHERE user_id=$1 AND reason='store_purchase'", [identity.id])).rows[0].count).toBe(1);
+      expect((await pool.query('SELECT COUNT(*)::int AS count, SUM(quantity)::int AS quantity FROM inventory WHERE user_id=$1 AND item_id=$2', [identity.id, 'bronze_chest'])).rows[0]).toEqual({ count: 1, quantity: 1 });
+    });
+  });
+
+  describe('regional chest integrity', () => {
+    async function grantChest(chestId = 'event_chest_1', quantity = 1) {
+      await repository.ensureUser(identity);
+      await pool.query('INSERT INTO inventory (user_id, item_id, quantity) VALUES ($1,$2,$3)', [identity.id, chestId, quantity]);
+    }
+
+    it('consumes and rewards the first regional chest claim exactly once', async () => {
+      await grantChest();
+      const result = await repository.openChest(identity.id, 'event_chest_1', 'region-a', 'chest-request-001', { coins: 25, items: [] });
+      expect(result).toEqual(expect.objectContaining({ chestId: 'event_chest_1', regionId: 'region-a', loot: { coins: 25, items: [] } }));
+      expect(await repository.getCoinBalance(identity.id)).toBe(25);
+      expect((await pool.query('SELECT quantity FROM inventory WHERE user_id=$1 AND item_id=$2', [identity.id, 'event_chest_1'])).rows[0].quantity).toBe(0);
+      expect(result.event.counter).toBe(1);
+    });
+
+    it('returns the first result for repeated and concurrent requests without duplicate rewards', async () => {
+      await grantChest('event_chest_1', 2);
+      const [first, concurrent] = await Promise.all([
+        repository.openChest(identity.id, 'event_chest_1', 'region-a', 'chest-request-002', { coins: 31, items: [] }),
+        repository.openChest(identity.id, 'event_chest_1', 'region-a', 'chest-request-002', { coins: 99, items: [] }),
+      ]);
+      const replay = await repository.openChest(identity.id, 'event_chest_1', 'region-a', 'chest-request-002', { coins: 77, items: [] });
+      expect(concurrent.loot).toEqual(first.loot);
+      expect(replay.loot).toEqual(first.loot);
+      expect(await repository.getCoinBalance(identity.id)).toBe(first.loot.coins);
+      expect((await pool.query('SELECT quantity FROM inventory WHERE user_id=$1 AND item_id=$2', [identity.id, 'event_chest_1'])).rows[0].quantity).toBe(1);
+      expect((await pool.query("SELECT COUNT(*)::int AS count FROM coin_ledger WHERE user_id=$1 AND reason='chest_loot'", [identity.id])).rows[0].count).toBe(1);
+      expect((await pool.query('SELECT COUNT(*)::int AS count FROM regional_event_contributors WHERE user_id=$1', [identity.id])).rows[0].count).toBe(1);
+    });
+
+    it('rejects an already-opened chest under a new request without changing the economy', async () => {
+      await grantChest('bronze_chest');
+      await repository.openChest(identity.id, 'bronze_chest', null, 'chest-request-003', { coins: 20, items: [] });
+      await expect(repository.openChest(identity.id, 'bronze_chest', null, 'chest-request-004', { coins: 50, items: [] })).rejects.toThrow('Chest not found in inventory');
+      expect(await repository.getCoinBalance(identity.id)).toBe(20);
+      expect((await pool.query("SELECT COUNT(*)::int AS count FROM coin_ledger WHERE user_id=$1 AND reason='chest_loot'", [identity.id])).rows[0].count).toBe(1);
+      expect((await pool.query("SELECT COUNT(*)::int AS count FROM quest_idempotency_keys WHERE user_id=$1 AND operation='chest_open'", [identity.id])).rows[0].count).toBe(1);
     });
   });
 

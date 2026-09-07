@@ -6,31 +6,14 @@ export class EventEngine {
     this.notifications = notificationProvider;
   }
 
-  async openChest(userId, chestId, regionId) {
-    // 1. Remove the chest from inventory
-    const consumed = await this.repository.consumeInventoryItem(userId, chestId);
-    if (!consumed) {
-      throw new Error('Chest not found in inventory');
-    }
-
-    // 2. Roll loot
+  async openChest(userId, chestId, regionId, idempotencyKey) {
     const loot = this._rollChestLoot(chestId);
-    
-    // 3. Grant rewards
-    await this.repository.grantRewards(userId, loot);
-
-    let eventStatus = null;
-    // 4. If it's an event chest, increment regional counter
-    if (chestId.startsWith('event_chest_') && regionId) {
-      eventStatus = await this.repository.contributeToRegionalEvent(userId, chestId, regionId);
-      
-      // If threshold was just reached, trigger the event
-      if (eventStatus.justActivated) {
-        await this._triggerRegionalEvent(regionId, eventStatus.eventId);
-      }
+    const result = await this.repository.openChest(userId, chestId, regionId, idempotencyKey, loot);
+    if (!result._replayed && result.event?.justActivated) {
+      await this._triggerRegionalEvent(regionId, result.event.eventId);
     }
-
-    return { loot, event: eventStatus };
+    const { _replayed, ...response } = result;
+    return response;
   }
 
   async getRegionalEventStatus(regionId) {

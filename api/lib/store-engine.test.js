@@ -13,8 +13,8 @@ describe('StoreEngine', () => {
   it('should purchase an item via the repository', async () => {
     const repository = { purchaseStoreItem: vi.fn().mockResolvedValue({ success: true, itemId: 'silver_chest' }) };
     const engine = new StoreEngine(repository);
-    const result = await engine.purchaseItem('user-1', 'silver_chest');
+    const result = await engine.purchaseItem('user-1', 'silver_chest', 'purchase-request-001');
     expect(result).toEqual({ success: true, itemId: 'silver_chest' });
-    expect(repository.purchaseStoreItem).toHaveBeenCalledWith('user-1', 'silver_chest');
+    expect(repository.purchaseStoreItem).toHaveBeenCalledWith('user-1', 'silver_chest', 'purchase-request-001');
   });
 });

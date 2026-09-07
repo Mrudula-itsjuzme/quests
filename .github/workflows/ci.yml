@@ -83,14 +83,9 @@ jobs:
         run: npm audit --omit=dev || true
 
   preflight:
-    name: Production env checks (main pushes only)
+    name: Production env gate (main pushes only)
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    # The check only runs once production secrets are configured: the step is
-    # skipped when PROD_SECRETS_READY is false, and skipped steps do not fail
-    # the job. Once secrets are wired this becomes a real gate.
-    env:
-      PROD_SECRETS_READY: ${{ secrets.DATABASE_URL != '' }}
     steps:
       - uses: actions/checkout@v7
       - name: Use Node.js 22
@@ -101,13 +96,21 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Run production env checks
-        if: env.PROD_SECRETS_READY == 'true'
         env:
+          NODE_ENV: production
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_SSL: ${{ secrets.DATABASE_SSL }}
           PROVIDER_MODE: ${{ secrets.PROVIDER_MODE }}
           QUEST_AI_VERIFY_URL: ${{ secrets.QUEST_AI_VERIFY_URL }}
           QUEST_PROVIDER_SECRET: ${{ secrets.QUEST_PROVIDER_SECRET }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           OIDC_ISSUER: ${{ secrets.OIDC_ISSUER }}
+          OIDC_AUDIENCE: ${{ secrets.OIDC_AUDIENCE }}
           OIDC_JWKS_URL: ${{ secrets.OIDC_JWKS_URL }}
           CORS_ORIGINS: ${{ secrets.CORS_ORIGINS }}
+          TRUST_PROXY: ${{ secrets.TRUST_PROXY }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          VISION_PROVIDER: ${{ secrets.VISION_PROVIDER }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          ALLOW_STUB_VISION_IN_PRODUCTION: ${{ secrets.ALLOW_STUB_VISION_IN_PRODUCTION }}
         run: node scripts/check_prod_env.js

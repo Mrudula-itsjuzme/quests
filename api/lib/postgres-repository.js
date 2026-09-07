@@ -1108,27 +1108,50 @@ export class PostgresQuestRepository {
     return rows;
   }
 
-  async purchaseStoreItem(userId, itemId) {
+  async purchaseStoreItem(userId, itemId, idempotencyKey) {
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
+      await client.query('SELECT id FROM quest_users WHERE id = $1 FOR UPDATE', [userId]);
+      const replay = await client.query(
+        `SELECT status, response_body FROM quest_idempotency_keys
+         WHERE user_id = $1 AND operation = 'store_purchase' AND key = $2 FOR UPDATE`,
+        [userId, idempotencyKey],
+      );
+      if (replay.rows[0]?.status === 'completed') {
+        const response = replay.rows[0].response_body;
+        if (response.itemId !== itemId) throw conflict('idempotency_key_reused');
+        await client.query('COMMIT');
+        return response;
+      }
+      await client.query(
+        `INSERT INTO quest_idempotency_keys (user_id, operation, key, status)
+         VALUES ($1, 'store_purchase', $2, 'processing')`,
+        [userId, idempotencyKey],
+      );
       const item = await client.query('SELECT price_coins FROM store_catalog WHERE item_id = $1', [itemId]);
       if (item.rows.length === 0) throw new Error('Item not found');
-      
-      const price = item.rows[0].price_coins;
+
+      const price = Number(item.rows[0].price_coins);
       const balance = await client.query('SELECT COALESCE(SUM(amount), 0)::int AS balance FROM coin_ledger WHERE user_id = $1', [userId]);
-      if ((balance.rows[0]?.balance || 0) < price) throw new Error('INSUFFICIENT_FUNDS');
+      const balanceBefore = Number(balance.rows[0]?.balance || 0);
+      if (balanceBefore < price) throw new Error('INSUFFICIENT_FUNDS');
 
-      // Deduct coins
-      await client.query(`INSERT INTO coin_ledger (id, ledger_key, user_id, amount, reason) VALUES ($1, $2, $3, $4, 'store_purchase')`, 
-        [randomUUID(), `purchase:${itemId}:${Date.now()}`, userId, -price]);
+      await client.query(`INSERT INTO coin_ledger (id, ledger_key, user_id, amount, reason)
+        VALUES ($1, $2, $3, $4, 'store_purchase')`,
+      [randomUUID(), `store-purchase:${userId}:${idempotencyKey}`, userId, -price]);
 
-      // Add to inventory
       await client.query(`INSERT INTO inventory (user_id, item_id, quantity) VALUES ($1, $2, 1) ON CONFLICT (user_id, item_id) DO UPDATE SET quantity = inventory.quantity + 1, updated_at = NOW()`,
         [userId, itemId]);
 
+      const response = { success: true, itemId, priceCoins: price, balance: balanceBefore - price };
+      await client.query(
+        `UPDATE quest_idempotency_keys SET status = 'completed', response_body = $3, completed_at = NOW()
+         WHERE user_id = $1 AND operation = 'store_purchase' AND key = $2`,
+        [userId, idempotencyKey, JSON.stringify(response)],
+      );
       await client.query('COMMIT');
-      return { success: true, itemId };
+      return response;
     } catch (e) {
       await client.query('ROLLBACK');
       throw e;
@@ -1146,6 +1169,96 @@ export class PostgresQuestRepository {
     if (loot.coins > 0) {
       await this.pool.query(`INSERT INTO coin_ledger (id, ledger_key, user_id, amount, reason) VALUES ($1, $2, $3, $4, 'chest_loot')`, 
         [randomUUID(), `loot:${Date.now()}`, userId, loot.coins]);
+    }
+  }
+
+  async openChest(userId, chestId, regionId, idempotencyKey, loot) {
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      await client.query('SELECT id FROM quest_users WHERE id = $1 FOR UPDATE', [userId]);
+      const replay = await client.query(
+        `SELECT status, response_body FROM quest_idempotency_keys
+         WHERE user_id = $1 AND operation = 'chest_open' AND key = $2 FOR UPDATE`,
+        [userId, idempotencyKey],
+      );
+      if (replay.rows[0]?.status === 'completed') {
+        const response = replay.rows[0].response_body;
+        if (response.chestId !== chestId || (response.regionId || null) !== (regionId || null)) throw conflict('idempotency_key_reused');
+        await client.query('COMMIT');
+        return { ...response, _replayed: true };
+      }
+      await client.query(
+        `INSERT INTO quest_idempotency_keys (user_id, operation, key, status)
+         VALUES ($1, 'chest_open', $2, 'processing')`,
+        [userId, idempotencyKey],
+      );
+
+      const consumed = await client.query(
+        `UPDATE inventory SET quantity = quantity - 1, updated_at = NOW()
+         WHERE user_id = $1 AND item_id = $2 AND quantity > 0 RETURNING quantity`,
+        [userId, chestId],
+      );
+      if (!consumed.rowCount) throw new Error('Chest not found in inventory');
+
+      if (Number(loot.coins) > 0) {
+        await client.query(
+          `INSERT INTO coin_ledger (id, ledger_key, user_id, amount, reason)
+           VALUES ($1, $2, $3, $4, 'chest_loot')`,
+          [randomUUID(), `chest-open:${userId}:${idempotencyKey}:coins`, userId, Number(loot.coins)],
+        );
+      }
+
+      let event = null;
+      if (chestId.startsWith('event_chest_') && regionId) {
+        await client.query('SELECT pg_advisory_xact_lock(hashtextextended($1, 0))', [`${regionId}:${chestId}`]);
+        let eventRow = await client.query(
+          `SELECT id, counter, threshold, state FROM regional_events
+           WHERE region_id = $1 AND chest_id = $2 AND state = 'accumulating' FOR UPDATE`,
+          [regionId, chestId],
+        );
+        if (!eventRow.rowCount) {
+          eventRow = await client.query(
+            `INSERT INTO regional_events (region_id, chest_id) VALUES ($1, $2)
+             RETURNING id, counter, threshold, state`,
+            [regionId, chestId],
+          );
+        }
+        const current = eventRow.rows[0];
+        const contribution = await client.query(
+          `INSERT INTO regional_event_contributors (event_id, user_id) VALUES ($1, $2)
+           ON CONFLICT DO NOTHING RETURNING user_id`,
+          [current.id, userId],
+        );
+        let counter = Number(current.counter);
+        let justActivated = false;
+        if (contribution.rowCount) {
+          const updated = await client.query(
+            'UPDATE regional_events SET counter = counter + 1, updated_at = NOW() WHERE id = $1 RETURNING counter, threshold',
+            [current.id],
+          );
+          counter = Number(updated.rows[0].counter);
+          if (counter >= Number(updated.rows[0].threshold)) {
+            await client.query("UPDATE regional_events SET state = 'active', active_until = NOW() + INTERVAL '24 hours' WHERE id = $1", [current.id]);
+            justActivated = true;
+          }
+        }
+        event = { eventId: current.id, counter, threshold: Number(current.threshold), justActivated };
+      }
+
+      const response = { chestId, regionId: regionId || null, loot, event };
+      await client.query(
+        `UPDATE quest_idempotency_keys SET status = 'completed', response_body = $3, completed_at = NOW()
+         WHERE user_id = $1 AND operation = 'chest_open' AND key = $2`,
+        [userId, idempotencyKey, JSON.stringify(response)],
+      );
+      await client.query('COMMIT');
+      return response;
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
     }
   }
 

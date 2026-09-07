@@ -496,6 +496,38 @@ describe('Quest API', () => {
   });
 });
 
+describe('Economy API', () => {
+  it('requires and replays a stable idempotency key for store purchases', async () => {
+    const repository = new MemoryQuestRepository({ definitions: questDefinitions });
+    await repository.ensureUser({ id: testConfig().DEV_USER_ID, displayName: 'Player', timezone: 'UTC' });
+    repository.coinLedger.push({ ledgerKey: 'test-funding', userId: testConfig().DEV_USER_ID, amount: 500, reason: 'test_funding' });
+    const app = createApp({ config: testConfig(), repository });
+
+    expect((await request(app).post('/api/v1/store/purchase').send({ itemId: 'bronze_chest' })).status).toBe(400);
+    const first = await request(app).post('/api/v1/store/purchase').set('Idempotency-Key', 'store-api-request-001').send({ itemId: 'bronze_chest' });
+    const replay = await request(app).post('/api/v1/store/purchase').set('Idempotency-Key', 'store-api-request-001').send({ itemId: 'bronze_chest' });
+    expect(first.status).toBe(200);
+    expect(replay.body).toEqual(first.body);
+    expect(repository.coinLedger.filter((entry) => entry.reason === 'store_purchase')).toHaveLength(1);
+    expect(repository.inventory.find((entry) => entry.itemId === 'bronze_chest').quantity).toBe(1);
+  });
+
+  it('requires and replays a stable idempotency key for chest opening', async () => {
+    const repository = new MemoryQuestRepository({ definitions: questDefinitions });
+    await repository.ensureUser({ id: testConfig().DEV_USER_ID, displayName: 'Player', timezone: 'UTC' });
+    repository.inventory.push({ userId: testConfig().DEV_USER_ID, itemId: 'event_chest_1', quantity: 1 });
+    const app = createApp({ config: testConfig(), repository });
+
+    expect((await request(app).post('/api/v1/chests/event_chest_1/open').send({ regionId: 'region-a' })).status).toBe(400);
+    const first = await request(app).post('/api/v1/chests/event_chest_1/open').set('Idempotency-Key', 'chest-api-request-001').send({ regionId: 'region-a' });
+    const replay = await request(app).post('/api/v1/chests/event_chest_1/open').set('Idempotency-Key', 'chest-api-request-001').send({ regionId: 'region-a' });
+    expect(first.status).toBe(200);
+    expect(replay.body).toEqual(first.body);
+    expect(repository.coinLedger.filter((entry) => entry.reason === 'chest_loot')).toHaveLength(1);
+    expect(repository.inventory.find((entry) => entry.itemId === 'event_chest_1').quantity).toBe(0);
+  });
+});
+
 describe('World API', () => {
   it('serves curated hotspots so a brand-new account has map content', async () => {
     const app = createApp({ config: testConfig() });

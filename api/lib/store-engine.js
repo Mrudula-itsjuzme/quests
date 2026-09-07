@@ -7,7 +7,7 @@ export class StoreEngine {
     return this.repository.getStoreCatalog();
   }
 
-  async purchaseItem(userId, itemId) {
-    return this.repository.purchaseStoreItem(userId, itemId);
+  async purchaseItem(userId, itemId, idempotencyKey) {
+    return this.repository.purchaseStoreItem(userId, itemId, idempotencyKey);
   }
 }

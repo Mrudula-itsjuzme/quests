@@ -136,6 +136,8 @@ const communityCommentSchema = z.object({ body: z.string().trim().min(1).max(100
 const communityReportSchema = z.object({ reason: z.enum(['abuse', 'misinfo', 'private_info', 'unsafe_location', 'spam', 'other']), details: z.string().trim().max(1000).optional() }).strict();
 const communityScopeSchema = z.enum(['public', 'friends']);
 const communityFollowSchema = z.object({ following: z.boolean() }).strict();
+const storePurchaseSchema = z.object({ itemId: z.string().trim().min(1).max(120) }).strict();
+const chestOpenSchema = z.object({ regionId: z.string().trim().min(1).max(160).optional() }).strict();
 const deleteAccountSchema = z.object({ reason: z.string().trim().max(1000).optional() }).strict().optional();
 const legacyQuestSchema = z.object({
   title: z.string().trim().min(1).max(160),
@@ -270,13 +272,12 @@ export function createApp(options = {}) {
   // Store & Regional Events (Milestone 5)
   app.get('/api/v1/store/catalog', asyncRoute(async (req, res) => res.json(await storeEngine.getCatalog())));
   app.post('/api/v1/store/purchase', writeLimiter, asyncRoute(async (req, res) => {
-    const { itemId } = req.body;
-    if (!itemId) throw new Error('Missing itemId');
-    res.json(await storeEngine.purchaseItem(req.identity.id, itemId));
+    const { itemId } = parse(storePurchaseSchema, req.body);
+    res.json(await storeEngine.purchaseItem(req.identity.id, itemId, requireIdempotency(req)));
   }));
   app.post('/api/v1/chests/:id/open', writeLimiter, asyncRoute(async (req, res) => {
-    const { regionId } = req.body; // Region ID for regional events
-    res.json(await eventEngine.openChest(req.identity.id, req.params.id, regionId));
+    const { regionId } = parse(chestOpenSchema, req.body);
+    res.json(await eventEngine.openChest(req.identity.id, req.params.id, regionId, requireIdempotency(req)));
   }));
   app.get('/api/v1/events/regional/:regionId', asyncRoute(async (req, res) => res.json(await eventEngine.getRegionalEventStatus(req.params.regionId))));
 
