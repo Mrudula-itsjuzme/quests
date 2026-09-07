@@ -10,6 +10,7 @@ import { useCameraPreview } from '../../lib/useCameraPreview';
 import { DiscoveryCard } from './DiscoveryCard';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { Capacitor } from '@capacitor/core';
+import { X } from 'lucide-react';
 
 function fileToDataUrl(file) {
   return new Promise((resolve, reject) => {
@@ -317,7 +318,7 @@ export function CaptureFlow({ onClose }) {
     >
       {/* Global close button */}
       <button type="button" className="capture-flow-close" aria-label="Close" onClick={() => { playTap(); onClose(); }}>
-        <Icon name="plus" />
+        <X aria-hidden="true" />
       </button>
 
       <AnimatePresence mode="wait">
@@ -364,6 +365,7 @@ export function CaptureFlow({ onClose }) {
                 aria-label={torchOn ? 'Turn torch off' : 'Turn torch on'}
                 title={torchOn ? 'Torch off' : 'Torch on'}
                 onClick={toggleTorch}
+                disabled={cameraStatus !== 'live'}
               >
                 <Icon name="bolt" />
               </button>
@@ -385,8 +387,21 @@ export function CaptureFlow({ onClose }) {
             <div className="capture-viewfinder-bottom">
               <div className="capture-focus-pill" aria-live="polite">
                 <span className="capture-focus-dot" style={{ background: currentFilter.accent }} aria-hidden="true" />
-                <span>{currentFilter.label}</span>
+                <span>{currentFilter.label} · {cameraStatus === 'live' ? 'Camera ready' : isNative ? 'Open camera' : 'Choose photo'}</span>
               </div>
+
+              <motion.button
+                type="button"
+                className="capture-shutter-button"
+                aria-label={cameraStatus === 'live' ? 'Capture photo' : isNative ? 'Capture photo — open camera' : 'Capture photo — choose a photo'}
+                onClick={() => { playTap(); handleNativeCamera(); }}
+                disabled={captureItem.isPending}
+                whileTap={{ scale: 0.9 }}
+              >
+                <span className="capture-shutter-inner" aria-hidden="true">
+                  <Icon name="camera" />
+                </span>
+              </motion.button>
 
               {/* Real photo-filter strip (Instagram/Snap style) */}
               <div className="capture-filter-strip" aria-label="Camera filters">
@@ -400,15 +415,10 @@ export function CaptureFlow({ onClose }) {
                     type="button"
                     className={`capture-filter-chip ${activeFilter === filter.id ? 'active' : ''}`}
                     aria-pressed={activeFilter === filter.id}
-                    aria-label={activeFilter === filter.id ? `Capture photo with ${filter.label}` : `Select ${filter.label} filter`}
+                    aria-label={activeFilter === filter.id ? `${filter.label} filter selected` : `Select ${filter.label} filter`}
                     onClick={(event) => {
                       playTap();
                       event.currentTarget.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-                      if (activeFilter === filter.id) {
-                        triggerHaptic([12]);
-                        handleNativeCamera();
-                        return;
-                      }
                       setActiveFilter(filter.id);
                     }}
                     title={filter.id}

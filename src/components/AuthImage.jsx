@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { API_BASE_URL } from '../lib/api';
 import { useAuth } from '../features/auth/AuthContext';
 
@@ -25,6 +25,11 @@ export function getAbsoluteImageUrl(imageRef) {
 export function AuthImage({ src, alt, className, useAuth: requiresAuth = false, onError, ...props }) {
   const [objectUrl, setObjectUrl] = useState(null);
   const { getToken } = useAuth();
+  const onErrorRef = useRef(onError);
+
+  useEffect(() => {
+    onErrorRef.current = onError;
+  }, [onError]);
 
   useEffect(() => {
     if (!src) return;
@@ -39,6 +44,7 @@ export function AuthImage({ src, alt, className, useAuth: requiresAuth = false, 
 
     let isMounted = true;
     let urlToRevoke = null;
+    const controller = new AbortController();
 
     async function load() {
       try {
@@ -50,6 +56,7 @@ export function AuthImage({ src, alt, className, useAuth: requiresAuth = false, 
         
         const response = await fetch(absoluteSrc, { 
           headers,
+          signal: controller.signal,
           // Follow redirects in case it points to a signed storageURL
           redirect: 'follow'
         });
@@ -60,8 +67,13 @@ export function AuthImage({ src, alt, className, useAuth: requiresAuth = false, 
         urlToRevoke = URL.createObjectURL(blob);
         setObjectUrl(urlToRevoke);
       } catch (err) {
-        console.error('Failed to load authenticated image', err);
-        if (isMounted) onError?.(err);
+        if (err?.name === 'AbortError') return;
+        // A parent-provided error handler means the missing image has a
+        // designed fallback. Keep that expected guest/offline path quiet.
+        if (!onErrorRef.current) {
+          console.warn('Authenticated image unavailable', { src: absoluteSrc, status: err?.message });
+        }
+        if (isMounted) onErrorRef.current?.(err);
       }
     }
     
@@ -69,9 +81,10 @@ export function AuthImage({ src, alt, className, useAuth: requiresAuth = false, 
 
     return () => {
       isMounted = false;
+      controller.abort();
       if (urlToRevoke) URL.revokeObjectURL(urlToRevoke);
     };
-  }, [src, requiresAuth, getToken, onError]);
+  }, [src, requiresAuth, getToken]);
 
   if (!objectUrl) return <div className={`image-placeholder ${className || ''}`} />;
   return <img src={objectUrl} alt={alt} className={className} {...props} />;

@@ -1,0 +1,9 @@
+# QA Evidence Log: Database Verification
+
+To verify the database state after the tests, query your database to confirm:
+- exactly one quest completion
+- exactly one XP credit for that completion
+- exactly one coin/reward ledger entry
+- no duplicate reward caused by retry
+
+(Please replace this file content with the actual database query output once the test is performed. Do not expose secrets or sensitive user data in the report.)

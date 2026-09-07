@@ -109,6 +109,9 @@ const captureRenameSchema = z.object({
 }).strict().refine((value) => Object.keys(value).length > 0, 'capture update cannot be empty');
 const postIdSchema = z.string().uuid();
 const hotspotCategorySchema = z.enum(['Hotspots', 'Parks', 'Waterfalls', 'Birding']);
+const hotspotIdSchema = z.string().trim().min(1).max(160).regex(/^[A-Za-z0-9._:-]+$/);
+const hotspotSaveSchema = z.object({ saved: z.boolean() }).strict();
+const hotspotRatingSchema = z.object({ rating: z.coerce.number().int().min(1).max(5) }).strict();
 const scenicSearchSchema = z.object({
   lat: z.coerce.number().min(-90).max(90),
   lng: z.coerce.number().min(-180).max(180),
@@ -202,7 +205,7 @@ export function createApp(options = {}) {
       return callback(new Error('cors_origin_denied'));
     },
     credentials: false,
-    methods: ['GET', 'POST', 'PATCH', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Authorization', 'Content-Type', 'Idempotency-Key', 'X-Request-ID'],
   });
   app.use('/api', corsMiddleware);
@@ -410,7 +413,24 @@ export function createApp(options = {}) {
       : parse(bboxSchema, req.query.bbox);
     // Curated content is identical for every player, so it is safe to cache
     // and revalidate the same way as the species catalog.
-    sendCachedJson(req, res, await repository.listWorldHotspots({ category, bbox, limit: req.query.limit }));
+    res.setHeader('Cache-Control', 'private, no-cache');
+    res.json(await repository.listWorldHotspots({ category, bbox, limit: req.query.limit, viewerId: req.identity.id }));
+  }));
+  app.put('/api/v1/world/hotspots/:hotspotId/saved', writeLimiter, asyncRoute(async (req, res) => {
+    const body = parse(hotspotSaveSchema, req.body);
+    const result = await repository.setHotspotSaved(req.identity.id, parse(hotspotIdSchema, req.params.hotspotId), body.saved);
+    if (!result) return res.status(404).json({ error: { code: 'hotspot_not_found', requestId: req.id } });
+    res.json(result);
+  }));
+  app.put('/api/v1/world/hotspots/:hotspotId/rating', writeLimiter, asyncRoute(async (req, res) => {
+    const body = parse(hotspotRatingSchema, req.body);
+    const result = await repository.rateHotspot(req.identity.id, parse(hotspotIdSchema, req.params.hotspotId), body.rating);
+    if (!result) return res.status(404).json({ error: { code: 'hotspot_not_found', requestId: req.id } });
+    res.json(result);
+  }));
+  app.get('/api/v1/community/users/:userId/saved-places', asyncRoute(async (req, res) => {
+    const places = await repository.listPublicSavedHotspots(parse(communityUserIdSchema, req.params.userId), req.identity.id);
+    res.json(redactPublicPayload(places));
   }));
   app.get('/api/v1/world/scenic-places', asyncRoute(async (req, res) => {
     const search = parse(scenicSearchSchema, req.query);

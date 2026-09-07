@@ -200,6 +200,10 @@ export function useToggleCommunityLike() {
     onSuccess: (post) => {
       queryClient.setQueriesData({ queryKey: ['community', 'posts'] }, (previous) =>
         Array.isArray(previous) ? previous.map((item) => (item.id === post.id ? post : item)) : previous);
+      queryClient.setQueriesData({ queryKey: ['community', 'stories'] }, (previous) =>
+        Array.isArray(previous) ? previous.map((item) => (item.postId === post.id
+          ? { ...item, likeCount: post.likeCount, commentCount: post.commentCount, viewerLiked: post.viewerLiked }
+          : item)) : previous);
     },
   });
 }
@@ -212,6 +216,7 @@ export function useAddCommunityComment() {
     onSuccess: (_comment, { postId }) => {
       queryClient.invalidateQueries({ queryKey: ['community', 'comments', postId] });
       queryClient.invalidateQueries({ queryKey: ['community', 'posts'] });
+      queryClient.invalidateQueries({ queryKey: ['community', 'stories'] });
     },
   });
 }

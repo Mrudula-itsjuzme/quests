@@ -201,6 +201,23 @@ suite('PostgreSQL quest repository', () => {
   });
 
   describe('coin wallet', () => {
+    it('coalesces concurrent retries for one captureId without double-paying', async () => {
+      await repository.ensureUser(identity);
+      const captureId = '3f277e7e-5ebd-4e0f-86c8-b75c41ed98cb';
+      const payload = {
+        userId: identity.id, captureId, itemName: 'Barn Owl', category: 'Fauna', cardTitle: 'Barn Owl',
+        rarityTier: 'B', rarityScore: 0.6, description: '', status: 'final', xpAwarded: 250, coinsAwarded: 40,
+      };
+      const [first, retry] = await Promise.all([
+        repository.createCapturedCard(payload),
+        repository.createCapturedCard(payload),
+      ]);
+      expect(retry.id).toBe(first.id);
+      expect(await repository.getCoinBalance(identity.id)).toBe(40);
+      expect((await repository.getUser(identity.id)).totalXp).toBe(250);
+      expect((await pool.query('SELECT COUNT(*)::int AS count FROM captured_cards WHERE capture_id = $1', [captureId])).rows[0].count).toBe(1);
+    });
+
     it('credits coins for a final capture and leaves provisional captures uncredited', async () => {
       await repository.ensureUser(identity);
       await repository.createCapturedCard({

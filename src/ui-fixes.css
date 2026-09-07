@@ -10,6 +10,119 @@
   /* Removed aggressive blur/glassmorphism */
 }
 
+/* Camera controls: make capture explicit and keep the mobile HUD uncluttered. */
+@media (max-width: 780px) {
+  html body .capture-flow-overlay .capture-flow-close {
+    top: calc(14px + env(safe-area-inset-top, 0px)) !important;
+    left: 14px !important;
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 50% !important;
+  }
+
+  html body .capture-flow-overlay .capture-flow-close::before {
+    content: none !important;
+  }
+
+  html body .capture-flow-overlay .capture-flow-close svg {
+    display: block !important;
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  html body .capture-flow-overlay .capture-player-badge {
+    margin-left: 58px !important;
+  }
+
+  html body .capture-flow-overlay .capture-social-rail {
+    top: calc(14px + env(safe-area-inset-top, 0px)) !important;
+    right: 14px !important;
+    gap: 8px !important;
+  }
+
+  html body .capture-flow-overlay .capture-rail-btn {
+    width: 44px !important;
+    height: 44px !important;
+  }
+
+  html body .capture-flow-overlay .capture-rail-btn:disabled {
+    opacity: 0.42 !important;
+    cursor: not-allowed !important;
+  }
+
+  html body .capture-flow-overlay .capture-viewfinder-bottom {
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+    gap: 9px !important;
+  }
+
+  html body .capture-flow-overlay .capture-focus-pill {
+    min-height: 30px !important;
+    padding: 6px 11px !important;
+    font-size: 0.72rem !important;
+  }
+
+  html body .capture-flow-overlay .capture-shutter-button {
+    width: 72px !important;
+    height: 72px !important;
+    flex: 0 0 72px !important;
+    display: grid !important;
+    place-items: center !important;
+    padding: 5px !important;
+    border: 3px solid rgba(255, 255, 255, 0.96) !important;
+    border-radius: 50% !important;
+    background: rgba(255, 252, 244, 0.34) !important;
+    box-shadow: 0 8px 28px rgba(8, 31, 21, 0.34) !important;
+  }
+
+  html body .capture-flow-overlay .capture-shutter-inner {
+    width: 100% !important;
+    height: 100% !important;
+    display: grid !important;
+    place-items: center !important;
+    border-radius: 50% !important;
+    color: #fffaf0 !important;
+    background: #25794f !important;
+  }
+
+  html body .capture-flow-overlay .capture-shutter-inner svg {
+    width: 25px !important;
+    height: 25px !important;
+  }
+
+  html body .capture-flow-overlay .capture-filter-strip {
+    min-height: 66px !important;
+    gap: 10px !important;
+    padding: 2px 16px 0 !important;
+    scroll-padding-inline: 16px !important;
+  }
+
+  html body .capture-flow-overlay .capture-filter-chip {
+    width: 50px !important;
+    min-width: 50px !important;
+    height: 64px !important;
+    gap: 3px !important;
+  }
+
+  html body .capture-flow-overlay .capture-filter-preview,
+  html body .capture-flow-overlay .capture-filter-chip.active .capture-filter-preview {
+    width: 42px !important;
+    height: 42px !important;
+    border-width: 2px !important;
+    transform: none !important;
+    box-shadow: 0 0 0 2px rgba(255, 252, 244, 0.84) !important;
+  }
+
+  html body .capture-flow-overlay .capture-filter-chip.active::after,
+  html body .capture-flow-overlay .capture-filter-chip.active .capture-filter-preview::after {
+    content: none !important;
+  }
+
+  html body .capture-flow-overlay .capture-filter-label,
+  html body .capture-flow-overlay .capture-filter-chip.active .capture-filter-label {
+    font-size: 0.62rem !important;
+  }
+}
+
 /* Keep the startup column inside the physical phone viewport. */
 @media (max-width: 780px) {
   html body .landing-v2 .landing-v2-inner {
@@ -7272,6 +7385,125 @@ html[data-wild-theme='dark'] body .community-story-view-copy p {
   text-shadow: 0 3px 18px rgba(0, 0, 0, 0.78) !important;
 }
 
+html body .community-story-actions,
+html[data-wild-theme='dark'] body .community-story-actions {
+  position: absolute !important;
+  right: 14px !important;
+  bottom: calc(22px + env(safe-area-inset-bottom, 0px)) !important;
+  z-index: 7 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 9px !important;
+}
+
+html body .community-story-actions > button,
+html[data-wild-theme='dark'] body .community-story-actions > button {
+  position: relative !important;
+  min-width: 52px !important;
+  height: 52px !important;
+  padding: 0 12px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  overflow: visible !important;
+  border: 1px solid rgba(255, 250, 240, 0.28) !important;
+  border-radius: 999px !important;
+  background: rgba(5, 14, 9, 0.58) !important;
+  color: #fffaf0 !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+}
+
+html body .community-story-actions > button.liked,
+html[data-wild-theme='dark'] body .community-story-actions > button.liked {
+  border-color: #ffe187 !important;
+  background: #ffe187 !important;
+  color: #31543d !important;
+}
+
+html body .community-story-actions > button.reported,
+html[data-wild-theme='dark'] body .community-story-actions > button.reported {
+  border-color: rgba(190, 238, 205, 0.7) !important;
+  background: rgba(35, 116, 73, 0.92) !important;
+}
+
+html body .community-story-actions svg,
+html[data-wild-theme='dark'] body .community-story-actions svg {
+  width: 20px !important;
+  height: 20px !important;
+}
+
+html body .community-story-actions span,
+html[data-wild-theme='dark'] body .community-story-actions span {
+  color: inherit !important;
+  font-size: 0.76rem !important;
+  font-weight: 900 !important;
+}
+
+html body .community-story-like-burst,
+html[data-wild-theme='dark'] body .community-story-like-burst {
+  position: absolute !important;
+  width: 34px !important;
+  height: 34px !important;
+  border: 2px solid #ffe187 !important;
+  border-radius: 50% !important;
+  pointer-events: none !important;
+}
+
+html body .community-story-comments,
+html[data-wild-theme='dark'] body .community-story-comments {
+  position: absolute !important;
+  left: 8px !important;
+  right: 8px !important;
+  bottom: calc(8px + env(safe-area-inset-bottom, 0px)) !important;
+  z-index: 9 !important;
+  max-height: min(58dvh, 520px) !important;
+  padding: 14px !important;
+  overflow-y: auto !important;
+  border: 1px solid rgba(40, 83, 57, 0.18) !important;
+  border-radius: 24px !important;
+  background: rgba(255, 250, 239, 0.97) !important;
+  color: #30291f !important;
+  box-shadow: 0 -18px 50px rgba(0, 0, 0, 0.34) !important;
+  overscroll-behavior: contain !important;
+}
+
+html body .community-story-comments > header,
+html[data-wild-theme='dark'] body .community-story-comments > header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  margin-bottom: 8px !important;
+}
+
+html body .community-story-comments > header strong,
+html[data-wild-theme='dark'] body .community-story-comments > header strong {
+  color: #30291f !important;
+  font-size: 1.05rem !important;
+}
+
+html body .community-story-comments > header button,
+html[data-wild-theme='dark'] body .community-story-comments > header button {
+  width: 40px !important;
+  height: 40px !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  background: #edf2e8 !important;
+  color: #31543d !important;
+  font-size: 1.2rem !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html body .community-story-actions > button,
+  html body .community-story-like-burst,
+  html body .community-story-comments {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 /* Rewards lower-card cleanup: readable actions and a toast that does not fight the dock. */
 html body .app-shell .rewards-reference .claim-all-button,
 html body .app-shell .rewards-reference .current-rank-panel > button,
@@ -7777,15 +8009,16 @@ html[data-wild-theme='system'] body .app-shell .mobile-bottom-dock .dock-item.ac
   background: transparent !important;
 }
 
-/* Camera overlay controls: keep actions up top and make the active filter read as the shutter. */
+/* Camera overlay controls: compact HUD with a dedicated shutter. */
 html body .capture-flow-overlay .capture-flow-close {
   display: grid !important;
   place-items: center !important;
-  top: calc(100px + env(safe-area-inset-top, 0px)) !important;
-  left: 18px !important;
+  transform: none !important;
+  top: calc(14px + env(safe-area-inset-top, 0px)) !important;
+  left: 14px !important;
   z-index: 12 !important;
-  width: 42px !important;
-  height: 42px !important;
+  width: 44px !important;
+  height: 44px !important;
   border-radius: 999px !important;
   background: rgba(255, 250, 240, 0.88) !important;
   color: #2f2116 !important;
@@ -7796,15 +8029,13 @@ html body .capture-flow-overlay .capture-flow-close {
 }
 
 html body .capture-flow-overlay .capture-flow-close svg {
-  display: none !important;
+  display: block !important;
+  width: 20px !important;
+  height: 20px !important;
 }
 
 html body .capture-flow-overlay .capture-flow-close::before {
-  content: "x" !important;
-  color: #2f2116 !important;
-  font-size: 1.05rem !important;
-  line-height: 1 !important;
-  font-weight: 950 !important;
+  content: none !important;
 }
 
 html body .capture-flow-overlay .capture-viewfinder-top {
@@ -7816,8 +8047,8 @@ html body .capture-flow-overlay .capture-brand-title {
 }
 
 html body .capture-flow-overlay .capture-social-rail {
-  top: calc(24px + env(safe-area-inset-top, 0px)) !important;
-  right: 10px !important;
+  top: calc(14px + env(safe-area-inset-top, 0px)) !important;
+  right: 14px !important;
   z-index: 12 !important;
   display: inline-flex !important;
   flex-direction: row !important;
@@ -7846,38 +8077,71 @@ html body .capture-flow-overlay .capture-rail-btn.active {
   box-shadow: 0 12px 30px rgba(240, 196, 91, 0.28) !important;
 }
 
+html body .capture-flow-overlay .capture-rail-btn:disabled {
+  opacity: 0.42 !important;
+  cursor: not-allowed !important;
+}
+
 html body .capture-flow-overlay .capture-rail-btn svg {
   width: 17px !important;
   height: 17px !important;
 }
 
 html body .capture-flow-overlay .capture-viewfinder-bottom {
-  bottom: calc(18px + env(safe-area-inset-bottom, 0px)) !important;
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
   left: 0 !important;
   right: 0 !important;
   padding: 0 0 6px !important;
   overflow: visible !important;
 }
 
+html body .capture-flow-overlay .capture-shutter-button {
+  width: 72px !important;
+  height: 72px !important;
+  flex: 0 0 72px !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 5px !important;
+  border: 3px solid rgba(255, 255, 255, 0.96) !important;
+  border-radius: 50% !important;
+  background: rgba(255, 252, 244, 0.34) !important;
+  box-shadow: 0 8px 28px rgba(8, 31, 21, 0.34) !important;
+}
+
+html body .capture-flow-overlay .capture-shutter-inner {
+  width: 100% !important;
+  height: 100% !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 50% !important;
+  color: #fffaf0 !important;
+  background: #25794f !important;
+}
+
+html body .capture-flow-overlay .capture-shutter-inner svg {
+  width: 25px !important;
+  height: 25px !important;
+}
+
 html body .capture-flow-overlay .capture-filter-strip {
-  min-height: 104px !important;
-  padding: 14px max(128px, calc(50vw - 48px)) 10px !important;
-  gap: 24px !important;
+  min-height: 66px !important;
+  padding: 2px 16px 0 !important;
+  gap: 10px !important;
   align-items: center !important;
   overflow-x: auto !important;
   overflow-y: visible !important;
-  scroll-padding-inline: max(128px, calc(50vw - 48px)) !important;
+  scroll-padding-inline: 16px !important;
 }
 
 html body .capture-flow-overlay .capture-filter-chip {
-  width: 70px !important;
-  min-width: 70px !important;
-  height: 88px !important;
+  width: 50px !important;
+  min-width: 50px !important;
+  height: 64px !important;
   display: inline-flex !important;
   flex-direction: column !important;
   align-items: center !important;
   justify-content: flex-start !important;
-  gap: 7px !important;
+  gap: 3px !important;
   border: 0 !important;
   border-radius: 999px !important;
   background: transparent !important;
@@ -7886,8 +8150,8 @@ html body .capture-flow-overlay .capture-filter-chip {
 }
 
 html body .capture-flow-overlay .capture-filter-preview {
-  width: 56px !important;
-  height: 56px !important;
+  width: 42px !important;
+  height: 42px !important;
   border-radius: 999px !important;
   border: 2px solid rgba(255, 250, 240, 0.72) !important;
   box-shadow: 0 12px 26px rgba(0, 0, 0, 0.32) !important;
@@ -7895,17 +8159,14 @@ html body .capture-flow-overlay .capture-filter-preview {
 
 html body .capture-flow-overlay .capture-filter-chip.active {
   z-index: 5 !important;
-  transform: translateY(-10px) !important;
+  transform: none !important;
 }
 
 html body .capture-flow-overlay .capture-filter-chip.active .capture-filter-preview {
-  width: 68px !important;
-  height: 68px !important;
-  border: 5px solid #fffaf0 !important;
-  box-shadow:
-    0 0 0 3px rgba(255, 250, 240, 0.46),
-    0 0 0 8px rgba(40, 118, 75, 0.42),
-    0 16px 34px rgba(0, 0, 0, 0.36) !important;
+  width: 42px !important;
+  height: 42px !important;
+  border: 2px solid #fffaf0 !important;
+  box-shadow: 0 0 0 2px rgba(40, 118, 75, 0.72), 0 10px 24px rgba(0, 0, 0, 0.3) !important;
   transform: none !important;
 }
 
@@ -7917,7 +8178,7 @@ html body .capture-flow-overlay .capture-filter-label {
   max-width: 78px !important;
   color: rgba(255, 250, 240, 0.86) !important;
   -webkit-text-fill-color: rgba(255, 250, 240, 0.86) !important;
-  font-size: 0.74rem !important;
+  font-size: 0.62rem !important;
   line-height: 1 !important;
   font-weight: 850 !important;
   text-align: center !important;
@@ -8353,4 +8614,261 @@ html body .app-shell .world-canvas-wrap .leaflet-container { background: rgba(23
 .bottom-sheet-close:hover,
 .celebration-close:hover {
   background: rgba(0, 0, 0, 0.25);
+}
+
+/* Mobile consistency pass: stable map canvas, compact controls and safe profile flow. */
+@media (max-width: 780px) {
+  html body .app-shell .world-explore-container {
+    width: 100vw !important;
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    overflow: hidden !important;
+    background: #dbe2cf !important;
+  }
+
+  html body .app-shell .world-canvas-wrap,
+  html body .app-shell .world-canvas-wrap .leaflet-container {
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    max-width: none !important;
+  }
+
+  html body .app-shell .world-canvas-wrap {
+    background: #d9ddc7 !important;
+  }
+
+  html body .app-shell .world-canvas-wrap .leaflet-container {
+    background: #d9ddc7 !important;
+  }
+
+  html body .app-shell .world-explore-container .explore-search-bar {
+    top: calc(14px + env(safe-area-inset-top, 0px)) !important;
+    left: 14px !important;
+    right: 82px !important;
+    width: auto !important;
+    gap: 8px !important;
+  }
+
+  html body .app-shell .explore-search-input-wrap {
+    height: 48px !important;
+    padding: 0 14px !important;
+    border-radius: 18px !important;
+  }
+
+  html body .app-shell .explore-search-input {
+    min-width: 0 !important;
+    font-size: 0.88rem !important;
+  }
+
+  html body .app-shell .explore-category-tags {
+    width: calc(100vw - 28px) !important;
+    max-width: none !important;
+    gap: 7px !important;
+    padding: 0 2px 5px !important;
+    scroll-padding-inline: 2px !important;
+  }
+
+  html body .app-shell .explore-tag {
+    height: 36px !important;
+    padding: 0 13px !important;
+    font-size: 0.77rem !important;
+    box-shadow: 0 6px 15px rgba(55, 34, 15, 0.08) !important;
+  }
+
+  html body .app-shell .world-hud-left {
+    top: calc(13px + env(safe-area-inset-top, 0px)) !important;
+    right: 14px !important;
+  }
+
+  html body .app-shell .world-hud-avatar {
+    width: 58px !important;
+    height: 48px !important;
+    border-width: 2px !important;
+    border-radius: 18px !important;
+  }
+
+  html body .app-shell .world-hud-right {
+    top: calc(70px + env(safe-area-inset-top, 0px)) !important;
+    right: 14px !important;
+    gap: 8px !important;
+  }
+
+  html body .app-shell .explore-map-tools {
+    top: calc(116px + env(safe-area-inset-top, 0px)) !important;
+    left: 14px !important;
+  }
+
+  html body .app-shell .explore-step-counter {
+    min-width: 106px !important;
+    min-height: 54px !important;
+    padding: 8px 11px !important;
+    border-radius: 16px !important;
+  }
+
+  html body .app-shell .explore-map-tools > p {
+    max-width: 156px !important;
+    padding: 6px 8px !important;
+    font-size: 0.64rem !important;
+    line-height: 1.25 !important;
+  }
+
+  html body .app-shell .map-control-locate {
+    top: calc(126px + env(safe-area-inset-top, 0px)) !important;
+    right: 14px !important;
+  }
+
+  html body .app-shell .explore-bottom-sheet {
+    min-height: 0 !important;
+    max-height: none !important;
+    height: 316px !important;
+    padding: 18px 16px calc(112px + env(safe-area-inset-bottom, 0px)) !important;
+    overflow: hidden !important;
+    border-radius: 28px 28px 0 0 !important;
+  }
+
+  html body .app-shell .explore-sheet-header {
+    margin-bottom: 12px !important;
+  }
+
+  html body .app-shell .explore-sheet-header h3 {
+    font-size: 1rem !important;
+  }
+
+  html body .app-shell .explore-hotspot-cards {
+    gap: 10px !important;
+    padding: 0 0 4px !important;
+  }
+
+  html body .app-shell .explore-hotspot-card {
+    flex: 0 0 162px !important;
+    width: 162px !important;
+    min-height: 150px !important;
+    height: 150px !important;
+    border-radius: 18px !important;
+  }
+
+  html body .app-shell .explore-hotspot-overlay {
+    padding: 11px !important;
+  }
+
+  html body .app-shell .explore-hotspot-title,
+  html body .app-shell .explore-hotspot-card h4 {
+    font-size: 0.91rem !important;
+    line-height: 1.08 !important;
+  }
+
+  html body .app-shell .explore-hotspot-meta,
+  html body .app-shell .explore-hotspot-meta span {
+    font-size: 0.67rem !important;
+    line-height: 1.2 !important;
+  }
+
+  html body .app-shell .profile-shell-v2 {
+    gap: 12px !important;
+    padding: max(58px, calc(18px + env(safe-area-inset-top, 0px))) 16px calc(126px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  html body .app-shell .profile-hero-v2 {
+    grid-template-columns: 62px minmax(0, 1fr) !important;
+    gap: 12px !important;
+    padding: 17px 15px !important;
+    border-radius: 22px !important;
+  }
+
+  html body .app-shell .profile-avatar-v2 {
+    width: 62px !important;
+    height: 62px !important;
+    border-radius: 18px !important;
+  }
+
+  html body .app-shell .profile-identity-v2 {
+    padding-right: 52px !important;
+  }
+
+  html body .app-shell .profile-identity-v2 h2 {
+    font-size: 1.12rem !important;
+  }
+
+  html body .app-shell .profile-streak-badge {
+    top: 55px !important;
+    right: 13px !important;
+    height: 30px !important;
+  }
+
+  html body .app-shell .profile-stat-grid-v2 {
+    gap: 8px !important;
+    margin-top: 0 !important;
+  }
+
+  html body .app-shell .profile-stat-v2 {
+    min-height: 72px !important;
+    padding: 12px 5px !important;
+    border-radius: 17px !important;
+  }
+
+  html body .app-shell .profile-stat-v2 strong {
+    font-size: clamp(1.25rem, 6.5vw, 1.65rem) !important;
+  }
+
+  html body .app-shell .profile-stat-v2 small {
+    font-size: 0.65rem !important;
+  }
+
+  html body .app-shell .profile-rank-section {
+    margin-top: 0 !important;
+    padding: 15px !important;
+    position: relative !important;
+    z-index: 1 !important;
+    border-radius: 20px !important;
+    border: 1px solid rgba(61, 83, 68, 0.13) !important;
+    background: rgba(255, 252, 244, 0.94) !important;
+    box-shadow: 0 10px 26px rgba(65, 52, 35, 0.08) !important;
+  }
+
+  html body .app-shell .profile-section-eyebrow,
+  html body .app-shell .profile-rank-count,
+  html body .app-shell .profile-rank-badge {
+    color: #443b30 !important;
+    -webkit-text-fill-color: #443b30 !important;
+  }
+
+  html body .app-shell .profile-rank-row {
+    gap: 9px 12px !important;
+  }
+
+  html body .app-shell .profile-menu-v2 {
+    margin-top: 0 !important;
+    position: relative !important;
+    z-index: 1 !important;
+    border-radius: 20px !important;
+    background: rgba(255, 252, 244, 0.96) !important;
+  }
+
+  html body .app-shell .profile-menu-row-v2 {
+    min-height: 56px !important;
+    padding: 0 16px !important;
+  }
+
+  html body .app-shell .profile-menu-emoji {
+    width: 34px !important;
+    height: 34px !important;
+    display: grid !important;
+    place-items: center !important;
+    border-radius: 11px !important;
+    background: rgba(47, 117, 77, 0.1) !important;
+    color: #2f754d !important;
+  }
+
+  html body .app-shell .profile-menu-emoji svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  html body .app-shell .profile-menu-row-label {
+    color: #252c28 !important;
+    -webkit-text-fill-color: #252c28 !important;
+    font-size: 0.91rem !important;
+    font-weight: 750 !important;
+  }
 }

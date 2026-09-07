@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { supabaseConfigured } from '../../lib/supabase';
 import { useAuth } from './AuthContext';
 import { playHover, playTap, playSuccess } from '../../lib/useSoundEffects';
+import { Icon } from '../../components/Icon';
 
 /* ─── helpers ─────────────────────────────────────────────────────────────── */
 const REMEMBERED_KEY = 'habbit_remembered_email';
@@ -46,7 +47,7 @@ function EyeToggle({ open, onClick }) {
       onClick={onClick}
       aria-label={open ? 'Hide password' : 'Show password'}
     >
-      {open ? '👁️' : '🙈'}
+      <Icon name="eye" />
     </button>
   );
 }
@@ -201,7 +202,7 @@ export function AuthPage({ mode }) {
         >
           {/* Header */}
           <motion.div variants={fieldStagger} initial="hidden" animate="show" custom={0}>
-            <div className="auth-logo-mark" aria-hidden="true">🌿</div>
+            <div className="auth-logo-mark" aria-hidden="true"><Icon name="leaf" /></div>
             <h1 id="auth-heading" className="auth-heading-v2">
               {isSignUp ? 'Create account' : isReturning ? 'Welcome back!' : 'Sign in'}
             </h1>

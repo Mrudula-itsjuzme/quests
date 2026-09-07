@@ -65,13 +65,21 @@ export function WorldCanvas({ hotspots = [], onSelectHotspot, onPointMap, userPo
 
       if (!offlineNative) {
         // OpenStreetMap standard tiles (No API Key Required)
-        Leaflet.tileLayer(
+        const tiles = Leaflet.tileLayer(
           'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
           {
             attribution: '© OpenStreetMap contributors',
             maxZoom: 19,
+            keepBuffer: 4,
+            updateWhenIdle: false,
           },
-        ).addTo(map);
+        );
+        tiles.on('tileerror', ({ tile }) => {
+          if (!tile || tile.dataset.fallbackApplied === 'true') return;
+          tile.dataset.fallbackApplied = 'true';
+          tile.src = tile.src.replace('tile.openstreetmap.org', 'tile.openstreetmap.fr/hot');
+        });
+        tiles.addTo(map);
 
         // Compact attribution in bottom-right
         Leaflet.control.attribution({ prefix: false, position: 'bottomright' }).addTo(map);
@@ -101,9 +109,14 @@ export function WorldCanvas({ hotspots = [], onSelectHotspot, onPointMap, userPo
   useEffect(() => {
     if (!mapReady || !mapRef.current) return undefined;
     const resize = () => mapRef.current?.invalidateSize();
+    const observer = typeof ResizeObserver === 'function' && containerRef.current
+      ? new ResizeObserver(resize)
+      : null;
+    observer?.observe(containerRef.current);
     window.addEventListener('resize', resize);
     const timer = window.setTimeout(resize, 350);
     return () => {
+      observer?.disconnect();
       window.removeEventListener('resize', resize);
       window.clearTimeout(timer);
     };

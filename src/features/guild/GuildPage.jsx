@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { CaptureImage } from '../../components/CaptureImage';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Icon } from '../../components/Icon';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import {
   useAddCommunityComment,
   useCommunityComments,
@@ -383,11 +384,23 @@ function CommunityStories({ onOpenProfile }) {
 function StoryViewerSheet({ stories, activeIndex, onNavigate, onClose, onOpenProfile }) {
   const story = stories[activeIndex];
   const pointerStart = useRef(null);
+  const toggleLike = useToggleCommunityLike();
+  const reportPost = useReportCommunityPost();
+  const [commentsOpen, setCommentsOpen] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reported, setReported] = useState(false);
+  const [likeBurst, setLikeBurst] = useState(0);
   const goPrevious = () => activeIndex > 0 && onNavigate(activeIndex - 1);
   const goNext = () => {
     if (activeIndex < stories.length - 1) onNavigate(activeIndex + 1);
     else onClose();
   };
+
+  useEffect(() => {
+    setCommentsOpen(false);
+    setReportOpen(false);
+    setReported(false);
+  }, [story.postId]);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -460,18 +473,89 @@ function StoryViewerSheet({ stories, activeIndex, onNavigate, onClose, onOpenPro
           aria-label="Previous story"
           onClick={goPrevious}
           disabled={activeIndex === 0}
-        />
+        ><ChevronLeft aria-hidden="true" /></button>
         <button
           type="button"
           className="community-story-nav community-story-nav-next"
           aria-label={activeIndex === stories.length - 1 ? 'Close stories' : 'Next story'}
           onClick={goNext}
-        />
+        ><ChevronRight aria-hidden="true" /></button>
         <div className="community-story-view-copy">
           <span>{story.discovery?.rarityStars || 0}★</span>
           <h3>{story.discovery?.cardTitle || story.discovery?.itemName || 'Discovery'}</h3>
           {story.placeLabel && <p>{story.placeLabel}</p>}
         </div>
+        <div className="community-story-actions" aria-label="Story actions">
+          <motion.button
+            key={`like-${likeBurst}`}
+            type="button"
+            className={story.viewerLiked ? 'liked' : ''}
+            aria-pressed={Boolean(story.viewerLiked)}
+            aria-label={story.viewerLiked ? 'Unlike story' : 'Like story'}
+            disabled={toggleLike.isPending}
+            whileTap={{ scale: 0.82 }}
+            animate={story.viewerLiked ? { scale: [1, 1.2, 1], rotate: [0, -8, 6, 0] } : { scale: 1 }}
+            onClick={() => {
+              playTap();
+              setLikeBurst((value) => value + 1);
+              toggleLike.mutate({ postId: story.postId, liked: !story.viewerLiked });
+            }}
+          >
+            <Icon name="star" />
+            <span>{story.likeCount || 0}</span>
+            <AnimatePresence>{story.viewerLiked && (
+              <motion.i className="community-story-like-burst" aria-hidden="true" initial={{ opacity: 1, scale: 0.4 }} animate={{ opacity: 0, scale: 1.8, y: -18 }} exit={{ opacity: 0 }} />
+            )}</AnimatePresence>
+          </motion.button>
+          <motion.button
+            type="button"
+            aria-label="Comment on story"
+            aria-expanded={commentsOpen}
+            whileTap={{ scale: 0.86 }}
+            onClick={() => { playTap(); setCommentsOpen((open) => !open); }}
+          >
+            <Icon name="scroll" />
+            <span>{story.commentCount || 0}</span>
+          </motion.button>
+          <motion.button
+            type="button"
+            className={reported ? 'reported' : ''}
+            aria-label={reported ? 'Story reported' : 'Report story'}
+            disabled={reported || reportPost.isPending}
+            whileTap={{ scale: 0.86 }}
+            animate={reported ? { scale: [1, 1.16, 1] } : { scale: 1 }}
+            onClick={() => { playTap(); setReportOpen(true); }}
+          >
+            <Icon name="shield" />
+            <span>{reported ? 'Done' : 'Report'}</span>
+          </motion.button>
+        </div>
+        <AnimatePresence>
+          {commentsOpen && (
+            <motion.aside
+              className="community-story-comments"
+              aria-label="Story comments"
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', stiffness: 420, damping: 36 }}
+            >
+              <header><strong>Comments</strong><button type="button" aria-label="Close comments" onClick={() => setCommentsOpen(false)}>×</button></header>
+              <CommentThread postId={story.postId} post={story} />
+            </motion.aside>
+          )}
+          {reportOpen && (
+            <ReportReasonSheet
+              post={{ ...story, id: story.postId }}
+              isSubmitting={reportPost.isPending}
+              onClose={() => setReportOpen(false)}
+              onSubmit={(reason) => reportPost.mutate(
+                { postId: story.postId, reason },
+                { onSuccess: () => { setReportOpen(false); setReported(true); } },
+              )}
+            />
+          )}
+        </AnimatePresence>
       </motion.section>
     </motion.div>,
     document.body,

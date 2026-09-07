@@ -66,7 +66,7 @@ export function GalleryPage() {
   }, [collection, species, activeTab, sortBy, searchQuery]);
 
   const sRankCount = collection.filter((c) => c.rarityStars === 5).length;
-  const totalXp = collection.reduce((sum, c) => sum + (c.xpAwarded || 0), 0);
+  const totalXp = collection.reduce((sum, c) => sum + (c.xpAwarded ?? Math.max(25, Number(c.rarityStars || 1) * 25)), 0);
 
   return (
     <main className="gallery-v2-shell">

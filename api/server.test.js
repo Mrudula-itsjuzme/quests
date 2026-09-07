@@ -566,6 +566,34 @@ describe('World API', () => {
     expect(body.every((spot) => spot.category === 'Waterfalls')).toBe(true);
   });
 
+  it('saves places publicly and keeps the operation idempotent', async () => {
+    const app = createApp({ config: testConfig() });
+    const hotspotId = 'demo-cubbon-park';
+    const first = await request(app).put(`/api/v1/world/hotspots/${hotspotId}/saved`).send({ saved: true });
+    const replay = await request(app).put(`/api/v1/world/hotspots/${hotspotId}/saved`).send({ saved: true });
+    expect(first.status).toBe(200);
+    expect(replay.body).toEqual(expect.objectContaining({ hotspotId, saved: true, saveCount: 1 }));
+
+    const publicList = await request(app).get(`/api/v1/community/users/${testConfig().DEV_USER_ID}/saved-places`);
+    expect(publicList.status).toBe(200);
+    expect(publicList.body.filter((item) => item.id === hotspotId)).toHaveLength(1);
+  });
+
+  it('upserts one rating per explorer and returns the aggregate', async () => {
+    const app = createApp({ config: testConfig() });
+    const hotspotId = 'demo-cubbon-park';
+    await request(app).put(`/api/v1/world/hotspots/${hotspotId}/rating`).send({ rating: 2 });
+    const revised = await request(app).put(`/api/v1/world/hotspots/${hotspotId}/rating`).send({ rating: 5 });
+    expect(revised.status).toBe(200);
+    expect(revised.body).toEqual(expect.objectContaining({ hotspotId, rating: 5, ratingCount: 1, viewerRating: 5 }));
+  });
+
+  it('rejects unknown places and invalid ratings', async () => {
+    const app = createApp({ config: testConfig() });
+    expect((await request(app).put('/api/v1/world/hotspots/not-real/saved').send({ saved: true })).status).toBe(404);
+    expect((await request(app).put('/api/v1/world/hotspots/demo-cubbon-park/rating').send({ rating: 6 })).status).toBe(400);
+  });
+
   it('rejects an unknown category instead of silently ignoring it', async () => {
     const app = createApp({ config: testConfig() });
     const response = await request(app).get('/api/v1/world/hotspots?category=Volcanoes');
@@ -791,6 +819,9 @@ describe('Community API', () => {
       expect.objectContaining({
         postId: post.body.id,
         viewed: false,
+        likeCount: 0,
+        commentCount: 0,
+        viewerLiked: false,
         discovery: expect.objectContaining({ rarityStars: expect.any(Number) }),
       }),
     ]);

@@ -340,6 +340,10 @@ export class PostgresQuestRepository {
       const cardId = randomUUID();
       const imageRef = card.imageRef || ((card.mediaData || card.storageRef) ? `/api/v1/captures/${cardId}/media` : null);
       if (card.captureId) {
+        // Serialize the check-and-create section for this client-supplied ID.
+        // The unique index is the final guard; this lock makes concurrent
+        // retries return the first result instead of surfacing a 23505 error.
+        await client.query('SELECT pg_advisory_xact_lock(hashtextextended($1, 0))', [card.captureId]);
         const existing = await client.query('SELECT * FROM captured_cards WHERE user_id = $1 AND capture_id = $2 FOR UPDATE', [card.userId, card.captureId]);
         if (existing.rows[0]) {
           await client.query('COMMIT');
@@ -570,23 +574,59 @@ export class PostgresQuestRepository {
     return rows.some((row) => hashSimilarity(row.image_hash, hash) >= threshold);
   }
   // --- World ---
-  async listWorldHotspots({ category = null, bbox = null, limit = 200 } = {}) {
-    const values = [];
-    const where = ['enabled'];
-    if (category) { values.push(category); where.push(`category = $${values.length}`); }
+  async listWorldHotspots({ category = null, bbox = null, limit = 200, viewerId = null } = {}) {
+    const values = [viewerId];
+    const where = ['h.enabled'];
+    if (category) { values.push(category); where.push(`h.category = $${values.length}`); }
     if (bbox) {
       // Explicit min/max per axis, so a caller cannot accidentally filter
       // latitude by a longitude range.
       values.push(bbox.minLat, bbox.maxLat, bbox.minLng, bbox.maxLng);
-      where.push(`lat BETWEEN $${values.length - 3} AND $${values.length - 2}`);
-      where.push(`lng BETWEEN $${values.length - 1} AND $${values.length}`);
+      where.push(`h.lat BETWEEN $${values.length - 3} AND $${values.length - 2}`);
+      where.push(`h.lng BETWEEN $${values.length - 1} AND $${values.length}`);
     }
     values.push(Math.min(Number(limit) || 200, 500));
     const { rows } = await this.pool.query(
-      `SELECT * FROM world_hotspots WHERE ${where.join(' AND ')} ORDER BY name LIMIT $${values.length}`,
+      `SELECT h.*,
+         EXISTS (SELECT 1 FROM saved_hotspots s WHERE s.hotspot_id = h.id AND s.user_id = $1) AS viewer_saved,
+         (SELECT COUNT(*)::int FROM saved_hotspots s WHERE s.hotspot_id = h.id) AS save_count,
+         (SELECT ROUND(AVG(r.rating)::numeric, 1) FROM hotspot_ratings r WHERE r.hotspot_id = h.id) AS rating,
+         (SELECT COUNT(*)::int FROM hotspot_ratings r WHERE r.hotspot_id = h.id) AS rating_count,
+         (SELECT r.rating FROM hotspot_ratings r WHERE r.hotspot_id = h.id AND r.user_id = $1) AS viewer_rating
+       FROM world_hotspots h WHERE ${where.join(' AND ')} ORDER BY h.name LIMIT $${values.length}`,
       values,
     );
     return rows.map(mapWorldHotspot);
+  }
+
+  async setHotspotSaved(userId, hotspotId, saved) {
+    const found = await this.pool.query('SELECT 1 FROM world_hotspots WHERE id = $1 AND enabled', [hotspotId]);
+    if (!found.rowCount) return null;
+    if (saved) await this.pool.query('INSERT INTO saved_hotspots (user_id, hotspot_id) VALUES ($1,$2) ON CONFLICT DO NOTHING', [userId, hotspotId]);
+    else await this.pool.query('DELETE FROM saved_hotspots WHERE user_id = $1 AND hotspot_id = $2', [userId, hotspotId]);
+    const exact = (await this.listWorldHotspots({ viewerId: userId, limit: 500 })).find((item) => item.id === hotspotId);
+    return exact ? { hotspotId, saved: exact.saved, saveCount: exact.saveCount, rating: exact.rating, ratingCount: exact.ratingCount, viewerRating: exact.viewerRating } : { hotspotId, saved, saveCount: 0 };
+  }
+
+  async rateHotspot(userId, hotspotId, rating) {
+    const found = await this.pool.query('SELECT 1 FROM world_hotspots WHERE id = $1 AND enabled', [hotspotId]);
+    if (!found.rowCount) return null;
+    await this.pool.query(`INSERT INTO hotspot_ratings (user_id, hotspot_id, rating) VALUES ($1,$2,$3)
+      ON CONFLICT (user_id, hotspot_id) DO UPDATE SET rating = EXCLUDED.rating, updated_at = NOW()`, [userId, hotspotId, rating]);
+    const exact = (await this.listWorldHotspots({ viewerId: userId, limit: 500 })).find((item) => item.id === hotspotId);
+    return exact ? { hotspotId, saved: exact.saved, saveCount: exact.saveCount, rating: exact.rating, ratingCount: exact.ratingCount, viewerRating: exact.viewerRating } : null;
+  }
+
+  async listPublicSavedHotspots(userId, viewerId) {
+    const { rows } = await this.pool.query(`SELECT h.*, s.created_at AS saved_at,
+      EXISTS (SELECT 1 FROM saved_hotspots mine WHERE mine.hotspot_id = h.id AND mine.user_id = $2) AS viewer_saved,
+      (SELECT COUNT(*)::int FROM saved_hotspots all_saves WHERE all_saves.hotspot_id = h.id) AS save_count,
+      (SELECT ROUND(AVG(r.rating)::numeric, 1) FROM hotspot_ratings r WHERE r.hotspot_id = h.id) AS rating,
+      (SELECT COUNT(*)::int FROM hotspot_ratings r WHERE r.hotspot_id = h.id) AS rating_count,
+      (SELECT r.rating FROM hotspot_ratings r WHERE r.hotspot_id = h.id AND r.user_id = $2) AS viewer_rating
+      FROM saved_hotspots s JOIN world_hotspots h ON h.id = s.hotspot_id
+      WHERE s.user_id = $1 AND h.enabled ORDER BY s.created_at DESC`, [userId, viewerId]);
+    return rows.map((row) => ({ ...mapWorldHotspot(row), savedByUserId: userId, savedAt: row.saved_at }));
   }
 
   // --- Community ---
@@ -676,6 +716,10 @@ export class PostgresQuestRepository {
         author: post.author,
         discovery: post.discovery,
         placeLabel: post.placeLabel,
+        caption: post.caption,
+        likeCount: post.likeCount,
+        commentCount: post.commentCount,
+        viewerLiked: post.viewerLiked,
         createdAt: post.createdAt,
         viewed: Boolean(row.story_viewed),
       };
@@ -1375,6 +1419,11 @@ function mapWorldHotspot(row) {
     region: row.region,
     featuredSpecies: row.featured_species || [],
     isDemo: row.is_demo,
+    saved: Boolean(row.viewer_saved),
+    saveCount: Number(row.save_count || 0),
+    rating: row.rating == null ? null : Number(row.rating),
+    ratingCount: Number(row.rating_count || 0),
+    viewerRating: row.viewer_rating == null ? null : Number(row.viewer_rating),
   };
 }
 
@@ -1501,4 +1550,3 @@ function demoCaptureMediaData() {
   }
   return _demoMediaData;
 }
-

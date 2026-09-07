@@ -201,6 +201,13 @@ describe('App (development auth mode)', () => {
     fireEvent.click(await screen.findByRole('button', { name: /Malabar Trogon/i }));
     expect(await screen.findByRole('dialog', { name: /Lyra Moonweaver's story/i })).toBeInTheDocument();
     expect(screen.getByLabelText('Story 1 of 2')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /like story/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /comment on story/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /report story/i })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /comment on story/i }));
+    expect(await screen.findByLabelText('Story comments')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /close comments/i }));
 
     fireEvent.click(screen.getByRole('button', { name: /next story/i }));
 

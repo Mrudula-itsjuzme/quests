@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useActiveQuests, useCaptures, useCollectibles, useCommunityPosts, useMarkNotificationRead, useMe, useNotifications, useScenicPlaces, useSpecies, useWorldHotspots } from '../quests/queries';
+import { useActiveQuests, useCaptures, useCollectibles, useCommunityPosts, useMarkNotificationRead, useMe, useNotifications, useRateHotspot, useScenicPlaces, useSetHotspotSaved, useSpecies, useWorldHotspots } from '../quests/queries';
 import { coinBalance, deriveGems, getEnergy } from '../../lib/playerEconomy';
 import { derivePlayerPresentation } from '../../lib/playerPresentation';
 import { timeOfDayPhase } from '../../lib/worldTime';
@@ -15,6 +15,7 @@ import { Geolocation } from '@capacitor/geolocation';
 import { Capacitor } from '@capacitor/core';
 import { CaptureImage } from '../../components/CaptureImage';
 import { useStepCounter } from '../../lib/useStepCounter';
+import { Footprints } from 'lucide-react';
 
 const CATEGORIES = ['All', 'Hotspots', 'Viewpoints', 'Culture', 'Parks', 'Waterfalls', 'Birding', 'Community'];
 
@@ -33,6 +34,8 @@ export function WorldScreen() {
     refetch: refetchHotspots,
   } = useWorldHotspots();
   const markNotificationRead = useMarkNotificationRead();
+  const saveHotspot = useSetHotspotSaved();
+  const rateHotspot = useRateHotspot();
   const navigate = useNavigate();
   const [lastKnownPosition, setLastKnownPosition] = useState(null);
   const [searchCenter, setSearchCenter] = useState(null);
@@ -146,7 +149,7 @@ export function WorldScreen() {
           <input
             type="text"
             className="explore-search-input"
-            placeholder="Search places, parks, waterfalls..."
+            placeholder="Search nearby places"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -223,11 +226,17 @@ export function WorldScreen() {
       />
 
       <div className="explore-map-tools" aria-live="polite">
-        <button type="button" className="explore-step-counter" onClick={stepCounter.status === 'active' ? stepCounter.stop : stepCounter.start}>
-          <span aria-hidden="true">👣</span>
+        {stepCounter.status !== 'web' && <button
+          type="button"
+          className="explore-step-counter"
+          aria-label={stepCounter.status === 'web' ? 'Step counter is available in the mobile app' : 'Start or stop step counter'}
+          disabled={stepCounter.status === 'web' || stepCounter.status === 'unavailable' || stepCounter.status === 'requesting'}
+          onClick={stepCounter.status === 'active' ? stepCounter.stop : stepCounter.start}
+        >
+          <Footprints aria-hidden="true" />
           <strong>{stepCounter.status === 'active' ? stepCounter.steps.toLocaleString() : 'Steps'}</strong>
-          <small>{stepCounter.status === 'active' ? 'this walk' : stepCounter.status === 'web' ? 'mobile app' : stepCounter.status === 'denied' ? 'permission off' : 'tap to start'}</small>
-        </button>
+          <small>{stepCounter.status === 'active' ? 'this walk' : stepCounter.status === 'web' ? 'in mobile app' : stepCounter.status === 'denied' ? 'permission off' : stepCounter.status === 'unavailable' ? 'not supported' : stepCounter.status === 'requesting' ? 'checking…' : 'tap to start'}</small>
+        </button>}
         {searchCenter && <p>{scenicLoading ? 'Finding scenic places…' : scenicError ? 'Live scenic search is unavailable.' : `${scenic.length} places around your pin`}</p>}
       </div>
 
@@ -371,6 +380,31 @@ export function WorldScreen() {
             )}
             {selectedHotspot.attribution && (
               <p className="explore-hotspot-attribution">{selectedHotspot.attribution}</p>
+            )}
+
+            {selectedHotspot.source === 'curated' && (
+              <div className="hotspot-community-actions">
+                <button type="button" className={selectedHotspot.saved ? 'is-active' : ''} disabled={saveHotspot.isPending}
+                  onClick={async () => {
+                    playTap();
+                    const social = await saveHotspot.mutateAsync({ hotspotId: selectedHotspot.id, saved: !selectedHotspot.saved });
+                    setSelectedHotspot((current) => current ? { ...current, ...social } : current);
+                  }}>
+                  <Icon name="bookmark" /> {selectedHotspot.saved ? 'Saved publicly' : 'Save publicly'}
+                </button>
+                <div className="hotspot-rating-control" aria-label="Rate this place">
+                  {[1, 2, 3, 4, 5].map((rating) => (
+                    <button type="button" key={rating} className={rating <= Number(selectedHotspot.viewerRating || 0) ? 'is-active' : ''}
+                      aria-label={`${rating} star${rating === 1 ? '' : 's'}`} disabled={rateHotspot.isPending}
+                      onClick={async () => {
+                        playTap();
+                        const social = await rateHotspot.mutateAsync({ hotspotId: selectedHotspot.id, rating });
+                        setSelectedHotspot((current) => current ? { ...current, ...social } : current);
+                      }}><Icon name="star" /></button>
+                  ))}
+                </div>
+                <small>{selectedHotspot.rating ? `${selectedHotspot.rating} from ${selectedHotspot.ratingCount} explorer${selectedHotspot.ratingCount === 1 ? '' : 's'}` : 'Not rated yet'}</small>
+              </div>
             )}
 
             <div className="explore-hotspot-detail-actions">

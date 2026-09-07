@@ -17,7 +17,7 @@ import { Camera } from '@capacitor/camera';
 export function useCameraPreview(active = true) {
   const videoRef = useRef(null);
   const streamRef = useRef(null);
-  const [status, setStatus] = useState('idle'); // idle | starting | live | unavailable
+  const [status, setStatus] = useState('idle'); // idle | starting | live | native | unavailable
 
   useEffect(() => {
     let cancelled = false;
@@ -39,7 +39,9 @@ export function useCameraPreview(active = true) {
         try {
           const permission = await Camera.checkPermissions();
           if (!cancelled) {
-            setStatus(permission.camera === 'granted' ? 'live' : 'unavailable');
+            // Capacitor opens the native camera UI on shutter press; it does
+            // not provide a live MediaStream for this web view.
+            setStatus(permission.camera === 'denied' ? 'unavailable' : 'native');
           }
         } catch {
           if (!cancelled) setStatus('unavailable');

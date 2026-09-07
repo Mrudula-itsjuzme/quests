@@ -26,11 +26,11 @@ function RankBadge({ stars }) {
 }
 
 const MENU_ITEMS = [
-  { id: 'rewards', label: 'Rewards & Store', icon: 'chest', to: '/app/rewards', emoji: '🎁' },
-  { id: 'collection', label: 'My Library', icon: 'book', to: '/app/collection', emoji: '📚' },
-  { id: 'community', label: 'Community', icon: 'shield', to: '/app/community', emoji: '🤝' },
-  { id: 'settings', label: 'Settings', icon: 'gear', emoji: '⚙️' },
-  { id: 'help', label: 'Help & Support', icon: 'feather', emoji: '💬' },
+  { id: 'rewards', label: 'Rewards & Store', icon: 'chest', to: '/app/rewards' },
+  { id: 'collection', label: 'My Library', icon: 'book', to: '/app/collection' },
+  { id: 'community', label: 'Community', icon: 'shield', to: '/app/community' },
+  { id: 'settings', label: 'Settings', icon: 'gear' },
+  { id: 'help', label: 'Help & Support', icon: 'feather' },
 ];
 
 export function ProfilePage() {
@@ -141,11 +141,8 @@ export function ProfilePage() {
 
       {/* ── Rank breakdown ── */}
       {totalCount > 0 && (
-        <motion.div
+        <div
           className="profile-rank-section"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.16 }}
         >
           <p className="profile-section-eyebrow">Rarity Breakdown</p>
           <div className="profile-rank-row">
@@ -161,7 +158,7 @@ export function ProfilePage() {
               <p className="profile-rank-empty">Capture nature to earn rank badges</p>
             )}
           </div>
-        </motion.div>
+        </div>
       )}
 
       {/* ── Menu list ── */}
@@ -174,7 +171,7 @@ export function ProfilePage() {
         {MENU_ITEMS.map((item) =>
           item.to ? (
             <Link key={item.id} to={item.to} className="profile-menu-row-v2" onClick={playTap}>
-              <span className="profile-menu-emoji">{item.emoji}</span>
+              <span className="profile-menu-emoji"><Icon name={item.icon} /></span>
               <span className="profile-menu-row-label">{item.label}</span>
               <span className="profile-menu-chevron">›</span>
             </Link>
@@ -185,7 +182,7 @@ export function ProfilePage() {
               className="profile-menu-row-v2"
               onClick={() => handleMenuItem(item)}
             >
-              <span className="profile-menu-emoji">{item.emoji}</span>
+              <span className="profile-menu-emoji"><Icon name={item.icon} /></span>
               <span className="profile-menu-row-label">{item.label}</span>
               <span className="profile-menu-chevron">›</span>
             </button>

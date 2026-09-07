@@ -2,6 +2,8 @@ import { Navigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from './AuthContext';
 import { playHover, playTap } from '../../lib/useSoundEffects';
+import { MapPin, MoveRight } from 'lucide-react';
+import { Icon } from '../../components/Icon';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 28, scale: 0.97 },
@@ -11,22 +13,33 @@ const fadeUp = {
   }),
 };
 
-const FEATURES = [
-  { icon: '📸', label: 'Snap & Classify', desc: 'AI identifies what you capture instantly' },
-  { icon: '⭐', label: 'Earn Rarity Ranks', desc: 'S → D grades — some finds are ultra-rare' },
-  { icon: '🗺️', label: 'Explore Hotspots', desc: 'World map of discoveries near you' },
-  { icon: '🤝', label: 'Share & Connect', desc: 'Post to community, follow fellow explorers' },
-];
-
 export function LandingPage() {
   const { isAuthenticated, enterAsGuest } = useAuth();
   if (isAuthenticated) return <Navigate to="/app" replace />;
 
   return (
     <main className="landing-v2">
-      {/* Ambient background blobs */}
-      <div className="landing-blob landing-blob-1" aria-hidden="true" />
-      <div className="landing-blob landing-blob-2" aria-hidden="true" />
+      <motion.img
+        className="landing-cinematic-bg"
+        src="/assets/wild-realm-startup-hero.png"
+        alt=""
+        aria-hidden="true"
+        initial={{ scale: 1.08 }}
+        animate={{ scale: [1.08, 1.015, 1.04] }}
+        transition={{ duration: 18, repeat: Infinity, repeatType: 'mirror', ease: 'easeInOut' }}
+      />
+      <div className="landing-cinematic-shade" aria-hidden="true" />
+
+      <motion.div
+        className="landing-hotspot-preview"
+        aria-hidden="true"
+        initial={{ opacity: 0, scale: 0.7, y: 12 }}
+        animate={{ opacity: 1, scale: [1, 1.05, 1], y: 0 }}
+        transition={{ opacity: { delay: 0.7 }, scale: { delay: 1.2, duration: 2.8, repeat: Infinity }, y: { delay: 0.7 } }}
+      >
+        <MapPin />
+        <span><strong>Scenic overlook</strong><small>1.2 km nearby</small></span>
+      </motion.div>
 
       <div className="landing-v2-inner">
         {/* Logo mark */}
@@ -37,7 +50,7 @@ export function LandingPage() {
           animate="show"
           custom={0}
         >
-          <div className="landing-logo-icon" aria-hidden="true">🌿</div>
+          <div className="landing-logo-icon" aria-hidden="true"><Icon name="leaf" /></div>
           <span className="landing-logo-text">Wild Realm</span>
         </motion.div>
 
@@ -50,32 +63,12 @@ export function LandingPage() {
           custom={1}
         >
           <h1>
-            Snap nature.<br />
-            <span className="landing-hero-gradient">Discover its rarity.</span>
+            Find the places<br />
+            <span className="landing-hero-gradient">worth going.</span>
           </h1>
           <p>
-            Point, shoot, and let AI classify every living thing you find.
-            Earn XP, fill your collection, and share with explorers worldwide.
+            Discover beautiful places nearby and turn every outing into a lasting memory.
           </p>
-        </motion.div>
-
-        {/* Feature chips */}
-        <motion.div
-          className="landing-features"
-          variants={fadeUp}
-          initial="hidden"
-          animate="show"
-          custom={2}
-        >
-          {FEATURES.map((f) => (
-            <div key={f.label} className="landing-feature-chip">
-              <span className="landing-feature-icon">{f.icon}</span>
-              <div>
-                <strong>{f.label}</strong>
-                <p>{f.desc}</p>
-              </div>
-            </div>
-          ))}
         </motion.div>
 
         {/* CTAs */}
@@ -92,24 +85,13 @@ export function LandingPage() {
             onClick={playTap}
             onMouseEnter={playHover}
           >
-            <span>🌿</span> Start Exploring
+            Explore nearby <MoveRight aria-hidden="true" />
           </Link>
-          <Link
-            className="landing-cta-secondary"
-            to="/sign-in"
-            onClick={playTap}
-            onMouseEnter={playHover}
-          >
-            Sign in
-          </Link>
-          <button
-            type="button"
-            className="landing-cta-ghost"
-            onClick={() => { playTap(); enterAsGuest(); }}
-            onMouseEnter={playHover}
-          >
-            Try as guest
-          </button>
+          <div className="landing-secondary-actions">
+            <Link to="/sign-in" onClick={playTap} onMouseEnter={playHover}>Sign in</Link>
+            <span aria-hidden="true" />
+            <button type="button" onClick={() => { playTap(); enterAsGuest(); }} onMouseEnter={playHover}>Continue as guest</button>
+          </div>
         </motion.div>
       </div>
     </main>

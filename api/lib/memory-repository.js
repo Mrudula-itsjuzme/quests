@@ -31,6 +31,8 @@ export class MemoryQuestRepository {
     ];
     this.regionalEvents = [];
     this.worldHotspots = demoWorldHotspots.map((item) => ({ ...item }));
+    this.savedHotspots = [];
+    this.hotspotRatings = [];
     this.communityPosts = [];
     this.communityLikes = [];
     this.communityComments = [];
@@ -43,7 +45,7 @@ export class MemoryQuestRepository {
   }
 
   // --- World ---
-  async listWorldHotspots({ category = null, bbox = null, limit = 200 } = {}) {
+  async listWorldHotspots({ category = null, bbox = null, limit = 200, viewerId = null } = {}) {
     return this.worldHotspots
       .filter((item) => item.enabled)
       .filter((item) => !category || item.category === category)
@@ -51,7 +53,40 @@ export class MemoryQuestRepository {
         || (item.gps.lat >= bbox.minLat && item.gps.lat <= bbox.maxLat
           && item.gps.lng >= bbox.minLng && item.gps.lng <= bbox.maxLng))
       .slice(0, Math.min(Number(limit) || 200, 500))
-      .map(({ enabled, ...rest }) => clone(rest));
+      .map(({ enabled, ...rest }) => clone({ ...rest, ...this._hotspotSocial(rest.id, viewerId) }));
+  }
+
+  _hotspotSocial(hotspotId, viewerId) {
+    const ratings = this.hotspotRatings.filter((item) => item.hotspotId === hotspotId);
+    const total = ratings.reduce((sum, item) => sum + item.rating, 0);
+    return {
+      saved: this.savedHotspots.some((item) => item.userId === viewerId && item.hotspotId === hotspotId),
+      saveCount: this.savedHotspots.filter((item) => item.hotspotId === hotspotId).length,
+      rating: ratings.length ? Math.round((total / ratings.length) * 10) / 10 : null,
+      ratingCount: ratings.length,
+      viewerRating: ratings.find((item) => item.userId === viewerId)?.rating || null,
+    };
+  }
+
+  async setHotspotSaved(userId, hotspotId, saved) {
+    if (!this.worldHotspots.some((item) => item.id === hotspotId && item.enabled)) return null;
+    this.savedHotspots = this.savedHotspots.filter((item) => !(item.userId === userId && item.hotspotId === hotspotId));
+    if (saved) this.savedHotspots.push({ userId, hotspotId, createdAt: new Date().toISOString() });
+    return { hotspotId, ...this._hotspotSocial(hotspotId, userId) };
+  }
+
+  async rateHotspot(userId, hotspotId, rating) {
+    if (!this.worldHotspots.some((item) => item.id === hotspotId && item.enabled)) return null;
+    this.hotspotRatings = this.hotspotRatings.filter((item) => !(item.userId === userId && item.hotspotId === hotspotId));
+    this.hotspotRatings.push({ userId, hotspotId, rating, updatedAt: new Date().toISOString() });
+    return { hotspotId, ...this._hotspotSocial(hotspotId, userId) };
+  }
+
+  async listPublicSavedHotspots(userId, viewerId) {
+    return this.savedHotspots.filter((item) => item.userId === userId).map((item) => {
+      const place = this.worldHotspots.find((entry) => entry.id === item.hotspotId);
+      return place ? { ...place, ...this._hotspotSocial(place.id, viewerId), savedByUserId: userId, savedAt: item.createdAt } : null;
+    }).filter(Boolean).map(clone);
   }
 
   // --- Community ---
@@ -108,6 +143,10 @@ export class MemoryQuestRepository {
         author: post.author,
         discovery: post.discovery,
         placeLabel: post.placeLabel,
+        caption: post.caption,
+        likeCount: post.likeCount,
+        commentCount: post.commentCount,
+        viewerLiked: post.viewerLiked,
         createdAt: post.createdAt,
         viewed: this.storyViews.some((view) => view.postId === post.id && view.viewerId === viewerId),
       }));
