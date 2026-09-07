@@ -58,7 +58,7 @@ export function BottomSheet({ isOpen, onClose, children }) {
           onPointerDown={(e) => dragControls.start(e)}
         />
         <div className="bottom-sheet-content">
-          <button type="button" aria-label="Close" onClick={onClose} style={{ display: 'none' }} />
+          <button type="button" className="bottom-sheet-close" aria-label="Close quest detail" onClick={onClose}>✕</button>
           {children}
         </div>
       </motion.div>

@@ -57,7 +57,7 @@ export function QuestSuccessModal({ quest, onClose }) {
         <div className="celebration-emblem">
           <Icon name="sun" />
         </div>
-        <button type="button" aria-label="Close" onClick={onClose} style={{ display: 'none' }} />
+        <button type="button" className="celebration-close" aria-label="Close celebration" onClick={onClose}>✕</button>
         <p className="eyebrow">QUEST ACCOMPLISHED</p>
         <h2>{quest?.title || 'Quest complete'}</h2>
         {quest?.description && <p className="celebration-desc">{quest.description}</p>}

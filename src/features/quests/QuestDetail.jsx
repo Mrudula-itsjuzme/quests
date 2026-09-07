@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ApiError } from '../../lib/api';
 import { Icon, categoryColors, categoryIcon } from '../../components/Icon';
@@ -18,6 +18,16 @@ export function QuestDetail({ quest }) {
   const [serviceMessage, setServiceMessage] = useState('');
   const [shareToFeed, setShareToFeed] = useState(true);
   const [rewardBurst, setRewardBurst] = useState(null);
+  const fileInputRef = useRef(null);
+
+  // Clear stale state when switching between quests (the component
+  // is reused inside the BottomSheet so it doesn't unmount).
+  useEffect(() => {
+    setTextProof('');
+    setFileError('');
+    setServiceMessage('');
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  }, [quest?.id]);
 
   if (!quest) {
     return (
@@ -46,16 +56,36 @@ export function QuestDetail({ quest }) {
     try {
       const uploadId = supabaseConfigured ? await uploadQuestProof(file) : `local_${crypto.randomUUID()}`;
       const result = await submitProof.mutateAsync({ assignmentId: quest.id, payload: { uploadId, feedOptIn: shareToFeed } });
-      announceCompletion(result, quest, setRewardBurst);
-      if (!result.completed && result.proofsRemaining) setServiceMessage(`Proof accepted. ${result.proofsRemaining} more ${result.proofsRemaining === 1 ? 'submission' : 'submissions'} required.`);
+      if (!result) {
+        setServiceMessage('No response from the server. Please try again.');
+      } else if (result.completed) {
+        announceCompletion(result, quest, setRewardBurst);
+      } else if (result.submission?.status === 'rejected') {
+        setServiceMessage(result.submission?.rejectionReason || 'Photo did not match the quest requirements. Please try again.');
+      } else if (result.submission?.status === 'manual_review' || result.assignment?.status === 'pending_verification') {
+        setServiceMessage('Submitted for review. You\u2019ll be notified once verified.');
+      } else if (result.proofsRemaining) {
+        setServiceMessage(`Proof accepted. ${result.proofsRemaining} more ${result.proofsRemaining === 1 ? 'submission' : 'submissions'} required.`);
+      }
     } catch (error) {
       if (error instanceof ApiError && error.code === 'guest_write_unavailable') {
         setServiceMessage('Sign in to submit verified quest proof.');
       } else if (error instanceof ApiError && (error.code === 'provider_not_configured' || error.status === 503)) {
         setServiceMessage('Photo review is temporarily unavailable. Please try again shortly.');
+      } else if (error instanceof ApiError && error.code === 'duplicate_submission') {
+        setServiceMessage('This photo has already been submitted.');
+      } else if (error instanceof ApiError && error.code === 'upload_cooldown_active') {
+        setServiceMessage('Too many recent attempts. Please wait a few minutes before trying again.');
+      } else if (error instanceof ApiError && error.code === 'quest_expired') {
+        setServiceMessage('This quest has expired.');
+      } else if (error instanceof ApiError && error.code === 'invalid_upload_reference') {
+        setServiceMessage('The photo could not be processed. Please select a different image.');
       } else {
         setServiceMessage('Could not submit your photo. Please try again.');
       }
+    } finally {
+      // Reset so the same file can be re-selected after a failure.
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
@@ -183,7 +213,7 @@ export function QuestDetail({ quest }) {
       {canAct && quest.verificationType === 'PHOTO' && (
         <div className="proof-form">
           <label htmlFor="proof-photo">Upload photo proof (JPEG/PNG/WEBP, up to 8MB)</label>
-          <input id="proof-photo" type="file" accept="image/jpeg,image/png,image/webp" onChange={onFileChange} disabled={submitProof.isPending} />
+          <input ref={fileInputRef} id="proof-photo" type="file" accept="image/jpeg,image/png,image/webp" onChange={onFileChange} disabled={submitProof.isPending} />
           <label className="feed-opt-in"><input type="checkbox" checked={shareToFeed} onChange={(event) => setShareToFeed(event.target.checked)} /> Share this verified completion with the community</label>
           {fileError && <p role="alert" className="form-error">{fileError}</p>}
         </div>

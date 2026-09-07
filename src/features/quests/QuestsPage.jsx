@@ -51,6 +51,7 @@ export function QuestsPage() {
 
   useEffect(() => {
     const handleQuestCompleted = (event) => {
+      setSelectedId(null);
       setCompletedQuestModal(event.detail);
     };
     window.addEventListener('habbit-quest-completed', handleQuestCompleted);

@@ -10,6 +10,136 @@
   /* Removed aggressive blur/glassmorphism */
 }
 
+/* Keep the startup column inside the physical phone viewport. */
+@media (max-width: 780px) {
+  html body .landing-v2 .landing-v2-inner {
+    box-sizing: border-box !important;
+    width: calc(100% - 36px) !important;
+    max-width: 430px !important;
+    padding: max(44px, env(safe-area-inset-top, 0px)) 0 max(30px, env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  html body .landing-v2 .landing-hero-copy {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    padding-inline: 0 !important;
+  }
+
+  html body .landing-v2 .landing-hero-copy h1 {
+    max-width: 11ch !important;
+    font-size: clamp(2.35rem, 11vw, 3.15rem) !important;
+  }
+}
+
+/* Startup clarity lock: keeps the photographic welcome screen readable at
+   phone and desktop aspect ratios without changing its routes or actions. */
+.landing-v2 .landing-v2-inner {
+  width: min(100%, 520px) !important;
+  margin: 0 auto !important;
+  justify-content: flex-end !important;
+  gap: 0 !important;
+}
+
+.landing-v2 .landing-logo-wrap {
+  top: calc(18px + env(safe-area-inset-top, 0px)) !important;
+  left: 18px !important;
+  width: auto !important;
+  flex-direction: row !important;
+}
+
+.landing-v2 .landing-logo-icon {
+  width: 42px !important;
+  height: 42px !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 14px !important;
+  font-size: 1.15rem !important;
+}
+
+.landing-v2 .landing-logo-text {
+  font-size: 0.7rem !important;
+  letter-spacing: 0.08em !important;
+}
+
+.landing-v2 .landing-hero-copy {
+  width: 100% !important;
+  max-width: 460px !important;
+  margin: 0 0 18px !important;
+  padding: 18px 4px 0 !important;
+}
+
+.landing-v2 .landing-hero-copy h1 {
+  max-width: 12ch !important;
+  margin: 0 !important;
+  color: #fffaf3 !important;
+  font-size: clamp(2.45rem, 11vw, 4.25rem) !important;
+  font-weight: 850 !important;
+  line-height: 0.98 !important;
+  letter-spacing: -0.045em !important;
+  text-align: left !important;
+  text-wrap: balance;
+  text-shadow: 0 3px 22px rgba(12, 18, 14, 0.5) !important;
+}
+
+.landing-v2 .landing-hero-gradient {
+  color: #fffaf3 !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+.landing-v2 .landing-hero-copy > p {
+  max-width: 39ch !important;
+  margin: 14px 0 0 !important;
+  color: rgba(255, 250, 243, 0.9) !important;
+  font-size: 0.96rem !important;
+  font-weight: 620 !important;
+  line-height: 1.48 !important;
+  text-align: left !important;
+  text-shadow: 0 2px 14px rgba(12, 18, 14, 0.58) !important;
+}
+
+.landing-v2 .landing-daily-note {
+  display: inline-flex;
+  width: fit-content;
+  margin-top: 13px;
+  padding: 7px 11px;
+  border: 1px solid rgba(255, 250, 243, 0.32);
+  border-radius: 999px;
+  background: rgba(13, 31, 21, 0.34);
+  color: #fffaf3;
+  font-size: 0.69rem;
+  font-weight: 780;
+  backdrop-filter: blur(12px);
+}
+
+.landing-v2 .landing-cta-group {
+  gap: 8px !important;
+  padding: 10px !important;
+  border-radius: 24px !important;
+  background: rgba(255, 252, 244, 0.9) !important;
+}
+
+.landing-v2 .landing-cta-primary {
+  justify-content: space-between !important;
+  min-height: 54px !important;
+  padding-inline: 20px !important;
+  background: linear-gradient(135deg, #24583b, #3f9a60) !important;
+}
+
+.landing-v2 .landing-cta-secondary,
+.landing-v2 .landing-cta-ghost {
+  min-height: 44px !important;
+}
+
+@media (min-width: 781px) {
+  .landing-v2 .landing-v2-inner {
+    margin-left: clamp(44px, 8vw, 120px) !important;
+  }
+
+  .landing-v2 .landing-logo-wrap {
+    left: clamp(44px, 8vw, 120px) !important;
+  }
+}
+
 .discovery-info-section {
   background: rgba(230, 226, 211, 0.03) !important;
   border: 1px solid rgba(230, 226, 211, 0.08) !important;
@@ -7797,4 +7927,430 @@ html body .capture-flow-overlay .capture-filter-label {
 html body .capture-flow-overlay .capture-filter-chip.active .capture-filter-label {
   color: #fffaf0 !important;
   -webkit-text-fill-color: #fffaf0 !important;
+}
+
+/* Selected startup direction: Map Aperture. */
+html body .landing-v2 {
+  position: relative !important;
+  min-height: 100svh !important;
+  overflow: hidden !important;
+  background: #0a1d12 !important;
+}
+
+html body .landing-v2 .landing-cinematic-bg {
+  position: absolute !important;
+  inset: -4% !important;
+  width: 108% !important;
+  height: 108% !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+  will-change: transform;
+}
+
+html body .landing-v2 .landing-cinematic-shade {
+  position: absolute !important;
+  inset: 0 !important;
+  background: linear-gradient(180deg, rgba(6, 18, 11, 0.04) 0%, rgba(6, 18, 11, 0.12) 43%, rgba(4, 16, 9, 0.93) 78%, #041108 100%) !important;
+}
+
+html body .landing-v2 .landing-v2-inner {
+  position: relative !important;
+  z-index: 3 !important;
+  box-sizing: border-box !important;
+  width: min(calc(100% - 40px), 520px) !important;
+  min-height: 100svh !important;
+  margin: 0 auto !important;
+  padding: max(20px, env(safe-area-inset-top, 0px)) 0 max(24px, env(safe-area-inset-bottom, 0px)) !important;
+  justify-content: flex-end !important;
+}
+
+html body .landing-v2 .landing-logo-wrap {
+  position: absolute !important;
+  top: max(20px, env(safe-area-inset-top, 0px)) !important;
+  left: 0 !important;
+  display: flex !important;
+  flex-direction: row !important;
+  width: auto !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+html body .landing-v2 .landing-logo-icon {
+  width: 48px !important;
+  height: 48px !important;
+  border: 5px solid rgba(255, 250, 237, 0.88) !important;
+  border-radius: 17px !important;
+  background: #f4dd9f !important;
+  color: #174c2e !important;
+}
+
+html body .landing-v2 .landing-logo-icon svg {
+  width: 23px !important;
+  height: 23px !important;
+  fill: currentColor !important;
+}
+
+html body .landing-v2 .landing-logo-text {
+  color: #fff9ec !important;
+  font-size: 0.69rem !important;
+  letter-spacing: 0.1em !important;
+  text-shadow: 0 2px 14px rgba(0,0,0,.5) !important;
+}
+
+html body .landing-v2 .landing-hotspot-preview {
+  position: absolute !important;
+  z-index: 4 !important;
+  top: 29% !important;
+  right: 9% !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 8px 10px !important;
+  border: 1px solid rgba(255, 249, 235, 0.62) !important;
+  border-radius: 999px !important;
+  background: rgba(255, 249, 235, 0.88) !important;
+  color: #123e27 !important;
+  box-shadow: 0 12px 30px rgba(5, 20, 11, 0.28) !important;
+  backdrop-filter: blur(16px) !important;
+}
+
+html body .landing-v2 .landing-hotspot-preview > svg {
+  width: 25px !important;
+  height: 25px !important;
+  stroke-width: 2.4 !important;
+}
+
+html body .landing-v2 .landing-hotspot-preview span {
+  display: grid !important;
+  gap: 1px !important;
+}
+
+html body .landing-v2 .landing-hotspot-preview strong,
+html body .landing-v2 .landing-hotspot-preview small {
+  color: inherit !important;
+  font-size: 0.62rem !important;
+  line-height: 1.1 !important;
+}
+
+html body .landing-v2 .landing-hotspot-preview small { opacity: .68 !important; }
+
+html body .landing-v2 .landing-hero-copy {
+  width: 100% !important;
+  max-width: 470px !important;
+  margin: 0 0 20px !important;
+  padding: 0 !important;
+}
+
+html body .landing-v2 .landing-hero-copy h1 {
+  max-width: none !important;
+  margin: 0 !important;
+  color: #fff9ec !important;
+  font-size: clamp(2.25rem, 10.2vw, 4.1rem) !important;
+  font-weight: 780 !important;
+  line-height: .98 !important;
+  letter-spacing: -.05em !important;
+  text-align: left !important;
+  text-shadow: 0 4px 24px rgba(0,0,0,.48) !important;
+}
+
+html body .landing-v2 .landing-hero-gradient {
+  color: #fff1c7 !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+html body .landing-v2 .landing-hero-copy > p {
+  max-width: 38ch !important;
+  margin: 14px 0 0 !important;
+  color: rgba(255, 249, 236, .76) !important;
+  font-size: .95rem !important;
+  font-weight: 560 !important;
+  line-height: 1.48 !important;
+  text-align: left !important;
+  text-shadow: 0 2px 16px rgba(0,0,0,.52) !important;
+}
+
+html body .landing-v2 .landing-cta-group {
+  width: 100% !important;
+  gap: 15px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+html body .landing-v2 .landing-cta-primary {
+  min-height: 58px !important;
+  padding: 0 22px !important;
+  border: 1px solid rgba(255,255,255,.22) !important;
+  border-radius: 999px !important;
+  background: linear-gradient(135deg, #236a43, #3d9c63) !important;
+  color: #fffdf6 !important;
+  box-shadow: 0 18px 38px rgba(0,0,0,.3) !important;
+  font-size: 1rem !important;
+  justify-content: space-between !important;
+}
+
+html body .landing-v2 .landing-cta-primary svg { width: 22px !important; height: 22px !important; }
+
+html body .landing-v2 .landing-secondary-actions {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 14px !important;
+}
+
+html body .landing-v2 .landing-secondary-actions a,
+html body .landing-v2 .landing-secondary-actions button {
+  min-height: 34px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: rgba(255, 249, 236, .76) !important;
+  font-size: .78rem !important;
+  font-weight: 650 !important;
+}
+
+html body .landing-v2 .landing-secondary-actions > span {
+  width: 1px !important;
+  height: 22px !important;
+  background: rgba(255, 249, 236, .22) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html body .landing-v2 .landing-cinematic-bg,
+  html body .landing-v2 .landing-hotspot-preview { animation: none !important; transform: none !important; }
+}
+
+/* Auth continuation of the cinematic startup. */
+html body .auth-shell-v2 {
+  min-height: 100svh !important;
+  display: grid !important;
+  align-items: center !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  padding: max(78px, calc(58px + env(safe-area-inset-top, 0px))) 20px max(22px, env(safe-area-inset-bottom, 0px)) !important;
+  background: linear-gradient(180deg, rgba(5,18,10,.2), rgba(5,18,10,.72)), url('/assets/wild-realm-startup-hero.png') center / cover no-repeat !important;
+}
+
+html body .auth-shell-v2 .auth-back-link {
+  position: fixed !important;
+  z-index: 3 !important;
+  top: max(18px, env(safe-area-inset-top, 0px)) !important;
+  left: 18px !important;
+  width: auto !important;
+  min-width: 0 !important;
+  min-height: 40px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 0 14px !important;
+  border: 1px solid rgba(255,249,236,.48) !important;
+  border-radius: 999px !important;
+  background: rgba(9,28,17,.52) !important;
+  color: #fff9ec !important;
+  font-size: .76rem !important;
+  font-weight: 720 !important;
+  white-space: nowrap !important;
+  box-shadow: 0 10px 24px rgba(0,0,0,.2) !important;
+  backdrop-filter: blur(15px) !important;
+}
+
+html body .auth-shell-v2 .auth-card-v2 {
+  box-sizing: border-box !important;
+  width: min(100%, 370px) !important;
+  max-width: 370px !important;
+  margin: 0 auto !important;
+  padding: 24px 20px 20px !important;
+  border: 1px solid rgba(255,255,255,.74) !important;
+  border-radius: 28px !important;
+  background: rgba(255,251,242,.95) !important;
+  color: #1f2b23 !important;
+  box-shadow: 0 24px 70px rgba(3,14,8,.34) !important;
+  backdrop-filter: blur(22px) saturate(1.15) !important;
+}
+
+html body .auth-shell-v2 .auth-logo-mark {
+  width: 46px !important;
+  height: 46px !important;
+  margin-bottom: 14px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 15px !important;
+  background: #f4dd9f !important;
+  color: #174c2e !important;
+  box-shadow: none !important;
+}
+
+html body .auth-shell-v2 .auth-logo-mark svg { width: 23px !important; height: 23px !important; fill: currentColor !important; }
+html body .auth-shell-v2 .auth-heading-v2 { margin: 0 !important; color: #1d2921 !important; font-size: 1.72rem !important; line-height: 1.08 !important; font-weight: 820 !important; }
+html body .auth-shell-v2 .auth-subheading { margin: 7px 0 18px !important; color: #687168 !important; font-size: .88rem !important; }
+html body .auth-shell-v2 .auth-form-v2 { gap: 14px !important; }
+html body .auth-shell-v2 .auth-field-wrap { gap: 6px !important; }
+html body .auth-shell-v2 .auth-label { color: #344239 !important; font-size: .69rem !important; letter-spacing: .055em !important; }
+
+html body .auth-shell-v2 .auth-input-v2 {
+  min-height: 50px !important;
+  border: 1px solid rgba(35,69,47,.18) !important;
+  border-radius: 17px !important;
+  background: rgba(255,255,255,.84) !important;
+  color: #1f2b23 !important;
+  font-size: .9rem !important;
+  box-shadow: none !important;
+}
+
+html body .auth-shell-v2 .auth-input-v2::placeholder { color: #a3aaa4 !important; }
+html body .auth-shell-v2 .auth-eye-btn { width: 42px !important; color: #6d776f !important; background: transparent !important; }
+html body .auth-shell-v2 .auth-eye-btn svg { width: 18px !important; height: 18px !important; fill: currentColor !important; }
+
+html body .auth-shell-v2 .auth-submit-btn {
+  min-height: 52px !important;
+  margin-top: 2px !important;
+  border-radius: 18px !important;
+  background: linear-gradient(135deg, #236a43, #3d9c63) !important;
+  color: #fffdf6 !important;
+  box-shadow: 0 12px 25px rgba(35,106,67,.22) !important;
+}
+
+html body .auth-shell-v2 .auth-divider { margin: 1px 0 !important; color: #7e877f !important; }
+html body .auth-shell-v2 .auth-divider::before,
+html body .auth-shell-v2 .auth-divider::after { background: rgba(35,69,47,.12) !important; }
+html body .auth-shell-v2 .auth-social-stack { gap: 9px !important; }
+
+html body .auth-shell-v2 .auth-social-btn {
+  min-height: 44px !important;
+  border: 1px solid rgba(35,69,47,.13) !important;
+  border-radius: 15px !important;
+  background: rgba(255,255,255,.68) !important;
+  color: #27342b !important;
+  font-size: .82rem !important;
+  font-weight: 680 !important;
+}
+
+html body .auth-shell-v2 .auth-social-btn > span { color: #344239 !important; background: #f4efe6 !important; }
+html body .auth-shell-v2 .auth-footer-links { gap: 11px !important; margin-top: 14px !important; }
+html body .auth-shell-v2 .auth-footer-links .auth-link,
+html body .auth-shell-v2 .auth-guest-btn { min-height: 34px !important; padding: 0 !important; border: 0 !important; background: transparent !important; color: #315d43 !important; font-size: .78rem !important; font-weight: 680 !important; }
+
+@media (max-height: 760px) {
+  html body .auth-shell-v2 { align-items: start !important; }
+  html body .auth-shell-v2 .auth-card-v2 { padding-block: 18px !important; }
+  html body .auth-shell-v2 .auth-logo-mark { display: none !important; }
+}
+
+html body .app-shell .hotspot-community-actions {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+  margin-top: 14px;
+}
+html body .app-shell .hotspot-community-actions > button {
+  min-height: 42px;
+  border: 1px solid rgba(31, 91, 61, .22);
+  border-radius: 14px;
+  background: rgba(255,255,255,.74);
+  color: #214532;
+  font-weight: 750;
+}
+html body .app-shell .hotspot-community-actions > button svg { width: 17px; height: 17px; }
+html body .app-shell .hotspot-community-actions > button.is-active { background: #1f6d49; color: white; }
+html body .app-shell .hotspot-rating-control { display: flex; gap: 2px; }
+html body .app-shell .hotspot-rating-control button {
+  width: 31px;
+  height: 38px;
+  padding: 6px;
+  border: 0;
+  background: transparent;
+  color: rgba(78, 66, 45, .3);
+}
+html body .app-shell .hotspot-rating-control button.is-active { color: #d49a25; }
+html body .app-shell .hotspot-rating-control svg { width: 20px; height: 20px; }
+html body .app-shell .hotspot-community-actions small { grid-column: 1 / -1; color: #6f6a5e; }
+
+/* Journey audit: make story progression visible instead of relying on invisible tap zones. */
+html body .community-story-nav,
+html[data-wild-theme='dark'] body .community-story-nav {
+  top: 46% !important;
+  bottom: auto !important;
+  width: 46px !important;
+  height: 52px !important;
+  display: grid !important;
+  place-items: center !important;
+  border: 1px solid rgba(255,255,255,.26) !important;
+  border-radius: 999px !important;
+  background: rgba(8,18,13,.46) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 22px rgba(0,0,0,.24) !important;
+  backdrop-filter: blur(8px) !important;
+}
+html body .community-story-nav svg,
+html[data-wild-theme='dark'] body .community-story-nav svg { width: 26px !important; height: 26px !important; }
+html body .community-story-nav-previous,
+html[data-wild-theme='dark'] body .community-story-nav-previous { left: 12px !important; }
+html body .community-story-nav-next,
+html[data-wild-theme='dark'] body .community-story-nav-next { right: 12px !important; }
+
+/* Completed quests must stay readable in the day palette. */
+html body .app-shell .quest-item-card.completed,
+html body .app-shell .quest-item-card.completed :where(h1,h2,h3,h4,p,span,strong,small) {
+  color: #f8f3e8 !important;
+  -webkit-text-fill-color: #f8f3e8 !important;
+}
+html body .app-shell .quest-item-card.completed .quest-progress-track { background: rgba(255,255,255,.28) !important; }
+html body .app-shell .quest-item-card.completed .quest-progress-fill { background: #d8b45d !important; }
+
+/* Keep Settings above the persistent dock and make its scroll body visibly scrollable. */
+html body .modal-overlay:has(.settings-modal),
+html[data-wild-theme='dark'] body .modal-overlay:has(.settings-modal) { z-index: 30000 !important; }
+html body .settings-scroll-body,
+html[data-wild-theme='dark'] body .settings-scroll-body { padding-bottom: max(28px, env(safe-area-inset-bottom, 0px)) !important; }
+
+/* Profile content was taller than the fixed app viewport but had no scroll owner. */
+html body .app-shell .profile-shell-v2 {
+  height: 100dvh !important;
+  max-height: 100dvh !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  padding-bottom: calc(122px + env(safe-area-inset-bottom, 0px)) !important;
+  overscroll-behavior: contain !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+/* A failed or slow tile request must not leave a blank graph-paper map. */
+html body .app-shell .world-canvas-wrap {
+  background: #d9ddc7 url('/assets/verdant-explorer-banner.png') center / cover no-repeat !important;
+}
+html body .app-shell .world-canvas-wrap .leaflet-container { background: rgba(237,232,205,.58) !important; }
+
+/* --- Dead control fixes: visible close affordances --- */
+.bottom-sheet-content {
+  position: relative;
+}
+.bottom-sheet-close,
+.celebration-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.15);
+  color: var(--wr-walnut, #3e2723);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  z-index: 10;
+  transition: background 0.15s ease;
+}
+.bottom-sheet-close:hover,
+.celebration-close:hover {
+  background: rgba(0, 0, 0, 0.25);
 }

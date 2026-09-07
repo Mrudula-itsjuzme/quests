@@ -84,6 +84,24 @@ export function useWorldHotspots(filters = {}) {
   });
 }
 
+export function useSetHotspotSaved() {
+  const api = useApiClient();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ hotspotId, saved }) => api.setHotspotSaved(hotspotId, saved),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['world', 'hotspots'] }),
+  });
+}
+
+export function useRateHotspot() {
+  const api = useApiClient();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ hotspotId, rating }) => api.rateHotspot(hotspotId, rating),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['world', 'hotspots'] }),
+  });
+}
+
 export function useScenicPlaces(center) {
   const api = useApiClient();
   return useQuery({
@@ -268,6 +286,7 @@ function useInvalidateQuestState() {
     queryClient.invalidateQueries({ queryKey: ['quests'] });
     queryClient.invalidateQueries({ queryKey: ['me'] });
     queryClient.invalidateQueries({ queryKey: ['collectibles'] });
+    queryClient.invalidateQueries({ queryKey: ['rewards'] });
   };
 }
 

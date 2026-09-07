@@ -156,6 +156,7 @@ function guestQuestMutationResult(assignmentId, value) {
     status: completed ? 'completed' : current.status,
   };
   return {
+    submission: { id: `guest-sub-${crypto.randomUUID()}`, status: 'approved' },
     assignment,
     completed,
     status: assignment.status,
@@ -422,6 +423,21 @@ export function createApiClient(getToken) {
       if (filters.bbox) params.set('bbox', filters.bbox);
       const query = params.toString();
       return request(`/world/hotspots${query ? `?${query}` : ''}`, { signal, token });
+    },
+    setHotspotSaved: async (hotspotId, saved) => {
+      const token = await getToken();
+      if (token === 'guest') return guestDelay({ hotspotId, saved, saveCount: saved ? 1 : 0 }, 120);
+      return request(`/world/hotspots/${encodeURIComponent(hotspotId)}/saved`, { method: 'PUT', body: { saved }, token });
+    },
+    rateHotspot: async (hotspotId, rating) => {
+      const token = await getToken();
+      if (token === 'guest') return guestDelay({ hotspotId, rating, ratingCount: 1, viewerRating: rating }, 120);
+      return request(`/world/hotspots/${encodeURIComponent(hotspotId)}/rating`, { method: 'PUT', body: { rating }, token });
+    },
+    getPublicSavedHotspots: async (userId, signal) => {
+      const token = await getToken();
+      if (token === 'guest') return guestDelay([], 120);
+      return request(`/community/users/${encodeURIComponent(userId)}/saved-places`, { signal, token });
     },
     getScenicPlaces: async ({ lat, lng, radius = 5000 }, signal) => {
       const token = await getToken();

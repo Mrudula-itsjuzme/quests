@@ -22,8 +22,10 @@ export function ProgressBar({ value, label, compact = false }) {
 }
 
 export function questProgressRatio(quest) {
-  if (!quest.targetValue) return 0;
-  return quest.progressValue / quest.targetValue;
+  if (quest.status === 'completed') return 1;
+  const target = Number(quest.targetValue) || 1;
+  const current = Number(quest.progressValue) || 0;
+  return Math.min(current / target, 1);
 }
 
 export function questStatusLabel(quest) {
