@@ -390,19 +390,6 @@ export function CaptureFlow({ onClose }) {
                 <span>{currentFilter.label} · {cameraStatus === 'live' ? 'Camera ready' : isNative ? 'Open camera' : 'Choose photo'}</span>
               </div>
 
-              <motion.button
-                type="button"
-                className="capture-shutter-button"
-                aria-label={cameraStatus === 'live' ? 'Capture photo' : isNative ? 'Capture photo — open camera' : 'Capture photo — choose a photo'}
-                onClick={() => { playTap(); handleNativeCamera(); }}
-                disabled={captureItem.isPending}
-                whileTap={{ scale: 0.9 }}
-              >
-                <span className="capture-shutter-inner" aria-hidden="true">
-                  <Icon name="camera" />
-                </span>
-              </motion.button>
-
               {/* Real photo-filter strip (Instagram/Snap style) */}
               <div className="capture-filter-strip" aria-label="Camera filters">
                 {CAPTURE_FILTERS.map((filter) => (
@@ -415,10 +402,15 @@ export function CaptureFlow({ onClose }) {
                     type="button"
                     className={`capture-filter-chip ${activeFilter === filter.id ? 'active' : ''}`}
                     aria-pressed={activeFilter === filter.id}
-                    aria-label={activeFilter === filter.id ? `${filter.label} filter selected` : `Select ${filter.label} filter`}
+                    aria-label={activeFilter === filter.id ? `Capture photo with ${filter.label}` : `Select ${filter.label} filter`}
                     onClick={(event) => {
                       playTap();
                       event.currentTarget.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                      if (activeFilter === filter.id) {
+                        triggerHaptic([12]);
+                        handleNativeCamera();
+                        return;
+                      }
                       setActiveFilter(filter.id);
                     }}
                     title={filter.id}

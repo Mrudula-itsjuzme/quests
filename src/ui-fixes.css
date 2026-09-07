@@ -10,6 +10,341 @@
   /* Removed aggressive blur/glassmorphism */
 }
 
+/* FINAL MOBILE REGRESSION FIX — keep this last so older compatibility rules cannot win. */
+@media (max-width: 780px) {
+  html body .app-shell .world-hud-left { display: none !important; }
+  html body .app-shell .world-explore-container .explore-search-bar { right: 14px !important; }
+
+  html body .app-shell .mobile-bottom-dock {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 0 !important;
+    padding-inline: 8px !important;
+  }
+  html body .app-shell :where(.dock-shutter-item, .dock-item) {
+    width: 100% !important;
+    min-width: 0 !important;
+    justify-self: stretch !important;
+  }
+
+  html body .capture-flow-overlay .capture-shutter-button { display: none !important; }
+  html body .capture-flow-overlay .capture-viewfinder-bottom {
+    bottom: calc(18px + env(safe-area-inset-bottom, 0px)) !important;
+    gap: 10px !important;
+  }
+  html body .capture-flow-overlay .capture-focus-pill {
+    background: rgba(7, 20, 13, 0.72) !important;
+    color: #fffaf0 !important;
+    font-size: 0.76rem !important;
+  }
+  html body .capture-flow-overlay .capture-filter-strip {
+    min-height: 104px !important;
+    gap: 16px !important;
+    padding: 10px max(28px, calc(50vw - 44px)) 4px !important;
+    scroll-padding-inline: max(28px, calc(50vw - 44px)) !important;
+  }
+  html body .capture-flow-overlay .capture-filter-chip {
+    width: 62px !important;
+    min-width: 62px !important;
+    height: 92px !important;
+    gap: 7px !important;
+  }
+  html body .capture-flow-overlay .capture-filter-preview {
+    width: 56px !important;
+    height: 56px !important;
+    border: 3px solid rgba(255, 250, 240, 0.9) !important;
+  }
+  html body .capture-flow-overlay .capture-filter-chip.active {
+    width: 80px !important;
+    min-width: 80px !important;
+    transform: translateY(-5px) !important;
+  }
+  html body .capture-flow-overlay .capture-filter-chip.active .capture-filter-preview {
+    width: 72px !important;
+    height: 72px !important;
+    border: 5px solid #fffaf0 !important;
+    box-shadow: 0 0 0 4px #2f8b5c, 0 14px 30px rgba(0, 0, 0, 0.38) !important;
+  }
+  html body .capture-flow-overlay .capture-filter-label,
+  html body .capture-flow-overlay .capture-filter-chip.active .capture-filter-label {
+    font-size: 0.72rem !important;
+    font-weight: 800 !important;
+  }
+
+  html body .app-shell :where(.quests-shell, .gallery-v2-shell, .community-screen, .community-feed) {
+    background: #f8efdd !important;
+    background-image: none !important;
+  }
+  html body .app-shell .quests-card-list { gap: 14px !important; padding-inline: 16px !important; }
+  html body .app-shell .quest-item-card,
+  html body .app-shell .quest-item-card.completed {
+    min-height: 132px !important;
+    border: 1px solid rgba(47, 117, 77, 0.24) !important;
+    border-left: 5px solid #2f754d !important;
+    border-radius: 20px !important;
+    background: #fffaf0 !important;
+    box-shadow: 0 10px 24px rgba(72, 52, 29, 0.09) !important;
+  }
+  html body .app-shell .quest-item-card.completed { background: #edf4e9 !important; }
+  html body .app-shell .quest-item-card :where(h1, h2, h3, h4, p, span, strong, small) {
+    color: #35281b !important;
+    -webkit-text-fill-color: #35281b !important;
+  }
+  html body .app-shell .quest-card-content { gap: 12px !important; padding: 14px 13px !important; }
+  html body .app-shell .quest-row-thumb { width: 58px !important; height: 58px !important; border-radius: 16px !important; }
+  html body .app-shell .quest-item-title { font-size: 1rem !important; line-height: 1.22 !important; }
+  html body .app-shell .quest-item-instruction {
+    font-size: 0.8rem !important;
+    line-height: 1.35 !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+
+  html body .app-shell .gallery-v2-shell { padding-inline: 16px !important; }
+  html body .app-shell .gallery-v2-header h1 { font-size: 1.8rem !important; letter-spacing: -0.035em !important; }
+  html body .app-shell .library-hero-panel {
+    border: 1px solid rgba(78, 57, 31, 0.12) !important;
+    background: #fffaf0 !important;
+    box-shadow: 0 10px 24px rgba(72, 52, 29, 0.07) !important;
+  }
+  html body .app-shell .gallery-v2-tabs {
+    width: calc(100vw - 32px) !important;
+    margin-inline: 0 !important;
+    padding: 6px 0 8px !important;
+    border: 0 !important;
+    background: transparent !important;
+  }
+  html body .app-shell .gallery-v2-tab {
+    min-height: 44px !important;
+    padding-inline: 15px !important;
+    font-size: 0.8rem !important;
+    background: #fffaf0 !important;
+  }
+  html body .app-shell .gallery-v2-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 12px !important; }
+  html body .app-shell .gallery-v2-card,
+  html body .app-shell .gallery-v2-card-featured {
+    grid-column: auto !important;
+    min-height: 220px !important;
+    border-radius: 18px !important;
+    background: #fffaf0 !important;
+    box-shadow: 0 10px 24px rgba(72, 52, 29, 0.1) !important;
+  }
+  html body .app-shell .gallery-v2-photo { height: 158px !important; }
+  html body .app-shell .gallery-v2-info { min-height: 62px !important; padding: 10px 12px !important; background: #fffaf0 !important; }
+  html body .app-shell .gallery-v2-name { font-size: 0.88rem !important; line-height: 1.2 !important; }
+
+  html body .app-shell .community-post-card {
+    border-radius: 20px !important;
+    background: #fffaf0 !important;
+    box-shadow: 0 10px 24px rgba(72, 52, 29, 0.09) !important;
+  }
+}
+
+/* Final mobile correction: restore breathing room and the original camera-first hierarchy. */
+@media (max-width: 780px) {
+  html body .app-shell .world-hud-left {
+    display: none !important;
+  }
+
+  html body .app-shell .world-explore-container .explore-search-bar {
+    right: 14px !important;
+  }
+
+  html body .app-shell .mobile-bottom-dock {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 0 !important;
+    padding-inline: 8px !important;
+  }
+
+  html body .app-shell .dock-shutter-item,
+  html body .app-shell .dock-item {
+    width: 100% !important;
+    min-width: 0 !important;
+    justify-self: stretch !important;
+  }
+
+  html body .capture-flow-overlay .capture-shutter-button {
+    display: none !important;
+  }
+
+  html body .capture-flow-overlay .capture-viewfinder-bottom {
+    bottom: calc(18px + env(safe-area-inset-bottom, 0px)) !important;
+    gap: 10px !important;
+  }
+
+  html body .capture-flow-overlay .capture-focus-pill {
+    background: rgba(7, 20, 13, 0.7) !important;
+    color: #fffaf0 !important;
+    font-size: 0.76rem !important;
+  }
+
+  html body .capture-flow-overlay .capture-filter-strip {
+    min-height: 98px !important;
+    gap: 16px !important;
+    padding: 8px max(28px, calc(50vw - 44px)) 4px !important;
+    scroll-padding-inline: max(28px, calc(50vw - 44px)) !important;
+  }
+
+  html body .capture-flow-overlay .capture-filter-chip {
+    width: 62px !important;
+    min-width: 62px !important;
+    height: 88px !important;
+    gap: 7px !important;
+  }
+
+  html body .capture-flow-overlay .capture-filter-preview {
+    width: 56px !important;
+    height: 56px !important;
+    border: 3px solid rgba(255, 250, 240, 0.9) !important;
+  }
+
+  html body .capture-flow-overlay .capture-filter-chip.active .capture-filter-preview {
+    width: 72px !important;
+    height: 72px !important;
+    border: 5px solid #fffaf0 !important;
+    box-shadow: 0 0 0 4px #2f8b5c, 0 14px 30px rgba(0, 0, 0, 0.38) !important;
+  }
+
+  html body .capture-flow-overlay .capture-filter-chip.active {
+    width: 80px !important;
+    min-width: 80px !important;
+    transform: translateY(-5px) !important;
+  }
+
+  html body .capture-flow-overlay .capture-filter-label,
+  html body .capture-flow-overlay .capture-filter-chip.active .capture-filter-label {
+    font-size: 0.72rem !important;
+    font-weight: 800 !important;
+  }
+
+  html body .app-shell :where(.quests-shell, .gallery-v2-shell, .community-screen) {
+    background: #f8efdd !important;
+    background-image: none !important;
+  }
+
+  html body .app-shell .quests-card-list {
+    gap: 14px !important;
+    padding-inline: 16px !important;
+  }
+
+  html body .app-shell .quest-item-card,
+  html body .app-shell .quest-item-card.completed {
+    min-height: 132px !important;
+    border: 1px solid rgba(47, 117, 77, 0.24) !important;
+    border-left: 5px solid #2f754d !important;
+    border-radius: 20px !important;
+    background: #fffaf0 !important;
+    box-shadow: 0 10px 24px rgba(72, 52, 29, 0.09) !important;
+  }
+
+  html body .app-shell .quest-item-card.completed {
+    background: #edf4e9 !important;
+  }
+
+  html body .app-shell .quest-item-card.completed :where(h1,h2,h3,h4,p,span,strong,small),
+  html body .app-shell .quest-item-card :where(h1,h2,h3,h4,p,span,strong,small) {
+    color: #35281b !important;
+    -webkit-text-fill-color: #35281b !important;
+  }
+
+  html body .app-shell .quest-card-content {
+    gap: 12px !important;
+    padding: 14px 13px !important;
+  }
+
+  html body .app-shell .quest-row-thumb {
+    width: 58px !important;
+    height: 58px !important;
+    border-radius: 16px !important;
+  }
+
+  html body .app-shell .quest-item-title {
+    font-size: 1rem !important;
+    line-height: 1.22 !important;
+  }
+
+  html body .app-shell .quest-item-instruction {
+    font-size: 0.8rem !important;
+    line-height: 1.35 !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+
+  html body .app-shell .gallery-v2-shell {
+    padding-inline: 16px !important;
+  }
+
+  html body .app-shell .gallery-v2-header h1 {
+    font-size: 1.8rem !important;
+    letter-spacing: -0.035em !important;
+  }
+
+  html body .app-shell .library-hero-panel {
+    border: 1px solid rgba(78, 57, 31, 0.12) !important;
+    background: #fffaf0 !important;
+    box-shadow: 0 10px 24px rgba(72, 52, 29, 0.07) !important;
+  }
+
+  html body .app-shell .gallery-v2-tabs {
+    width: calc(100vw - 32px) !important;
+    margin-inline: 0 !important;
+    padding: 6px 0 8px !important;
+    border: 0 !important;
+    background: transparent !important;
+  }
+
+  html body .app-shell .gallery-v2-tab {
+    min-height: 44px !important;
+    padding-inline: 15px !important;
+    font-size: 0.8rem !important;
+    background: #fffaf0 !important;
+  }
+
+  html body .app-shell .gallery-v2-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  html body .app-shell .gallery-v2-card,
+  html body .app-shell .gallery-v2-card-featured {
+    grid-column: auto !important;
+    min-height: 220px !important;
+    border-radius: 18px !important;
+    background: #fffaf0 !important;
+    box-shadow: 0 10px 24px rgba(72, 52, 29, 0.1) !important;
+  }
+
+  html body .app-shell .gallery-v2-photo {
+    height: 158px !important;
+  }
+
+  html body .app-shell .gallery-v2-info {
+    min-height: 62px !important;
+    padding: 10px 12px !important;
+    background: #fffaf0 !important;
+  }
+
+  html body .app-shell .gallery-v2-name {
+    font-size: 0.88rem !important;
+    line-height: 1.2 !important;
+  }
+
+  html body .app-shell .community-screen,
+  html body .app-shell .community-feed {
+    background: #f8efdd !important;
+    background-image: none !important;
+  }
+
+  html body .app-shell .community-post-card {
+    border-radius: 20px !important;
+    background: #fffaf0 !important;
+    box-shadow: 0 10px 24px rgba(72, 52, 29, 0.09) !important;
+  }
+}
+
 /* Camera controls: make capture explicit and keep the mobile HUD uncluttered. */
 @media (max-width: 780px) {
   html body .capture-flow-overlay .capture-flow-close {
@@ -8870,5 +9205,568 @@ html body .app-shell .world-canvas-wrap .leaflet-container { background: rgba(23
     -webkit-text-fill-color: #252c28 !important;
     font-size: 0.91rem !important;
     font-weight: 750 !important;
+  }
+}
+
+/* FINAL MOBILE REGRESSION FIX — intentionally last in the cascade. */
+@media (max-width: 780px) {
+  html body .app-shell .world-hud-left { display: none !important; }
+  html body .app-shell .world-explore-container .explore-search-bar { right: 14px !important; }
+
+  html body .app-shell .mobile-bottom-dock {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 0 !important;
+    padding-inline: 8px !important;
+  }
+  html body .app-shell :where(.dock-shutter-item, .dock-item) {
+    width: 100% !important;
+    min-width: 0 !important;
+    justify-self: stretch !important;
+  }
+
+  html body .capture-flow-overlay .capture-shutter-button { display: none !important; }
+  html body .capture-flow-overlay .capture-viewfinder-bottom {
+    bottom: calc(18px + env(safe-area-inset-bottom, 0px)) !important;
+    gap: 10px !important;
+  }
+  html body .capture-flow-overlay .capture-focus-pill {
+    background: rgba(7, 20, 13, 0.72) !important;
+    color: #fffaf0 !important;
+    font-size: 0.76rem !important;
+  }
+  html body .capture-flow-overlay .capture-filter-strip {
+    min-height: 104px !important;
+    gap: 16px !important;
+    padding: 10px max(28px, calc(50vw - 44px)) 4px !important;
+    scroll-padding-inline: max(28px, calc(50vw - 44px)) !important;
+  }
+  html body .capture-flow-overlay .capture-filter-chip {
+    width: 62px !important;
+    min-width: 62px !important;
+    height: 92px !important;
+    gap: 7px !important;
+  }
+  html body .capture-flow-overlay .capture-filter-preview {
+    width: 56px !important;
+    height: 56px !important;
+    border: 3px solid rgba(255, 250, 240, 0.9) !important;
+  }
+  html body .capture-flow-overlay .capture-filter-chip.active {
+    width: 80px !important;
+    min-width: 80px !important;
+    transform: translateY(-5px) !important;
+  }
+  html body .capture-flow-overlay .capture-filter-chip.active .capture-filter-preview {
+    width: 72px !important;
+    height: 72px !important;
+    border: 5px solid #fffaf0 !important;
+    box-shadow: 0 0 0 4px #2f8b5c, 0 14px 30px rgba(0, 0, 0, 0.38) !important;
+  }
+  html body .capture-flow-overlay .capture-filter-label,
+  html body .capture-flow-overlay .capture-filter-chip.active .capture-filter-label {
+    font-size: 0.72rem !important;
+    font-weight: 800 !important;
+  }
+
+  html body .app-shell :where(.quests-shell, .gallery-v2-shell, .community-screen, .community-feed) {
+    background: #f8efdd !important;
+    background-image: none !important;
+  }
+  html body .app-shell .quests-card-list { gap: 14px !important; padding-inline: 16px !important; }
+  html body .app-shell .quest-item-card,
+  html body .app-shell .quest-item-card.completed {
+    min-height: 132px !important;
+    border: 1px solid rgba(47, 117, 77, 0.24) !important;
+    border-left: 5px solid #2f754d !important;
+    border-radius: 20px !important;
+    background: #fffaf0 !important;
+    box-shadow: 0 10px 24px rgba(72, 52, 29, 0.09) !important;
+  }
+  html body .app-shell .quest-item-card.completed { background: #edf4e9 !important; }
+  html body .app-shell .quest-item-card :where(h1, h2, h3, h4, p, span, strong, small) {
+    color: #35281b !important;
+    -webkit-text-fill-color: #35281b !important;
+  }
+  html body .app-shell .quest-card-content { gap: 12px !important; padding: 14px 13px !important; }
+  html body .app-shell .quest-row-thumb { width: 58px !important; height: 58px !important; border-radius: 16px !important; }
+  html body .app-shell .quest-item-title { font-size: 1rem !important; line-height: 1.22 !important; }
+  html body .app-shell .quest-item-instruction {
+    font-size: 0.8rem !important;
+    line-height: 1.35 !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+
+  html body .app-shell .gallery-v2-shell { padding-inline: 16px !important; }
+  html body .app-shell .gallery-v2-header h1 { font-size: 1.8rem !important; letter-spacing: -0.035em !important; }
+  html body .app-shell .library-hero-panel,
+  html body .app-shell .community-post-card {
+    border: 1px solid rgba(78, 57, 31, 0.12) !important;
+    background: #fffaf0 !important;
+    box-shadow: 0 10px 24px rgba(72, 52, 29, 0.08) !important;
+  }
+  html body .app-shell .gallery-v2-tabs {
+    width: calc(100vw - 32px) !important;
+    margin-inline: 0 !important;
+    padding: 6px 0 8px !important;
+    border: 0 !important;
+    background: transparent !important;
+  }
+  html body .app-shell .gallery-v2-tab {
+    min-height: 44px !important;
+    padding-inline: 15px !important;
+    font-size: 0.8rem !important;
+    background: #fffaf0 !important;
+  }
+  html body .app-shell .gallery-v2-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 12px !important; }
+  html body .app-shell .gallery-v2-card,
+  html body .app-shell .gallery-v2-card-featured {
+    grid-column: auto !important;
+    min-height: 220px !important;
+    border-radius: 18px !important;
+    background: #fffaf0 !important;
+    box-shadow: 0 10px 24px rgba(72, 52, 29, 0.1) !important;
+  }
+  html body .app-shell .gallery-v2-photo { height: 158px !important; }
+  html body .app-shell .gallery-v2-info { min-height: 62px !important; padding: 10px 12px !important; background: #fffaf0 !important; }
+  html body .app-shell .gallery-v2-name { font-size: 0.88rem !important; line-height: 1.2 !important; }
+
+  html body .app-shell .community-tabs-bar {
+    margin: 0 16px 16px !important;
+    height: 56px !important;
+  }
+  html body .app-shell .community-tab-btn { height: 56px !important; font-size: 0.76rem !important; }
+  html body .app-shell .community-stories-rail {
+    gap: 14px !important;
+    margin: 0 !important;
+    padding: 8px 18px 18px !important;
+  }
+  html body .app-shell .community-story-card { width: 68px !important; min-width: 68px !important; font-size: 0.76rem !important; }
+  html body .app-shell .community-story-ring { width: 64px !important; height: 64px !important; }
+  html body .app-shell .community-story-photo,
+  html body .app-shell .community-story-photo .capture-image-photo { width: 58px !important; height: 58px !important; }
+  html body .app-shell .community-story-photo .capture-image-photo { opacity: 1 !important; }
+  html body .app-shell .community-feed-stream { gap: 18px !important; padding: 0 16px calc(132px + env(safe-area-inset-bottom, 0px)) !important; }
+  html body .app-shell .community-post-card { width: 100% !important; border-radius: 22px !important; overflow: hidden !important; }
+  html body .app-shell .post-header-row { min-height: 78px !important; padding: 16px 18px !important; }
+  html body .app-shell .post-photo-wrap { aspect-ratio: 4 / 3 !important; height: auto !important; }
+  html body .app-shell .post-info-block { padding: 15px 18px 18px !important; }
+
+  /* Story photos paint an immediate photographic placeholder while auth media resolves. */
+  html body .app-shell .community-story-photo[data-state='loading'] .capture-image-crest {
+    background: #17392b url('/assets/verdant-explorer-banner.png') center / cover no-repeat !important;
+  }
+  html body .app-shell .community-story-photo[data-state='loading'] .capture-image-crest.element-sky {
+    background-image: url('/auth-celestial-aperture.png') !important;
+  }
+  html body .app-shell .community-story-photo[data-state='loading'] .capture-image-crest > * {
+    opacity: 0 !important;
+  }
+
+  html body .community-story-view-photo[data-state='loading'] .capture-image-crest {
+    background: #17392b url('/assets/verdant-explorer-banner.png') center / cover no-repeat !important;
+  }
+  html body .community-story-view-photo[data-state='loading'] .capture-image-crest.element-sky {
+    background-image: url('/auth-celestial-aperture.png') !important;
+  }
+  html body .community-story-view-photo[data-state='loading'] .capture-image-crest > * {
+    opacity: 0 !important;
+  }
+
+  /* Annotation polish: keep the active lens the same size, only strengthen its ring. */
+  html body .capture-flow-overlay .capture-filter-chip.active {
+    width: 62px !important;
+    min-width: 62px !important;
+    transform: none !important;
+  }
+  html body .capture-flow-overlay .capture-filter-chip.active .capture-filter-preview {
+    width: 56px !important;
+    height: 56px !important;
+    border: 5px solid #fffaf0 !important;
+    box-shadow: 0 0 0 4px #2f8b5c, 0 8px 20px rgba(0, 0, 0, 0.28) !important;
+  }
+  html body .capture-flow-overlay .capture-filter-chip.active::after,
+  html body .capture-flow-overlay .capture-filter-chip.active .capture-filter-preview::after {
+    content: none !important;
+    display: none !important;
+  }
+
+  html body .app-shell .gallery-v2-header h1 {
+    font-size: 1.68rem !important;
+    font-weight: 800 !important;
+    line-height: 1.08 !important;
+    letter-spacing: -0.025em !important;
+  }
+  html body .app-shell .gallery-v2-sort-row {
+    min-width: 0 !important;
+    gap: 12px !important;
+  }
+  html body .app-shell .gallery-sort-pills {
+    width: 218px !important;
+    max-width: calc(100% - 76px) !important;
+    min-width: 0 !important;
+    padding: 4px !important;
+    overflow: hidden !important;
+  }
+  html body .app-shell .gallery-sort-pill {
+    width: auto !important;
+    min-width: 0 !important;
+    flex: 1 1 0 !important;
+    padding-inline: 8px !important;
+  }
+
+  html body .app-shell .gallery-v2-card,
+  html body .app-shell .gallery-v2-card-featured {
+    height: 258px !important;
+    min-height: 258px !important;
+    display: grid !important;
+    grid-template-rows: 180px 78px !important;
+  }
+  html body .app-shell .gallery-v2-photo,
+  html body .app-shell .gallery-v2-card-featured .gallery-v2-photo {
+    width: 100% !important;
+    height: 180px !important;
+    min-height: 180px !important;
+  }
+  html body .app-shell .gallery-v2-info,
+  html body .app-shell .gallery-v2-card-featured .gallery-v2-info {
+    height: 78px !important;
+    min-height: 78px !important;
+    padding: 10px 12px !important;
+    align-content: center !important;
+  }
+  html body .app-shell .gallery-v2-name,
+  html body .app-shell .gallery-v2-card-featured .gallery-v2-name {
+    font-size: 0.86rem !important;
+    line-height: 1.18 !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+  html body .app-shell .gallery-v2-rank-badge {
+    min-width: 42px !important;
+    height: 32px !important;
+    padding: 0 10px !important;
+    font-size: 0.74rem !important;
+  }
+
+  html body .app-shell .mobile-bottom-dock .dock-item {
+    gap: 4px !important;
+  }
+  html body .app-shell .mobile-bottom-dock .dock-item svg {
+    width: 22px !important;
+    height: 22px !important;
+  }
+  html body .app-shell .mobile-bottom-dock .dock-item span {
+    font-size: 0.7rem !important;
+    font-weight: 750 !important;
+  }
+
+  html body .app-shell .quest-item-card.completed,
+  html body .app-shell .quest-item-card.completed :where(h1, h2, h3, h4, p, span, strong, small) {
+    color: #35281b !important;
+    -webkit-text-fill-color: #35281b !important;
+  }
+  html body .app-shell .quest-item-card.completed .quest-rarity-mark,
+  html body .app-shell .quest-item-card.completed .quest-xp-reward {
+    color: #205f41 !important;
+    -webkit-text-fill-color: #205f41 !important;
+  }
+  html body .app-shell .quest-item-card.completed .quest-progress-track {
+    background: rgba(32, 95, 65, 0.18) !important;
+  }
+  html body .app-shell .quest-item-card.completed .quest-progress-fill {
+    background: #2f754d !important;
+  }
+
+  /* Community is a full mobile canvas, not a card nested inside the page. */
+  html body .app-shell .guild-page.page-stack {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 100dvh !important;
+    margin: 0 !important;
+    padding: max(14px, env(safe-area-inset-top, 0px)) 0 calc(122px + env(safe-area-inset-bottom, 0px)) !important;
+    background: #f8efdd !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    overflow-x: hidden !important;
+  }
+  html body .app-shell .guild-page > [role='tabpanel'] {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  html body .app-shell .guild-page .community-tabs-bar {
+    width: calc(100% - 32px) !important;
+    margin: 0 16px 12px !important;
+    background: rgba(255, 250, 240, 0.62) !important;
+  }
+  html body .app-shell .guild-page .community-feed-stream {
+    width: 100% !important;
+    gap: 12px !important;
+    padding: 0 16px calc(118px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  html body .app-shell .guild-page .community-stories-rail {
+    width: calc(100% + 32px) !important;
+    margin-inline: -16px !important;
+    padding: 8px 18px 8px !important;
+  }
+  html body .app-shell .guild-page .community-post-card {
+    margin: 0 !important;
+  }
+  html body .app-shell .mobile-content-area:has(.guild-page),
+  html body .app-shell .route-stage:has(.guild-page) {
+    background: #f8efdd !important;
+    background-image: none !important;
+  }
+
+  /* Stories own the viewport so the app dock/page never shifts the viewer. */
+  html body .community-story-backdrop {
+    inset: 0 !important;
+    z-index: 30000 !important;
+    padding: 0 !important;
+  }
+  html body .community-story-viewer {
+    width: 100vw !important;
+    height: 100dvh !important;
+    max-width: none !important;
+    max-height: none !important;
+    border-radius: 0 !important;
+    overflow: hidden !important;
+  }
+  html body .community-story-view-photo,
+  html body .community-story-view-photo .capture-image-photo,
+  html body .community-story-view-photo .capture-image-crest {
+    width: 100% !important;
+    height: 100% !important;
+  }
+  html body .community-story-stable-poster {
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    background: #10261a !important;
+  }
+  html body .community-story-view-photo {
+    z-index: 1 !important;
+    background: transparent !important;
+  }
+  html body .community-story-view-photo[data-state='loading'] .capture-image-crest {
+    opacity: 0 !important;
+  }
+  html body .community-story-view-photo[data-state='loaded'] .capture-image-photo {
+    animation: community-story-photo-settle 140ms ease-out both !important;
+  }
+  html body .community-story-actions > .community-story-report-btn {
+    min-width: 48px !important;
+    width: 48px !important;
+    padding: 0 !important;
+    border-color: rgba(255, 250, 240, 0.2) !important;
+    background: rgba(5, 14, 9, 0.42) !important;
+  }
+  html body .community-story-actions > button.liked {
+    border-color: rgba(255, 122, 146, 0.78) !important;
+    background: #f45f79 !important;
+    color: #fffaf0 !important;
+  }
+  html body .community-story-actions > button.liked svg {
+    fill: currentColor !important;
+  }
+  html body .community-report-backdrop {
+    z-index: 40000 !important;
+    align-items: end !important;
+    padding: 0 !important;
+  }
+  html body .community-report-sheet {
+    width: min(100%, 430px) !important;
+    max-height: 82dvh !important;
+    margin: 0 auto !important;
+    border-radius: 24px 24px 0 0 !important;
+    padding-bottom: max(16px, env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+@keyframes community-story-photo-settle {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Community reference match: open, borderless social layout. */
+@media (max-width: 780px) {
+  html body .app-shell .guild-page .community-tabs-bar {
+    width: 100% !important;
+    height: 70px !important;
+    margin: 0 0 10px !important;
+    padding: 0 18px !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(71, 54, 36, 0.08) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+  html body .app-shell .guild-page .community-tab-btn {
+    height: 70px !important;
+    padding: 8px 4px 12px !important;
+    gap: 5px !important;
+    background: transparent !important;
+    font-size: 0.86rem !important;
+    font-weight: 750 !important;
+  }
+  html body .app-shell .guild-page .community-tab-btn svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+  html body .app-shell .guild-page .community-tab-btn::after {
+    right: calc(50% - 23px) !important;
+    left: calc(50% - 23px) !important;
+    height: 3px !important;
+  }
+
+  html body .app-shell .guild-page .community-feed-stream {
+    gap: 20px !important;
+  }
+  html body .app-shell .guild-page .community-stories-rail {
+    gap: 14px !important;
+    padding: 12px 20px 24px !important;
+  }
+  html body .app-shell .guild-page .community-story-card {
+    width: 76px !important;
+    min-width: 76px !important;
+    gap: 8px !important;
+    font-size: 0.8rem !important;
+    font-weight: 700 !important;
+  }
+  html body .app-shell .guild-page .community-story-ring {
+    width: 70px !important;
+    height: 70px !important;
+    padding: 3px !important;
+  }
+  html body .app-shell .guild-page .community-story-photo,
+  html body .app-shell .guild-page .community-story-photo .capture-image-photo {
+    width: 64px !important;
+    height: 64px !important;
+  }
+
+  html body .app-shell .guild-page .community-post-card {
+    border-radius: 26px !important;
+  }
+  html body .app-shell .guild-page .post-header-row {
+    min-height: 100px !important;
+    padding: 20px 24px !important;
+  }
+  html body .app-shell .guild-page .post-author-avatar {
+    width: 48px !important;
+    height: 48px !important;
+    font-size: 0.82rem !important;
+  }
+  html body .app-shell .guild-page .post-author-block {
+    gap: 14px !important;
+  }
+  html body .app-shell .guild-page .post-author-name-btn h4 {
+    font-size: 1rem !important;
+    font-weight: 850 !important;
+  }
+  html body .app-shell .guild-page .post-author-name-btn small {
+    font-size: 0.78rem !important;
+  }
+  html body .app-shell .guild-page .post-photo-wrap {
+    aspect-ratio: 1.4 / 1 !important;
+  }
+  html body .app-shell .guild-page .post-info-block {
+    padding: 16px 24px 24px !important;
+  }
+  html body .app-shell .guild-page .post-info-block h3 {
+    font-size: 1.12rem !important;
+    line-height: 1.2 !important;
+  }
+  html body .app-shell .guild-page .post-location {
+    font-size: 0.9rem !important;
+  }
+  html body .app-shell .guild-page .post-caption,
+  html body .app-shell .guild-page .post-hashtags {
+    font-size: 0.96rem !important;
+    line-height: 1.35 !important;
+  }
+  html body .app-shell .mobile-bottom-dock {
+    background: rgba(255, 250, 240, 0.94) !important;
+    border-color: rgba(80, 65, 45, 0.12) !important;
+  }
+}
+
+/* Phone-density correction: keep a complete post readable above the dock. */
+@media (max-width: 480px) {
+  html body .app-shell .guild-page.page-stack {
+    padding-top: max(4px, env(safe-area-inset-top, 0px)) !important;
+  }
+  html body .app-shell .guild-page .community-tabs-bar {
+    width: calc(100% - 32px) !important;
+    max-width: none !important;
+    height: 56px !important;
+    margin: 0 auto 4px !important;
+    padding-inline: 0 !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+  html body .app-shell .guild-page .community-tab-btn {
+    height: 56px !important;
+    padding: 5px 4px 9px !important;
+    gap: 3px !important;
+    font-size: 0.76rem !important;
+  }
+  html body .app-shell .guild-page .community-tab-btn svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+  html body .app-shell .guild-page .community-feed-stream {
+    gap: 10px !important;
+  }
+  html body .app-shell .guild-page .community-stories-rail {
+    gap: 12px !important;
+    padding: 8px 18px 12px !important;
+  }
+  html body .app-shell .guild-page .community-story-card {
+    width: 64px !important;
+    min-width: 64px !important;
+    gap: 5px !important;
+    font-size: 0.72rem !important;
+  }
+  html body .app-shell .guild-page .community-story-ring {
+    width: 60px !important;
+    height: 60px !important;
+  }
+  html body .app-shell .guild-page .community-story-photo,
+  html body .app-shell .guild-page .community-story-photo .capture-image-photo {
+    width: 54px !important;
+    height: 54px !important;
+  }
+  html body .app-shell .guild-page .community-post-card {
+    border-radius: 22px !important;
+  }
+  html body .app-shell .guild-page .post-header-row {
+    min-height: 80px !important;
+    padding: 14px 18px !important;
+  }
+  html body .app-shell .guild-page .post-author-avatar {
+    width: 44px !important;
+    height: 44px !important;
+  }
+  html body .app-shell .guild-page .post-author-block {
+    gap: 10px !important;
+  }
+  html body .app-shell .guild-page .post-photo-wrap {
+    aspect-ratio: 1.42 / 1 !important;
+  }
+  html body .app-shell .guild-page .post-info-block {
+    padding: 13px 18px 18px !important;
+  }
+  html body .app-shell .guild-page .post-info-block h3 {
+    font-size: 1rem !important;
+  }
+  html body .app-shell .guild-page .post-caption,
+  html body .app-shell .guild-page .post-hashtags {
+    font-size: 0.86rem !important;
   }
 }

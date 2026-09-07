@@ -1,36 +1,32 @@
-# Startup screen design QA
+# Mobile regression design QA
 
-- Source visual truth: `/home/mrudula/.codex/generated_images/01a0776d-349d-7a03-9a18-ccf7c9cabba3/exec-b93f39da-f936-4b0e-9746-be38579e9b1e.png`
-- Implementation screenshot: `/tmp/wild-realm-startup-option-1-final.png`
-- Side-by-side comparison: `/tmp/wild-realm-startup-design-qa.png`
-- Target viewport: 390 x 844 CSS pixels; in-app Browser reported 391 x 844 due to its viewport boundary.
-- Source pixels: 853 x 1844, normalized to 390 x 844 with proportional scaling and white padding.
-- Implementation pixels: 390 x 844 at browser density 1.
-- State: settled startup animation, signed out.
+- Reference screenshots: the five map, dock, camera, quest, and library screenshots plus the three community screenshots supplied in this task.
+- Implementation captures: `/tmp/wild-realm-map-fixed.png`, `/tmp/wild-realm-camera-fixed.png`, `/tmp/wild-realm-quests-fixed.png`, `/tmp/wild-realm-library-fixed.png`, `/tmp/wild-realm-community-fixed.png`, `/tmp/wild-realm-arjun-story-fixed.png`.
+- Viewport: 390 x 844 CSS pixels (browser boundary reported 391 x 844).
+- State: guest, day theme, seeded community and collection data.
 
-## Full-view comparison evidence
+## Findings and corrections
 
-The implementation preserves the selected direction's full-bleed misty mountain scene, lone explorer focal point, upper-left brand, nearby-place cue, lower-third two-line headline, supporting copy, single green primary action, and quiet inline authentication actions. The generated clean background plate matches the source art direction without baking interactive UI into the raster.
+- P1 map overflow: removed the redundant level badge from the map HUD and restored the search width. No horizontal overflow remains.
+- P1 camera hierarchy: removed the second shutter, made the selected large lens the capture action, and enlarged and respaced the lens rail.
+- P1 story media flash: story thumbnails now load eagerly and show an immediate photographic placeholder while protected or remote media resolves. Arjun opens successfully and Next advances.
+- P2 dock balance: restored five equal columns while preserving the center camera action.
+- P1 quests: restored cream and forest contrast, readable type, card breathing room, two-line descriptions, and larger thumbnails.
+- P1 library: removed the full-width featured-card distortion, restored a two-column grid, flattened the stray gradient treatment, and normalized tabs and typography.
+- P1 community: restored compact app-like margins, story sizing, 4:3 post media, cream cards, and safe bottom spacing.
+- Annotation follow-up: active camera filters retain their normal diameter with a stronger ring; Library sort controls are contained; Library cards use equal 258px heights; dock icons are 22px; and completed quest copy uses dark walnut text with forest accents.
+- Community page follow-up: removed the nested-page treatment by eliminating doubled gutters and the outer gradient, using one full-width cream canvas, tightening Stories-to-feed spacing, and keeping the feed card at a single 16px phone gutter.
+- Story viewer follow-up: removed the translucent opening frame, remounts media per story, preloads story imagery, paints a stable poster under the media, uses a heart for likes, and presents reporting as a quiet shield action with a correctly layered bottom sheet.
+- Community reference match: replaced the boxed tab strip with a borderless native bar, increased story and author hierarchy, matched the taller social-card proportions and typography, and softened the persistent dock to the supplied target.
+- Phone-density correction: reduced the oversized navigation, Stories rail, author header, and vertical gaps at 480px and below so the post title, location, caption, and tags remain visible above the fixed dock.
+- Navigation alignment: centered the three equal-width Community tabs within a symmetric 16px page gutter and removed the asymmetric internal padding.
 
-## Focused region comparison evidence
+## Visual and interaction evidence
 
-The lower interaction region was checked separately in the browser: `Explore nearby` resolves to `/sign-up`, `Sign in` resolves to `/sign-in`, and `Continue as guest` is enabled. There were no browser console errors. The selected mock's photographic pin was intentionally represented by the app's standard map-pin icon and live text so it remains accessible, editable, and animatable.
+The corrected screens were checked at the same phone viewport against the supplied references. Content now uses consistent side gutters, touch-sized controls, cream surfaces, forest accents, walnut text, a balanced dock, and a camera-first hierarchy without stacked capture buttons.
 
-## Fidelity surfaces
-
-- Typography: Manrope is retained; headline weight, two-line wrap, compact tracking, body scale, and action hierarchy match the source closely.
-- Spacing and layout: major vertical regions and bottom safe-area actions match; no page scroll or horizontal overflow was observed.
-- Colors: forest green, cream, muted gold, translucent white hotspot surface, and dark lower image treatment align with the source.
-- Image quality: dedicated generated 390 x 844 art-direction-matched background plate is used at full bleed with an intentional cover crop.
-- Copy: source headline and core call to action are preserved. Supporting copy is equivalent and concise.
-
-## Comparison history
-
-1. Initial implementation had a three-line headline and clipped secondary action. Fixed by reducing headline scale and tightening the secondary-action spacing.
-2. Post-fix capture shows the intended two-line headline, fully visible actions, no overflow, and no console errors.
-
-## Follow-up polish
-
-- P3: a future iteration could use an individual circular photographic hotspot thumbnail instead of the standard map-pin glyph.
+- Camera opens from the center dock and exposes one active capture lens plus selectable filters.
+- Arjun's story opens with visible previous and next controls; Next advanced and the story counter remained present.
+- Map, quests, library, and community rendered without horizontal overflow in the inspected viewport.
 
 final result: passed

@@ -46,6 +46,12 @@ function initials(name) {
     .join('');
 }
 
+function storyPosterFallback(story) {
+  return story?.discovery?.element?.toLowerCase() === 'sky'
+    ? '/auth-celestial-aperture.png'
+    : '/assets/verdant-explorer-banner.png';
+}
+
 export function GuildPage() {
   const [tab, setTab] = useState('FEED');
   const [shareOpen, setShareOpen] = useState(false);
@@ -319,6 +325,16 @@ function CommunityStories({ onOpenProfile }) {
   const [activeStoryIndex, setActiveStoryIndex] = useState(null);
   const visibleStories = (stories || []).slice(0, 12);
 
+  useEffect(() => {
+    (stories || []).slice(0, 12).forEach((story) => {
+      const source = story.discovery?.imageRef;
+      if (!source || typeof Image === 'undefined') return;
+      const image = new Image();
+      image.decoding = 'async';
+      image.src = source;
+    });
+  }, [stories]);
+
   if (isLoading) {
     return (
       <div className="community-stories-rail" aria-busy="true">
@@ -349,6 +365,7 @@ function CommunityStories({ onOpenProfile }) {
                 alt={story.discovery?.itemName || story.author.displayName}
                 element={story.discovery?.element}
                 className="community-story-photo"
+                eager
                 useAuth={story.discovery?.imageRef?.includes('/captures/')}
               />
             </span>
@@ -416,7 +433,7 @@ function StoryViewerSheet({ stories, activeIndex, onNavigate, onClose, onOpenPro
     <motion.div
       className="community-story-backdrop"
       role="presentation"
-      initial={{ opacity: 0 }}
+      initial={false}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       onClick={onClose}
@@ -426,7 +443,7 @@ function StoryViewerSheet({ stories, activeIndex, onNavigate, onClose, onOpenPro
         role="dialog"
         aria-modal="true"
         aria-label={`${story.author.displayName}'s story`}
-        initial={{ y: 20, opacity: 0, scale: 0.98 }}
+        initial={false}
         animate={{ y: 0, opacity: 1, scale: 1 }}
         exit={{ y: 20, opacity: 0, scale: 0.98 }}
         transition={{ type: 'spring', stiffness: 420, damping: 34 }}
@@ -460,11 +477,19 @@ function StoryViewerSheet({ stories, activeIndex, onNavigate, onClose, onOpenPro
           </div>
           <button type="button" aria-label="Close story" onClick={onClose}>×</button>
         </div>
+        <img
+          className="community-story-stable-poster"
+          src={storyPosterFallback(story)}
+          alt=""
+          aria-hidden="true"
+        />
         <CaptureImage
+          key={story.id}
           imageRef={story.discovery?.imageRef}
           alt={story.discovery?.itemName || 'Community story'}
           element={story.discovery?.element}
           className="community-story-view-photo"
+          eager
           useAuth={story.discovery?.imageRef?.includes('/captures/')}
         />
         <button
@@ -501,7 +526,7 @@ function StoryViewerSheet({ stories, activeIndex, onNavigate, onClose, onOpenPro
               toggleLike.mutate({ postId: story.postId, liked: !story.viewerLiked });
             }}
           >
-            <Icon name="star" />
+            <Icon name="heart" />
             <span>{story.likeCount || 0}</span>
             <AnimatePresence>{story.viewerLiked && (
               <motion.i className="community-story-like-burst" aria-hidden="true" initial={{ opacity: 1, scale: 0.4 }} animate={{ opacity: 0, scale: 1.8, y: -18 }} exit={{ opacity: 0 }} />
@@ -519,7 +544,7 @@ function StoryViewerSheet({ stories, activeIndex, onNavigate, onClose, onOpenPro
           </motion.button>
           <motion.button
             type="button"
-            className={reported ? 'reported' : ''}
+            className={`community-story-report-btn ${reported ? 'reported' : ''}`}
             aria-label={reported ? 'Story reported' : 'Report story'}
             disabled={reported || reportPost.isPending}
             whileTap={{ scale: 0.86 }}
@@ -527,7 +552,7 @@ function StoryViewerSheet({ stories, activeIndex, onNavigate, onClose, onOpenPro
             onClick={() => { playTap(); setReportOpen(true); }}
           >
             <Icon name="shield" />
-            <span>{reported ? 'Done' : 'Report'}</span>
+            <span className="sr-only">{reported ? 'Reported' : 'Report'}</span>
           </motion.button>
         </div>
         <AnimatePresence>
