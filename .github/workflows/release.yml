@@ -102,12 +102,12 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Download Android Artifact
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: app-debug.apk
 
       - name: Download iOS Artifact
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: App-iOS-Unsigned.zip
 
