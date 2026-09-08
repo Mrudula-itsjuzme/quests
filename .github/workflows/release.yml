@@ -32,7 +32,7 @@ jobs:
         run: npm run build
 
       - name: Setup Java
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v6
         with:
           distribution: 'zulu'
           # Capacitor Android compiles with Java 21 (source/target VERSION_21).
