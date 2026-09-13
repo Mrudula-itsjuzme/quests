@@ -100,6 +100,12 @@ export function mergeHotspots(curated = [], discovered = []) {
   );
 }
 
+/** Keeps a location-aware Explore view local instead of leaking demo-city POIs. */
+export function filterHotspotsNearOrigin(hotspots = [], origin = null, radiusKm = 75) {
+  if (!origin) return hotspots;
+  return hotspots.filter((place) => place.distanceKm == null || place.distanceKm <= radiusKm);
+}
+
 /** Groups privacy-redacted public posts into photo-backed community hotspots. */
 export function buildCommunityHotspots(posts = [], origin = null) {
   const clusters = new Map();
@@ -163,6 +169,7 @@ export function buildDiscoveryHotspots(captures = [], species = [], origin = nul
         grade: bestGrade(cards),
         source: 'discovered',
         discoveries: cards.length,
+        imageRef: cards.find((card) => card.imageRef)?.imageRef || imageForCategory(CATEGORY_BY_ELEMENT[element]),
         gps: { lat, lng },
         distanceKm: km,
         distanceLabel: formatDistance(km),

@@ -29,11 +29,37 @@ function makePinHtml(pin) {
   const grade = pin.grade || '';
   const gradeClass = grade ? `rank-hex-${grade.toLowerCase()}` : 'map-pin-curated';
   const label = grade || getCategoryEmoji(pin.category);
+  const imageRef = safeImageRef(pin.imageRef, pin.category);
   return `
-    <div class="map-leaflet-pin ${gradeClass}" title="${pin.title}">
-      <div class="map-leaflet-pin-inner">${label}</div>
+    <div class="map-leaflet-pin ${gradeClass}${imageRef ? ' map-pin-photo' : ''}" title="${escapeHtml(pin.title)}">
+      <div class="map-leaflet-pin-inner">
+        ${imageRef ? `<img src="${imageRef}" alt="" loading="lazy" referrerpolicy="no-referrer" />` : label}
+      </div>
     </div>
   `;
+}
+
+function escapeHtml(value = '') {
+  return String(value).replace(/[&<>"']/g, (character) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;',
+  })[character]);
+}
+
+function safeImageRef(value, category) {
+  if (typeof value !== 'string') return '';
+  // Private capture endpoints need authorization headers, which a Leaflet
+  // HTML marker cannot attach. Use a local visual fallback instead of a
+  // broken image while the authenticated photo remains in the detail card.
+  if (value.startsWith('/api/')) return markerFallback(category);
+  if (value.startsWith('/') || value.startsWith('data:image/') || /^https:\/\//i.test(value)) return escapeHtml(value);
+  return '';
+}
+
+function markerFallback(category = '') {
+  const key = String(category).toLowerCase();
+  if (key.includes('bird')) return '/assets/blue-billed-cuckoo.png';
+  if (key.includes('water') || key.includes('park') || key.includes('community')) return '/assets/verdant-explorer-banner.png';
+  return '/assets/quest-compass-poster.png';
 }
 
 function getCategoryEmoji(category = '') {

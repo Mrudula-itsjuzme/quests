@@ -5,7 +5,7 @@ import { useActiveQuests, useCaptures, useCollectibles, useCommunityPosts, useMa
 import { coinBalance, deriveGems, getEnergy } from '../../lib/playerEconomy';
 import { derivePlayerPresentation } from '../../lib/playerPresentation';
 import { timeOfDayPhase } from '../../lib/worldTime';
-import { buildCommunityHotspots, buildDiscoveryHotspots, mapCuratedHotspots, mergeHotspots } from '../../lib/discoveryHotspots';
+import { buildCommunityHotspots, buildDiscoveryHotspots, filterHotspotsNearOrigin, mapCuratedHotspots, mergeHotspots } from '../../lib/discoveryHotspots';
 import { WorldCanvas } from './WorldCanvas';
 import { WorldHud } from './WorldHud';
 import { pickWeather } from './WeatherLayer';
@@ -39,7 +39,8 @@ export function WorldScreen() {
   const navigate = useNavigate();
   const [lastKnownPosition, setLastKnownPosition] = useState(null);
   const [searchCenter, setSearchCenter] = useState(null);
-  const { data: scenicPlaces, isFetching: scenicLoading, isError: scenicError } = useScenicPlaces(searchCenter);
+  const nearbyCenter = searchCenter || lastKnownPosition;
+  const { data: scenicPlaces, isFetching: scenicLoading, isError: scenicError } = useScenicPlaces(nearbyCenter);
   const stepCounter = useStepCounter();
 
   const [selectedTag, setSelectedTag] = useState('All');
@@ -111,9 +112,14 @@ export function WorldScreen() {
     () => buildDiscoveryHotspots(captures, species, lastKnownPosition),
     [captures, species, lastKnownPosition],
   );
-  const scenic = useMemo(() => mapCuratedHotspots(scenicPlaces, searchCenter || lastKnownPosition), [scenicPlaces, searchCenter, lastKnownPosition]);
-  const community = useMemo(() => buildCommunityHotspots(communityPosts, searchCenter || lastKnownPosition), [communityPosts, searchCenter, lastKnownPosition]);
-  const hotspots = useMemo(() => mergeHotspots([...scenic, ...community, ...curated], discovered), [scenic, community, curated, discovered]);
+  const scenic = useMemo(() => mapCuratedHotspots(scenicPlaces, nearbyCenter), [scenicPlaces, nearbyCenter]);
+  const community = useMemo(() => buildCommunityHotspots(communityPosts, nearbyCenter), [communityPosts, nearbyCenter]);
+  const hotspots = useMemo(() => {
+    const merged = mergeHotspots([...scenic, ...community, ...curated], discovered);
+    // Once a real location (or dropped pin) is known, do not keep unrelated
+    // demo-city content in the nearby carousel or on the visible map.
+    return filterHotspotsNearOrigin(merged, nearbyCenter);
+  }, [scenic, community, curated, discovered, nearbyCenter]);
 
   const filteredHotspots = useMemo(() => {
     return hotspots.filter((item) => {
@@ -237,7 +243,7 @@ export function WorldScreen() {
           <strong>{stepCounter.status === 'active' ? stepCounter.steps.toLocaleString() : 'Steps'}</strong>
           <small>{stepCounter.status === 'active' ? 'this walk' : stepCounter.status === 'web' ? 'in mobile app' : stepCounter.status === 'denied' ? 'permission off' : stepCounter.status === 'unavailable' ? 'not supported' : stepCounter.status === 'requesting' ? 'checking…' : 'tap to start'}</small>
         </button>}
-        {searchCenter && <p>{scenicLoading ? 'Finding scenic places…' : scenicError ? 'Live scenic search is unavailable.' : `${scenic.length} places around your pin`}</p>}
+        {nearbyCenter && <p>{scenicLoading ? 'Finding scenic places…' : scenicError ? 'Live scenic search is unavailable.' : `${scenic.length} places near you`}</p>}
       </div>
 
       <button
@@ -264,7 +270,7 @@ export function WorldScreen() {
       {/* Bottom Sheet: Top Nature Hotspots Near You */}
       <div className="explore-bottom-sheet">
         <div className="explore-sheet-header">
-          <h3>{searchCenter ? 'Explore around your pin' : 'Places worth exploring'}</h3>
+          <h3>{searchCenter ? 'Explore around your pin' : lastKnownPosition ? 'Top spots near you' : 'Places worth exploring'}</h3>
           <button type="button" className="explore-sheet-see-all" onClick={() => navigate('/app/collection')}>
             See all ›
           </button>

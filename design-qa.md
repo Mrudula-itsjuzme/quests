@@ -65,6 +65,19 @@ Focused regions were evaluated in the full phone captures because the affected c
 
 final result: passed
 
+### Iteration 8 — live-location discovery and photo pins, passed
+
+- Traced the Coimbatore mismatch to a split data path: GPS moved the Leaflet viewport, but the scenic-place query was enabled only after a manual map tap.
+- The same live coordinate now drives map centering, distance sorting, the OpenStreetMap scenic lookup, and the `Top spots near you` carousel.
+- Once a location is known, results outside a 75 km locality boundary are removed so Bengaluru demo places do not leak into a Coimbatore view.
+- Replaced emoji-only POI markers with circular photo pins. OpenStreetMap `image` and Wikimedia Commons metadata are used when available, with local category photography as a resilient fallback.
+- Camera capture now requests a fresh high-accuracy fix through Capacitor Geolocation on native devices and retains the browser geolocation fallback on web.
+- Updated primary Library, Community, and Quests headings to the bundled Cormorant Garamond display face while keeping Manrope for compact controls and content.
+- Rendered evidence: `/tmp/wild-realm-qa/map-photo-pins-final.png` and `/tmp/wild-realm-qa/library-font-final-v2.png` at 415 x 844.
+- Regression evidence: 199 tests passed, including locality filtering and scenic image mapping; typecheck, production build, and `git diff --check` passed.
+
+final result: passed
+
 ### Iteration 7 — tactile interactions and real night theme, passed
 
 - Replaced the Community like glyph with a heart while preserving its existing toggle and count behavior.

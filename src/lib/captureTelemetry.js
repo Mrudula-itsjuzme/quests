@@ -1,13 +1,39 @@
 const GPS_TIMEOUT_MS = 8000;
 const MOTION_SAMPLE_MS = 400;
 
-function getGeolocation() {
+async function getGeolocation() {
+  const startedAt = performance.now();
+  try {
+    const { Capacitor } = await import('@capacitor/core');
+    if (Capacitor.isNativePlatform()) {
+      const { Geolocation } = await import('@capacitor/geolocation');
+      const permission = await Geolocation.checkPermissions();
+      const status = permission.location === 'granted'
+        ? permission
+        : await Geolocation.requestPermissions();
+      if (status.location !== 'granted') return null;
+      const position = await Geolocation.getCurrentPosition({
+        enableHighAccuracy: true,
+        timeout: GPS_TIMEOUT_MS,
+        maximumAge: 0,
+      });
+      return {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+        accuracyM: position.coords.accuracy ?? null,
+        altitude: position.coords.altitude ?? null,
+        gpsFixMs: Math.round(performance.now() - startedAt),
+      };
+    }
+  } catch {
+    // Fall through to the browser geolocation path in web and hybrid shells.
+  }
+
   return new Promise((resolve) => {
-    if (!navigator.geolocation) {
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
       resolve(null);
       return;
     }
-    const startedAt = performance.now();
     navigator.geolocation.getCurrentPosition(
       (position) => {
         resolve({

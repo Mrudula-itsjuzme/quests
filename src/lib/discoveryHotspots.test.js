@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { buildCommunityHotspots, buildDiscoveryHotspots, distanceKm, formatDistance, mapCuratedHotspots, mergeHotspots } from './discoveryHotspots';
+import { buildCommunityHotspots, buildDiscoveryHotspots, distanceKm, filterHotspotsNearOrigin, formatDistance, mapCuratedHotspots, mergeHotspots } from './discoveryHotspots';
 
 const species = [
   { id: 'sky-house-sparrow', element: 'Sky' },
@@ -153,6 +153,22 @@ describe('mergeHotspots', () => {
   it('returns curated content even when the player has captured nothing', () => {
     const merged = mergeHotspots([{ id: 'curated-only', distanceKm: null }], []);
     expect(merged).toHaveLength(1);
+  });
+});
+
+describe('filterHotspotsNearOrigin', () => {
+  it('removes a different-city demo place once live location is known', () => {
+    const places = [
+      { id: 'coimbatore-park', distanceKm: 3 },
+      { id: 'cubbon-park', distanceKm: 230 },
+    ];
+    expect(filterHotspotsNearOrigin(places, { lat: 11.0168, lng: 76.9558 }))
+      .toEqual([{ id: 'coimbatore-park', distanceKm: 3 }]);
+  });
+
+  it('preserves the discovery list before permission is granted', () => {
+    const places = [{ id: 'default', distanceKm: 230 }];
+    expect(filterHotspotsNearOrigin(places)).toBe(places);
   });
 });
 
