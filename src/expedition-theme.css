@@ -1,0 +1,265 @@
+/* MODERN EXPEDITION × ARCANE SIGNAL — visual system, behavior preserved. */
+@media (max-width: 780px) {
+  html body .app-shell {
+    --expedition-ink: #13261e;
+    --expedition-ink-2: #203b2e;
+    --expedition-signal: #38d887;
+    --expedition-signal-soft: #b9f3cf;
+    --expedition-cream: #fbf5e7;
+    --expedition-paper: #fffaf0;
+    --expedition-walnut: #3a2d22;
+  }
+
+  html body .app-shell :where(.gallery-v2-shell, .quests-shell, .guild-page.page-stack) {
+    background:
+      radial-gradient(circle at 92% 3%, rgba(56, 216, 135, 0.16), transparent 22%),
+      linear-gradient(180deg, #eef4e8 0%, var(--expedition-cream) 34%, #f8efdd 100%) !important;
+  }
+
+  html body .app-shell .mobile-bottom-dock {
+    border: 1px solid rgba(185, 243, 207, 0.2) !important;
+    background: rgba(19, 38, 30, 0.96) !important;
+    box-shadow: 0 16px 40px rgba(15, 33, 25, 0.3), inset 0 1px rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(18px) saturate(130%) !important;
+  }
+
+  html body .app-shell .mobile-bottom-dock .dock-item,
+  html body .app-shell .mobile-bottom-dock .dock-item svg,
+  html body .app-shell .mobile-bottom-dock .dock-item span {
+    color: rgba(255, 250, 240, 0.65) !important;
+    -webkit-text-fill-color: rgba(255, 250, 240, 0.65) !important;
+  }
+
+  html body .app-shell .mobile-bottom-dock .dock-item.active,
+  html body .app-shell .mobile-bottom-dock .dock-item.active svg,
+  html body .app-shell .mobile-bottom-dock .dock-item.active span {
+    color: var(--expedition-signal) !important;
+    -webkit-text-fill-color: var(--expedition-signal) !important;
+    font-weight: 850 !important;
+  }
+
+  html body .app-shell .dock-camera-button {
+    border-color: #f6f0df !important;
+    background: linear-gradient(145deg, #3ce08b, #1f9c61) !important;
+    box-shadow: 0 0 0 7px rgba(56, 216, 135, 0.12), 0 12px 28px rgba(15, 89, 54, 0.36) !important;
+  }
+
+  html body .app-shell .gallery-v2-header h1 {
+    font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif !important;
+    font-size: 2.2rem !important;
+    font-weight: 850 !important;
+    letter-spacing: -0.055em !important;
+  }
+
+  html body .app-shell .gallery-title-kicker,
+  html body .app-shell .library-kicker,
+  html body .app-shell .library-loop-kicker {
+    color: #238056 !important;
+    letter-spacing: 0.16em !important;
+  }
+
+  html body .app-shell .library-hero-panel {
+    min-height: 132px !important;
+    border: 1px solid rgba(185, 243, 207, 0.18) !important;
+    background:
+      linear-gradient(90deg, rgba(13, 31, 23, 0.98), rgba(26, 59, 44, 0.9)),
+      url('/assets/verdant-explorer-banner.png') center 43% / cover no-repeat !important;
+    box-shadow: 0 18px 34px rgba(25, 48, 37, 0.18) !important;
+  }
+
+  html body .app-shell .library-hero-panel .library-kicker,
+  html body .app-shell .library-hero-panel p,
+  html body .app-shell .library-hero-panel dt,
+  html body .app-shell .library-hero-panel dd {
+    color: #fffaf0 !important;
+    -webkit-text-fill-color: #fffaf0 !important;
+  }
+
+  html body .app-shell .library-hero-panel .library-kicker {
+    color: var(--expedition-signal) !important;
+    -webkit-text-fill-color: var(--expedition-signal) !important;
+  }
+
+  html body .app-shell .library-hero-panel .gallery-v2-stat {
+    border-color: rgba(255, 250, 240, 0.12) !important;
+    background: rgba(255, 250, 240, 0.08) !important;
+  }
+
+  html body .app-shell .gallery-v2-tabs .gallery-v2-tab {
+    min-height: 40px !important;
+    border-color: rgba(19, 38, 30, 0.1) !important;
+    background: rgba(255, 250, 240, 0.74) !important;
+  }
+
+  html body .app-shell .gallery-v2-tabs .gallery-v2-tab.active {
+    border-color: var(--expedition-ink) !important;
+    background: var(--expedition-ink) !important;
+    color: var(--expedition-signal-soft) !important;
+    -webkit-text-fill-color: var(--expedition-signal-soft) !important;
+    box-shadow: 0 8px 18px rgba(19, 38, 30, 0.18) !important;
+  }
+
+  html body .app-shell .gallery-v2-count {
+    color: var(--expedition-ink) !important;
+    font-size: 0.72rem !important;
+    font-weight: 850 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+  }
+
+  html body .app-shell .gallery-sort-pills {
+    border-color: rgba(19, 38, 30, 0.14) !important;
+    background: rgba(255, 250, 240, 0.78) !important;
+    box-shadow: 0 8px 18px rgba(49, 42, 31, 0.08) !important;
+  }
+
+  html body .app-shell .gallery-sort-pill.active {
+    background: var(--expedition-ink) !important;
+    color: var(--expedition-signal-soft) !important;
+    -webkit-text-fill-color: var(--expedition-signal-soft) !important;
+  }
+
+  html body .app-shell .gallery-v2-grid {
+    gap: 14px !important;
+  }
+
+  html body .app-shell .gallery-v2-card {
+    border: 1px solid rgba(19, 38, 30, 0.11) !important;
+    background: var(--expedition-paper) !important;
+    box-shadow: 0 14px 26px rgba(42, 48, 35, 0.13) !important;
+  }
+
+  html body .app-shell .gallery-v2-card-featured {
+    grid-column: 1 / -1 !important;
+    aspect-ratio: 1.48 / 1 !important;
+  }
+
+  html body .app-shell .gallery-v2-card-featured .gallery-v2-photo {
+    height: 70% !important;
+  }
+
+  html body .app-shell .gallery-v2-card-featured .gallery-v2-info {
+    height: 30% !important;
+    padding: 12px 15px !important;
+  }
+
+  html body .app-shell .gallery-v2-card-featured .gallery-v2-name {
+    font-size: 1.08rem !important;
+  }
+
+  html body .app-shell .gallery-v2-rank-badge {
+    background: rgba(19, 38, 30, 0.86) !important;
+    color: #f4d27a !important;
+    -webkit-text-fill-color: #f4d27a !important;
+    backdrop-filter: blur(10px) !important;
+  }
+
+  html body .app-shell .quest-user-topbar {
+    border-color: rgba(185, 243, 207, 0.15) !important;
+    background:
+      linear-gradient(105deg, rgba(16, 35, 27, 0.98), rgba(30, 66, 49, 0.92)),
+      url('/assets/quest-compass-poster.png') center / cover no-repeat !important;
+    box-shadow: 0 16px 30px rgba(24, 44, 34, 0.19) !important;
+  }
+
+  html body .app-shell .quest-user-topbar :where(h3, p, span, strong, small) {
+    color: #fffaf0 !important;
+    -webkit-text-fill-color: #fffaf0 !important;
+  }
+
+  html body .app-shell .quest-season-strip {
+    border-left: 4px solid var(--expedition-signal) !important;
+    background: rgba(255, 250, 240, 0.84) !important;
+    box-shadow: 0 10px 22px rgba(48, 44, 32, 0.08) !important;
+  }
+
+  html body .app-shell .quest-cadence-tabs {
+    border-color: rgba(19, 38, 30, 0.12) !important;
+    background: rgba(255, 250, 240, 0.74) !important;
+  }
+
+  html body .app-shell .quest-cadence-btn.active {
+    background: var(--expedition-ink) !important;
+    color: var(--expedition-signal-soft) !important;
+    -webkit-text-fill-color: var(--expedition-signal-soft) !important;
+  }
+
+  html body .app-shell .quests-section-header h2 {
+    color: var(--expedition-ink) !important;
+    font-size: 1.12rem !important;
+    font-weight: 900 !important;
+    letter-spacing: -0.035em !important;
+  }
+
+  html body .app-shell .quest-item-card,
+  html body .app-shell .quest-item-card.completed {
+    border-color: rgba(19, 38, 30, 0.12) !important;
+    border-left: 4px solid #4e755f !important;
+    background: rgba(255, 250, 240, 0.92) !important;
+    box-shadow: 0 12px 24px rgba(47, 48, 35, 0.1) !important;
+  }
+
+  html body .app-shell .quest-item-card.completed {
+    border-left-color: var(--expedition-signal) !important;
+    background: rgba(230, 244, 229, 0.94) !important;
+  }
+
+  html body .app-shell .quest-card-action {
+    border-radius: 9px !important;
+    background: var(--expedition-ink) !important;
+    color: #fffaf0 !important;
+    -webkit-text-fill-color: #fffaf0 !important;
+    box-shadow: 0 7px 15px rgba(19, 38, 30, 0.18) !important;
+  }
+
+  html body .app-shell .guild-page .community-tabs-bar {
+    border-color: rgba(185, 243, 207, 0.14) !important;
+    background: var(--expedition-ink) !important;
+    box-shadow: 0 12px 26px rgba(19, 38, 30, 0.19) !important;
+  }
+
+  html body .app-shell .guild-page .community-tab-btn,
+  html body .app-shell .guild-page .community-tab-btn svg {
+    color: rgba(255, 250, 240, 0.62) !important;
+    -webkit-text-fill-color: rgba(255, 250, 240, 0.62) !important;
+  }
+
+  html body .app-shell .guild-page .community-tab-btn.active,
+  html body .app-shell .guild-page .community-tab-btn.active svg {
+    color: var(--expedition-signal) !important;
+    -webkit-text-fill-color: var(--expedition-signal) !important;
+  }
+
+  html body .app-shell .guild-page .community-tab-btn.active::after {
+    height: 3px !important;
+    background: var(--expedition-signal) !important;
+    box-shadow: 0 0 12px rgba(56, 216, 135, 0.7) !important;
+  }
+
+  html body .app-shell .guild-page .community-post-card {
+    border-color: rgba(19, 38, 30, 0.1) !important;
+    background: rgba(255, 250, 240, 0.94) !important;
+    box-shadow: 0 15px 30px rgba(43, 47, 34, 0.12) !important;
+  }
+
+  html body .app-shell .explore-bottom-sheet {
+    border-top: 3px solid var(--expedition-signal) !important;
+    background: rgba(255, 250, 240, 0.96) !important;
+    box-shadow: 0 -18px 36px rgba(19, 38, 30, 0.18) !important;
+  }
+
+  html body .capture-flow-overlay .capture-player-badge,
+  html body .capture-flow-overlay .capture-top-action {
+    border: 1px solid rgba(185, 243, 207, 0.2) !important;
+    background: rgba(19, 38, 30, 0.78) !important;
+    color: #fffaf0 !important;
+    -webkit-text-fill-color: #fffaf0 !important;
+    backdrop-filter: blur(14px) saturate(125%) !important;
+  }
+
+  html body .capture-flow-overlay .capture-filter-chip.active .capture-filter-preview {
+    border-color: #ffffff !important;
+    box-shadow: 0 0 0 2px var(--expedition-signal), 0 10px 24px rgba(0, 0, 0, 0.34) !important;
+  }
+}
+
