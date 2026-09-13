@@ -65,6 +65,18 @@ Focused regions were evaluated in the full phone captures because the affected c
 
 final result: passed
 
+### Iteration 9 — functional Library deck, passed
+
+- Replaced the decorative stacked-card illusion with explicit 42 px previous/next controls.
+- Verified the next action promotes `Misty Mountains` from the rear stack into the lead card and the previous action reverses it.
+- Preserved the lead-card flip interaction: first card tap flips, second card tap opens details; deck navigation clears the flipped state.
+- Removed the redundant `14 of 14` completion claim, duplicate capture/five-star stat pills, and the temporary `1 / 14` overlay.
+- Library summary is now one line (`14 discoveries · 4 five-star`) plus the existing XP value.
+- Reverted primary screen headings from the serif experiment to Manrope 700 with calmer tracking.
+- Exact 415 x 844 evidence: `/tmp/wild-realm-qa/library-navigation-final.png` and `/tmp/wild-realm-qa/library-next-card.png`.
+
+final result: passed
+
 ### Iteration 8 — live-location discovery and photo pins, passed
 
 - Traced the Coimbatore mismatch to a split data path: GPS moved the Leaflet viewport, but the scenic-place query was enabled only after a manual map tap.

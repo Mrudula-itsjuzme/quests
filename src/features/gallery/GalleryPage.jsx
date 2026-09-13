@@ -36,6 +36,7 @@ export function GalleryPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const [flippedCardId, setFlippedCardId] = useState(null);
+  const [deckIndex, setDeckIndex] = useState(0);
   const isLoading = capturesLoading || speciesLoading;
 
   const collection = useMemo(
@@ -68,6 +69,20 @@ export function GalleryPage() {
 
   const sRankCount = collection.filter((c) => c.rarityStars === 5).length;
   const totalXp = collection.reduce((sum, c) => sum + (c.xpAwarded ?? Math.max(25, Number(c.rarityStars || 1) * 25)), 0);
+  const deckList = useMemo(() => {
+    if (displayList.length < 2) return displayList;
+    const start = deckIndex % displayList.length;
+    return [...displayList.slice(start), ...displayList.slice(0, start)];
+  }, [displayList, deckIndex]);
+
+  const moveDeck = (direction) => {
+    playTap();
+    setFlippedCardId(null);
+    setDeckIndex((current) => {
+      if (displayList.length < 2) return 0;
+      return (current + direction + displayList.length) % displayList.length;
+    });
+  };
 
   return (
     <main className="gallery-v2-shell">
@@ -100,23 +115,9 @@ export function GalleryPage() {
       <section className="library-hero-panel" aria-label="Library summary">
         <div>
           <span className="library-kicker">Collection progress</span>
-          <p>{collection.length} of {Math.max(collection.length, species?.length || 0)} finds saved</p>
-          <progress
-            className="library-collection-progress"
-            value={collection.length}
-            max={Math.max(collection.length, species?.length || 1)}
-            aria-label="Collection completion"
-          />
+          <p>{collection.length} discoveries · {sRankCount} five-star</p>
         </div>
         <dl className="gallery-v2-stats">
-          <div className="gallery-v2-stat">
-            <dt>Captures</dt>
-            <dd>{collection.length}</dd>
-          </div>
-          <div className="gallery-v2-stat gold">
-            <dt>5 Star</dt>
-            <dd>{sRankCount}</dd>
-          </div>
           <div className="gallery-v2-stat">
             <dt>XP</dt>
             <dd>{totalXp.toLocaleString()}</dd>
@@ -131,7 +132,7 @@ export function GalleryPage() {
             key={tab.id}
             type="button"
             className={`gallery-v2-tab ${activeTab === tab.id ? 'active' : ''}`}
-            onClick={() => { playTap(); setActiveTab(tab.id); }}
+            onClick={() => { playTap(); setActiveTab(tab.id); setDeckIndex(0); setFlippedCardId(null); }}
           >
             <span>{tab.emoji}</span>
             {tab.label}
@@ -149,7 +150,7 @@ export function GalleryPage() {
                 key={opt.value}
                 type="button"
                 className={`gallery-sort-pill ${sortBy === opt.value ? 'active' : ''}`}
-                onClick={() => { playTap(); setSortBy(opt.value); }}
+                onClick={() => { playTap(); setSortBy(opt.value); setDeckIndex(0); setFlippedCardId(null); }}
               >
                 {opt.label}
               </button>
@@ -187,7 +188,7 @@ export function GalleryPage() {
         /* ── Instagram-style photo grid ── */
         <div className="gallery-v2-grid">
           <>
-            {displayList.map((card, i) => {
+            {deckList.map((card, i) => {
               const stars = card.rarityStars ?? 1;
               const speciesEntry = (species || []).find((s) => s.id === card.speciesId);
               const gradeColor = GRADE_COLORS[stars] || GRADE_COLORS[1];
@@ -251,6 +252,12 @@ export function GalleryPage() {
                 </motion.button>
               );
             })}
+            {displayList.length > 1 && (
+              <div className="gallery-deck-controls" aria-label="Browse collection cards">
+                <button type="button" onClick={() => moveDeck(-1)} aria-label="Previous collection card">‹</button>
+                <button type="button" onClick={() => moveDeck(1)} aria-label="Next collection card">›</button>
+              </div>
+            )}
           </>
         </div>
       )}

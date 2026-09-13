@@ -1516,16 +1516,6 @@
     font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif !important;
   }
 
-  html body .app-shell :where(
-    .gallery-title-lockup h1,
-    .community-network-header h1,
-    .quests-section-header h2
-  ) {
-    font-family: 'Cormorant Garamond', Georgia, serif !important;
-    font-weight: 700 !important;
-    letter-spacing: -0.025em !important;
-  }
-
   html body .app-shell :where(.quest-item-title, .post-info-block h3) {
     font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif !important;
     font-weight: 700 !important;
@@ -1539,9 +1529,41 @@
   html body .app-shell .gallery-v2-shell .gallery-title-lockup h1,
   html body .app-shell .guild-page .community-network-header h1,
   html body .app-shell .quests-shell .quests-section-header h2 {
-    font-family: 'Cormorant Garamond', Georgia, serif !important;
+    font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif !important;
     font-weight: 700 !important;
-    letter-spacing: -0.02em !important;
+    letter-spacing: -0.045em !important;
+  }
+
+  html body .app-shell .library-hero-panel > div:first-child p {
+    margin-bottom: 0 !important;
+  }
+
+  html body .app-shell .gallery-deck-controls {
+    position: absolute !important;
+    top: 164px !important;
+    left: 20px !important;
+    right: 20px !important;
+    z-index: 8 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    pointer-events: none !important;
+  }
+
+  html body .app-shell .gallery-deck-controls button {
+    width: 42px !important;
+    height: 42px !important;
+    display: grid !important;
+    place-items: center !important;
+    padding: 0 0 3px !important;
+    border: 1px solid rgba(255, 250, 240, 0.72) !important;
+    border-radius: 50% !important;
+    background: rgba(17, 38, 29, 0.76) !important;
+    color: #fffaf0 !important;
+    font: 500 2rem/1 'Manrope', sans-serif !important;
+    box-shadow: 0 5px 18px rgba(13, 31, 23, 0.2) !important;
+    backdrop-filter: blur(8px) !important;
+    pointer-events: auto !important;
   }
 
   html body .app-shell .gallery-card-flipper {
