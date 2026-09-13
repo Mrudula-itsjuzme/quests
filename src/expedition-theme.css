@@ -561,4 +561,23 @@
     color: #fffaf0 !important;
     -webkit-text-fill-color: #fffaf0 !important;
   }
+
+  html[data-wild-theme='light'] body .app-shell .mobile-bottom-dock .dock-item:not(.active),
+  html[data-wild-theme='system'] body .app-shell .mobile-bottom-dock .dock-item:not(.active),
+  html[data-wild-theme='dark'] body .app-shell .mobile-bottom-dock .dock-item:not(.active),
+  html[data-wild-theme='light'] body .app-shell .mobile-bottom-dock .dock-item:not(.active) :where(svg, span),
+  html[data-wild-theme='system'] body .app-shell .mobile-bottom-dock .dock-item:not(.active) :where(svg, span),
+  html[data-wild-theme='dark'] body .app-shell .mobile-bottom-dock .dock-item:not(.active) :where(svg, span) {
+    color: #403d35 !important;
+    -webkit-text-fill-color: #403d35 !important;
+    opacity: 1 !important;
+  }
+
+  html[data-wild-theme='light'] body .app-shell .explore-search-input::placeholder,
+  html[data-wild-theme='system'] body .app-shell .explore-search-input::placeholder,
+  html[data-wild-theme='dark'] body .app-shell .explore-search-input::placeholder {
+    color: #625d52 !important;
+    -webkit-text-fill-color: #625d52 !important;
+    opacity: 1 !important;
+  }
 }

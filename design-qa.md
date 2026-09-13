@@ -47,6 +47,13 @@ Focused regions were evaluated in the full phone captures because the affected c
 - Copy/content: existing labels and profile-derived values are unchanged.
 - Browser console: zero error or warning entries after the corrected Map capture.
 
+### Iteration 3 — passed
+
+- User evidence showed the earlier white-on-white Map search and inactive dock state in a stale hot-reload tab.
+- Added explicit light/system/dark inactive-state guards so later theme selectors cannot restore white labels.
+- Re-captured the exact Map route at 416 x 808: `/tmp/wild-realm-qa/map-visibility-guard.png`.
+- Computed inactive dock labels are `rgb(64, 61, 53)` and the placeholder is `rgb(98, 93, 82)` on the cream surfaces.
+
 ## Implementation checklist
 
 - [x] Correct dock contrast and visibility.
