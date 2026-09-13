@@ -23,7 +23,7 @@ import { CommunityShareSheet } from './CommunityShareSheet';
 const TABS = [
   { id: 'FEED', label: 'Feed', icon: 'star' },
   { id: 'FRIENDS', label: 'Chats', icon: 'user' },
-  { id: 'MAP', label: 'Places', icon: 'compass' },
+  { id: 'MAP', label: 'Nearby', icon: 'compass' },
 ];
 
 function timeAgo(value) {
@@ -949,6 +949,10 @@ function CommunityMap() {
 
   return (
     <div className="community-map-panel">
+      <div className="community-map-intro">
+        <h2>Discoveries nearby</h2>
+        <p>Public finds shared with a place are grouped here.</p>
+      </div>
       <div
         className="community-map-canvas"
         role="img"

@@ -85,7 +85,10 @@ export function GalleryPage() {
           </div>
         ) : (
           <>
-            <h1>My Library</h1>
+            <div className="gallery-title-lockup">
+              <span className="gallery-title-kicker">Field collection</span>
+              <h1>My Library</h1>
+            </div>
             <button type="button" className="gallery-icon-btn" aria-label="Search" onClick={() => setShowSearch(true)}>
               <Icon name="search" />
             </button>

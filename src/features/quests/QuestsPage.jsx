@@ -110,7 +110,7 @@ export function QuestsPage() {
               onClick={() => { playTap(); setTab(t); }}
               whileTap={{ scale: 0.95 }}
             >
-              {t.toUpperCase()}
+              {t[0].toUpperCase() + t.slice(1)}
             </motion.button>
           );
         })}

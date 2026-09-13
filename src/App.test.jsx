@@ -149,7 +149,7 @@ describe('App (development auth mode)', () => {
     expect(await screen.findByRole('heading', { name: /^community$/i, hidden: true })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /^feed$/i })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /^chats$/i })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: /^places$/i })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /^nearby$/i })).toBeInTheDocument();
   });
 
   it('shows a real community empty state instead of a coming-soon placeholder', async () => {
