@@ -1441,4 +1441,444 @@
       transition: none !important;
     }
   }
+
+  /* Library fidelity correction: remove the dead dashboard gap and let the
+     selected deck become the first-viewport focal point. */
+  html body .app-shell .gallery-v2-shell {
+    display: flex !important;
+    flex-direction: column !important;
+    padding-top: 12px !important;
+  }
+
+  html body .app-shell .gallery-v2-header {
+    min-height: 96px !important;
+    padding: 22px 30px 8px !important;
+  }
+
+  html body .app-shell .gallery-icon-btn {
+    top: 24px !important;
+  }
+
+  html body .app-shell .library-hero-panel {
+    min-height: 60px !important;
+    margin: 0 30px 8px !important;
+    padding: 0 0 10px !important;
+  }
+
+  html body .app-shell .gallery-v2-tabs {
+    order: 3 !important;
+    margin-bottom: 8px !important;
+    padding: 4px 22px 5px !important;
+  }
+
+  html[data-wild-theme] body .app-shell .gallery-v2-tab,
+  html[data-wild-theme='light'] body .app-shell .gallery-v2-tab,
+  html[data-wild-theme='system'] body .app-shell .gallery-v2-tab,
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-tab {
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  html body .app-shell .gallery-v2-grid {
+    order: 4 !important;
+    padding-top: 0 !important;
+  }
+
+  html body .app-shell .gallery-v2-sort-row {
+    order: 5 !important;
+    margin-top: 0 !important;
+    padding: 0 0 118px !important;
+  }
+
+  html body .app-shell .gallery-v2-card:nth-child(1) {
+    height: 388px !important;
+    margin-top: 4px !important;
+    margin-bottom: 18px !important;
+    display: grid !important;
+    grid-template-rows: minmax(0, 78%) minmax(0, 22%) !important;
+  }
+
+  html body .app-shell .gallery-v2-card:nth-child(2),
+  html body .app-shell .gallery-v2-card:nth-child(3) {
+    height: 354px !important;
+    display: grid !important;
+    grid-template-rows: minmax(0, 78%) minmax(0, 22%) !important;
+  }
+
+  html body .app-shell .gallery-v2-card:nth-child(-n + 3) .gallery-v2-photo,
+  html body .app-shell .gallery-v2-card:nth-child(-n + 3) .gallery-v2-info {
+    height: 100% !important;
+  }
+
+  html body .app-shell :where(.gallery-v2-shell, .guild-page, .quests-shell) {
+    font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif !important;
+  }
+
+  html body .app-shell :where(
+    .gallery-title-lockup h1,
+    .community-network-header h1,
+    .quests-section-header h2,
+    .quest-item-title,
+    .post-info-block h3
+  ) {
+    font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.035em !important;
+  }
+
+  html body .app-shell :where(.gallery-title-lockup h1, .community-network-header h1) {
+    font-size: 2.35rem !important;
+  }
+
+  html body .app-shell .gallery-card-flipper {
+    position: relative !important;
+    grid-row: 1 / -1 !important;
+    width: 100% !important;
+    height: 100% !important;
+    transform-style: preserve-3d !important;
+  }
+
+  html body .app-shell .gallery-v2-card.is-flipped .gallery-card-flipper {
+    transform: none !important;
+  }
+
+  html body .app-shell .gallery-card-face {
+    position: absolute !important;
+    inset: 0 !important;
+    overflow: hidden !important;
+    backface-visibility: hidden !important;
+    -webkit-backface-visibility: hidden !important;
+    border-radius: inherit !important;
+    transition: transform 480ms cubic-bezier(.2,.78,.18,1), opacity 180ms ease !important;
+  }
+
+  html body .app-shell .gallery-card-front {
+    display: grid !important;
+    grid-template-rows: minmax(0, 78%) minmax(0, 22%) !important;
+    background: #fffaf0 !important;
+    transform: rotateY(0deg) !important;
+    opacity: 1 !important;
+  }
+
+  html body .app-shell .gallery-card-back {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    gap: 12px !important;
+    padding: 28px !important;
+    transform: rotateY(180deg) !important;
+    text-align: left !important;
+    color: #f8f2e7 !important;
+    background: #174a35 !important;
+    opacity: 0 !important;
+  }
+
+  html body .app-shell .gallery-v2-card.is-flipped .gallery-card-front {
+    transform: rotateY(-180deg) !important;
+    opacity: 0 !important;
+  }
+
+  html body .app-shell .gallery-v2-card.is-flipped .gallery-card-back {
+    transform: rotateY(0deg) !important;
+    opacity: 1 !important;
+  }
+
+  html body .app-shell .gallery-card-back-rarity {
+    color: #eec76f !important;
+    font-size: 0.76rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+  }
+
+  html body .app-shell .gallery-card-back strong {
+    font-size: 1.65rem !important;
+    line-height: 1.05 !important;
+  }
+
+  html body .app-shell .gallery-card-back p {
+    margin: 0 !important;
+    color: rgba(248, 242, 231, 0.78) !important;
+    font-size: 0.9rem !important;
+    line-height: 1.5 !important;
+  }
+
+  html body .app-shell .gallery-card-back dl {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    width: 100% !important;
+    margin: 4px 0 0 !important;
+    padding-top: 14px !important;
+    border-top: 1px solid rgba(248, 242, 231, 0.18) !important;
+  }
+
+  html body .app-shell .gallery-card-back dl div {
+    display: grid !important;
+    gap: 3px !important;
+  }
+
+  html body .app-shell .gallery-card-back dt {
+    color: rgba(248, 242, 231, 0.58) !important;
+    font-size: 0.68rem !important;
+  }
+
+  html body .app-shell .gallery-card-back dd {
+    margin: 0 !important;
+    color: #fffaf0 !important;
+    font-weight: 800 !important;
+  }
+
+  html body .app-shell .gallery-card-back-action {
+    margin-top: 8px !important;
+    color: #fffaf0 !important;
+    font-size: 0.75rem !important;
+    font-weight: 800 !important;
+  }
+
+  html body .app-shell .post-action.active,
+  html body .app-shell .post-action.active svg {
+    color: #d8494f !important;
+    fill: #d8494f !important;
+  }
+
+  html body .app-shell .quests-shell {
+    padding-top: 14px !important;
+  }
+
+  html body .app-shell .quest-explorer-card {
+    margin-bottom: 8px !important;
+  }
+
+  html body .app-shell .quest-season-strip {
+    margin-top: -12px !important;
+    padding: 17px 16px 11px !important;
+    border-radius: 0 0 18px 18px !important;
+  }
+
+  html body .app-shell .quest-cadence-tabs {
+    width: calc(100% - 42px) !important;
+    min-height: 44px !important;
+    margin: 15px auto 12px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(45, 54, 45, 0.14) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  html body .app-shell .quest-cadence-btn {
+    position: relative !important;
+    min-height: 44px !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+  }
+
+  html body .app-shell .quest-cadence-btn::after {
+    content: '' !important;
+    position: absolute !important;
+    left: 28% !important;
+    right: 28% !important;
+    bottom: -1px !important;
+    height: 3px !important;
+    border-radius: 999px !important;
+    background: #18734b !important;
+    transform: scaleX(0) !important;
+    transition: transform 180ms cubic-bezier(.2,.8,.2,1) !important;
+  }
+
+  html body .app-shell .quest-cadence-btn.active::after {
+    transform: scaleX(1) !important;
+  }
+
+  html body .app-shell .quest-cadence-btn.active {
+    background: transparent !important;
+    color: #176a46 !important;
+  }
+
+  html body .app-shell .quests-section-header {
+    padding-bottom: 9px !important;
+  }
+
+  html body .app-shell .quest-item-card:not(.quest-featured) {
+    border-radius: 16px !important;
+    box-shadow: none !important;
+  }
+
+  /* Dark is a separate midnight-field theme, not a dimmed light palette. */
+  html[data-wild-theme='dark'] body .app-shell :where(.gallery-v2-shell, .guild-page, .quests-shell) {
+    color: #f3eee4 !important;
+    background: #0c1613 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell :where(
+    .gallery-title-lockup h1,
+    .community-network-header h1,
+    .quests-section-header h2,
+    .gallery-v2-count
+  ) {
+    color: #f3eee4 !important;
+    -webkit-text-fill-color: #f3eee4 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .library-hero-panel {
+    border-bottom-color: rgba(216, 231, 220, 0.16) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .library-hero-panel :where(p, dt, dd),
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-tab,
+  html[data-wild-theme='dark'] body .app-shell .gallery-sort-pill,
+  html[data-wild-theme='dark'] body .app-shell .community-tab-btn,
+  html[data-wild-theme='dark'] body .app-shell .quest-cadence-btn {
+    color: #c5cfc8 !important;
+    -webkit-text-fill-color: #c5cfc8 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-stat:last-child {
+    background: #1a2823 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-stat:last-child :where(dt, dd) {
+    color: #f0cf7b !important;
+    -webkit-text-fill-color: #f0cf7b !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell :where(.gallery-v2-tab.active, .gallery-sort-pill.active, .community-tab-btn.active, .quest-cadence-btn.active) {
+    color: #67d69a !important;
+    -webkit-text-fill-color: #67d69a !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell :where(.gallery-v2-tab::after, .community-tab-btn::after, .quest-cadence-btn::after) {
+    background: #45c986 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-tabs-bar,
+  html[data-wild-theme='dark'] body .app-shell .quest-cadence-tabs {
+    border-bottom-color: rgba(216, 231, 220, 0.16) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-post-card {
+    border-bottom-color: rgba(216, 231, 220, 0.14) !important;
+    background: #0c1613 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-post-card :where(h3, h4, p, small, span) {
+    color: #ece8df !important;
+    -webkit-text-fill-color: #ece8df !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-user-topbar {
+    background: #14251f !important;
+    box-shadow: inset 0 0 0 1px rgba(240, 207, 123, 0.24) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-season-strip,
+  html[data-wild-theme='dark'] body .app-shell .quest-item-card {
+    border-color: rgba(216, 231, 220, 0.14) !important;
+    background: #13211c !important;
+    color: #ece8df !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-item-card.quest-featured {
+    background: linear-gradient(145deg, #18352a, #2b2b20) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quest-item-card :where(h4, p, span) {
+    color: #ece8df !important;
+    -webkit-text-fill-color: #ece8df !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .mobile-bottom-dock {
+    border-color: rgba(216, 231, 220, 0.14) !important;
+    background: rgba(13, 24, 20, 0.96) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .mobile-bottom-dock .dock-item:not(.active),
+  html[data-wild-theme='dark'] body .app-shell .mobile-bottom-dock .dock-item:not(.active) :where(svg, span) {
+    color: #aab5ae !important;
+    -webkit-text-fill-color: #aab5ae !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .mobile-bottom-dock .dock-item.active,
+  html[data-wild-theme='dark'] body .app-shell .mobile-bottom-dock .dock-item.active :where(svg, span) {
+    color: #67d69a !important;
+    -webkit-text-fill-color: #67d69a !important;
+  }
+
+  /* Route-level night surfaces outrank the shared light-theme compatibility
+     selectors above. Keep the hierarchy dark all the way to the viewport so
+     pale copy never lands on a cream parent. */
+  html[data-wild-theme='dark'] body .app-shell .app-main-content,
+  html[data-wild-theme='dark'] body .app-shell .mobile-content-area,
+  html[data-wild-theme='dark'] body .app-shell .route-stage,
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-shell,
+  html[data-wild-theme='dark'] body .app-shell .guild-page,
+  html[data-wild-theme='dark'] body .app-shell .quests-shell {
+    background: #0c1613 !important;
+    background-image: none !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-title-lockup h1,
+  html[data-wild-theme='dark'] body .app-shell .community-network-header h1,
+  html[data-wild-theme='dark'] body .app-shell .quests-section-header h2,
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-count {
+    color: #f3eee4 !important;
+    -webkit-text-fill-color: #f3eee4 !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quests-shell .quest-season-strip,
+  html[data-wild-theme='dark'] body .app-shell .quests-shell .quest-item-card {
+    border-color: rgba(216, 231, 220, 0.14) !important;
+    background: #13211c !important;
+    color: #ece8df !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quests-shell .quest-item-card.quest-featured {
+    background: linear-gradient(145deg, #18352a, #2b2b20) !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quests-shell .quest-card-content,
+  html[data-wild-theme='dark'] body .app-shell .guild-page .post-info-block {
+    background: transparent !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quests-shell .quest-item-card:not(.quest-featured) .quest-card-content {
+    background: #13211c !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-stat,
+  html[data-wild-theme='dark'] body .app-shell .gallery-v2-tab,
+  html[data-wild-theme='dark'] body .app-shell .gallery-sort-pill,
+  html[data-wild-theme='dark'] body .app-shell .community-tab-btn,
+  html[data-wild-theme='dark'] body .app-shell .quest-cadence-btn {
+    border-color: rgba(216, 231, 220, 0.14) !important;
+    background: #18241f !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .community-tab-btn,
+  html[data-wild-theme='dark'] body .app-shell .quest-cadence-btn {
+    background: transparent !important;
+  }
+
+  html[data-wild-theme='dark'] body .app-shell .quests-shell :where(
+    .quest-item-title,
+    .quest-item-instruction,
+    .quest-progress-num,
+    .quest-rarity-mark,
+    .quest-xp-reward
+  ),
+  html[data-wild-theme='dark'] body .app-shell .guild-page .post-info-block :where(h3, h4, p, span, small) {
+    color: #ece8df !important;
+    -webkit-text-fill-color: #ece8df !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html body .app-shell .gallery-card-flipper,
+    html body .app-shell .quest-cadence-btn::after {
+      transition: none !important;
+    }
+  }
 }

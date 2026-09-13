@@ -244,7 +244,7 @@ function CommunityFeed({ onShare }) {
                   disabled={toggleLike.isPending}
                   onClick={() => { playTap(); toggleLike.mutate({ postId: post.id, liked: !post.viewerLiked }); }}
                 >
-                  <Icon name="star" />
+                  <Icon name="heart" />
                   <span>{post.viewerLiked ? 'Liked' : 'Like'}</span>
                   <strong>{post.likeCount}</strong>
                 </button>

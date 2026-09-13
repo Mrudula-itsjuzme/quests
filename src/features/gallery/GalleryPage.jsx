@@ -35,6 +35,7 @@ export function GalleryPage() {
   const [selectedCard, setSelectedCard] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
+  const [flippedCardId, setFlippedCardId] = useState(null);
   const isLoading = capturesLoading || speciesLoading;
 
   const collection = useMemo(
@@ -190,43 +191,62 @@ export function GalleryPage() {
               const stars = card.rarityStars ?? 1;
               const speciesEntry = (species || []).find((s) => s.id === card.speciesId);
               const gradeColor = GRADE_COLORS[stars] || GRADE_COLORS[1];
+              const isFlipped = flippedCardId === card.id;
               return (
                 <motion.button
                   key={card.id}
                   type="button"
-                  className={`gallery-v2-card rank-${stars} ${i === 0 ? 'gallery-v2-card-featured' : ''}`}
+                  className={`gallery-v2-card rank-${stars} ${i === 0 ? 'gallery-v2-card-featured is-flippable' : ''} ${isFlipped ? 'is-flipped' : ''}`}
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ delay: Math.min(i, 10) * 0.025, type: 'spring', stiffness: 380, damping: 28 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => { playTap(); setSelectedCard(card); }}
-                  aria-label={`Open ${card.itemName}, ${stars} star rank`}
+                  onClick={() => {
+                    playTap();
+                    if (i === 0 && !isFlipped) setFlippedCardId(card.id);
+                    else setSelectedCard(card);
+                  }}
+                  aria-label={i === 0 && !isFlipped
+                    ? `Flip ${card.itemName}, ${stars} star rank`
+                    : `Open ${card.itemName}, ${stars} star rank`}
                 >
-                  {/* Photo — fills top 70% */}
-                  <div className="gallery-v2-photo">
-                    <CaptureImage
-                      imageRef={card.imageRef}
-                      alt={card.itemName}
-                      element={speciesEntry?.element}
-                      useAuth={card.imageRef?.includes('/captures/')}
-                    />
-                    {/* Rank badge on photo */}
-                    <span
-                      className="gallery-v2-rank-badge"
-                      style={{ color: gradeColor, borderColor: gradeColor }}
-                    >
-                      {stars}★
-                    </span>
-                  </div>
-
-                  {/* Info — bottom 30% */}
-                  <div className="gallery-v2-info">
-                    <span className="gallery-v2-name">{card.itemName || card.cardTitle}</span>
-                    <span className="gallery-v2-meta">
-                      {speciesEntry?.element || card.element || 'Wild'}
-                      {card.location ? ` · ${card.location}` : ''}
-                    </span>
+                  <div className="gallery-card-flipper">
+                    <div className="gallery-card-face gallery-card-front">
+                      <div className="gallery-v2-photo">
+                        <CaptureImage
+                          imageRef={card.imageRef}
+                          alt={card.itemName}
+                          element={speciesEntry?.element}
+                          useAuth={card.imageRef?.includes('/captures/')}
+                        />
+                        <span
+                          className="gallery-v2-rank-badge"
+                          style={{ color: gradeColor, borderColor: gradeColor }}
+                        >
+                          {stars}★
+                        </span>
+                      </div>
+                      <div className="gallery-v2-info">
+                        <span className="gallery-v2-name">{card.itemName || card.cardTitle}</span>
+                        <span className="gallery-v2-meta">
+                          {speciesEntry?.element || card.element || 'Wild'}
+                          {card.location ? ` · ${card.location}` : ''}
+                        </span>
+                      </div>
+                    </div>
+                    {i === 0 && (
+                      <div className="gallery-card-face gallery-card-back" aria-hidden={!isFlipped}>
+                        <span className="gallery-card-back-rarity">{stars}★ discovery</span>
+                        <strong>{card.itemName || card.cardTitle}</strong>
+                        <p>{card.notes || `A ${speciesEntry?.element || card.element || 'wild'} find saved to your collection.`}</p>
+                        <dl>
+                          <div><dt>Element</dt><dd>{speciesEntry?.element || card.element || 'Wild'}</dd></div>
+                          <div><dt>XP earned</dt><dd>{card.xpAwarded ?? Math.max(25, stars * 25)}</dd></div>
+                        </dl>
+                        <span className="gallery-card-back-action">Tap again for details</span>
+                      </div>
+                    )}
                   </div>
                 </motion.button>
               );

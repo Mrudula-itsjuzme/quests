@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useMe, useCaptures } from '../quests/queries';
 import { coinBalance } from '../../lib/playerEconomy';
 import { playTap } from '../../lib/useSoundEffects';
-import { SettingsModal } from '../../components/SettingsModal';
 import { Icon } from '../../components/Icon';
 
 // Use 1-5 numeric ranks instead of legacy grades
@@ -36,7 +35,6 @@ const MENU_ITEMS = [
 export function ProfilePage() {
   const { data: me } = useMe();
   const { data: captures } = useCaptures();
-  const [settingsOpen, setSettingsOpen] = useState(false);
   const [notice, setNotice] = useState('');
 
   const discoveries = (captures || []).filter((c) => c.status !== 'rejected');
@@ -55,7 +53,7 @@ export function ProfilePage() {
 
   const handleMenuItem = (item) => {
     playTap();
-    if (item.id === 'settings') setSettingsOpen(true);
+    if (item.id === 'settings') window.dispatchEvent(new Event('habbit-open-settings'));
     else if (item.id === 'help') unavailable('Help & support coming soon.');
   };
 
@@ -206,7 +204,6 @@ export function ProfilePage() {
         )}
       </AnimatePresence>
 
-      {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
     </main>
   );
 }

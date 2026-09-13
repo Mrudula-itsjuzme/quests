@@ -23,8 +23,8 @@ export function SettingsModal({ onClose, user, onLogout, themeMode = 'light', on
   };
 
   const setTheme = (mode) => {
-    playTap();
     onThemeChange?.(mode);
+    playTap();
   };
 
   return (

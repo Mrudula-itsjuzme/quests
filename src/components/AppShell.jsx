@@ -70,6 +70,17 @@ export function AppShell() {
     setCaptureOpen(true);
   };
 
+  const handleThemeChange = useCallback((mode) => {
+    if (!['light', 'dark', 'system'].includes(mode)) return;
+    document.documentElement.dataset.wildTheme = mode;
+    setThemeMode(mode);
+    try {
+      localStorage.setItem(THEME_KEY, mode);
+    } catch {
+      // The state change still applies when persistent storage is unavailable.
+    }
+  }, []);
+
   const prefetchRoute = useCallback((routePath) => {
     const loader = routeLoaders[routePath];
     if (loader) {
@@ -288,7 +299,7 @@ export function AppShell() {
           <SettingsModal
             user={me}
             themeMode={themeMode}
-            onThemeChange={setThemeMode}
+            onThemeChange={handleThemeChange}
             onClose={() => setSettingsOpen(false)}
             onLogout={() => {
               setSettingsOpen(false);

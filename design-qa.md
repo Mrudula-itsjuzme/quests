@@ -65,6 +65,28 @@ Focused regions were evaluated in the full phone captures because the affected c
 
 final result: passed
 
+### Iteration 7 — tactile interactions and real night theme, passed
+
+- Replaced the Community like glyph with a heart while preserving its existing toggle and count behavior.
+- Standardized the three redesigned routes on Manrope with restrained 700-weight headings instead of the previous extra-heavy display treatment.
+- Added a true two-state Library card interaction: the lead card flips in 3D on first tap and opens the existing detail view on the second tap; reduced-motion users receive an immediate state change.
+- Flattened Quests cadence controls into a mission switch and tightened secondary mission cards without changing quest data or actions.
+- Built a separate midnight-field theme using charcoal, emerald, and restrained rank gold rather than dimming the cream palette.
+- Fixed the mobile Profile settings entry to open the app-level Settings controller; verified `Day -> Night` changes the root theme state from `light` to `dark`.
+- Exact 415 x 844 rendered evidence: `/tmp/wild-realm-qa/library-final-v2.png`, `/tmp/wild-realm-qa/library-card-flip-final-v2.png`, `/tmp/wild-realm-qa/library-dark-final-v2.png`, `/tmp/wild-realm-qa/quests-dark-final-v3.png`, and `/tmp/wild-realm-qa/community-dark-final-v3.png`.
+
+final result: passed
+
+### Iteration 6 — Library fidelity correction, passed
+
+- User screenshot exposed three P1 visual misses: 135px of avoidable dead space, legacy pill surfaces returning on category filters, and the collection deck colliding with the fixed camera dock.
+- Compacted header/progress rhythm, removed category pill surfaces with theme-specific selectors, moved sort controls below the collection deck, and shortened the deck for the 415 x 844 viewport.
+- Corrected the card grid-row cascade so the main photo occupies 78% of the card instead of leaving a large empty lower panel.
+- Final rendered evidence: `/tmp/wild-realm-qa/library-fidelity-final.png`.
+- Direct comparison against the selected concept confirms the intended hierarchy: title, real progress/XP, open category rail, dominant layered photo deck, and unobstructed persistent navigation.
+
+final result: passed
+
 ### Iteration 5 — selected Library deck + Community photo feed, passed
 
 - Accepted visual target: `/home/mrudula/.codex/generated_images/01a09419-d3cf-7601-98b0-24f8f6aa2b49/exec-9b4da771-92c4-4cf5-89ae-7ba8225c3972.png`.
