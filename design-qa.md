@@ -65,6 +65,16 @@ Focused regions were evaluated in the full phone captures because the affected c
 
 final result: passed
 
+### Iteration 10 — compact Library rhythm, passed
+
+- Reduced header height by 18 px, summary height by 12 px, and filter spacing by 9 px.
+- Reduced the lead deck card from 388 px to 348 px and rear cards from 354 px to 322 px.
+- Recentered previous/next controls against the shorter photograph.
+- The next card row is now visibly discoverable above the fixed dock at 415 x 844.
+- Rendered evidence: `/tmp/wild-realm-qa/library-compact-final.png`.
+
+final result: passed
+
 ### Iteration 9 — functional Library deck, passed
 
 - Replaced the decorative stacked-card illusion with explicit 42 px previous/next controls.

@@ -1451,24 +1451,24 @@
   }
 
   html body .app-shell .gallery-v2-header {
-    min-height: 96px !important;
-    padding: 22px 30px 8px !important;
+    min-height: 78px !important;
+    padding: 12px 30px 4px !important;
   }
 
   html body .app-shell .gallery-icon-btn {
-    top: 24px !important;
+    top: 15px !important;
   }
 
   html body .app-shell .library-hero-panel {
-    min-height: 60px !important;
-    margin: 0 30px 8px !important;
-    padding: 0 0 10px !important;
+    min-height: 48px !important;
+    margin: 0 30px 4px !important;
+    padding: 0 0 7px !important;
   }
 
   html body .app-shell .gallery-v2-tabs {
     order: 3 !important;
-    margin-bottom: 8px !important;
-    padding: 4px 22px 5px !important;
+    margin-bottom: 4px !important;
+    padding: 2px 22px 3px !important;
   }
 
   html[data-wild-theme] body .app-shell .gallery-v2-tab,
@@ -1493,16 +1493,16 @@
   }
 
   html body .app-shell .gallery-v2-card:nth-child(1) {
-    height: 388px !important;
-    margin-top: 4px !important;
-    margin-bottom: 18px !important;
+    height: 348px !important;
+    margin-top: 2px !important;
+    margin-bottom: 12px !important;
     display: grid !important;
     grid-template-rows: minmax(0, 78%) minmax(0, 22%) !important;
   }
 
   html body .app-shell .gallery-v2-card:nth-child(2),
   html body .app-shell .gallery-v2-card:nth-child(3) {
-    height: 354px !important;
+    height: 322px !important;
     display: grid !important;
     grid-template-rows: minmax(0, 78%) minmax(0, 22%) !important;
   }
@@ -1540,7 +1540,7 @@
 
   html body .app-shell .gallery-deck-controls {
     position: absolute !important;
-    top: 164px !important;
+    top: 145px !important;
     left: 20px !important;
     right: 20px !important;
     z-index: 8 !important;
