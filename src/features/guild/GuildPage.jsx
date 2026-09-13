@@ -59,7 +59,10 @@ export function GuildPage() {
 
   return (
     <main className="guild-page page-stack">
-      <h1 className="sr-only">Community</h1>
+      <header className="community-network-header">
+        <h1>Community</h1>
+        <p>See what people found nearby.</p>
+      </header>
 
       <div className="community-tabs-bar" role="tablist" aria-label="Community sections">
         {TABS.map((item) => (

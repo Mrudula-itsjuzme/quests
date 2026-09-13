@@ -140,12 +140,12 @@ export function QuestsPage() {
           />
         ) : (
           <>
-            {visibleQuests.map((quest) => {
+            {visibleQuests.map((quest, index) => {
               const state = questState(quest);
               return (
                 <motion.div
                   key={quest.id}
-                  className={`quest-item-card ${state} rarity-${(quest.rarity || 'Common').toLowerCase()}`}
+                  className={`quest-item-card ${index === 0 ? 'quest-featured' : ''} ${state} rarity-${(quest.rarity || 'Common').toLowerCase()}`}
                   whileHover={{ scale: 1.01 }}
                   onClick={() => { playTap(); setSelectedId(quest.id); }}
                 >

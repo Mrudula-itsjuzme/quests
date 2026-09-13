@@ -86,7 +86,6 @@ export function GalleryPage() {
         ) : (
           <>
             <div className="gallery-title-lockup">
-              <span className="gallery-title-kicker">Field collection</span>
               <h1>My Library</h1>
             </div>
             <button type="button" className="gallery-icon-btn" aria-label="Search" onClick={() => setShowSearch(true)}>
@@ -99,8 +98,8 @@ export function GalleryPage() {
       {/* ── Stats strip ── */}
       <section className="library-hero-panel" aria-label="Library summary">
         <div>
-          <span className="library-kicker">Field archive</span>
-          <p>{collection.length} captures logged across your Wild Realm finds.</p>
+          <span className="library-kicker">Collection progress</span>
+          <p>{collection.length} {collection.length === 1 ? 'find' : 'finds'} saved</p>
         </div>
         <dl className="gallery-v2-stats">
           <div className="gallery-v2-stat">

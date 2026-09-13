@@ -64,3 +64,18 @@ Focused regions were evaluated in the full phone captures because the affected c
 - [x] Verify Community post and action visibility.
 
 final result: passed
+
+### Iteration 4 — game UI and copy pass, passed
+
+- Replaced decorative product language with direct labels: `My Library`, `Collection progress`, `Community`, and `See what people found nearby.`
+- Standardized Library, Quests, and Community UI typography on Inter with 800-weight screen and content headings.
+- Turned the Library filters into a complete two-row grid at phone width; no category or sort control is clipped and document width remains 416 CSS pixels.
+- Strengthened game state using real data already on screen: rank/XP, quest completion, rarity stars, collection counts, and explorer rank badges. No fake score or streak was added.
+- Rebuilt Quests around one highlighted daily mission followed by compact secondary missions; profile data and quest actions still use the existing queries and handlers.
+- Rebuilt Community as an image-led feed with a compact centered mode switch and visible explorer rank treatment.
+- Exact-size captures: `/tmp/wild-realm-qa/quests-final-v2.png`, `/tmp/wild-realm-qa/library-final-v2.png`, `/tmp/wild-realm-qa/community-final-v2.png`.
+- Compared the current renders directly against the user-provided 415 x 808 Quests and Library screenshots with `view_image`; checked copy, font hierarchy, color, overflow, card rhythm, media crop, and dock clearance.
+- Above-the-fold copy diff: intentional removal of `Field collection`, `Field archive`, and the generated `Field network / Stories from outside` copy; navigation and action labels are unchanged.
+- Core interactions remain wired: cadence tabs, quest selection/actions, Library filters/sorts/search, Community tabs/posts, and the persistent Camera action.
+
+final result: passed
