@@ -370,3 +370,195 @@
     transition: none !important;
   }
 }
+
+/* Screenshot-led correction: restore clarity and compact phone rhythm. */
+@media (max-width: 780px) {
+  html[data-wild-theme] body .app-shell .mobile-bottom-dock,
+  html body .app-shell .mobile-bottom-dock {
+    border: 1px solid rgba(57, 49, 36, 0.12) !important;
+    background: rgba(255, 252, 244, 0.97) !important;
+    box-shadow: 0 14px 30px rgba(51, 45, 33, 0.16) !important;
+  }
+
+  html[data-wild-theme] body .app-shell .mobile-bottom-dock .dock-item,
+  html[data-wild-theme] body .app-shell .mobile-bottom-dock .dock-item svg,
+  html[data-wild-theme] body .app-shell .mobile-bottom-dock .dock-item span,
+  html body .app-shell .mobile-bottom-dock .dock-item,
+  html body .app-shell .mobile-bottom-dock .dock-item svg,
+  html body .app-shell .mobile-bottom-dock .dock-item span {
+    color: #4d493f !important;
+    -webkit-text-fill-color: #4d493f !important;
+    opacity: 1 !important;
+  }
+
+  html[data-wild-theme] body .app-shell .mobile-bottom-dock .dock-item.active,
+  html[data-wild-theme] body .app-shell .mobile-bottom-dock .dock-item.active svg,
+  html[data-wild-theme] body .app-shell .mobile-bottom-dock .dock-item.active span,
+  html body .app-shell .mobile-bottom-dock .dock-item.active,
+  html body .app-shell .mobile-bottom-dock .dock-item.active svg,
+  html body .app-shell .mobile-bottom-dock .dock-item.active span {
+    color: #176f49 !important;
+    -webkit-text-fill-color: #176f49 !important;
+  }
+
+  html body .app-shell .gallery-v2-header {
+    min-height: 84px !important;
+    padding-bottom: 8px !important;
+  }
+
+  html body .app-shell .gallery-title-kicker {
+    font-size: 0.59rem !important;
+    letter-spacing: 0.13em !important;
+  }
+
+  html body .app-shell .gallery-v2-header h1 {
+    font-size: 2.05rem !important;
+  }
+
+  html body .app-shell .gallery-icon-btn {
+    width: 42px !important;
+    height: 42px !important;
+    border-color: rgba(38, 91, 61, 0.14) !important;
+    background: rgba(255, 252, 244, 0.9) !important;
+    color: #176f49 !important;
+    box-shadow: 0 7px 18px rgba(42, 51, 36, 0.1) !important;
+  }
+
+  html body .app-shell .library-hero-panel {
+    min-height: 104px !important;
+    border-color: rgba(50, 69, 51, 0.12) !important;
+    background:
+      linear-gradient(100deg, rgba(255, 251, 240, 0.97), rgba(235, 244, 226, 0.94)),
+      url('/assets/verdant-explorer-banner.png') center 48% / cover no-repeat !important;
+    box-shadow: 0 9px 22px rgba(45, 54, 38, 0.09) !important;
+  }
+
+  html body .app-shell .library-hero-panel .library-kicker {
+    color: #267553 !important;
+    -webkit-text-fill-color: #267553 !important;
+  }
+
+  html body .app-shell .library-hero-panel p,
+  html body .app-shell .library-hero-panel dt,
+  html body .app-shell .library-hero-panel dd {
+    color: #352c23 !important;
+    -webkit-text-fill-color: #352c23 !important;
+  }
+
+  html body .app-shell .library-hero-panel .gallery-v2-stat {
+    border-color: rgba(57, 50, 38, 0.1) !important;
+    background: rgba(255, 252, 244, 0.58) !important;
+  }
+
+  html[data-wild-theme] body .app-shell .gallery-v2-tabs,
+  html body .app-shell .gallery-v2-tabs {
+    margin-top: 8px !important;
+    padding: 4px 0 7px !important;
+    border: 0 !important;
+    background: transparent !important;
+  }
+
+  html[data-wild-theme] body .app-shell .gallery-v2-tabs .gallery-v2-tab.active,
+  html body .app-shell .gallery-v2-tabs .gallery-v2-tab.active {
+    border-color: rgba(31, 103, 66, 0.18) !important;
+    background: #e5f0e7 !important;
+    color: #1f6742 !important;
+    -webkit-text-fill-color: #1f6742 !important;
+    box-shadow: none !important;
+  }
+
+  html body .app-shell .gallery-v2-sort-row {
+    padding-top: 13px !important;
+    padding-bottom: 14px !important;
+  }
+
+  html body .app-shell .gallery-sort-pills {
+    box-shadow: none !important;
+  }
+
+  html body .app-shell .gallery-sort-pill.active {
+    background: #dfece2 !important;
+    color: #1f6742 !important;
+    -webkit-text-fill-color: #1f6742 !important;
+  }
+
+  html body .app-shell .gallery-v2-card-featured {
+    grid-column: auto !important;
+    aspect-ratio: 0.72 !important;
+  }
+
+  html body .app-shell .gallery-v2-card-featured .gallery-v2-photo {
+    height: 72% !important;
+  }
+
+  html body .app-shell .gallery-v2-card-featured .gallery-v2-info {
+    height: 28% !important;
+    padding: 10px 12px !important;
+  }
+
+  html body .app-shell .gallery-v2-card-featured .gallery-v2-name {
+    font-size: 0.9rem !important;
+  }
+
+  html body .app-shell .gallery-v2-card:nth-child(3n + 2) {
+    transform: none !important;
+  }
+
+  html[data-wild-theme] body .app-shell .quest-user-topbar,
+  html body .app-shell .quest-user-topbar {
+    border-color: rgba(54, 57, 42, 0.12) !important;
+    background: rgba(255, 252, 244, 0.94) !important;
+    box-shadow: 0 9px 22px rgba(48, 44, 32, 0.1) !important;
+  }
+
+  html[data-wild-theme] body .app-shell .quest-user-topbar :where(h3, p, span, strong, small),
+  html body .app-shell .quest-user-topbar :where(h3, p, span, strong, small) {
+    color: #352c23 !important;
+    -webkit-text-fill-color: #352c23 !important;
+  }
+
+  html body .app-shell .quest-user-avatar {
+    border-color: rgba(31, 103, 66, 0.18) !important;
+    background: #e5f0e7 !important;
+    color: #1f6742 !important;
+  }
+
+  html[data-wild-theme] body .app-shell .world-explore-container .explore-search-bar,
+  html body .app-shell .world-explore-container .explore-search-bar {
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  html[data-wild-theme] body .app-shell .explore-search-input-wrap,
+  html body .app-shell .explore-search-input-wrap {
+    border: 1px solid rgba(54, 57, 42, 0.12) !important;
+    background: rgba(255, 252, 244, 0.96) !important;
+    box-shadow: 0 9px 22px rgba(43, 44, 32, 0.14) !important;
+  }
+
+  html[data-wild-theme] body .app-shell .explore-search-input,
+  html[data-wild-theme] body .app-shell .explore-search-input::placeholder,
+  html body .app-shell .explore-search-input,
+  html body .app-shell .explore-search-input::placeholder {
+    color: #4d493f !important;
+    -webkit-text-fill-color: #4d493f !important;
+  }
+
+  html[data-wild-theme] body .app-shell .explore-tag,
+  html body .app-shell .explore-tag {
+    border: 1px solid rgba(54, 57, 42, 0.1) !important;
+    background: rgba(255, 252, 244, 0.92) !important;
+    color: #403b32 !important;
+    -webkit-text-fill-color: #403b32 !important;
+    box-shadow: 0 5px 13px rgba(55, 45, 31, 0.1) !important;
+  }
+
+  html[data-wild-theme] body .app-shell .explore-tag.active,
+  html body .app-shell .explore-tag.active {
+    border-color: #23734e !important;
+    background: #23734e !important;
+    color: #fffaf0 !important;
+    -webkit-text-fill-color: #fffaf0 !important;
+  }
+}

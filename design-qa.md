@@ -1,32 +1,59 @@
-# Mobile regression design QA
+# Wild Realm mobile visual QA
 
-- Reference screenshots: the five map, dock, camera, quest, and library screenshots plus the three community screenshots supplied in this task.
-- Implementation captures: `/tmp/wild-realm-map-fixed.png`, `/tmp/wild-realm-camera-fixed.png`, `/tmp/wild-realm-quests-fixed.png`, `/tmp/wild-realm-library-fixed.png`, `/tmp/wild-realm-community-fixed.png`, `/tmp/wild-realm-arjun-story-fixed.png`.
-- Viewport: 390 x 844 CSS pixels (browser boundary reported 391 x 844).
-- State: guest, day theme, seeded community and collection data.
+- Source visual truth: user-supplied Library, Quests, Community, Map, and Camera screenshots in this task; the Browser Comment Library reference is 415 x 808 CSS pixels.
+- Implementation URL: `http://127.0.0.1:5173`
+- Viewport: 415 x 808 requested; browser reported 416 x 808 CSS pixels at device scale 1.
+- State: guest profile, populated Library, Daily Quests, Community Feed, default Map, Camera Auto filter.
+- Density normalization: compared as phone-screen captures at CSS scale; the one-pixel width difference is browser viewport rounding and was not treated as a design difference.
 
-## Findings and corrections
+## Full-view comparison evidence
 
-- P1 map overflow: removed the redundant level badge from the map HUD and restored the search width. No horizontal overflow remains.
-- P1 camera hierarchy: removed the second shutter, made the selected large lens the capture action, and enlarged and respaced the lens rail.
-- P1 story media flash: story thumbnails now load eagerly and show an immediate photographic placeholder while protected or remote media resolves. Arjun opens successfully and Next advances.
-- P2 dock balance: restored five equal columns while preserving the center camera action.
-- P1 quests: restored cream and forest contrast, readable type, card breathing room, two-line descriptions, and larger thumbnails.
-- P1 library: removed the full-width featured-card distortion, restored a two-column grid, flattened the stray gradient treatment, and normalized tabs and typography.
-- P1 community: restored compact app-like margins, story sizing, 4:3 post media, cream cards, and safe bottom spacing.
-- Annotation follow-up: active camera filters retain their normal diameter with a stronger ring; Library sort controls are contained; Library cards use equal 258px heights; dock icons are 22px; and completed quest copy uses dark walnut text with forest accents.
-- Community page follow-up: removed the nested-page treatment by eliminating doubled gutters and the outer gradient, using one full-width cream canvas, tightening Stories-to-feed spacing, and keeping the feed card at a single 16px phone gutter.
-- Story viewer follow-up: removed the translucent opening frame, remounts media per story, preloads story imagery, paints a stable poster under the media, uses a heart for likes, and presents reporting as a quiet shield action with a correctly layered bottom sheet.
-- Community reference match: replaced the boxed tab strip with a borderless native bar, increased story and author hierarchy, matched the taller social-card proportions and typography, and softened the persistent dock to the supplied target.
-- Phone-density correction: reduced the oversized navigation, Stories rail, author header, and vertical gaps at 480px and below so the post title, location, caption, and tags remain visible above the fixed dock.
-- Navigation alignment: centered the three equal-width Community tabs within a symmetric 16px page gutter and removed the asymmetric internal padding.
+- Initial implementation: `/tmp/wild-realm-qa/library-current.png`
+- Corrected Library: `/tmp/wild-realm-qa/library-corrected.png`
+- Corrected Quests: `/tmp/wild-realm-qa/quests-fixed.png`
+- Community: `/tmp/wild-realm-qa/community-current.png`
+- Corrected Map: `/tmp/wild-realm-qa/map-fixed.png`
+- Camera: `/tmp/wild-realm-qa/camera-current.png`
 
-## Visual and interaction evidence
+## Focused comparison evidence
 
-The corrected screens were checked at the same phone viewport against the supplied references. Content now uses consistent side gutters, touch-sized controls, cream surfaces, forest accents, walnut text, a balanced dock, and a camera-first hierarchy without stacked capture buttons.
+Focused regions were evaluated in the full phone captures because the affected controls were readable at 1:1 CSS scale: Library header/archive/filter/sort/dock, Quests profile/cadence/cards, Map search/chips, Community tabs/post actions, and Camera badge/filter strip.
 
-- Camera opens from the center dock and exposes one active capture lens plus selectable filters.
-- Arjun's story opens with visible previous and next controls; Next advanced and the story counter remained present.
-- Map, quests, library, and community rendered without horizontal overflow in the inspected viewport.
+## Findings and comparison history
+
+### Iteration 1 — blocked
+
+- P1, persistent dock: a higher-specificity legacy rule forced a white dock while expedition rules forced inactive labels white, hiding four navigation destinations.
+- P1, Quests profile: the same cascade mismatch produced white profile text on a white card.
+- P1, Map search: white placeholder text rendered inside a white search field.
+- P2, Library composition: the dark archive panel dominated the hierarchy, the full-width first card cropped the subject awkwardly, and the filter/sort spacing delayed collection content until y=494.
+- P2, filters: the category rail still read as a bounded overflow slab instead of lightweight individual controls.
+
+### Fixes applied
+
+- Restored a warm light dock with dark inactive labels and forest-green active state using theme-specific selectors.
+- Restored the Quests profile to a light, legible field card.
+- Restored the Map search and category controls to light surfaces with a single green active chip.
+- Reduced the archive panel from 132px to 104px and changed it from dark to a quiet cream/green field surface.
+- Removed the forced full-width Library feature card and artificial stagger.
+- Tightened header, filter, and sort spacing; removed the filter rail border/background.
+
+### Iteration 2 — passed
+
+- Typography: headings, metadata, and small controls are legible with consistent Manrope optical weights and no observed clipping.
+- Spacing/layout: Library collection begins at y=455 instead of y=494; two-column cards match the reference rhythm and persistent controls remain visible.
+- Colors/tokens: cream surfaces, forest-green active states, and restrained signal accents are consistent across the five screens.
+- Image quality: existing real capture and map assets retain correct crop and sharpness; no placeholder or code-drawn assets were introduced.
+- Copy/content: existing labels and profile-derived values are unchanged.
+- Browser console: zero error or warning entries after the corrected Map capture.
+
+## Implementation checklist
+
+- [x] Correct dock contrast and visibility.
+- [x] Correct Quests profile contrast.
+- [x] Correct Map search/filter contrast.
+- [x] Restore compact Library hierarchy and card grid.
+- [x] Preserve Camera controls and filter sizing.
+- [x] Verify Community post and action visibility.
 
 final result: passed
