@@ -263,3 +263,110 @@
   }
 }
 
+/* Second refinement pass: more rhythm and tactility without adding UI chrome. */
+@media (max-width: 780px) {
+  html body .app-shell .gallery-icon-btn {
+    width: 46px !important;
+    height: 46px !important;
+    border: 1px solid rgba(185, 243, 207, 0.2) !important;
+    background: var(--expedition-ink) !important;
+    color: var(--expedition-signal) !important;
+    box-shadow: 0 10px 22px rgba(19, 38, 30, 0.2) !important;
+  }
+
+  html body .app-shell .gallery-v2-header,
+  html body .app-shell .quests-header-row {
+    position: relative !important;
+    isolation: isolate !important;
+  }
+
+  html body .app-shell .gallery-v2-info {
+    justify-content: center !important;
+    border-top: 1px solid rgba(19, 38, 30, 0.08) !important;
+    background: linear-gradient(135deg, #fffaf0, #f2ead8) !important;
+  }
+
+  html body .app-shell .gallery-v2-name {
+    color: var(--expedition-ink) !important;
+    font-weight: 850 !important;
+    letter-spacing: -0.025em !important;
+  }
+
+  html body .app-shell .gallery-v2-meta {
+    color: rgba(35, 61, 48, 0.68) !important;
+    font-size: 0.66rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.1em !important;
+    text-transform: uppercase !important;
+  }
+
+  html body .app-shell .gallery-v2-card:nth-child(3n + 2) {
+    transform: translateY(8px) !important;
+  }
+
+  html body .app-shell .gallery-v2-grid {
+    padding-bottom: 10px !important;
+  }
+
+  html body .app-shell .quest-item-card:nth-child(3n + 1) {
+    border-left-color: #39bb79 !important;
+  }
+
+  html body .app-shell .quest-item-card:nth-child(3n + 2) {
+    border-left-color: #d6ae58 !important;
+  }
+
+  html body .app-shell .quest-item-card:nth-child(3n) {
+    border-left-color: #658bb2 !important;
+  }
+
+  html body .app-shell .quest-row-thumb {
+    border: 2px solid rgba(255, 250, 240, 0.9) !important;
+    box-shadow: 0 6px 14px rgba(19, 38, 30, 0.2) !important;
+  }
+
+  html body .app-shell .community-story-ring {
+    border: 2px solid var(--expedition-signal) !important;
+    box-shadow: 0 0 0 3px rgba(56, 216, 135, 0.12) !important;
+  }
+
+  html body .app-shell .community-post-card .post-info-block {
+    border-top: 1px solid rgba(19, 38, 30, 0.08) !important;
+    background: linear-gradient(145deg, rgba(255, 250, 240, 0.98), rgba(241, 237, 221, 0.96)) !important;
+  }
+
+  html body .app-shell .explore-search-bar {
+    border: 1px solid rgba(185, 243, 207, 0.24) !important;
+    background: rgba(19, 38, 30, 0.92) !important;
+    color: #fffaf0 !important;
+    -webkit-text-fill-color: #fffaf0 !important;
+    box-shadow: 0 12px 28px rgba(19, 38, 30, 0.25) !important;
+  }
+
+  html body .app-shell .explore-search-bar input,
+  html body .app-shell .explore-search-bar input::placeholder {
+    color: rgba(255, 250, 240, 0.78) !important;
+    -webkit-text-fill-color: rgba(255, 250, 240, 0.78) !important;
+  }
+
+  html body .capture-flow-overlay .capture-focus-pill {
+    border: 1px solid rgba(56, 216, 135, 0.28) !important;
+    background: rgba(19, 38, 30, 0.84) !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.26) !important;
+  }
+
+  html body .app-shell :where(.gallery-v2-card, .quest-item-card, .community-post-card) {
+    transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease !important;
+  }
+
+  html body .app-shell :where(.gallery-v2-card, .quest-item-card, .community-post-card):active {
+    transform: scale(0.985) !important;
+    box-shadow: 0 7px 16px rgba(35, 42, 30, 0.12) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html body .app-shell :where(.gallery-v2-card, .quest-item-card, .community-post-card) {
+    transition: none !important;
+  }
+}
