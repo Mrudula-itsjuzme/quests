@@ -61,7 +61,6 @@ export function GuildPage() {
     <main className="guild-page page-stack">
       <header className="community-network-header">
         <h1>Community</h1>
-        <p>See what people found nearby.</p>
       </header>
 
       <div className="community-tabs-bar" role="tablist" aria-label="Community sections">

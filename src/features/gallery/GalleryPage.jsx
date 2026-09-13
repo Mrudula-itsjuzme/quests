@@ -99,7 +99,13 @@ export function GalleryPage() {
       <section className="library-hero-panel" aria-label="Library summary">
         <div>
           <span className="library-kicker">Collection progress</span>
-          <p>{collection.length} {collection.length === 1 ? 'find' : 'finds'} saved</p>
+          <p>{collection.length} of {Math.max(collection.length, species?.length || 0)} finds saved</p>
+          <progress
+            className="library-collection-progress"
+            value={collection.length}
+            max={Math.max(collection.length, species?.length || 1)}
+            aria-label="Collection completion"
+          />
         </div>
         <dl className="gallery-v2-stats">
           <div className="gallery-v2-stat">

@@ -65,6 +65,20 @@ Focused regions were evaluated in the full phone captures because the affected c
 
 final result: passed
 
+### Iteration 5 — selected Library deck + Community photo feed, passed
+
+- Accepted visual target: `/home/mrudula/.codex/generated_images/01a09419-d3cf-7601-98b0-24f8f6aa2b49/exec-9b4da771-92c4-4cf5-89ae-7ba8225c3972.png`.
+- Implemented the selected Library direction as a layered three-card deck with a dominant real capture, slim real collection progress, lightweight category rail, compact XP, and understated sort controls.
+- Implemented the selected Community direction as a full-width photographic stream with open author/rank metadata, underline navigation, integrated reactions, and a compact compose action.
+- Motion uses a 380ms spring-like deck settle, 180ms selection indicators, 260ms feed entry, direct press feedback, and complete reduced-motion fallbacks.
+- Exact viewport: 415 x 808 requested; browser reported 416 x 808 with document `scrollWidth` equal to `clientWidth`.
+- Rendered evidence: `/tmp/wild-realm-qa/library-deck-final.png` and `/tmp/wild-realm-qa/community-photo-final.png`.
+- Direct `view_image` comparison covered hierarchy, type, palette, image crop, open-vs-card container model, deck overlap, tabs, progress, rank metadata, dock clearance, and responsive overflow.
+- Above-the-fold copy diff: no new marketing copy or decorative labels; functional route, filter, sort, rank, and content labels are preserved.
+- Core interaction path verified through the existing Library filter/sort/card handlers and Community tab/post handlers; API-backed populated states rendered with zero browser warnings or errors.
+
+final result: passed
+
 ### Iteration 4 — game UI and copy pass, passed
 
 - Replaced decorative product language with direct labels: `My Library`, `Collection progress`, `Community`, and `See what people found nearby.`
