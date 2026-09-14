@@ -88,12 +88,12 @@ export function QuestsPage() {
         </div>
         <div className="quest-season-strip">
           <div>
-            <span style={{ color: 'var(--wr-walnut)', fontWeight: 800 }}>Rank Progress</span>
-            <strong style={{ color: 'var(--wr-forest)', fontWeight: 900 }}>{me?.tierLabel || `${me?.tier || 'Bronze'} Explorer`}</strong>
+            <span>Next rank</span>
+            <strong>{xpRemaining > 0 ? `${xpRemaining} XP to go` : 'Rank ready'}</strong>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <span style={{ color: 'var(--wr-walnut)', fontWeight: 800 }}>{xpIntoLevel} / {xpForCurrentLevel || 250} XP</span>
-            {xpRemaining > 0 && <small style={{ display: 'block', color: 'var(--wr-walnut-muted)', fontWeight: 700 }}>{xpRemaining} XP to next rank</small>}
+            <span>{xpIntoLevel} / {xpForCurrentLevel || 250}</span>
+            <small>level XP</small>
           </div>
         </div>
       </section>

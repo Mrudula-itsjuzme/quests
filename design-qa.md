@@ -65,6 +65,17 @@ Focused regions were evaluated in the full phone captures because the affected c
 
 final result: passed
 
+### Iteration 11 — cursive accent and Quest trail, passed
+
+- Limited the more cursive Cormorant Garamond italic treatment to primary Library/Community titles and the active Quest section title; operational copy remains Manrope.
+- Merged the duplicated explorer and rank-progress slabs into one compact progression card.
+- Rewrote the repeated rank block as direct progress information: `Next rank`, remaining XP, and level XP.
+- Rebuilt the quest list as a numbered vertical mission trail while preserving existing quest selection, action, and progress handlers.
+- Added matching night-theme borders for the unified explorer card and trail nodes.
+- Exact 415 x 844 evidence: `/tmp/wild-realm-qa/library-cursive-pass.png` and `/tmp/wild-realm-qa/quests-trail-font-pass-v2.png`.
+
+final result: passed
+
 ### Iteration 10 — compact Library rhythm, passed
 
 - Reduced header height by 18 px, summary height by 12 px, and filter spacing by 9 px.
