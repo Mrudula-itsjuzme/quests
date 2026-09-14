@@ -65,6 +65,16 @@ Focused regions were evaluated in the full phone captures because the affected c
 
 final result: passed
 
+### Iteration 12 — image fallback and top-space correction, passed
+
+- Fixed `CaptureImage` failure handling so a local fallback is promoted to the visible `loaded` state instead of remaining at zero opacity under `loading`.
+- Added a regression assertion covering the rendered state after an authenticated media request fails.
+- Reduced Library shell/header/summary top spacing by another 30 px combined while preserving safe controls and the working card deck.
+- Waited beyond the 2.8 second media timeout and visually confirmed the lead and secondary card images render.
+- Exact 415 x 844 evidence: `/tmp/wild-realm-qa/library-image-spacing-fixed.png`.
+
+final result: passed
+
 ### Iteration 11 — cursive accent and Quest trail, passed
 
 - Limited the more cursive Cormorant Garamond italic treatment to primary Library/Community titles and the active Quest section title; operational copy remains Manrope.

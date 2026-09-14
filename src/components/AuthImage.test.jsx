@@ -26,6 +26,7 @@ describe('authenticated capture images', () => {
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
     await waitFor(() => expect(container.querySelector('img')).toHaveAttribute('src', '/assets/quest-compass-poster.png'));
+    expect(container.querySelector('.capture-image')).toHaveAttribute('data-state', 'loaded');
     await new Promise((resolve) => setTimeout(resolve, 50));
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(warnSpy).not.toHaveBeenCalled();
