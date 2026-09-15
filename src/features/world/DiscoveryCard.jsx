@@ -216,7 +216,9 @@ export function DiscoveryCard({
           <div className="discovery-info-section">
             <span className="discovery-info-label">🤖 AI Observed</span>
             <p className="discovery-info-value">
-              {aiCaption || `${gradeLabel} specimen identified with ${confidence != null ? confidence + '% confidence' : 'high confidence'}.`}
+              {aiCaption || (confidence != null
+                ? `Identification confidence: ${confidence}%. No field observation was returned.`
+                : 'Still identifying this discovery. No field observation is available yet.')}
             </p>
           </div>
 

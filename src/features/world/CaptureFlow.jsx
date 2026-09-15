@@ -168,7 +168,13 @@ export function CaptureFlow({ onClose }) {
       triggerHaptic([40, 60, 40, 60, 100]);
     } catch (error) {
       triggerHaptic([80, 40, 80]);
-      setErrorMessage(error?.code === 'anti_cheat_rejected' ? messageForRejection(error.reason) : 'The rarity engine could not read that photo. Try again.');
+      setErrorMessage(
+        error?.code === 'anti_cheat_rejected'
+          ? messageForRejection(error.reason)
+          : error?.code === 'vision_provider_invalid_subject'
+            ? 'That looks like an indoor or man-made object. Wild Realm only rewards nature and heritage discoveries.'
+            : 'We could not identify a valid nature subject in that photo. Try again in good light.',
+      );
       setStage('error');
     }
   };
@@ -405,7 +411,9 @@ export function CaptureFlow({ onClose }) {
                     aria-label={activeFilter === filter.id ? `Capture photo with ${filter.label}` : `Select ${filter.label} filter`}
                     onClick={(event) => {
                       playTap();
-                      event.currentTarget.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                      if (typeof event.currentTarget.scrollIntoView === 'function') {
+                        event.currentTarget.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                      }
                       if (activeFilter === filter.id) {
                         triggerHaptic([12]);
                         handleNativeCamera();

@@ -79,8 +79,8 @@ jobs:
           TEST_DATABASE_URL: postgres://questuser:testpass@127.0.0.1:5432/questdb
         run: npm run test:ci -- api/postgres.integration.test.js
 
-      - name: Run npm audit (report only)
-        run: npm audit --omit=dev || true
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
 
   preflight:
     name: Production env gate (main pushes only)
@@ -104,6 +104,9 @@ jobs:
           QUEST_AI_VERIFY_URL: ${{ secrets.QUEST_AI_VERIFY_URL }}
           QUEST_PROVIDER_SECRET: ${{ secrets.QUEST_PROVIDER_SECRET }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_API_BASE_URL: /api
           OIDC_ISSUER: ${{ secrets.OIDC_ISSUER }}
           OIDC_AUDIENCE: ${{ secrets.OIDC_AUDIENCE }}
           OIDC_JWKS_URL: ${{ secrets.OIDC_JWKS_URL }}
@@ -112,5 +115,4 @@ jobs:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           VISION_PROVIDER: ${{ secrets.VISION_PROVIDER }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-          ALLOW_STUB_VISION_IN_PRODUCTION: ${{ secrets.ALLOW_STUB_VISION_IN_PRODUCTION }}
         run: node scripts/check_prod_env.js

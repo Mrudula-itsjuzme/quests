@@ -55,6 +55,9 @@ silently calls the device. The backend must also list the native origin in
 export CORS_ORIGINS=https://your-backend.example.com,capacitor://localhost,http://localhost
 ```
 
+Only the exact loopback-style Capacitor origins are accepted as non-HTTPS
+production CORS exceptions. The native API URL itself must still use HTTPS.
+
 ## Explore map data
 
 The Explore map renders two real layers:
@@ -62,8 +65,9 @@ The Explore map renders two real layers:
 - **Curated world hotspots** — `world_hotspots`, served by
   `GET /api/v1/world/hotspots` (optional `category` and
   `bbox=minLng,minLat,maxLng,maxLat` filters). Migration `018` seeds demo rows
-  flagged `is_demo = TRUE`; replace them with curated content by inserting rows
-  with `is_demo = FALSE`.
+  flagged `is_demo = TRUE`. They are visible in development/test and hidden by
+  default in production. Insert reviewed rows with `is_demo = FALSE` for a
+  production deployment; do not relabel the bundled demo rows.
 - **The player's own capture clusters** — derived from GPS-tagged captures.
 
 Both arrive through the normal React Query data layer. Running `npm run migrate`

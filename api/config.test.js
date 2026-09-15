@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { loadConfig } from './config.js';
 
+const productionClientEnv = {
+  SUPABASE_URL: 'https://project-ref.supabase.co',
+  VITE_SUPABASE_URL: 'https://project-ref.supabase.co',
+  VITE_SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_test_value',
+  VITE_API_BASE_URL: '/api',
+};
+
 describe('configuration security', () => {
   it('keeps development identity, mock providers, and public listeners opt-in', () => {
     const config = loadConfig({ NODE_ENV: 'development' });
@@ -31,6 +38,7 @@ describe('configuration security', () => {
 
   it('accepts an explicitly hardened production configuration', () => {
     const config = loadConfig({
+      ...productionClientEnv,
       NODE_ENV: 'production',
       DEV_AUTH_ENABLED: 'false',
       DEV_ALLOW_LEGACY_MUTATIONS: 'false',
@@ -47,24 +55,39 @@ describe('configuration security', () => {
     });
     expect(config.corsOrigins).toEqual(['https://app.example.com']);
     expect(config.DEV_AUTH_ENABLED).toBe(false);
+    expect(config.includeDemoHotspots).toBe(false);
   });
 
-  it('rejects the stub vision provider in production unless explicitly allowed', () => {
-    expect(() => loadConfig({
-      NODE_ENV: 'production',
-      DEV_AUTH_ENABLED: 'false',
-      DEV_ALLOW_LEGACY_MUTATIONS: 'false',
-      PROVIDER_MODE: 'http',
-      QUEST_AI_VERIFY_URL: 'https://verify.example.com/v1/proofs',
-      QUEST_PROVIDER_SECRET: 'provider-secret-value',
-      CRON_SECRET: 'cron-secret-value',
-      DATABASE_URL: 'postgres://quest_app:secret@db:5432/quests',
-      OIDC_ISSUER: 'https://identity.example.com',
-      OIDC_AUDIENCE: 'habbit-api',
-      CORS_ORIGINS: 'https://app.example.com',
-    })).toThrow(/Production requires a real VISION_PROVIDER/);
+  it('allows only the exact native Capacitor origins as production HTTP exceptions', () => {
+    const base = {
+      ...productionClientEnv,
+      NODE_ENV: 'production', DATABASE_URL: 'postgres://quest_app:secret@db:5432/quests',
+      PROVIDER_MODE: 'http', QUEST_AI_VERIFY_URL: 'https://verify.example.com/v1/proofs',
+      QUEST_PROVIDER_SECRET: 'provider-secret-value', CRON_SECRET: 'cron-secret-value',
+      VISION_PROVIDER: 'openrouter',
+      OPENROUTER_API_KEY: 'openrouter-key-value',
+    };
+    expect(() => loadConfig({ ...base, CORS_ORIGINS: 'https://app.example.com,capacitor://localhost,http://localhost' })).not.toThrow();
+    expect(() => loadConfig({ ...base, CORS_ORIGINS: 'http://device.example.com' })).toThrow(/Capacitor origins/);
+  });
 
-    const config = loadConfig({
+  it('rejects mismatched client auth, service-role keys, and insecure client API URLs', () => {
+    const base = {
+      ...productionClientEnv,
+      NODE_ENV: 'production', DATABASE_URL: 'postgres://quest_app:secret@db:5432/quests',
+      PROVIDER_MODE: 'http', QUEST_AI_VERIFY_URL: 'https://verify.example.com/v1/proofs',
+      QUEST_PROVIDER_SECRET: 'provider-secret-value', CRON_SECRET: 'cron-secret-value',
+      CORS_ORIGINS: 'https://app.example.com', VISION_PROVIDER: 'openrouter',
+      OPENROUTER_API_KEY: 'openrouter-key-value',
+    };
+    expect(() => loadConfig({ ...base, VITE_SUPABASE_URL: 'https://other-project.supabase.co' })).toThrow(/must match SUPABASE_URL/);
+    expect(() => loadConfig({ ...base, VITE_SUPABASE_PUBLISHABLE_KEY: 'service_role_secret' })).toThrow(/never a service-role key/);
+    expect(() => loadConfig({ ...base, VITE_API_BASE_URL: 'http://api.example.com/api' })).toThrow(/absolute HTTPS URL/);
+  });
+
+  it('rejects the stub vision provider in production without an override', () => {
+    expect(() => loadConfig({
+      ...productionClientEnv,
       NODE_ENV: 'production',
       DEV_AUTH_ENABLED: 'false',
       DEV_ALLOW_LEGACY_MUTATIONS: 'false',
@@ -76,9 +99,7 @@ describe('configuration security', () => {
       OIDC_ISSUER: 'https://identity.example.com',
       OIDC_AUDIENCE: 'habbit-api',
       CORS_ORIGINS: 'https://app.example.com',
-      ALLOW_STUB_VISION_IN_PRODUCTION: 'true',
-    });
-    expect(config.VISION_PROVIDER).toBe('stub');
+    })).toThrow(/VISION_PROVIDER=openrouter/);
   });
 
   it('derives the Supabase issuer, audience, and asymmetric JWKS endpoint', () => {
@@ -96,6 +117,7 @@ describe('configuration security', () => {
 
   it('rejects plaintext OIDC metadata in production', () => {
     expect(() => loadConfig({
+      ...productionClientEnv,
       NODE_ENV: 'production',
       DEV_AUTH_ENABLED: 'false',
       DEV_ALLOW_LEGACY_MUTATIONS: 'false',
@@ -109,8 +131,9 @@ describe('configuration security', () => {
     })).toThrow(/HTTPS OIDC/);
   });
 
-  it('requires real auth metadata, scheduler secret, and HTTPS proof endpoint in production', () => {
+  it('requires Supabase client configuration, scheduler secret, and HTTPS proof endpoint in production', () => {
     const base = {
+      ...productionClientEnv,
       NODE_ENV: 'production',
       DEV_AUTH_ENABLED: 'false',
       DEV_ALLOW_LEGACY_MUTATIONS: 'false',
@@ -123,8 +146,8 @@ describe('configuration security', () => {
       VISION_PROVIDER: 'openrouter',
       OPENROUTER_API_KEY: 'openrouter-key-value',
     };
-    expect(() => loadConfig(base)).toThrow(/OIDC_ISSUER and OIDC_AUDIENCE/);
-    expect(() => loadConfig({ ...base, SUPABASE_URL: 'https://project-ref.supabase.co' })).not.toThrow();
+    expect(() => loadConfig({ ...base, SUPABASE_URL: undefined })).toThrow(/SUPABASE_URL/);
+    expect(() => loadConfig(base)).not.toThrow();
     expect(() => loadConfig({
       ...base,
       OIDC_ISSUER: 'https://identity.example.com',
@@ -141,6 +164,7 @@ describe('configuration security', () => {
 
   it('rejects disabled or local proof providers in production', () => {
     const base = {
+      ...productionClientEnv,
       NODE_ENV: 'production',
       DEV_AUTH_ENABLED: 'false',
       DEV_ALLOW_LEGACY_MUTATIONS: 'false',
@@ -157,6 +181,7 @@ describe('configuration security', () => {
 
   it('rejects wildcard production CORS and public proxy trust', () => {
     const base = {
+      ...productionClientEnv,
       NODE_ENV: 'production',
       DEV_AUTH_ENABLED: 'false',
       DEV_ALLOW_LEGACY_MUTATIONS: 'false',
@@ -171,7 +196,7 @@ describe('configuration security', () => {
       OPENROUTER_API_KEY: 'openrouter-key-value',
     };
     expect(() => loadConfig({ ...base, CORS_ORIGINS: '*' })).toThrow(/explicit production CORS/);
-    expect(() => loadConfig({ ...base, CORS_ORIGINS: 'http://app.example.com' })).toThrow(/HTTPS production CORS/);
+    expect(() => loadConfig({ ...base, CORS_ORIGINS: 'http://app.example.com' })).toThrow(/exact Capacitor origins/);
     expect(() => loadConfig({ ...base, CORS_ORIGINS: 'https://app.example.com', TRUST_PROXY: '2' })).toThrow(/TRUST_PROXY/);
   });
 

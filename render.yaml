@@ -1,10 +1,9 @@
 services:
   - type: web
     name: quests-app
-    env: node
-    buildCommand: npm ci && npm run build
-    preDeployCommand: npm run migrate
-    startCommand: npm start
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
     envVars:
       - key: NODE_ENV
         value: production
@@ -14,29 +13,26 @@ services:
           property: connectionString
       - key: CRON_SECRET
         generateValue: true
-      # NOTE: ALLOW_STUB_VISION_IN_PRODUCTION must stay unset here. The stub
-      # vision provider would silently mint fake species for every capture;
-      # production requires VISION_PROVIDER=openrouter with a real
-      # OPENROUTER_API_KEY set in the Render dashboard instead.
+      # Add the remaining required auth, provider, CORS, and Vite values from
+      # .env.production.example in the Render dashboard. Startup fails closed
+      # until they are supplied; the stub vision provider has no production override.
 
   - type: cron
     name: quests-scheduler
-    env: node
+    runtime: node
     schedule: "0 * * * *"
     buildCommand: npm ci
     startCommand: node scripts/run-scheduler.js
     envVars:
       - key: NODE_ENV
         value: production
-      - key: DATABASE_URL
-        fromDatabase:
-          name: quests-db
-          property: connectionString
       - key: CRON_SECRET
         fromService:
           type: web
           name: quests-app
           envVarKey: CRON_SECRET
+      - key: SCHEDULER_URL
+        value: https://quests-app.onrender.com/api/internal/scheduler
 
 databases:
   - name: quests-db

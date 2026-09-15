@@ -4,7 +4,7 @@ import { demoWorldHotspots } from './world-hotspots.js';
 import { speciesCatalog } from './species-catalog.js';
 
 export class MemoryQuestRepository {
-  constructor({ definitions = [] } = {}) {
+  constructor({ definitions = [], includeDemoHotspots = true } = {}) {
     this.definitions = definitions.map((item) => ({ ...item }));
     this.users = new Map();
     this.assignments = new Map();
@@ -30,7 +30,7 @@ export class MemoryQuestRepository {
       { itemId: 'event_chest_1', name: 'Verdant Event Chest', type: 'chest', priceCoins: 500 },
     ];
     this.regionalEvents = [];
-    this.worldHotspots = demoWorldHotspots.map((item) => ({ ...item }));
+    this.worldHotspots = includeDemoHotspots ? demoWorldHotspots.map((item) => ({ ...item })) : [];
     this.savedHotspots = [];
     this.hotspotRatings = [];
     this.communityPosts = [];

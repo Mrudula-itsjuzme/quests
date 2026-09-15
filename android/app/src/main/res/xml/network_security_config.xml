@@ -5,10 +5,9 @@
             <certificates src="system" />
         </trust-anchors>
     </base-config>
-    <!-- Allow cleartext HTTP to localhost for the ADB reverse tunnel used
-         during development/testing. Does not affect any remote traffic. -->
+    <!-- Localhost remains available for an explicit ADB reverse development
+         tunnel. Release traffic to remote hosts must use TLS. -->
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="false">localhost</domain>
-        <domain includeSubdomains="false">10.12.71.162</domain>
     </domain-config>
 </network-security-config>

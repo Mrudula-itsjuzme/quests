@@ -559,6 +559,14 @@ describe('World API', () => {
     expect(body.every((spot) => spot.isDemo === true)).toBe(true);
   });
 
+  it('returns an honest empty hotspot list when demo content is disabled', async () => {
+    const repository = new MemoryQuestRepository({ definitions: questDefinitions, includeDemoHotspots: false });
+    const app = createApp({ config: testConfig({ INCLUDE_DEMO_HOTSPOTS: 'false' }), repository });
+    const response = await request(app).get('/api/v1/world/hotspots');
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual([]);
+  });
+
   it('filters by category', async () => {
     const app = createApp({ config: testConfig() });
     const { body } = await request(app).get('/api/v1/world/hotspots?category=Waterfalls');

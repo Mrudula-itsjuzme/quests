@@ -79,6 +79,13 @@ Required in production:
 | `PROVIDER_MODE` | `http` |
 | `QUEST_AI_VERIFY_URL` | HTTPS endpoint for the proof verifier |
 | `QUEST_PROVIDER_SECRET` | random verifier credential, at least 16 characters |
+| `QUEST_PROVIDER_TIMEOUT_MS` | `10000` (bounded external verifier timeout) |
+| `QUEST_PROVIDER_MAX_RETRIES` | `1` (one retry for transient failures) |
+| `VISION_PROVIDER` | `openrouter` |
+| `OPENROUTER_API_KEY` | OpenRouter server-side API key |
+| `VISION_PROVIDER_TIMEOUT_MS` | `20000` |
+| `VISION_PROVIDER_MAX_RETRIES` | `1` |
+| `INCLUDE_DEMO_HOTSPOTS` | `false` |
 | `CRON_SECRET` | random scheduler credential, at least 16 characters |
 | `QUEST_NOTIFICATION_URL` | optional HTTPS delivery webhook |
 
@@ -163,9 +170,10 @@ Render keeps prior deploys. To roll back:
    back the schema. If a migration introduced a breaking schema change, you
    must assess whether the previous application version is still compatible
    with the current schema before rolling back the app alone. This
-   repository's migrations to date are additive (new tables/columns), so
-   rollback of app code alone is safe for the current migration set
-   (`001`–`006`).
+   repository's migrations to date are additive (new tables/columns and
+   indexes), so rollback of app code alone is expected to remain compatible
+   with the current migration set (`001`–`033`). Verify the specific target
+   revision before every rollback.
 4. If a bad migration must be undone, write and apply a new forward migration
    that reverses it — do not hand-edit `schema_migrations` or delete rows
    from it.
@@ -175,9 +183,13 @@ Render keeps prior deploys. To roll back:
 - **Automatic health verification is intentionally not implemented.** PHOTO
   proof uses private Supabase Storage uploads plus the configured HTTP
   verifier. AUTO/health quests fail closed with `provider_not_configured`.
-- On Render, configure an external hourly cron to call
-  `GET /api/internal/scheduler` with `Authorization: Bearer <CRON_SECRET>`.
-  Vercel deployments use the checked-in hourly cron configuration.
-- Flutter parity, CI hardening beyond the steps listed in
-  `.github/workflows/ci.yml`, and multi-region/multi-instance scaling are not
-  covered by this guide.
+- Render uses the checked-in cron service to call `POST /api/internal/scheduler`
+  with `Authorization: Bearer <CRON_SECRET>`. Confirm `SCHEDULER_URL` matches
+  the deployed web-service hostname. Vercel uses its checked-in hourly cron.
+- The separate Flutter client passes static analysis and its current test
+  suite. Signed store builds, physical-device validation, and
+  multi-region/multi-instance scaling remain outside this guide.
+- The bundled `demo-*` hotspot rows are intentionally hidden when
+  `NODE_ENV=production`. Insert reviewed `is_demo = FALSE` rows before launch
+  or Explore will honestly show no curated hotspots while still showing the
+  signed-in player's own GPS-tagged capture clusters.

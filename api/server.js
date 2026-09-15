@@ -155,7 +155,7 @@ const legacyQuestSchema = z.object({
 export function createApp(options = {}) {
   const config = options.config || loadConfig();
   const repository = options.repository || new MemoryQuestRepository({ definitions: questDefinitions });
-  const providers = options.providers || createProviders({ mode: config.PROVIDER_MODE, aiVerifyUrl: config.QUEST_AI_VERIFY_URL, providerSecret: config.QUEST_PROVIDER_SECRET, notificationUrl: config.QUEST_NOTIFICATION_URL });
+  const providers = options.providers || createProviders({ mode: config.PROVIDER_MODE, aiVerifyUrl: config.QUEST_AI_VERIFY_URL, providerSecret: config.QUEST_PROVIDER_SECRET, notificationUrl: config.QUEST_NOTIFICATION_URL, timeoutMs: config.QUEST_PROVIDER_TIMEOUT_MS, maxRetries: config.QUEST_PROVIDER_MAX_RETRIES });
   const engine = options.engine || new QuestEngine({ repository, providers });
   const storeEngine = options.storeEngine || new StoreEngine(repository);
   const eventEngine = options.eventEngine || new EventEngine(repository, providers.notifications);
@@ -620,11 +620,11 @@ export async function createRuntime(env = process.env) {
   let repository;
   if (config.databaseUrl) {
     pool = new Pool({ connectionString: config.databaseUrl, ssl: config.DATABASE_SSL ? { rejectUnauthorized: false } : false, max: 10, connectionTimeoutMillis: 5_000, idleTimeoutMillis: 30_000, statement_timeout: config.DATABASE_STATEMENT_TIMEOUT_MS, query_timeout: config.DATABASE_STATEMENT_TIMEOUT_MS + 1_000 });
-    repository = new PostgresQuestRepository(pool);
+    repository = new PostgresQuestRepository(pool, { includeDemoHotspots: config.includeDemoHotspots });
   } else {
-    repository = new MemoryQuestRepository({ definitions: questDefinitions });
+    repository = new MemoryQuestRepository({ definitions: questDefinitions, includeDemoHotspots: config.includeDemoHotspots });
   }
-  const providers = createProviders({ mode: config.PROVIDER_MODE, aiVerifyUrl: config.QUEST_AI_VERIFY_URL, providerSecret: config.QUEST_PROVIDER_SECRET, notificationUrl: config.QUEST_NOTIFICATION_URL });
+  const providers = createProviders({ mode: config.PROVIDER_MODE, aiVerifyUrl: config.QUEST_AI_VERIFY_URL, providerSecret: config.QUEST_PROVIDER_SECRET, notificationUrl: config.QUEST_NOTIFICATION_URL, timeoutMs: config.QUEST_PROVIDER_TIMEOUT_MS, maxRetries: config.QUEST_PROVIDER_MAX_RETRIES });
 
   return { config, pool, repository, providers, engine: new QuestEngine({ repository, providers }) };
 }

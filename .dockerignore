@@ -11,3 +11,13 @@ coverage
 .kilo
 .codex
 mobile_flutter
+android
+ios
+server
+releases
+qa-proof
+audit
+.claude-flow
+ruvector.db
+android_screen*.png
+test-output.txt

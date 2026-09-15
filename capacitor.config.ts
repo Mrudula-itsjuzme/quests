@@ -2,11 +2,10 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.wildrealm.app',
-  appName: 'Wander',
+  appName: 'Wild Realm',
   webDir: 'dist',
   server: {
-    androidScheme: 'http',
-    cleartext: true
+    androidScheme: 'http'
   },
   plugins: {
     Keyboard: {

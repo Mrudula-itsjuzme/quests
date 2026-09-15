@@ -151,6 +151,11 @@ suite('PostgreSQL quest repository', () => {
       expect(all.every((spot) => spot.isDemo)).toBe(true);
     });
 
+    it('hides demo seed rows when production content mode is selected', async () => {
+      const productionRepository = new PostgresQuestRepository(pool, { includeDemoHotspots: false });
+      expect(await productionRepository.listWorldHotspots()).toEqual([]);
+    });
+
     it('returns coordinates as numbers on the correct axes', async () => {
       const all = await repository.listWorldHotspots();
       const jog = all.find((spot) => spot.id === 'demo-jog-falls');

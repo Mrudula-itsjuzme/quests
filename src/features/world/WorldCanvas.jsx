@@ -159,7 +159,10 @@ export function WorldCanvas({ hotspots = [], onSelectHotspot, onPointMap, userPo
         userMarkerRef.current = null;
       }
 
-      const pos = userPosition || { lat: 12.9716, lng: 77.5946 };
+      // Do not draw a fabricated "you are here" marker while a real location
+      // fix is unresolved. The old Bengaluru fallback looked like live GPS.
+      if (!userPosition) return;
+      const pos = userPosition;
 
       const userIcon = Leaflet.divIcon({
         className: '',

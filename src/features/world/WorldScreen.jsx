@@ -73,7 +73,7 @@ export function WorldScreen() {
   // Distances are only shown when the browser actually grants a position;
   // a denied or unavailable fix simply omits them.
   useEffect(() => {
-    let cancelled = false;
+    let watchId = null;
     const fetchLocation = async () => {
       try {
         if (Capacitor.isNativePlatform()) {
@@ -82,16 +82,20 @@ export function WorldScreen() {
             const request = await Geolocation.requestPermissions();
             if (request.location !== 'granted') return;
           }
-          const position = await Geolocation.getCurrentPosition({ enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 });
-          if (!cancelled) setLastKnownPosition({ lat: position.coords.latitude, lng: position.coords.longitude });
+          watchId = await Geolocation.watchPosition(
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
+            (position) => {
+              if (position) setLastKnownPosition({ lat: position.coords.latitude, lng: position.coords.longitude });
+            },
+          );
         } else {
           if (typeof navigator === 'undefined' || !navigator.geolocation) return;
-          navigator.geolocation.getCurrentPosition(
+          watchId = navigator.geolocation.watchPosition(
             (position) => {
-              if (!cancelled) setLastKnownPosition({ lat: position.coords.latitude, lng: position.coords.longitude });
+              setLastKnownPosition({ lat: position.coords.latitude, lng: position.coords.longitude });
             },
             () => {},
-            { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
           );
         }
       } catch {
@@ -99,7 +103,11 @@ export function WorldScreen() {
       }
     };
     fetchLocation();
-    return () => { cancelled = true; };
+    return () => {
+      if (watchId == null) return;
+      if (Capacitor.isNativePlatform()) Geolocation.clearWatch({ id: watchId });
+      else if (typeof navigator !== 'undefined' && navigator.geolocation) navigator.geolocation.clearWatch(watchId);
+    };
   }, []);
 
   // Explore shows two real layers: curated world hotspots served by

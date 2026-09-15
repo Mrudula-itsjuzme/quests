@@ -5,8 +5,9 @@ import { fileURLToPath } from 'node:url';
 import { progressionEngine } from './progression-engine.js';
 
 export class PostgresQuestRepository {
-  constructor(pool) {
+  constructor(pool, { includeDemoHotspots = true } = {}) {
     this.pool = pool;
+    this.includeDemoHotspots = includeDemoHotspots;
     this._definitionCache = null;
   }
 
@@ -577,6 +578,7 @@ export class PostgresQuestRepository {
   async listWorldHotspots({ category = null, bbox = null, limit = 200, viewerId = null } = {}) {
     const values = [viewerId];
     const where = ['h.enabled'];
+    if (!this.includeDemoHotspots) where.push('NOT h.is_demo');
     if (category) { values.push(category); where.push(`h.category = $${values.length}`); }
     if (bbox) {
       // Explicit min/max per axis, so a caller cannot accidentally filter

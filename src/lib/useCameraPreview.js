@@ -38,15 +38,17 @@ export function useCameraPreview(active = true) {
       if (Capacitor.isNativePlatform()) {
         try {
           const permission = await Camera.checkPermissions();
-          if (!cancelled) {
-            // Capacitor opens the native camera UI on shutter press; it does
-            // not provide a live MediaStream for this web view.
-            setStatus(permission.camera === 'denied' ? 'unavailable' : 'native');
+          if (permission.camera !== 'granted') {
+            const requested = await Camera.requestPermissions({ permissions: ['camera'] });
+            if (requested.camera !== 'granted') {
+              if (!cancelled) setStatus('unavailable');
+              return;
+            }
           }
         } catch {
           if (!cancelled) setStatus('unavailable');
+          return;
         }
-        return;
       }
 
       const media = typeof navigator !== 'undefined' ? navigator.mediaDevices : null;

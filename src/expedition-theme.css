@@ -2009,3 +2009,91 @@
     }
   }
 }
+
+/* Final Night contrast guard. ui-fixes.css carries the legacy cream pass,
+   while this file is the last imported theme layer. */
+html[data-wild-theme='dark'] body .app-shell :where(
+  .gallery-v2-tab, .gallery-sort-pill, .community-tab-btn, .quest-cadence-btn
+) {
+  border-color: rgba(216, 231, 220, 0.16) !important;
+  background: #18241f !important;
+  color: #d7e0da !important;
+  -webkit-text-fill-color: #d7e0da !important;
+}
+
+html[data-wild-theme='dark'] body .app-shell :where(
+  .gallery-v2-tab.active, .gallery-sort-pill.active,
+  .community-tab-btn.active, .quest-cadence-btn.active
+) {
+  border-color: rgba(103, 214, 154, 0.46) !important;
+  background: #1b392d !important;
+  color: #7be4aa !important;
+  -webkit-text-fill-color: #7be4aa !important;
+}
+
+html[data-wild-theme='dark'] body .app-shell .gallery-v2-tabs button.gallery-v2-tab,
+html[data-wild-theme='dark'] body .app-shell .gallery-sort-pills button.gallery-sort-pill,
+html[data-wild-theme='dark'] body .app-shell .community-tabs-bar button.community-tab-btn,
+html[data-wild-theme='dark'] body .app-shell .quest-cadence-tabs button.quest-cadence-btn {
+  color: #d7e0da !important;
+  -webkit-text-fill-color: #d7e0da !important;
+}
+
+:root[data-wild-theme='dark'] body div.app-shell main.gallery-v2-shell div.gallery-v2-tabs > button.gallery-v2-tab:not(.active) {
+  color: #d7e0da !important;
+  -webkit-text-fill-color: #d7e0da !important;
+}
+
+html[data-wild-theme='dark'] body .app-shell :where(
+  .app-main-content, .mobile-content-area, .route-stage,
+  .journal-page-transition, .gallery-v2-shell, .guild-page,
+  .quests-shell, .profile-shell-v2, .profile-page, .rewards-page
+) {
+  background: #0c1613 !important;
+  background-image: none !important;
+  color: #f3eee4 !important;
+}
+
+html[data-wild-theme='dark'] body .app-shell :where(
+  .quest-user-topbar, .quest-season-strip, .quest-cadence-tabs,
+  .quest-item-card, .quest-card-content, .community-tabs-bar,
+  .community-chats-screen, .community-chats-hero, .community-story-chip,
+  .community-friend-card, .community-post-card, .gallery-v2-header,
+  .gallery-v2-stat, .gallery-v2-tabs, .gallery-v2-card,
+  .library-hero-panel, .library-start-card, .library-start-panel,
+  .profile-hero-v2, .profile-stat-v2, .profile-rank-section,
+  .profile-menu-v2, .profile-menu-row-v2
+) {
+  border-color: rgba(216, 231, 220, 0.14) !important;
+  background: #13211c !important;
+  color: #ece8df !important;
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.22) !important;
+}
+
+html[data-wild-theme='dark'] body .app-shell :where(
+  h1, h2, h3, h4, p, small, .gallery-v2-count,
+  .quest-item-title, .quest-item-instruction, .quest-row-meta,
+  .profile-menu-row-label
+) {
+  color: #ece8df !important;
+  -webkit-text-fill-color: #ece8df !important;
+  text-shadow: none !important;
+}
+
+html[data-wild-theme='dark'] body .app-shell .mobile-bottom-dock {
+  border-color: rgba(216, 231, 220, 0.14) !important;
+  background: rgba(13, 24, 20, 0.96) !important;
+  box-shadow: 0 -12px 34px rgba(0, 0, 0, 0.3) !important;
+}
+
+html[data-wild-theme='dark'] body .app-shell .mobile-bottom-dock .dock-item:not(.active),
+html[data-wild-theme='dark'] body .app-shell .mobile-bottom-dock .dock-item:not(.active) :where(svg, span) {
+  color: #aab5ae !important;
+  -webkit-text-fill-color: #aab5ae !important;
+}
+
+html[data-wild-theme='dark'] body .app-shell .mobile-bottom-dock .dock-item.active,
+html[data-wild-theme='dark'] body .app-shell .mobile-bottom-dock .dock-item.active :where(svg, span) {
+  color: #67d69a !important;
+  -webkit-text-fill-color: #67d69a !important;
+}
