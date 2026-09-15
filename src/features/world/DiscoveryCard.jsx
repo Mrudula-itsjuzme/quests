@@ -1,3 +1,4 @@
+import { Share2, MapPin, NotebookPen, Sparkles, BadgeCheck } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { Icon } from '../../components/Icon';
@@ -89,6 +90,7 @@ export function DiscoveryCard({
 
   const cardId = cardData.assetId || cardData.id || 'new';
   const [shareNotice, setShareNotice] = useState('');
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
   // 3D tilt
   const cardRef = useRef(null);
@@ -113,6 +115,30 @@ export function DiscoveryCard({
     else if (result === 'shared') setShareNotice('Shared! 🎉');
     setTimeout(() => setShareNotice(''), 3000);
   };
+
+  if (isNew) return (
+    <article className="reference-identification">
+      {cardImg && <CaptureImage className="reference-identification-photo" imageRef={cardImg} alt={itemName} useAuth={cardImg?.includes('/captures/')} eager style={{filter:imageFilter && imageFilter!=='none'?imageFilter:undefined}}/>}
+      <div className="reference-identification-shade" />
+      <button className="reference-identification-share" aria-label="Share discovery" onClick={()=>onShare?.({caption:notesValue.trim() || undefined})}><Share2 size={21}/></button>
+      <section className="reference-identification-content">
+        <h2>{titleValue || itemName}</h2>
+        {scientificName && <em>{scientificName}</em>}
+        <div className="reference-identification-badges"><span><BadgeCheck size={15}/>{['Common','Uncommon','Rare','Epic','Legendary'][Math.min(4,Math.max(0,stars-1))]}</span>{confidence != null && <span><Sparkles size={15}/>{confidence}% match</span>}</div>
+        <ul className="reference-identification-meta">
+          {rawXp>0 && <li><Sparkles size={16}/><span>+{rawXp} XP</span></li>}
+          <li><NotebookPen size={16}/><span>Ready for your Journal</span></li>
+          <li><MapPin size={16}/><span>{locationText || 'Location not recorded'}</span></li>
+        </ul>
+        {detailsOpen && <div className="reference-identification-details">
+          <p>{aiCaption || 'No field observation was returned.'}</p>
+          <label htmlFor="identification-title">Discovery name</label><input id="identification-title" value={titleValue ?? itemName} maxLength={80} onChange={e=>onTitleChange?.(e.target.value)}/>
+          <label htmlFor="identification-notes">Notes</label><textarea id="identification-notes" value={notesValue} maxLength={500} rows={3} onChange={e=>onNotesChange?.(e.target.value)} placeholder="What did you notice?"/>
+        </div>}
+        <div className="reference-identification-actions"><button onClick={()=>setDetailsOpen(!detailsOpen)} aria-expanded={detailsOpen}>{detailsOpen?'Hide Details':'View Details'}</button><button onClick={onAddToLibrary}>Save to Journal</button></div>
+      </section>
+    </article>
+  );
 
   return (
     <motion.div

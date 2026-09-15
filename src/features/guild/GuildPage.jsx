@@ -1,3 +1,4 @@
+import { GroupsPanel } from './GroupsPanel';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { CaptureImage } from '../../components/CaptureImage';
@@ -24,6 +25,7 @@ const TABS = [
   { id: 'FEED', label: 'Feed', icon: 'star' },
   { id: 'FRIENDS', label: 'Chats', icon: 'user' },
   { id: 'MAP', label: 'Nearby', icon: 'compass' },
+  { id: 'GROUPS', label: 'Trips', icon: 'compass' },
 ];
 
 function timeAgo(value) {
@@ -85,6 +87,7 @@ export function GuildPage() {
         {tab === 'FEED' && <CommunityFeed onShare={() => setShareOpen(true)} />}
         {tab === 'FRIENDS' && <FriendsPanel />}
         {tab === 'MAP' && <CommunityMap />}
+        {tab === 'GROUPS' && <GroupsPanel />}
       </div>
 
       {tab === 'FEED' && (

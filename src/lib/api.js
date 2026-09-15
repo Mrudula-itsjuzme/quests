@@ -296,6 +296,11 @@ export function createApiClient(getToken) {
       if (token === 'guest') return guestDelay(GUEST_USER, 200);
       return request('/me', { signal, token });
     },
+    requestAccountDeletion: async () => {
+      const token = await getToken();
+      if (token === 'guest') throw new Error('Guest sessions have no cloud account.');
+      return request('/me/delete-request', { method: 'POST', body: {}, token });
+    },
     updateMe: async (patch) => {
       const token = await getToken();
       if (token === 'guest') return guestDelay({ ...GUEST_USER, ...patch }, 200);

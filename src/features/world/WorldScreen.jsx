@@ -17,7 +17,7 @@ import { CaptureImage } from '../../components/CaptureImage';
 import { useStepCounter } from '../../lib/useStepCounter';
 import { Footprints } from 'lucide-react';
 
-const CATEGORIES = ['All', 'Hotspots', 'Viewpoints', 'Culture', 'Parks', 'Waterfalls', 'Birding', 'Community'];
+const CATEGORIES = ['Places', 'Wildlife', 'Trails'];
 
 export function WorldScreen() {
   const { data: me, isLoading: meLoading } = useMe();
@@ -43,7 +43,7 @@ export function WorldScreen() {
   const { data: scenicPlaces, isFetching: scenicLoading, isError: scenicError } = useScenicPlaces(nearbyCenter);
   const stepCounter = useStepCounter();
 
-  const [selectedTag, setSelectedTag] = useState('All');
+  const [selectedTag, setSelectedTag] = useState('Places');
   const [searchQuery, setSearchQuery] = useState('');
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [selectedHotspot, setSelectedHotspot] = useState(null);
@@ -131,7 +131,7 @@ export function WorldScreen() {
 
   const filteredHotspots = useMemo(() => {
     return hotspots.filter((item) => {
-      const matchesCategory = selectedTag === 'All' || item.category === selectedTag;
+      const matchesCategory = selectedTag === 'Places' || (selectedTag === 'Wildlife' ? ['Birding', 'Fauna', 'Flora'].includes(item.category) : ['Trails', 'Parks', 'Viewpoints', 'Hotspots'].includes(item.category));
       const matchesSearch = !searchQuery || item.title.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesCategory && matchesSearch;
     });
@@ -358,6 +358,7 @@ export function WorldScreen() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 24 }}
           >
+            <div className="reference-place-hero"><CaptureImage imageRef={selectedHotspot.imageRef || imageForHotspot(selectedHotspot)} alt={selectedHotspot.title} useAuth={selectedHotspot.imageRef?.includes('/captures/')} /></div>
             <div className="explore-hotspot-detail-head">
               <div>
                 <h3 id="hotspot-detail-title">{selectedHotspot.title}</h3>

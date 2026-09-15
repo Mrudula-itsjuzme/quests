@@ -2,7 +2,7 @@ import { Navigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from './AuthContext';
 import { playHover, playTap } from '../../lib/useSoundEffects';
-import { MapPin, MoveRight } from 'lucide-react';
+import { MoveRight } from 'lucide-react';
 import { Icon } from '../../components/Icon';
 
 const fadeUp = {
@@ -21,7 +21,7 @@ export function LandingPage() {
     <main className="landing-v2">
       <motion.img
         className="landing-cinematic-bg"
-        src="/assets/wild-realm-startup-hero.png"
+        src="/assets/reference-splash.png"
         alt=""
         aria-hidden="true"
         initial={{ scale: 1.08 }}
@@ -29,17 +29,6 @@ export function LandingPage() {
         transition={{ duration: 18, repeat: Infinity, repeatType: 'mirror', ease: 'easeInOut' }}
       />
       <div className="landing-cinematic-shade" aria-hidden="true" />
-
-      <motion.div
-        className="landing-hotspot-preview"
-        aria-hidden="true"
-        initial={{ opacity: 0, scale: 0.7, y: 12 }}
-        animate={{ opacity: 1, scale: [1, 1.05, 1], y: 0 }}
-        transition={{ opacity: { delay: 0.7 }, scale: { delay: 1.2, duration: 2.8, repeat: Infinity }, y: { delay: 0.7 } }}
-      >
-        <MapPin />
-        <span><strong>Scenic overlook</strong><small>1.2 km nearby</small></span>
-      </motion.div>
 
       <div className="landing-v2-inner">
         {/* Logo mark */}
@@ -62,13 +51,8 @@ export function LandingPage() {
           animate="show"
           custom={1}
         >
-          <h1>
-            Find the places<br />
-            <span className="landing-hero-gradient">worth going.</span>
-          </h1>
-          <p>
-            Discover beautiful places nearby and turn every outing into a lasting memory.
-          </p>
+          <h1>Wild Realm</h1>
+          <p>Explore. Capture. Belong.</p>
         </motion.div>
 
         {/* CTAs */}
@@ -81,11 +65,11 @@ export function LandingPage() {
         >
           <Link
             className="landing-cta-primary"
-            to="/sign-up"
+            to="/welcome"
             onClick={playTap}
             onMouseEnter={playHover}
           >
-            Explore nearby <MoveRight aria-hidden="true" />
+            Start exploring <MoveRight aria-hidden="true" />
           </Link>
           <div className="landing-secondary-actions">
             <Link to="/sign-in" onClick={playTap} onMouseEnter={playHover}>Sign in</Link>
@@ -94,6 +78,7 @@ export function LandingPage() {
           </div>
         </motion.div>
       </div>
+      <p className="landing-motto">Nature connects us all.</p>
     </main>
   );
 }

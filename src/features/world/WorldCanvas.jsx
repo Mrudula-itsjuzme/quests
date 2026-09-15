@@ -90,20 +90,24 @@ export function WorldCanvas({ hotspots = [], onSelectHotspot, onPointMap, userPo
       }).setView([12.9716, 77.5946], 12);
 
       if (!offlineNative) {
-        // OpenStreetMap standard tiles (No API Key Required)
+        // Satellite imagery matches the reference; retain a street-map fallback.
         const tiles = Leaflet.tileLayer(
-          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+          'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
           {
-            attribution: '© OpenStreetMap contributors',
+            attribution: 'Imagery © Esri, Maxar, Earthstar Geographics, and the GIS User Community',
             maxZoom: 19,
             keepBuffer: 4,
             updateWhenIdle: false,
           },
         );
-        tiles.on('tileerror', ({ tile }) => {
-          if (!tile || tile.dataset.fallbackApplied === 'true') return;
-          tile.dataset.fallbackApplied = 'true';
-          tile.src = tile.src.replace('tile.openstreetmap.org', 'tile.openstreetmap.fr/hot');
+        let fallbackAdded = false;
+        tiles.on('tileerror', () => {
+          if (fallbackAdded || destroyed) return;
+          fallbackAdded = true;
+          Leaflet.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors', maxZoom: 19,
+          }).addTo(map);
+          map.removeLayer(tiles);
         });
         tiles.addTo(map);
 

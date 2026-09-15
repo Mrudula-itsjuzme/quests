@@ -1,3 +1,4 @@
+import { Home, UsersRound, NotebookPen, UserRound, Plus } from 'lucide-react';
 import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -33,13 +34,13 @@ const CaptureFlow = lazy(() => import('../features/world/CaptureFlow').then((m) 
 // Profile is reachable from the topbar avatar, and Rewards from Profile, so the
 // dock keeps four thumb-sized targets instead of crowding six onto a phone.
 const navItemsLeft = [
-  { to: '/app', label: 'Map', icon: 'compass', end: true },
-  { to: '/app/quests', label: 'Quests', icon: 'scroll' },
+  { to: '/app', label: 'Explore', icon: Home, end: true },
+  { to: '/app/community', label: 'Community', icon: UsersRound },
 ];
 
 const navItemsRight = [
-  { to: '/app/library', label: 'Library', icon: 'book' },
-  { to: '/app/community', label: 'Community', icon: 'user' },
+  { to: '/app/library', label: 'Journal', icon: NotebookPen },
+  { to: '/app/profile', label: 'Profile', icon: UserRound },
 ];
 
 const routeLoaders = {
@@ -160,7 +161,7 @@ export function AppShell() {
           >
             <span className="brand-mark" aria-hidden="true"><Icon name="leaf" /></span>
             <div>
-              <strong>WANDER</strong>
+              <strong>Wild Realm</strong>
             </div>
           </motion.div>
           <div className="user-profile-trigger">
@@ -216,7 +217,7 @@ export function AppShell() {
               onClick={playTap}
               onMouseEnter={() => { playHover(); prefetchRoute(item.to); }}
             >
-              <Icon name={item.icon} />
+              <item.icon strokeWidth={1.6} />
               <span>{item.label}</span>
             </NavLink>
           ))}
@@ -231,7 +232,7 @@ export function AppShell() {
               whileTap={{ scale: 0.9 }}
               onClick={handleOpenCapture}
             >
-              <Icon name="camera" />
+              <Plus strokeWidth={1.6} />
             </motion.button>
           </div>
 
@@ -247,7 +248,7 @@ export function AppShell() {
                 prefetchRoute(item.to);
               }}
             >
-              <Icon name={item.icon} />
+              <item.icon strokeWidth={1.6} />
               <span>{item.label}</span>
             </NavLink>
           ))}

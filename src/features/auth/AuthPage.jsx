@@ -1,3 +1,4 @@
+import { Mail } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { Navigate, Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -89,6 +90,7 @@ export function AuthPage({ mode }) {
   const isSignUp = mode === 'sign-up';
 
   const remembered = useMemo(() => getRememberedEmail(), []);
+  const [emailFormOpen, setEmailFormOpen] = useState(false);
   const [email, setEmail] = useState(remembered);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -204,14 +206,14 @@ export function AuthPage({ mode }) {
           <motion.div variants={fieldStagger} initial="hidden" animate="show" custom={0}>
             <div className="auth-logo-mark" aria-hidden="true"><Icon name="leaf" /></div>
             <h1 id="auth-heading" className="auth-heading-v2">
-              {isSignUp ? 'Create account' : isReturning ? 'Welcome back!' : 'Sign in'}
+              Wild Realm
             </h1>
             <p className="auth-subheading">
               {isSignUp
                 ? 'Join Wild Realm and start exploring.'
                 : isReturning
                   ? 'Your path continues.'
-                  : 'Sign in to your Wild Realm account.'}
+                  : 'Welcome back'}
             </p>
           </motion.div>
 
@@ -227,7 +229,7 @@ export function AuthPage({ mode }) {
               <p>{isSignUp ? 'Check your email to confirm, then come back.' : 'Preparing your sanctuary…'}</p>
             </motion.div>
           ) : (
-            <form onSubmit={onSubmit} noValidate className="auth-form-v2">
+            <form onSubmit={onSubmit} noValidate className="auth-form-v2" hidden={!emailFormOpen}>
               {/* Email */}
               <motion.div className="auth-field-wrap" variants={fieldStagger} initial="hidden" animate="show" custom={1}>
                 <label htmlFor="auth-email" className="auth-label">Email</label>
@@ -310,7 +312,7 @@ export function AuthPage({ mode }) {
 
           {submitState !== 'success' && (
             <motion.div className="auth-social-stack" variants={fieldStagger} initial="hidden" animate="show" custom={4}>
-              <div className="auth-divider"><span>or</span></div>
+
               <button
                 type="button"
                 className="auth-social-btn"
@@ -328,11 +330,15 @@ export function AuthPage({ mode }) {
                 onClick={() => handleSocialSignIn('apple')}
                 onMouseEnter={playHover}
               >
-                <span aria-hidden="true"></span>
+
                 Continue with Apple
+              </button>
+              <button type="button" className="auth-social-btn auth-email-choice" aria-expanded={emailFormOpen} onClick={() => setEmailFormOpen((open) => !open)}>
+                <Mail strokeWidth={1.6} /> Continue with Email
               </button>
             </motion.div>
           )}
+          {error && !emailFormOpen && <p role="alert" className="auth-error-msg">{error}</p>}
 
           {/* Footer links */}
           <motion.div className="auth-footer-links" variants={fieldStagger} initial="hidden" animate="show" custom={5}>

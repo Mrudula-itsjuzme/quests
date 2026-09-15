@@ -10,7 +10,7 @@ import { useCameraPreview } from '../../lib/useCameraPreview';
 import { DiscoveryCard } from './DiscoveryCard';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { Capacitor } from '@capacitor/core';
-import { X } from 'lucide-react';
+import { X, Images, SwitchCamera } from 'lucide-react';
 
 function fileToDataUrl(file) {
   return new Promise((resolve, reject) => {
@@ -76,6 +76,8 @@ export function CaptureFlow({ onClose }) {
   const isNative = Capacitor.isNativePlatform();
   const inputRef = useRef(null);
   const filterChipRefs = useRef(new Map());
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [facingMode, setFacingMode] = useState('environment');
   const [stage, setStage] = useState('prompt'); // prompt | scanning | candidates | reveal | error
   const [card, setCard] = useState(null);
   const [name, setName] = useState('');
@@ -86,7 +88,7 @@ export function CaptureFlow({ onClose }) {
   const [notes, setNotes] = useState('');
   const [activeFilter, setActiveFilter] = useState('Auto');
   const [torchOn, setTorchOn] = useState(false);
-  const { videoRef, status: cameraStatus } = useCameraPreview(stage === 'prompt');
+  const { videoRef, status: cameraStatus } = useCameraPreview(stage === 'prompt', facingMode);
   const captureItem = useCaptureItem();
   const addCardToLibrary = useAddCardToLibrary();
   const renameCapture = useRenameCapture();
@@ -107,12 +109,7 @@ export function CaptureFlow({ onClose }) {
     return () => window.cancelAnimationFrame(frame);
   }, [activeFilter, stage]);
 
-  const cycleFilter = () => {
-    const currentIndex = CAPTURE_FILTERS.findIndex((filter) => filter.id === activeFilter);
-    const next = CAPTURE_FILTERS[(currentIndex + 1) % CAPTURE_FILTERS.length];
-    setActiveFilter(next.id);
-    triggerHaptic([8]);
-  };
+
 
   const toggleTorch = async () => {
     playTap();
@@ -375,7 +372,7 @@ export function CaptureFlow({ onClose }) {
               >
                 <Icon name="bolt" />
               </button>
-              <button type="button" className="capture-rail-btn" aria-label="Next filter" title="Next filter" onClick={() => { playTap(); cycleFilter(); }}>
+              <button type="button" className="capture-rail-btn" aria-label={filtersOpen ? "Hide filters" : "Show filters"} aria-expanded={filtersOpen} title="Filters" onClick={() => { playTap(); setFiltersOpen((open) => !open); }}>
                 <Icon name="rotate" />
               </button>
               <button
@@ -396,8 +393,15 @@ export function CaptureFlow({ onClose }) {
                 <span>{currentFilter.label} · {cameraStatus === 'live' ? 'Camera ready' : isNative ? 'Open camera' : 'Choose photo'}</span>
               </div>
 
+              <div className="capture-control-row">
+                <button type="button" className="capture-control-button" aria-label="Open photo journal" onClick={openLibrary}><Images strokeWidth={1.6} /></button>
+                <button type="button" className="capture-primary-shutter" aria-label="Take photo" onClick={() => { playTap(); triggerHaptic([12]); handleNativeCamera(); }} />
+                <button type="button" className="capture-control-button" aria-label="Flip camera" disabled={cameraStatus !== 'live'} onClick={() => { playTap(); setFacingMode((mode) => mode === 'environment' ? 'user' : 'environment'); }}><SwitchCamera strokeWidth={1.6} /></button>
+              </div>
+              <p className="capture-photo-mode">PHOTO</p>
+
               {/* Real photo-filter strip (Instagram/Snap style) */}
-              <div className="capture-filter-strip" aria-label="Camera filters">
+              <div className="capture-filter-strip" aria-label="Camera filters" hidden={!filtersOpen}>
                 {CAPTURE_FILTERS.map((filter) => (
                   <button
                     key={filter.id}

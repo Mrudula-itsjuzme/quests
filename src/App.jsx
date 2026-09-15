@@ -10,6 +10,7 @@ import { RequireOnboarding } from './features/auth/RequireOnboarding';
 import { useMotionReducedPreference } from './lib/useMotionPreference';
 
 // Lazy load route components
+const WelcomeTour = React.lazy(() => import('./features/auth/WelcomeTour').then(m => ({ default: m.WelcomeTour })));
 const LandingPage = React.lazy(() => import('./features/auth/LandingPage').then(m => ({ default: m.LandingPage })));
 const AuthPage = React.lazy(() => import('./features/auth/AuthPage').then(m => ({ default: m.AuthPage })));
 const OnboardingPage = React.lazy(() => import('./features/onboarding/OnboardingPage').then(m => ({ default: m.OnboardingPage })));
@@ -59,6 +60,7 @@ function App() {
         <Suspense fallback={<AppLoading />}>
           <Routes>
             <Route path="/" element={<LandingPage />} />
+            <Route path="/welcome" element={<WelcomeTour />} />
             <Route path="/sign-in" element={<AuthPage mode="sign-in" />} />
             <Route path="/sign-up" element={<AuthPage mode="sign-up" />} />
             <Route element={<ProtectedRoute />}>

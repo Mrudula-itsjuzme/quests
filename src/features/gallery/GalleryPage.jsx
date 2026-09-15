@@ -2,18 +2,16 @@ import { useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useCaptures, useSpecies } from '../quests/queries';
 import { playTap } from '../../lib/useSoundEffects';
-import { DiscoveryCard } from '../world/DiscoveryCard';
+import { SpeciesDetail } from './SpeciesDetail';
+import { useJournalPreferences } from './useJournalPreferences';
 import { Icon } from '../../components/Icon';
 import { CaptureImage } from '../../components/CaptureImage';
 
 const ELEMENT_TABS = [
-  { id: 'all', label: 'All', emoji: '🌍' },
-  { id: 'Fire', label: 'Fire', emoji: '🔥' },
-  { id: 'Water', label: 'Water', emoji: '💧' },
-  { id: 'Grass', label: 'Grass', emoji: '🌿' },
-  { id: 'Earth', label: 'Earth', emoji: '🪨' },
-  { id: 'Sky', label: 'Sky', emoji: '☁️' },
-  { id: 'familiars', label: 'Fauna', emoji: '🦎' },
+  { id: 'all', label: 'All' },
+  { id: 'wildlife', label: 'Wildlife' },
+  { id: 'places', label: 'Places' },
+  { id: 'favorites', label: 'Favourites' },
 ];
 
 const RARITY_ORDER = [5, 4, 3, 2, 1];
@@ -28,6 +26,7 @@ const SORT_OPTIONS = [
 ];
 
 export function GalleryPage() {
+  const {favorites,toggleFavorite,markViewed} = useJournalPreferences();
   const { data: captures, isLoading: capturesLoading } = useCaptures();
   const { data: species, isLoading: speciesLoading } = useSpecies();
   const [activeTab, setActiveTab] = useState('all');
@@ -35,8 +34,6 @@ export function GalleryPage() {
   const [selectedCard, setSelectedCard] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
-  const [flippedCardId, setFlippedCardId] = useState(null);
-  const [deckIndex, setDeckIndex] = useState(0);
   const isLoading = capturesLoading || speciesLoading;
 
   const collection = useMemo(
@@ -47,10 +44,11 @@ export function GalleryPage() {
   const displayList = useMemo(() => {
     const speciesById = new Map((species || []).map((s) => [s.id, s]));
     let filtered = collection;
-    if (activeTab !== 'all') {
-      filtered = activeTab === 'familiars'
-        ? collection.filter((c) => (speciesById.get(c.speciesId)?.category || c.category) === 'Fauna')
-        : collection.filter((c) => (speciesById.get(c.speciesId)?.element || c.element || 'Earth') === activeTab);
+    if (activeTab === 'favorites') {
+      filtered = collection.filter(c=>favorites.includes(c.id));
+    } else if (activeTab !== 'all') {
+      const categories = { wildlife: ['Fauna'], flora: ['Flora'], places: ['Landscape', 'Heritage'] };
+      filtered = collection.filter((c) => categories[activeTab]?.includes(speciesById.get(c.speciesId)?.category || c.category));
     }
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
@@ -65,24 +63,13 @@ export function GalleryPage() {
       if (sortBy === 'recent') return new Date(b.capturedAt) - new Date(a.capturedAt);
       return byRarity(a) - byRarity(b) || new Date(b.capturedAt) - new Date(a.capturedAt);
     });
-  }, [collection, species, activeTab, sortBy, searchQuery]);
+  }, [collection, species, activeTab, sortBy, searchQuery, favorites]);
 
-  const sRankCount = collection.filter((c) => c.rarityStars === 5).length;
-  const totalXp = collection.reduce((sum, c) => sum + (c.xpAwarded ?? Math.max(25, Number(c.rarityStars || 1) * 25)), 0);
-  const deckList = useMemo(() => {
-    if (displayList.length < 2) return displayList;
-    const start = deckIndex % displayList.length;
-    return [...displayList.slice(start), ...displayList.slice(0, start)];
-  }, [displayList, deckIndex]);
-
-  const moveDeck = (direction) => {
-    playTap();
-    setFlippedCardId(null);
-    setDeckIndex((current) => {
-      if (displayList.length < 2) return 0;
-      return (current + direction + displayList.length) % displayList.length;
-    });
-  };
+  const speciesCount = new Set(collection.filter((c) => ['Fauna', 'Flora'].includes((species || []).find((entry) => entry.id === c.speciesId)?.category || c.category)).map((c) => c.speciesId || c.itemName || c.cardTitle).filter(Boolean)).size;
+  const placeCount = new Set(collection.map((c) => {
+    const category = (species || []).find((entry) => entry.id === c.speciesId)?.category || c.category;
+    return ['Landscape', 'Heritage'].includes(category) ? (c.speciesId || c.itemName || c.cardTitle) : null;
+  }).filter(Boolean)).size;
 
   return (
     <main className="gallery-v2-shell">
@@ -102,7 +89,7 @@ export function GalleryPage() {
         ) : (
           <>
             <div className="gallery-title-lockup">
-              <h1>My Library</h1>
+              <h1>My Journal</h1>
             </div>
             <button type="button" className="gallery-icon-btn" aria-label="Search" onClick={() => setShowSearch(true)}>
               <Icon name="search" />
@@ -113,15 +100,10 @@ export function GalleryPage() {
 
       {/* ── Stats strip ── */}
       <section className="library-hero-panel" aria-label="Library summary">
-        <div>
-          <span className="library-kicker">Collection progress</span>
-          <p>{collection.length} discoveries · {sRankCount} five-star</p>
-        </div>
         <dl className="gallery-v2-stats">
-          <div className="gallery-v2-stat">
-            <dt>XP</dt>
-            <dd>{totalXp.toLocaleString()}</dd>
-          </div>
+          <div className="gallery-v2-stat"><dd>{collection.length}</dd><dt>Captures</dt></div>
+          <div className="gallery-v2-stat"><dd>{speciesCount}</dd><dt>Species</dt></div>
+          <div className="gallery-v2-stat"><dd>{placeCount}</dd><dt>Places</dt></div>
         </dl>
       </section>
 
@@ -132,16 +114,15 @@ export function GalleryPage() {
             key={tab.id}
             type="button"
             className={`gallery-v2-tab ${activeTab === tab.id ? 'active' : ''}`}
-            onClick={() => { playTap(); setActiveTab(tab.id); setDeckIndex(0); setFlippedCardId(null); }}
+            onClick={() => { playTap(); setActiveTab(tab.id); }}
           >
-            <span>{tab.emoji}</span>
             {tab.label}
           </button>
         ))}
       </div>
 
       {/* ── Sort row ── */}
-      {displayList.length > 0 && (
+      {displayList.length > 0 && showSearch && (
         <div className="gallery-v2-sort-row">
           <span className="gallery-v2-count">{displayList.length} {displayList.length === 1 ? 'card' : 'cards'}</span>
           <div className="gallery-sort-pills">
@@ -150,7 +131,7 @@ export function GalleryPage() {
                 key={opt.value}
                 type="button"
                 className={`gallery-sort-pill ${sortBy === opt.value ? 'active' : ''}`}
-                onClick={() => { playTap(); setSortBy(opt.value); setDeckIndex(0); setFlippedCardId(null); }}
+                onClick={() => { playTap(); setSortBy(opt.value); }}
               >
                 {opt.label}
               </button>
@@ -174,8 +155,8 @@ export function GalleryPage() {
             <span className="library-loop-kicker">Collection loop</span>
             <h3>
               {collection.length === 0
-                ? 'Start your Library.'
-                : `No ${activeTab === 'familiars' ? 'Fauna' : activeTab} finds yet.`}
+                ? 'Start your Journal.'
+                : searchQuery ? 'No matching discoveries.' : `No ${(ELEMENT_TABS.find((tab) => tab.id === activeTab)?.label || 'matching').toLowerCase()} finds yet.`}
             </h3>
             <p>
               {collection.length === 0
@@ -188,16 +169,15 @@ export function GalleryPage() {
         /* ── Instagram-style photo grid ── */
         <div className="gallery-v2-grid">
           <>
-            {deckList.map((card, i) => {
+            {displayList.map((card, i) => {
               const stars = card.rarityStars ?? 1;
               const speciesEntry = (species || []).find((s) => s.id === card.speciesId);
               const gradeColor = GRADE_COLORS[stars] || GRADE_COLORS[1];
-              const isFlipped = flippedCardId === card.id;
               return (
                 <motion.button
                   key={card.id}
                   type="button"
-                  className={`gallery-v2-card rank-${stars} ${i === 0 ? 'gallery-v2-card-featured is-flippable' : ''} ${isFlipped ? 'is-flipped' : ''}`}
+                  className={`gallery-v2-card rank-${stars}`}
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
@@ -205,12 +185,10 @@ export function GalleryPage() {
                   whileTap={{ scale: 0.95 }}
                   onClick={() => {
                     playTap();
-                    if (i === 0 && !isFlipped) setFlippedCardId(card.id);
-                    else setSelectedCard(card);
+                    markViewed(card.id);
+                    setSelectedCard(card);
                   }}
-                  aria-label={i === 0 && !isFlipped
-                    ? `Flip ${card.itemName}, ${stars} star rank`
-                    : `Open ${card.itemName}, ${stars} star rank`}
+                  aria-label={`Open ${card.itemName || card.cardTitle}, ${stars} star rank`}
                 >
                   <div className="gallery-card-flipper">
                     <div className="gallery-card-face gallery-card-front">
@@ -236,28 +214,12 @@ export function GalleryPage() {
                         </span>
                       </div>
                     </div>
-                    {i === 0 && (
-                      <div className="gallery-card-face gallery-card-back" aria-hidden={!isFlipped}>
-                        <span className="gallery-card-back-rarity">{stars}★ discovery</span>
-                        <strong>{card.itemName || card.cardTitle}</strong>
-                        <p>{card.notes || `A ${speciesEntry?.element || card.element || 'wild'} find saved to your collection.`}</p>
-                        <dl>
-                          <div><dt>Element</dt><dd>{speciesEntry?.element || card.element || 'Wild'}</dd></div>
-                          <div><dt>XP earned</dt><dd>{card.xpAwarded ?? Math.max(25, stars * 25)}</dd></div>
-                        </dl>
-                        <span className="gallery-card-back-action">Tap again for details</span>
-                      </div>
-                    )}
+
                   </div>
                 </motion.button>
               );
             })}
-            {displayList.length > 1 && (
-              <div className="gallery-deck-controls" aria-label="Browse collection cards">
-                <button type="button" onClick={() => moveDeck(-1)} aria-label="Previous collection card">‹</button>
-                <button type="button" onClick={() => moveDeck(1)} aria-label="Next collection card">›</button>
-              </div>
-            )}
+
           </>
         </div>
       )}
@@ -274,13 +236,15 @@ export function GalleryPage() {
             animate={{ backgroundColor: 'rgba(0,0,0,0.88)' }}
             exit={{ backgroundColor: 'rgba(0,0,0,0)' }}
           >
-            <DiscoveryCard
+            <SpeciesDetail
+              key={selectedCard.id}
               card={selectedCard}
               species={species}
-              layoutIdPrefix="gallery-"
-              onAddToLibrary={() => setSelectedCard(null)}
-              onShare={() => setSelectedCard(null)}
-              onClose={() => setSelectedCard(null)}
+              collection={collection}
+              onSelect={card=>{markViewed(card.id);setSelectedCard(card);}}
+              favorite={favorites.includes(selectedCard.id)}
+              onFavorite={()=>toggleFavorite(selectedCard.id)}
+              onClose={()=>setSelectedCard(null)}
             />
           </motion.div>
         )}
