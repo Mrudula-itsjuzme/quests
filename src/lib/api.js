@@ -6,6 +6,7 @@
 // `npm run build:native` fails the build if VITE_API_BASE_URL is missing, so a
 // native bundle can never reach this line with a relative base.
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+import { logError } from './logger';
 
 export function normalizeTimezone(timezone) {
   const value = typeof timezone === 'string' && timezone.trim() ? timezone.trim() : 'UTC';
@@ -71,13 +72,9 @@ async function request(path, { method = 'GET', body, token, idempotencyKey, sign
           err.name = 'AbortError';
           throw err;
         }
-        if (typeof console !== 'undefined') {
-          console.error('Wild Realm API request failed', {
-            baseUrl: API_BASE_URL,
-            path,
-            method,
-            message: error?.message,
-          });
+        logError('api_network_error', error, { path, method });
+        if (typeof window !== 'undefined' && !navigator.onLine) {
+          window.dispatchEvent(new CustomEvent('habbit-notice', { detail: 'No connection — check your network and try again.' }));
         }
         throw new ApiError(0, 'network_unavailable');
       }
@@ -94,6 +91,9 @@ async function request(path, { method = 'GET', body, token, idempotencyKey, sign
       }
 
       if (!response.ok) {
+        if (response.status === 401 && typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('habbit-auth-unauthorized', { detail: payload?.error }));
+        }
         throw new ApiError(response.status, payload?.error?.code, payload?.error?.requestId, payload?.error?.reason);
       }
       return payload;
@@ -617,10 +617,10 @@ export function createApiClient(getToken) {
       if (token === 'guest') return guestDelay(GUEST_REWARDS, 200);
       return request('/rewards', { signal, token });
     },
-    claimRewards: async () => {
+    claimRewards: async (idempotencyKey) => {
       const token = await getToken();
       if (token === 'guest') return guestDelay([{ level: 15 }], 200);
-      return request('/rewards/claim', { method: 'POST', token });
+      return request('/rewards/claim', { method: 'POST', idempotencyKey: idempotencyKey || newIdempotencyKey(), token });
     },
     getNotifications: async (signal) => {
       const token = await getToken();

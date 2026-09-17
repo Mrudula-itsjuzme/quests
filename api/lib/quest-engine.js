@@ -280,9 +280,12 @@ export class QuestEngine {
     return this.repository.listRewards(identity.id);
   }
 
-  async claimRewards(identity) {
+  async claimRewards(identity, idempotencyKey) {
     const user = await this.repository.ensureUser(identity);
-    return this.repository.claimRewards(user.id);
+    if (!idempotencyKey) return this.repository.claimRewards(user.id);
+    return this.repository.runIdempotent(user.id, 'claim-rewards', idempotencyKey, async () => {
+      return this.repository.claimRewards(user.id);
+    });
   }
 
   async notifications(identity) {

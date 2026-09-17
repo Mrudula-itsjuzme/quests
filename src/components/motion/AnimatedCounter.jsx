@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { animate, useMotionValue } from 'framer-motion';
+import { animate, useMotionValue, useReducedMotion } from 'framer-motion';
+import { useMotionReducedPreference } from '../../lib/useMotionPreference';
 
 const defaultFormatter = (val) => Math.round(val).toLocaleString();
 
@@ -7,8 +8,17 @@ export function AnimatedCounter({ value, duration = 0.8, prefix = '', suffix = '
   const count = useMotionValue(value);
   const [displayValue, setDisplayValue] = useState(formatter(value));
   const isFirstRender = useRef(true);
+  const systemReduced = useReducedMotion();
+  const calm = useMotionReducedPreference();
+  const reduced = systemReduced || calm;
 
   useEffect(() => {
+    if (reduced) {
+      count.set(value);
+      setDisplayValue(formatter(value));
+      isFirstRender.current = false;
+      return;
+    }
     if (isFirstRender.current) {
       isFirstRender.current = false;
       return;
@@ -23,7 +33,7 @@ export function AnimatedCounter({ value, duration = 0.8, prefix = '', suffix = '
     });
 
     return () => controls.stop();
-  }, [value, duration, count, formatter]);
+  }, [value, duration, count, formatter, reduced]);
 
-  return <span>{prefix}{displayValue}{suffix}</span>;
+  return <span>{prefix}{reduced ? formatter(value) : displayValue}{suffix}</span>;
 }

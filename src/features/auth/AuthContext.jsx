@@ -4,6 +4,7 @@ import { App } from '@capacitor/app';
 import { Browser } from '@capacitor/browser';
 import { supabase, supabaseConfigured } from '../../lib/supabase';
 import { AccountQueryBoundary } from './AccountQueryBoundary';
+import { logError } from '../../lib/logger';
 
 const AuthContext = createContext(null);
 
@@ -46,6 +47,28 @@ export function AuthProvider({ children }) {
   }, []);
 
   useEffect(() => {
+    // Server-side revocation path. When the API returns 401 (e.g. the user
+    // was suspended or the token was revoked server-side) we clear the local
+    // session state so the UI re-gates immediately. We do NOT call
+    // supabase.auth.signOut() here intentionally: the Supabase token may still
+    // be valid (the server revoked its own refresh token, not Supabase's), and
+    // calling signOut() would trigger a redundant round-trip to an auth
+    // endpoint that is unrelated to the revocation. If the user re-signs in via
+    // Supabase within the token TTL they will be let through by the server again
+    // only if their account status is restored.
+    const handleUnauthorized = () => {
+      setSession(null);
+      setIsGuest(false);
+      localStorage.removeItem('habbit_guest_mode');
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('habbit-notice', { detail: 'Your session has expired. Please sign in again.' }));
+      }
+    };
+    window.addEventListener('habbit-auth-unauthorized', handleUnauthorized);
+    return () => window.removeEventListener('habbit-auth-unauthorized', handleUnauthorized);
+  }, []);
+
+  useEffect(() => {
     if (!supabaseConfigured || !Capacitor.isNativePlatform()) return undefined;
     let listener;
     App.addListener('appUrlOpen', async ({ url }) => {
@@ -54,7 +77,7 @@ export function AuthProvider({ children }) {
       const code = callback.searchParams.get('code');
       if (code) {
         const { error } = await supabase.auth.exchangeCodeForSession(code);
-        if (error) console.error('Native OAuth callback failed', { message: error.message });
+        if (error) logError('oauth_callback_failed', error);
         else await Browser.close();
       }
     }).then((handle) => { listener = handle; });

@@ -86,3 +86,23 @@ Other edits appeared in this shared checkout during the pass (including migratio
 - Species catalogue loading no longer blocks rendering already-loaded captures. Catalogue failure has its own recoverable notice.
 - Onboarding refuses to edit a blank profile when the existing account request failed; retry must succeed first.
 - Verified 26 affected App/Journal/onboarding tests. Corrected older empty-journal test fixtures that had returned 404 rather than a successful empty capture list. Lint/typecheck passed before final test/CSS additions; whitespace check passed.
+
+### Real PostgreSQL verification on an isolated local instance — 2026-09-17
+
+- Used installed PostgreSQL 16 in a newly initialized `/tmp` cluster on loopback port 55439. No configured deployment database or user records were touched.
+- Current clean baseline was `8015bbf` (app version 1.2.0). Its full suite passed **280 tests with no skipped files**, including all 35 existing PostgreSQL tests.
+- Added real-SQL profile coverage; it initially failed with `column u.status does not exist`. Fixed search to use `account_status`, restored inactive direct-profile/follow filtering, and exposed persisted status through the user mapping.
+- All **36 PostgreSQL tests passed** after the status fixes. Expanded the new test to check literal wildcard search and absence of private preferences from public search responses; that targeted test passed after those additional fixes.
+- Database migrations ran successfully and their idempotent rerun passed on this isolated instance. This verifies local SQL behavior, not live Supabase connectivity, deployment migrations, production role privileges, backups or capacity.
+
+### Retake identity regression on 1.2.0
+
+- Current hook retained a single mutable key after a failed capture and regenerated it on every candidate retry. A different retaken photo could reuse the old key; a retry of the same candidate could lose its deduplication identity.
+- Request identity now derives from capture ID and candidate index. Verified all three input paths generate a capture ID; legacy callers without one retain a generated key.
+- Four capture/retry tests passed, including failed candidate retry and switching to a new photo before the failed request succeeds. No deployment performed.
+
+### Small-animation reliability
+
+- Animated counters now respect system reduced motion and the live Calm Motion setting. Enabling it stops an active count animation and displays the actual value immediately.
+- Floating XP previously waited for an exit callback to hide, while its parent waited for that callback to start hiding. It now completes after 1.2 seconds, cancels callbacks on unmount, and keeps the reward readable without travel/scale animation under reduced motion.
+- Five affected counter/XP/quest-detail tests passed; the two level-up tests also passed in the preceding targeted run. These are interaction tests, not fresh visual/device evidence.

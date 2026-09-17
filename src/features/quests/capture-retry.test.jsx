@@ -15,3 +15,18 @@ it('reuses capture identity after a failed response and separates candidate conf
   await act(async () => { await result.current.mutateAsync({ ...bundle, chosenCandidateIndex: 0 }); });
   expect(mocks.createCapture.mock.calls[2][1]).not.toBe(mocks.createCapture.mock.calls[1][1]);
 });
+
+it('keeps candidate retries stable and gives a retaken photo a separate identity', async () => {
+  mocks.createCapture.mockReset();
+  mocks.createCapture.mockRejectedValue(new Error('connection interrupted'));
+  const client = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
+  const wrapper = ({ children }) => <QueryClientProvider client={client}>{children}</QueryClientProvider>;
+  const { result } = renderHook(() => useCaptureItem(), { wrapper });
+  const original = { captureId: '11111111-1111-4111-8111-111111111111', chosenCandidateIndex: 1 };
+  for (const bundle of [original, { ...original }, { ...original, captureId: '22222222-2222-4222-8222-222222222222' }]) {
+    await act(async () => { await expect(result.current.mutateAsync(bundle)).rejects.toThrow('connection interrupted'); });
+  }
+  const keys = mocks.createCapture.mock.calls.map(call => call[1]);
+  expect(keys[0]).toBe(keys[1]);
+  expect(keys[2]).not.toBe(keys[0]);
+});

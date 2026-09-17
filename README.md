@@ -53,7 +53,7 @@ The visual system leans into quiet field-journal textures, cream surfaces, fores
 ## What is already built
 
 - **Quest engine** with daily Mind, Body, and Discovery quests, weekly photo quests, and monthly expeditions.
-- **Capture and verification flow** with private upload references, review decisions, duplicate-proof protections, and idempotent mutations.
+- **Capture and verification flow** with private upload references, review decisions, perceptual-hash duplicate checks, and server-authoritative idempotent mutations.
 - **World exploration** with curated hotspots, bounding-box/category queries, satellite imagery, OSM fallback, and personal GPS capture clusters.
 - **Progression economy** with XP, coins, streaks, milestones, reward claims, collectible hooks, and a normalized six-tier explorer ladder.
 - **Community layer** with feed, leaderboard, public profiles, follower counts, explorer stats, verified discovery grids, and searchable users.

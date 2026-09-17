@@ -14,6 +14,7 @@ import { MagneticButton } from './motion/MagneticButton';
 import { WorldAmbience } from './WorldAmbience';
 import { useAndroidBackButton } from '../lib/useAndroidBackButton';
 import { DesktopSidebar } from './DesktopSidebar';
+import { ErrorBoundary } from './ErrorBoundary';
 
 const THEME_KEY = 'wild-realm-theme';
 
@@ -294,9 +295,11 @@ export function AppShell() {
 
       <AnimatePresence>
         {captureOpen && (
-          <Suspense fallback={<div className="camera-route-loading" role="status" aria-live="polite"><Icon name="camera" /></div>}>
-            <CaptureFlow onClose={() => setCaptureOpen(false)} />
-          </Suspense>
+          <ErrorBoundary onReset={() => setCaptureOpen(false)}>
+            <Suspense fallback={<div className="camera-route-loading" role="status" aria-live="polite"><Icon name="camera" /></div>}>
+              <CaptureFlow onClose={() => setCaptureOpen(false)} />
+            </Suspense>
+          </ErrorBoundary>
         )}
       </AnimatePresence>
 

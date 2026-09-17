@@ -1,4 +1,5 @@
 import React from 'react';
+import { logError } from '../lib/logger';
 
 export class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -11,12 +12,18 @@ export class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error('Uncaught error caught by ErrorBoundary:', error, errorInfo);
+    logError('error_boundary_caught', error, {
+      componentStack: errorInfo?.componentStack?.slice(0, 400),
+    });
   }
 
   handleReset = () => {
     this.setState({ hasError: false, error: null });
-    window.location.reload();
+    if (typeof this.props.onReset === 'function') {
+      this.props.onReset();
+    } else {
+      window.location.reload();
+    }
   };
 
   render() {

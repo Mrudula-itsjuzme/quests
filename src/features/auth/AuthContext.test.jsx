@@ -30,3 +30,20 @@ it('finishes loading when session restoration rejects', async () => {
   render(<AuthProvider><Probe /></AuthProvider>);
   await waitFor(() => expect(screen.getByText('anonymous:account')).toBeInTheDocument());
 });
+
+it('clears session and dispatches notice on habbit-auth-unauthorized event', async () => {
+  mocks.getSession.mockResolvedValue({ data: { session: { user: { id: 'alice' } } } });
+  render(<AuthProvider><Probe /></AuthProvider>);
+  expect(await screen.findByText('alice:account')).toBeInTheDocument();
+
+  const noticeSpy = vi.fn();
+  window.addEventListener('habbit-notice', noticeSpy);
+  
+  act(() => {
+    window.dispatchEvent(new CustomEvent('habbit-auth-unauthorized', { detail: { code: 'account_inactive' } }));
+  });
+
+  expect(screen.getByText('anonymous:account')).toBeInTheDocument();
+  expect(noticeSpy).toHaveBeenCalled();
+  window.removeEventListener('habbit-notice', noticeSpy);
+});

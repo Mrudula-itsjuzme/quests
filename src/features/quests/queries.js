@@ -1,4 +1,3 @@
-import { useRef } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useApiClient } from '../../lib/useApiClient';
 import { newIdempotencyKey } from '../../lib/api';
@@ -45,16 +44,11 @@ export function useSpecies() {
 export function useCaptureItem() {
   const api = useApiClient();
   const queryClient = useQueryClient();
-  const pendingKeyRef = useRef(null);
   return useMutation({
-    mutationFn: (bundle) => {
-      if (bundle?.chosenCandidateIndex != null || !pendingKeyRef.current) {
-        pendingKeyRef.current = newIdempotencyKey();
-      }
-      return api.createCapture(bundle, pendingKeyRef.current);
-    },
+    mutationFn: (bundle) => api.createCapture(bundle, bundle.captureId
+      ? `capture:${bundle.captureId}:${bundle.chosenCandidateIndex ?? 'identify'}`
+      : newIdempotencyKey()),
     onSuccess: () => {
-      pendingKeyRef.current = null;
       queryClient.invalidateQueries({ queryKey: ['captures'] });
       queryClient.invalidateQueries({ queryKey: ['world', 'hotspots'] });
     },
@@ -65,7 +59,7 @@ export function useAddCardToLibrary() {
   const api = useApiClient();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (captureId) => api.addCardToLibrary(captureId, newIdempotencyKey()),
+    mutationFn: (captureId) => api.addCardToLibrary(captureId, `card:add:${captureId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['captures'] });
       queryClient.invalidateQueries({ queryKey: ['world', 'hotspots'] });
@@ -264,7 +258,7 @@ export function useClaimRewards() {
   const api = useApiClient();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: () => api.claimRewards(),
+    mutationFn: () => api.claimRewards(newIdempotencyKey()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rewards'] });
       queryClient.invalidateQueries({ queryKey: ['me'] });

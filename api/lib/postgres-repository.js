@@ -33,17 +33,21 @@ export class PostgresQuestRepository {
        LEFT JOIN community_posts p ON p.user_id = u.id
        LEFT JOIN community_follows f1 ON f1.following_id = u.id
        LEFT JOIN community_follows f2 ON f2.follower_id = u.id
-       WHERE u.status NOT IN ('suspended', 'banned', 'deleted', 'deletion_requested')
+       WHERE u.account_status = 'active'
          AND u.display_name ILIKE $1
        GROUP BY u.id
        ORDER BY u.total_xp DESC
        LIMIT $2`,
-      [`%${query}%`, limit]
+      [`%${query.replace(/[\\%_]/g, '\\$&')}%`, limit]
     );
     return rows.map((r) => {
       const u = mapUser(r);
       return {
-        ...u,
+        id: u.id,
+        displayName: u.displayName,
+        totalXp: u.totalXp,
+        streakDays: u.streakDays,
+        primaryPath: u.primaryPath,
         userId: u.id,
         rankTitle: progressionEngine.rankTitleForXp(u.totalXp),
         stats: {
@@ -915,7 +919,7 @@ export class PostgresQuestRepository {
          LEFT JOIN community_follows followers ON followers.following_id = u.id
          LEFT JOIN community_follows following ON following.follower_id = u.id
          LEFT JOIN community_friendships f ON f.status = 'accepted' AND (f.requester_id = u.id OR f.addressee_id = u.id)
-         WHERE u.id = $2
+         WHERE u.id = $2 AND u.account_status = 'active'
          GROUP BY u.id`,
         [viewerId, profileUserId],
       ),
@@ -930,7 +934,7 @@ export class PostgresQuestRepository {
 
   async setCommunityFollow(viewerId, profileUserId, following) {
     if (viewerId === profileUserId) return null;
-    const exists = await this.pool.query('SELECT id FROM quest_users WHERE id = $1', [profileUserId]);
+    const exists = await this.pool.query("SELECT id FROM quest_users WHERE id = $1 AND account_status = 'active'", [profileUserId]);
     if (!exists.rows[0]) return null;
     if (following) {
       await this.pool.query(
@@ -1491,7 +1495,7 @@ function mapCommunityProfile(row, viewerId, recentPosts = []) {
   };
 }
 
-function mapUser(row) { return { id: row.id, displayName: row.display_name, timezone: row.timezone, totalXp: Number(row.total_xp), streakDays: Number(row.streak_days), lastStreakPeriod: row.last_streak_period, primaryPath: row.primary_path ?? null, reminderTime: row.reminder_time ? String(row.reminder_time).slice(0, 5) : null, motionPreference: row.motion_preference || 'system', onboardingCompletedAt: row.onboarding_completed_at ?? null, tourVersionSeen: Number(row.tour_version_seen || 0) }; }
+function mapUser(row) { return { id: row.id, status: row.account_status || 'active', displayName: row.display_name, timezone: row.timezone, totalXp: Number(row.total_xp), streakDays: Number(row.streak_days), lastStreakPeriod: row.last_streak_period, primaryPath: row.primary_path ?? null, reminderTime: row.reminder_time ? String(row.reminder_time).slice(0, 5) : null, motionPreference: row.motion_preference || 'system', onboardingCompletedAt: row.onboarding_completed_at ?? null, tourVersionSeen: Number(row.tour_version_seen || 0) }; }
 function mapDefinition(row) { return { id: row.id, title: row.title, description: row.description, category: row.category, rarity: row.rarity, cadence: row.cadence, verificationType: row.verification_type, subjectTag: row.subject_tag, targetValue: Number(row.target_value), unit: row.unit, cooldownDays: Number(row.cooldown_days), xpReward: Number(row.xp_reward), enabled: row.enabled, instructions: row.instructions || [] }; }
 function mapAssignment(row) { return { id: row.id, userId: row.user_id, definitionId: row.definition_id, title: row.title, description: row.description, category: row.category, rarity: row.rarity, cadence: row.cadence, verificationType: row.verification_type, subjectTag: row.subject_tag, targetValue: Number(row.target_value), progressValue: Number(row.progress_value), unit: row.unit, xpReward: Number(row.xp_reward), instructions: row.instructions || [], periodKey: row.period_key, status: row.status, assignedAt: row.assigned_at, startsAt: row.starts_at, expiresAt: row.expires_at, completedAt: row.completed_at, updatedAt: row.updated_at }; }
 function mapSubmission(row) { return { id: row.id, userId: row.user_id, assignmentId: row.assignment_id, verificationType: row.verification_type, status: row.status, imageHash: row.image_hash, confidence: row.confidence == null ? null : Number(row.confidence), metadata: row.metadata || {}, uploadId: row.upload_id, feedPosted: row.feed_posted, createdAt: row.created_at }; }

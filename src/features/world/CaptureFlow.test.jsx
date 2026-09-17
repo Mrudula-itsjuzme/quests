@@ -10,8 +10,8 @@ vi.mock('../quests/queries',()=>({
 vi.mock('../../lib/useCameraPreview',()=>({useCameraPreview:()=>({videoRef:{current:null},status:'unavailable'})}));
 vi.mock('../../lib/captureTelemetry',()=>({collectCaptureTelemetry:async()=>({capturedAt:'2026-09-15T10:00:00Z'})}));
 vi.mock('../../lib/useSoundEffects',()=>({playTap:()=>{}}));
-vi.mock('@capacitor/core',()=>({Capacitor:{isNativePlatform:()=>false}}));
-vi.mock('@capacitor/camera',()=>({Camera:{},CameraResultType:{},CameraSource:{}}));
+vi.mock('@capacitor/core',()=>({Capacitor:{isNativePlatform:vi.fn(()=>false)}}));
+vi.mock('@capacitor/camera',()=>({Camera:{requestPermissions:vi.fn(),getPhoto:vi.fn()},CameraResultType:{Uri:'uri'},CameraSource:{Camera:'camera'}}));
 it('previews a photo and allows retaking without submitting it',async()=>{
   const {container}=render(<MemoryRouter><CaptureFlow onClose={()=>{}}/></MemoryRouter>);
   const input=document.querySelector('input[type="file"]');
@@ -40,4 +40,35 @@ it('hands the original photo to Quests without identifying or posting it',async(
     expect(capture).not.toHaveBeenCalled();
     expect(onClose).toHaveBeenCalledOnce();
   } finally { global.fetch=previousFetch; }
+});
+
+import { Capacitor } from '@capacitor/core';
+import { Camera } from '@capacitor/camera';
+
+it('shows error stage for non-cancel camera errors', async () => {
+  Capacitor.isNativePlatform.mockReturnValue(true);
+  Camera.requestPermissions.mockResolvedValue({ camera: 'granted' });
+  Camera.getPhoto.mockRejectedValue(new Error('hardware failure'));
+  
+  render(<MemoryRouter><CaptureFlow onClose={()=>{}}/></MemoryRouter>);
+  
+  fireEvent.click(screen.getByRole('button', { name: 'Take photo' }));
+  
+  expect(await screen.findByText(/Could not open device camera/)).toBeInTheDocument();
+  Capacitor.isNativePlatform.mockReturnValue(false);
+});
+
+it('does not show error stage when user cancels camera', async () => {
+  Capacitor.isNativePlatform.mockReturnValue(true);
+  Camera.requestPermissions.mockResolvedValue({ camera: 'granted' });
+  Camera.getPhoto.mockRejectedValue(new Error('User cancelled photos app'));
+  
+  render(<MemoryRouter><CaptureFlow onClose={()=>{}}/></MemoryRouter>);
+  
+  fireEvent.click(screen.getByRole('button', { name: 'Take photo' }));
+  
+  // Wait a tick for promise rejection to settle
+  await new Promise(r => setTimeout(r, 10));
+  expect(screen.queryByText(/Could not open device camera/)).not.toBeInTheDocument();
+  Capacitor.isNativePlatform.mockReturnValue(false);
 });

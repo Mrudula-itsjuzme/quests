@@ -181,8 +181,12 @@ export function createApp(options = {}) {
   });
   app.use(helmet({
     crossOriginResourcePolicy: { policy: 'same-site' },
+    crossOriginOpenerPolicy: { policy: 'same-origin' },
+    crossOriginEmbedderPolicy: { policy: 'require-corp' },
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
     contentSecurityPolicy: {
       directives: {
+        upgradeInsecureRequests: [],
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
@@ -197,6 +201,10 @@ export function createApp(options = {}) {
       },
     },
   }));
+  app.use((req, res, next) => {
+    res.setHeader('Permissions-Policy', 'camera=self, microphone=()');
+    next();
+  });
   const corsMiddleware = cors({
     origin(origin, callback) {
       if (!origin || config.corsOrigins.includes(origin)) return callback(null, true);
@@ -239,6 +247,20 @@ export function createApp(options = {}) {
   app.use('/api', authLimiter);
   app.use('/api', authenticate);
   app.use('/api', readLimiter);
+  app.use('/api', asyncRoute(async (req, res, next) => {
+    if (!req.identity?.id) return next();
+    const me = await engine.getMe(req.identity);
+    const BLOCKED_STATUSES = new Set(['suspended', 'banned', 'deleted']);
+    if (BLOCKED_STATUSES.has(me.status)) {
+      return res.status(403).json({ error: { code: 'account_inactive', requestId: req.id } });
+    }
+    const isDeletionRequestRoute = req.path.endsWith('/me/delete-request');
+    const isMeReadRoute = req.path.endsWith('/me') && req.method === 'GET';
+    if (me.status === 'deletion_requested' && !isDeletionRequestRoute && !isMeReadRoute) {
+      return res.status(403).json({ error: { code: 'account_inactive', requestId: req.id } });
+    }
+    next();
+  }));
   // Prometheus metrics (disabled in test by default). Internal endpoint:
   // runtime metrics leak dependency versions and request patterns, so require
   // the same CRON_SECRET bearer credential the scheduler uses.
@@ -259,18 +281,9 @@ export function createApp(options = {}) {
   }
   app.get('/api/v1/me', asyncRoute(async (req, res) => {
     const me = await engine.getMe(req.identity);
-    const BLOCKED_STATUSES = new Set(['suspended', 'banned', 'deleted']);
-    if (BLOCKED_STATUSES.has(me.status)) {
-      return res.status(403).json({ error: { code: 'account_inactive', requestId: req.id } });
-    }
     return res.json(me);
   }));
   app.patch('/api/v1/me', writeLimiter, asyncRoute(async (req, res) => {
-    const me = await engine.getMe(req.identity);
-    const INACTIVE_STATUSES = new Set(['suspended', 'banned', 'deleted', 'deletion_requested']);
-    if (INACTIVE_STATUSES.has(me.status)) {
-      return res.status(403).json({ error: { code: 'account_inactive', requestId: req.id } });
-    }
     return res.json(await engine.updateMe(req.identity, parse(profileSchema, req.body)));
   }));
   app.get('/api/v1/quests/definitions', asyncRoute(async (req, res) => sendCachedJson(req, res, await engine.definitions(req.identity, {
@@ -559,7 +572,7 @@ export function createApp(options = {}) {
   app.get('/api/v1/feed', asyncRoute(async (req, res) => res.json(redactPublicPayload(await engine.feed(req.identity)))));
   app.get('/api/v1/leaderboard', asyncRoute(async (req, res) => res.json(redactPublicPayload(await engine.leaderboard(req.identity)))));
   app.get('/api/v1/rewards', asyncRoute(async (req, res) => res.json(await engine.rewards(req.identity))));
-  app.post('/api/v1/rewards/claim', writeLimiter, asyncRoute(async (req, res) => res.json(await engine.claimRewards(req.identity))));
+  app.post('/api/v1/rewards/claim', writeLimiter, asyncRoute(async (req, res) => res.json(await engine.claimRewards(req.identity, requireIdempotency(req)))));
   app.get('/api/v1/notifications', asyncRoute(async (req, res) => res.json(await engine.notifications(req.identity))));
   app.post('/api/v1/notifications/:notificationId/read', writeLimiter, asyncRoute(async (req, res) => res.json(await engine.markNotificationRead(req.identity, parse(notificationIdSchema, req.params.notificationId)))));
   app.post('/api/v1/admin/submissions/:submissionId/review', writeLimiter, asyncRoute(async (req, res) => {

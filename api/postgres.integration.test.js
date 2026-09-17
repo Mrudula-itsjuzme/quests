@@ -49,6 +49,25 @@ suite('PostgreSQL quest repository', () => {
     expect(runs.rows).toEqual([{ status: 'completed', assignment_count: 10 }]);
   });
 
+  it('searches real profiles and hides deletion-requested accounts from direct lookup and follow', async () => {
+    await repository.ensureUser(identity);
+    const target = { id: 'profile-target', displayName: 'Fern Explorer', timezone: 'UTC' };
+    await repository.ensureUser(target);
+    const found = await repository.searchUsers('Fern');
+    expect(found).toHaveLength(1);
+    expect(found[0]).not.toHaveProperty('timezone');
+    expect(found[0]).not.toHaveProperty('reminderTime');
+    expect(await repository.searchUsers('%')).toHaveLength(0);
+    expect((await repository.getUser(target.id)).status).toBe('active');
+    expect(await repository.getCommunityProfile(identity.id, target.id)).not.toBeNull();
+    await repository.requestAccountDeletion(target.id);
+    expect((await repository.getUser(target.id)).status).toBe('deletion_requested');
+    expect(await repository.searchUsers('Fern')).toHaveLength(0);
+    expect(await repository.getCommunityProfile(identity.id, target.id)).toBeNull();
+    expect(await repository.setCommunityFollow(identity.id, target.id, true)).toBeNull();
+    expect((await pool.query('SELECT * FROM community_follows WHERE following_id = $1', [target.id])).rows).toHaveLength(0);
+  });
+
   it('credits an assignment only once under replay', async () => {
     const [assignment] = await engine.generateDaily(identity, 'integration-daily-001');
     const first = await engine.completeLegacy(identity, assignment.id);

@@ -1342,6 +1342,42 @@ describe('Media Contract', () => {
     const response = await request(app).get('/api/v1/captures/11111111-1111-4111-8111-111111111111/media');
     expect(response.status).toBe(404);
   });
+
+  it('enforces account_inactive across all API routes for suspended, banned, deleted, or deletion_requested users', async () => {
+    const repository = new MemoryQuestRepository({ definitions: questDefinitions });
+    const app = createApp({ config: testConfig(), repository });
+
+    const me = await repository.ensureUser({ id: testConfig().DEV_USER_ID, displayName: 'Test User', timezone: 'UTC' });
+    repository.users.get(me.id).status = 'suspended';
+
+    const activeRes = await request(app).get('/api/v1/quests/active');
+    expect(activeRes.status).toBe(403);
+    expect(activeRes.body.error.code).toBe('account_inactive');
+
+    const claimRes = await request(app).post('/api/v1/rewards/claim').set('Idempotency-Key', 'test-claim-key-1');
+    expect(claimRes.status).toBe(403);
+    expect(claimRes.body.error.code).toBe('account_inactive');
+
+    const postRes = await request(app).post('/api/v1/community/posts').set('Idempotency-Key', 'test-post-key-1').send({ cardId: '11111111-1111-4111-8111-111111111111' });
+    expect(postRes.status).toBe(403);
+    expect(postRes.body.error.code).toBe('account_inactive');
+  });
+
+  it('enforces idempotency key on /api/v1/rewards/claim', async () => {
+    const repository = new MemoryQuestRepository({ definitions: questDefinitions });
+    const app = createApp({ config: testConfig(), repository });
+
+    const missingKeyRes = await request(app).post('/api/v1/rewards/claim');
+    expect(missingKeyRes.status).toBe(400);
+    expect(missingKeyRes.body.error.code).toBe('idempotency_key_required');
+
+    const validKeyRes = await request(app).post('/api/v1/rewards/claim').set('Idempotency-Key', 'claim-key-100');
+    expect(validKeyRes.status).toBe(200);
+
+    const replayedRes = await request(app).post('/api/v1/rewards/claim').set('Idempotency-Key', 'claim-key-100');
+    expect(replayedRes.status).toBe(200);
+    expect(replayedRes.body).toEqual(validKeyRes.body);
+  });
 });
 
 function highConfidenceVisionProvider() {

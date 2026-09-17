@@ -1,6 +1,6 @@
 import { StartupScreen } from './components/StartupScreen';
 import React, { Suspense } from 'react';
-import { Navigate, Route, Routes, useNavigate, useLocation } from 'react-router-dom';
+import { Navigate, Route, Routes, useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { App as CapApp } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 import { MotionConfig } from 'framer-motion';
@@ -9,6 +9,7 @@ import { AuthProvider } from './features/auth/AuthContext';
 import { ProtectedRoute } from './features/auth/ProtectedRoute';
 import { RequireOnboarding } from './features/auth/RequireOnboarding';
 import { useMotionReducedPreference } from './lib/useMotionPreference';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 // Lazy load route components
 const WelcomeTour = React.lazy(() => import('./features/auth/WelcomeTour').then(m => ({ default: m.WelcomeTour })));
@@ -55,8 +56,16 @@ function App() {
       // 3. Otherwise exit
       CapApp.exitApp();
     });
+
+    const stateListener = CapApp.addListener('appStateChange', ({ isActive }) => {
+      if (isActive) {
+        import('./lib/queryClient').then(({ queryClient }) => queryClient.invalidateQueries());
+      }
+    });
+
     return () => {
       listener.then(l => l.remove());
+      stateListener.then(l => l.remove());
     };
   }, [location, navigate]);
 
@@ -70,18 +79,20 @@ function App() {
             <Route path="/sign-in" element={<AuthPage mode="sign-in" />} />
             <Route path="/sign-up" element={<AuthPage mode="sign-up" />} />
             <Route element={<ProtectedRoute />}>
-              <Route path="/onboarding" element={<OnboardingPage />} />
-              <Route element={<RequireOnboarding />}>
-                <Route path="/app" element={<AppShell />}>
-                  <Route index element={<WorldScreen />} />
-                  <Route path="quests" element={<QuestsPage />} />
-                  <Route path="community" element={<GuildPage />} />
-                  <Route path="rewards" element={<RewardsPage />} />
-                  <Route path="collection" element={<GalleryPage />} />
-                  <Route path="library" element={<GalleryPage />} />
-                  <Route path="profile" element={<ProfilePage />} />
-                  <Route path="community/user/:id" element={<PublicProfile />} />
-                  <Route path="admin/queue" element={<ModerationQueue />} />
+              <Route element={<ErrorBoundary><Outlet /></ErrorBoundary>}>
+                <Route path="/onboarding" element={<OnboardingPage />} />
+                <Route element={<RequireOnboarding />}>
+                  <Route path="/app" element={<AppShell />}>
+                    <Route index element={<WorldScreen />} />
+                    <Route path="quests" element={<QuestsPage />} />
+                    <Route path="community" element={<GuildPage />} />
+                    <Route path="rewards" element={<RewardsPage />} />
+                    <Route path="collection" element={<GalleryPage />} />
+                    <Route path="library" element={<GalleryPage />} />
+                    <Route path="profile" element={<ProfilePage />} />
+                    <Route path="community/user/:id" element={<PublicProfile />} />
+                    <Route path="admin/queue" element={<ModerationQueue />} />
+                  </Route>
                 </Route>
               </Route>
             </Route>

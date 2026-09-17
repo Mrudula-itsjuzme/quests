@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   build-android:
-    name: Build Android APK
+    name: Build Android Release APK
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -28,8 +28,15 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Build Web App
-        run: npm run build
+      - name: Build Web App for Native
+        env:
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+        run: |
+          if [ -z "$VITE_API_BASE_URL" ]; then
+            echo "::error::VITE_API_BASE_URL secret is required for native release builds."
+            exit 1
+          fi
+          npm run build:native
 
       - name: Setup Java
         uses: actions/setup-java@v5
@@ -41,15 +48,15 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
-      - name: Build Android APK
+      - name: Build Android Release APK
         working-directory: android
-        run: ./gradlew assembleDebug
+        run: ./gradlew assembleRelease
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v7
         with:
-          name: app-debug.apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: app-release-unsigned.apk
+          path: android/app/build/outputs/apk/release/app-release-unsigned.apk
 
   build-ios:
     name: Build iOS App
@@ -67,27 +74,81 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Build Web App
-        run: npm run build
+      - name: Build Web App for Native
+        env:
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+        run: |
+          if [ -z "$VITE_API_BASE_URL" ]; then
+            echo "::error::VITE_API_BASE_URL secret is required for native release builds."
+            exit 1
+          fi
+          npm run build:native
 
       - name: Sync Capacitor
         run: npx cap sync ios
 
-      - name: Build iOS App (Unsigned)
+      - name: Build iOS App
         working-directory: ios/App
+        env:
+          APPLE_CERT_BASE64: ${{ secrets.APPLE_CERTIFICATE_BASE64 }}
+          PROVISIONING_PROFILE_BASE64: ${{ secrets.PROVISIONING_PROFILE_BASE64 }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
         run: |
-          xcodebuild -project App.xcodeproj -scheme App -configuration Release CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO -derivedDataPath build build
-          # Archive the app bundle to a zip file for the release. Products are
-          # at build/Build/Products/Release-iphoneos under ios/App, so 4 levels
-          # up lands at ios/App/App-iOS-Unsigned.zip (matching the upload path).
-          cd build/Build/Products/Release-iphoneos
-          zip -r ../../../../App-iOS-Unsigned.zip App.app
+          if [ -n "$APPLE_CERT_BASE64" ] && [ -n "$PROVISIONING_PROFILE_BASE64" ]; then
+            echo "Certificate and profile found. Building signed release."
+            
+            # 1. Install cert into temporary keychain
+            KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+            security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+            security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+            security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+            
+            CERT_PATH=$RUNNER_TEMP/build_certificate.p12
+            echo -n "$APPLE_CERT_BASE64" | base64 --decode -o $CERT_PATH
+            security import $CERT_PATH -P "" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+            security list-keychains -d user -s $KEYCHAIN_PATH
+            
+            # 2. Install provisioning profile
+            PP_PATH=$RUNNER_TEMP/profile.mobileprovision
+            echo -n "$PROVISIONING_PROFILE_BASE64" | base64 --decode -o $PP_PATH
+            mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+            cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles/
+            
+            # 3. Create ExportOptions.plist
+            cat <<EOF > ExportOptions.plist
+            <?xml version="1.0" encoding="UTF-8"?>
+            <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+            <plist version="1.0">
+            <dict>
+              <key>method</key>
+              <string>app-store</string>
+              <key>manageAppVersionAndBuildNumber</key>
+              <true/>
+              <key>uploadSymbols</key>
+              <true/>
+            </dict>
+            </plist>
+            EOF
+
+            # 4. Archive and Export
+            xcodebuild -workspace App.xcworkspace -scheme App -configuration Release archive -archivePath build/App.xcarchive
+            xcodebuild -exportArchive -archivePath build/App.xcarchive -exportOptionsPlist ExportOptions.plist -exportPath build/exported
+            
+            mv build/exported/App.ipa ../../App-iOS-Signed.ipa
+          else
+            echo "No signing secrets found. Building unsigned release zip."
+            xcodebuild -project App.xcodeproj -scheme App -configuration Release CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO -derivedDataPath build build
+            cd build/Build/Products/Release-iphoneos
+            zip -r ../../../../App-iOS-Unsigned.zip App.app
+          fi
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v7
         with:
-          name: App-iOS-Unsigned.zip
-          path: ios/App/App-iOS-Unsigned.zip
+          name: App-iOS-Release
+          path: |
+            App-iOS-Unsigned.zip
+            App-iOS-Signed.ipa
 
   create-release:
     name: Create GitHub Release
@@ -104,17 +165,19 @@ jobs:
       - name: Download Android Artifact
         uses: actions/download-artifact@v7
         with:
-          name: app-debug.apk
+          name: app-release-unsigned.apk
 
       - name: Download iOS Artifact
         uses: actions/download-artifact@v7
         with:
-          name: App-iOS-Unsigned.zip
+          name: App-iOS-Release
+          path: ./ios-artifacts
 
       - name: Release
         uses: softprops/action-gh-release@v3
         with:
           fail_on_unmatched_files: true
           files: |
-            app-debug.apk
-            App-iOS-Unsigned.zip
+            app-release-unsigned.apk
+            ./ios-artifacts/App-iOS-Unsigned.zip
+            ./ios-artifacts/App-iOS-Signed.ipa

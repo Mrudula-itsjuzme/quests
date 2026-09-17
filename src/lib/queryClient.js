@@ -5,7 +5,7 @@ export const createQueryClient = () => new QueryClient({
   defaultOptions: {
     queries: {
       retry: (failureCount, error) => {
-        if (error?.name === 'AbortError' || error?.code === 'request_timeout') return false;
+        if (error?.name === 'AbortError') return false;
         if (error instanceof ApiError && error.status >= 400 && error.status < 500) return false;
         return failureCount < 2;
       },
