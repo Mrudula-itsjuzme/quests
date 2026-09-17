@@ -46,12 +46,8 @@ async function request(path, { method = 'GET', body, token, idempotencyKey, sign
   }
 
   let timeoutId;
-  let timerFired = false;
-  let timeoutReject;
   const timeoutPromise = new Promise((_, reject) => {
-    timeoutReject = reject;
     timeoutId = setTimeout(() => {
-      timerFired = true;
       controller.abort();
       reject(new ApiError(0, 'request_timeout'));
     }, 15000);
