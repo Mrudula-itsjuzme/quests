@@ -1,3 +1,4 @@
+import { PlaceDetail } from './PlaceDetail';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -5,7 +6,7 @@ import { useActiveQuests, useCaptures, useCollectibles, useCommunityPosts, useMa
 import { coinBalance, deriveGems, getEnergy } from '../../lib/playerEconomy';
 import { derivePlayerPresentation } from '../../lib/playerPresentation';
 import { timeOfDayPhase } from '../../lib/worldTime';
-import { buildCommunityHotspots, buildDiscoveryHotspots, mapCuratedHotspots, mergeHotspots } from '../../lib/discoveryHotspots';
+import { buildCommunityHotspots, buildDiscoveryHotspots, filterHotspotsNearOrigin, mapCuratedHotspots, mergeHotspots } from '../../lib/discoveryHotspots';
 import { WorldCanvas } from './WorldCanvas';
 import { WorldHud } from './WorldHud';
 import { pickWeather } from './WeatherLayer';
@@ -14,10 +15,9 @@ import { Icon } from '../../components/Icon';
 import { Geolocation } from '@capacitor/geolocation';
 import { Capacitor } from '@capacitor/core';
 import { CaptureImage } from '../../components/CaptureImage';
-import { useStepCounter } from '../../lib/useStepCounter';
-import { Footprints } from 'lucide-react';
+import { Search } from 'lucide-react';
 
-const CATEGORIES = ['All', 'Hotspots', 'Viewpoints', 'Culture', 'Parks', 'Waterfalls', 'Birding', 'Community'];
+const CATEGORIES = ['Places', 'Wildlife', 'Trails'];
 
 export function WorldScreen() {
   const { data: me, isLoading: meLoading } = useMe();
@@ -39,10 +39,10 @@ export function WorldScreen() {
   const navigate = useNavigate();
   const [lastKnownPosition, setLastKnownPosition] = useState(null);
   const [searchCenter, setSearchCenter] = useState(null);
-  const { data: scenicPlaces, isFetching: scenicLoading, isError: scenicError } = useScenicPlaces(searchCenter);
-  const stepCounter = useStepCounter();
+  const nearbyCenter = searchCenter || lastKnownPosition;
+  const { data: scenicPlaces, isFetching: scenicLoading, isError: scenicError } = useScenicPlaces(nearbyCenter);
 
-  const [selectedTag, setSelectedTag] = useState('All');
+  const [selectedTag, setSelectedTag] = useState('Places');
   const [searchQuery, setSearchQuery] = useState('');
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [selectedHotspot, setSelectedHotspot] = useState(null);
@@ -72,7 +72,7 @@ export function WorldScreen() {
   // Distances are only shown when the browser actually grants a position;
   // a denied or unavailable fix simply omits them.
   useEffect(() => {
-    let cancelled = false;
+    let watchId = null;
     const fetchLocation = async () => {
       try {
         if (Capacitor.isNativePlatform()) {
@@ -81,16 +81,20 @@ export function WorldScreen() {
             const request = await Geolocation.requestPermissions();
             if (request.location !== 'granted') return;
           }
-          const position = await Geolocation.getCurrentPosition({ enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 });
-          if (!cancelled) setLastKnownPosition({ lat: position.coords.latitude, lng: position.coords.longitude });
+          watchId = await Geolocation.watchPosition(
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
+            (position) => {
+              if (position) setLastKnownPosition({ lat: position.coords.latitude, lng: position.coords.longitude });
+            },
+          );
         } else {
           if (typeof navigator === 'undefined' || !navigator.geolocation) return;
-          navigator.geolocation.getCurrentPosition(
+          watchId = navigator.geolocation.watchPosition(
             (position) => {
-              if (!cancelled) setLastKnownPosition({ lat: position.coords.latitude, lng: position.coords.longitude });
+              setLastKnownPosition({ lat: position.coords.latitude, lng: position.coords.longitude });
             },
             () => {},
-            { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
           );
         }
       } catch {
@@ -98,7 +102,11 @@ export function WorldScreen() {
       }
     };
     fetchLocation();
-    return () => { cancelled = true; };
+    return () => {
+      if (watchId == null) return;
+      if (Capacitor.isNativePlatform()) Geolocation.clearWatch({ id: watchId });
+      else if (typeof navigator !== 'undefined' && navigator.geolocation) navigator.geolocation.clearWatch(watchId);
+    };
   }, []);
 
   // Explore shows two real layers: curated world hotspots served by
@@ -111,13 +119,18 @@ export function WorldScreen() {
     () => buildDiscoveryHotspots(captures, species, lastKnownPosition),
     [captures, species, lastKnownPosition],
   );
-  const scenic = useMemo(() => mapCuratedHotspots(scenicPlaces, searchCenter || lastKnownPosition), [scenicPlaces, searchCenter, lastKnownPosition]);
-  const community = useMemo(() => buildCommunityHotspots(communityPosts, searchCenter || lastKnownPosition), [communityPosts, searchCenter, lastKnownPosition]);
-  const hotspots = useMemo(() => mergeHotspots([...scenic, ...community, ...curated], discovered), [scenic, community, curated, discovered]);
+  const scenic = useMemo(() => mapCuratedHotspots(scenicPlaces, nearbyCenter), [scenicPlaces, nearbyCenter]);
+  const community = useMemo(() => buildCommunityHotspots(communityPosts, nearbyCenter), [communityPosts, nearbyCenter]);
+  const hotspots = useMemo(() => {
+    const merged = mergeHotspots([...scenic, ...community, ...curated], discovered);
+    // Once a real location (or dropped pin) is known, do not keep unrelated
+    // demo-city content in the nearby carousel or on the visible map.
+    return filterHotspotsNearOrigin(merged, nearbyCenter);
+  }, [scenic, community, curated, discovered, nearbyCenter]);
 
   const filteredHotspots = useMemo(() => {
     return hotspots.filter((item) => {
-      const matchesCategory = selectedTag === 'All' || item.category === selectedTag;
+      const matchesCategory = selectedTag === 'Places' || (selectedTag === 'Wildlife' ? ['Birding', 'Fauna', 'Flora'].includes(item.category) : ['Trails', 'Parks', 'Viewpoints', 'Hotspots'].includes(item.category));
       const matchesSearch = !searchQuery || item.title.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesCategory && matchesSearch;
     });
@@ -145,11 +158,12 @@ export function WorldScreen() {
       {/* Top Search & Filter Bar Overlay */}
       <div className="explore-search-bar">
         <div className="explore-search-input-wrap">
-          <Icon name="compass" />
+          <Search size={19} aria-hidden="true" />
           <input
             type="text"
             className="explore-search-input"
-            placeholder="Search nearby places"
+            aria-label="Search loaded places"
+            placeholder="Search places on this map"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -226,18 +240,15 @@ export function WorldScreen() {
       />
 
       <div className="explore-map-tools" aria-live="polite">
-        {stepCounter.status !== 'web' && <button
-          type="button"
-          className="explore-step-counter"
-          aria-label={stepCounter.status === 'web' ? 'Step counter is available in the mobile app' : 'Start or stop step counter'}
-          disabled={stepCounter.status === 'web' || stepCounter.status === 'unavailable' || stepCounter.status === 'requesting'}
-          onClick={stepCounter.status === 'active' ? stepCounter.stop : stepCounter.start}
-        >
-          <Footprints aria-hidden="true" />
-          <strong>{stepCounter.status === 'active' ? stepCounter.steps.toLocaleString() : 'Steps'}</strong>
-          <small>{stepCounter.status === 'active' ? 'this walk' : stepCounter.status === 'web' ? 'in mobile app' : stepCounter.status === 'denied' ? 'permission off' : stepCounter.status === 'unavailable' ? 'not supported' : stepCounter.status === 'requesting' ? 'checking…' : 'tap to start'}</small>
-        </button>}
-        {searchCenter && <p>{scenicLoading ? 'Finding scenic places…' : scenicError ? 'Live scenic search is unavailable.' : `${scenic.length} places around your pin`}</p>}
+        <p className="explore-location-state">
+          {nearbyCenter
+            ? scenicLoading
+              ? 'Finding scenic places…'
+              : scenicError
+                ? 'Live scenic search is unavailable.'
+                : `${scenic.length} places near you`
+            : 'Location unavailable — tap the map to explore an area.'}
+        </p>
       </div>
 
       <button
@@ -261,16 +272,16 @@ export function WorldScreen() {
         <Icon name="compass" />
       </button>
 
-      {/* Bottom Sheet: Top Nature Hotspots Near You */}
+      {/* The fallback collection is featured, never falsely presented as nearby. */}
       <div className="explore-bottom-sheet">
         <div className="explore-sheet-header">
-          <h3>{searchCenter ? 'Explore around your pin' : 'Places worth exploring'}</h3>
+          <h3>{searchCenter ? 'Explore around your pin' : lastKnownPosition ? 'Top spots near you' : 'Featured destinations'}</h3>
           <button type="button" className="explore-sheet-see-all" onClick={() => navigate('/app/collection')}>
             See all ›
           </button>
         </div>
 
-        <div className="explore-hotspot-cards">
+        <div className="explore-hotspot-cards" key={`${selectedTag}:${searchQuery}`}>
           {hotspotsLoading ? (
             <div className="explore-hotspot-empty" aria-busy="true">
               <p role="status">Charting nearby nature…</p>
@@ -295,9 +306,7 @@ export function WorldScreen() {
                 whileTap={{ scale: 0.96 }}
                 onClick={() => { playTap(); setSelectedHotspot(place); }}
               >
-                {place.source === 'community' && (
-                  <CaptureImage className="explore-community-photo" imageRef={place.imageRef} alt={place.title} useAuth />
-                )}
+                <CaptureImage className="explore-community-photo" imageRef={place.imageRef || imageForHotspot(place)} alt={place.title} useAuth={place.imageRef?.includes('/captures/')} />
                 <div className="explore-hotspot-overlay">
                   {/* Curated places carry a category chip; the player's own
                       capture clusters carry their best rarity grade. */}
@@ -326,102 +335,28 @@ export function WorldScreen() {
               <p>
                 {hotspots.length === 0
                   ? 'Capture a discovery to start mapping your area.'
-                  : 'Try a different category or search term.'}
+                  : searchQuery ? 'Search filters the places loaded on this map. Tap another area to explore there.' : 'Try a different category.'}
               </p>
             </div>
           )}
         </div>
       </div>
 
-      <AnimatePresence>
-        {selectedHotspot && (
-          <motion.div
-            className="explore-hotspot-detail"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="hotspot-detail-title"
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 24 }}
-          >
-            <div className="explore-hotspot-detail-head">
-              <div>
-                <h3 id="hotspot-detail-title">{selectedHotspot.title}</h3>
-                <p>
-                  {selectedHotspot.category}
-                  {selectedHotspot.region ? ` · ${selectedHotspot.region}` : ''}
-                  {selectedHotspot.distanceLabel ? ` · ${selectedHotspot.distanceLabel}` : ''}
-                </p>
-              </div>
-              <button type="button" onClick={() => { playTap(); setSelectedHotspot(null); }} aria-label="Close location details">×</button>
-            </div>
+      {selectedHotspot && <PlaceDetail
+        place={selectedHotspot} species={species} image={selectedHotspot.imageRef || imageForHotspot(selectedHotspot)}
+        onClose={() => setSelectedHotspot(null)}
+        onCapture={() => { setSelectedHotspot(null); window.dispatchEvent(new CustomEvent('wild-realm-open-capture')); }}
+        saving={saveHotspot.isPending} rating={rateHotspot.isPending}
+        onSave={async () => {
+          try { const social = await saveHotspot.mutateAsync({hotspotId:selectedHotspot.id,saved:!selectedHotspot.saved}); setSelectedHotspot(current=>current?{...current,...social}:current); }
+          catch { window.dispatchEvent(new CustomEvent('habbit-notice',{detail:'Could not save this place. Please try again.'})); }
+        }}
+        onRate={async rating => {
+          try { const social = await rateHotspot.mutateAsync({hotspotId:selectedHotspot.id,rating}); setSelectedHotspot(current=>current?{...current,...social}:current); }
+          catch { window.dispatchEvent(new CustomEvent('habbit-notice',{detail:'Could not save your rating. Please try again.'})); }
+        }}
+      />}
 
-            {selectedHotspot.description && <p className="explore-hotspot-detail-body">{selectedHotspot.description}</p>}
-
-            {selectedHotspot.featuredSpecies?.length > 0 && (
-              <div className="explore-hotspot-species">
-                <small>Likely finds</small>
-                <div>
-                  {selectedHotspot.featuredSpecies.map((id) => {
-                    const entry = (species || []).find((s) => s.id === id);
-                    return <span key={id} className="explore-hotspot-species-chip">{entry?.commonName || id}</span>;
-                  })}
-                </div>
-              </div>
-            )}
-
-            {selectedHotspot.source === 'discovered' && (
-              <p className="explore-hotspot-detail-body">
-                {selectedHotspot.discoveries} of your discoveries came from here.
-              </p>
-            )}
-            {selectedHotspot.source === 'community' && (
-              <p className="explore-hotspot-detail-body">Photo shared by {selectedHotspot.contributor}.</p>
-            )}
-            {selectedHotspot.attribution && (
-              <p className="explore-hotspot-attribution">{selectedHotspot.attribution}</p>
-            )}
-
-            {selectedHotspot.source === 'curated' && (
-              <div className="hotspot-community-actions">
-                <button type="button" className={selectedHotspot.saved ? 'is-active' : ''} disabled={saveHotspot.isPending}
-                  onClick={async () => {
-                    playTap();
-                    const social = await saveHotspot.mutateAsync({ hotspotId: selectedHotspot.id, saved: !selectedHotspot.saved });
-                    setSelectedHotspot((current) => current ? { ...current, ...social } : current);
-                  }}>
-                  <Icon name="bookmark" /> {selectedHotspot.saved ? 'Saved publicly' : 'Save publicly'}
-                </button>
-                <div className="hotspot-rating-control" aria-label="Rate this place">
-                  {[1, 2, 3, 4, 5].map((rating) => (
-                    <button type="button" key={rating} className={rating <= Number(selectedHotspot.viewerRating || 0) ? 'is-active' : ''}
-                      aria-label={`${rating} star${rating === 1 ? '' : 's'}`} disabled={rateHotspot.isPending}
-                      onClick={async () => {
-                        playTap();
-                        const social = await rateHotspot.mutateAsync({ hotspotId: selectedHotspot.id, rating });
-                        setSelectedHotspot((current) => current ? { ...current, ...social } : current);
-                      }}><Icon name="star" /></button>
-                  ))}
-                </div>
-                <small>{selectedHotspot.rating ? `${selectedHotspot.rating} from ${selectedHotspot.ratingCount} explorer${selectedHotspot.ratingCount === 1 ? '' : 's'}` : 'Not rated yet'}</small>
-              </div>
-            )}
-
-            <div className="explore-hotspot-detail-actions">
-              <button
-                type="button"
-                className="continue-journey-btn"
-                onClick={() => { playTap(); setSelectedHotspot(null); window.dispatchEvent(new CustomEvent('wild-realm-open-capture')); }}
-              >
-                Capture here <span>→</span>
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-      </AnimatePresence>
     </motion.div>
   );
 }
@@ -431,5 +366,5 @@ function imageForHotspot(place) {
   if (/bird|lake|hebbal/.test(text)) return '/assets/blue-billed-cuckoo.png';
   if (/water|falls|jog|shivana|athirap/.test(text)) return '/assets/verdant-explorer-banner.png';
   if (/park|cubbon|lalbagh|flower/.test(text)) return '/assets/verdant-explorer-banner.png';
-  return '/assets/quest-compass-poster.png';
+  return '/assets/guest-library/mountains.jpg';
 }

@@ -1,212 +1,49 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useMe, useCaptures } from '../quests/queries';
-import { coinBalance } from '../../lib/playerEconomy';
-import { playTap } from '../../lib/useSoundEffects';
-import { SettingsModal } from '../../components/SettingsModal';
-import { Icon } from '../../components/Icon';
-
-// Use 1-5 numeric ranks instead of legacy grades
-const RANK_COLORS = {
-  5: { bg: 'rgba(240,196,107,0.15)', border: 'rgba(240,196,107,0.5)', text: '#f0c46b', label: 'Legendary' },
-  4: { bg: 'rgba(167,139,250,0.15)', border: 'rgba(167,139,250,0.5)', text: '#a78bfa', label: 'Epic' },
-  3: { bg: 'rgba(96,165,250,0.15)',  border: 'rgba(96,165,250,0.5)',  text: '#60a5fa', label: 'Rare' },
-  2: { bg: 'rgba(52,211,153,0.15)', border: 'rgba(52,211,153,0.4)',  text: '#34d399', label: 'Uncommon' },
-  1: { bg: 'rgba(255,255,255,0.05)', border: 'rgba(255,255,255,0.1)', text: 'rgba(233,241,236,0.55)', label: 'Common' },
-};
-
-function RankBadge({ stars }) {
-  const cfg = RANK_COLORS[stars] || RANK_COLORS[1];
-  return (
-    <span className="profile-rank-badge" style={{ background: cfg.bg, borderColor: cfg.border, color: cfg.text }}>
-      {stars > 0 && <span aria-label={`${stars} stars`}>{stars} {'★'.repeat(stars)}</span>}
-    </span>
-  );
-}
-
-const MENU_ITEMS = [
-  { id: 'rewards', label: 'Rewards & Store', icon: 'chest', to: '/app/rewards' },
-  { id: 'collection', label: 'My Library', icon: 'book', to: '/app/collection' },
-  { id: 'community', label: 'Community', icon: 'shield', to: '/app/community' },
-  { id: 'settings', label: 'Settings', icon: 'gear' },
-  { id: 'help', label: 'Help & Support', icon: 'feather' },
-];
+import { Leaf, UsersRound, Sprout, Pencil, Settings, ChevronRight } from 'lucide-react';
+import { useMe, useCaptures, useSpecies, useUpdateMe } from '../quests/queries';
+import { CaptureImage } from '../../components/CaptureImage';
+import { SpeciesDetail } from '../gallery/SpeciesDetail';
+import { useJournalPreferences } from '../gallery/useJournalPreferences';
 
 export function ProfilePage() {
   const { data: me } = useMe();
   const { data: captures } = useCaptures();
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [notice, setNotice] = useState('');
-
-  const discoveries = (captures || []).filter((c) => c.status !== 'rejected');
-  const totalCount = discoveries.length;
-  const totalXp = me?.totalXp || 0;
-  const totalCoins = coinBalance(me);
-  const currentStreak = me?.streakDays || 0;
-  const level = me?.level || 1;
-  const progress = me?.progressToNextLevel || 0;
-
-  const unavailable = (msg) => { 
-    playTap(); 
-    setNotice(msg); 
-    setTimeout(() => setNotice(''), 4000);
-  };
-
-  const handleMenuItem = (item) => {
-    playTap();
-    if (item.id === 'settings') setSettingsOpen(true);
-    else if (item.id === 'help') unavailable('Help & support coming soon.');
-  };
-
-  // Rank breakdown from captures
-  const rankBreakdown = [5, 4, 3, 2, 1].map((stars) => ({
-    stars,
-    count: discoveries.filter((c) => (c.rarityStars || 1) === stars).length,
-  }));
-
-  return (
-    <main className="profile-shell-v2">
-      <h1 className="sr-only">Profile</h1>
-
-      {/* ── Hero banner ── */}
-      <motion.div
-        className="profile-hero-v2"
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 26 }}
-      >
-        <button
-          type="button"
-          className="profile-hero-settings"
-          aria-label="Open profile settings"
-          onClick={() => handleMenuItem({ id: 'settings' })}
-        >
-          <Icon name="gear" />
-        </button>
-        {/* Avatar */}
-        <div className="profile-avatar-v2" aria-hidden="true">
-          {(me?.displayName || 'A').charAt(0).toUpperCase()}
-        </div>
-
-        <div className="profile-identity-v2">
-          <h2>{me?.displayName || 'Adventurer'}</h2>
-          {me && (
-            <div className="profile-tier-row">
-              <span className="profile-tier-label">{me.tierLabel || `${me.tier} Explorer`}</span>
-              <span className="profile-level-pill">Lv. {level}</span>
-            </div>
-          )}
-          {/* XP bar */}
-          {me && (
-            <div className="profile-xp-wrap">
-              <div className="profile-xp-track">
-                <motion.div
-                  className="profile-xp-fill"
-                  initial={{ width: 0 }}
-                  animate={{ width: `${Math.round((progress || 0) * 100)}%` }}
-                  transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-                />
-              </div>
-              <span className="profile-xp-label">{me.xpIntoLevel} / {me.xpForCurrentLevel} XP</span>
-            </div>
-          )}
-        </div>
-
-        <div className="profile-streak-badge" title={`${currentStreak}-day streak`}>
-          🔥 {currentStreak}
-        </div>
-      </motion.div>
-
-      {/* ── Stat grid ── */}
-      <motion.div
-        className="profile-stat-grid-v2"
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.08, type: 'spring', stiffness: 300, damping: 26 }}
-      >
-        <div className="profile-stat-v2">
-          <strong>{totalCount}</strong>
-          <small>Discoveries</small>
-        </div>
-        <div className="profile-stat-v2 gold">
-          <strong>{totalXp.toLocaleString()}</strong>
-          <small>Total XP</small>
-        </div>
-        <div className="profile-stat-v2">
-          <strong>{totalCoins.toLocaleString()}</strong>
-          <small>Coins</small>
-        </div>
-      </motion.div>
-
-      {/* ── Rank breakdown ── */}
-      {totalCount > 0 && (
-        <div
-          className="profile-rank-section"
-        >
-          <p className="profile-section-eyebrow">Rarity Breakdown</p>
-          <div className="profile-rank-row">
-            {rankBreakdown.map(({ stars, count }) => (
-              count > 0 ? (
-                <div key={stars} className="profile-rank-cell">
-                  <RankBadge stars={stars} />
-                  <span className="profile-rank-count">×{count}</span>
-                </div>
-              ) : null
-            ))}
-            {rankBreakdown.every(({ count }) => count === 0) && (
-              <p className="profile-rank-empty">Capture nature to earn rank badges</p>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* ── Menu list ── */}
-      <motion.div
-        className="profile-menu-v2"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.22 }}
-      >
-        {MENU_ITEMS.map((item) =>
-          item.to ? (
-            <Link key={item.id} to={item.to} className="profile-menu-row-v2" onClick={playTap}>
-              <span className="profile-menu-emoji"><Icon name={item.icon} /></span>
-              <span className="profile-menu-row-label">{item.label}</span>
-              <span className="profile-menu-chevron">›</span>
-            </Link>
-          ) : (
-            <button
-              key={item.id}
-              type="button"
-              className="profile-menu-row-v2"
-              onClick={() => handleMenuItem(item)}
-            >
-              <span className="profile-menu-emoji"><Icon name={item.icon} /></span>
-              <span className="profile-menu-row-label">{item.label}</span>
-              <span className="profile-menu-chevron">›</span>
-            </button>
-          )
-        )}
-      </motion.div>
-
-      {/* Toast */}
-      <AnimatePresence>
-        {notice && (
-          <motion.div
-            className="toast-notice"
-            role="status"
-            initial={{ opacity: 0, y: 20, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.9 }}
-          >
-            <span>{notice}</span>
-            <button type="button" onClick={() => { playTap(); setNotice(''); }} aria-label="Dismiss">×</button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
-    </main>
-  );
+  const { data: species } = useSpecies();
+  const updateMe = useUpdateMe();
+  const journal = useJournalPreferences();
+  const [editing, setEditing] = useState(false);
+  const [name, setName] = useState('');
+  const [tab, setTab] = useState('achievements');
+  const [selected, setSelected] = useState(null);
+  const discoveries = (captures || []).filter(c => c.status !== 'rejected');
+  const category = c => (species || []).find(s => s.id === c.speciesId)?.category || c.category;
+  const speciesCount = new Set(discoveries.filter(c => ['Fauna','Flora'].includes(category(c))).map(c => c.speciesId || c.itemName)).size;
+  const places = new Set(discoveries.filter(c => ['Landscape','Heritage'].includes(category(c))).map(c => c.speciesId || c.itemName)).size;
+  const achievements = [
+    { label: 'Explorer', detail: `Level ${me?.level || 1}`, icon: Leaf, color: 'sage', earned: (me?.level || 1) >= 3 },
+    { label: 'Nature Lover', detail: `${discoveries.length} captures`, icon: Sprout, color: 'teal', earned: discoveries.length >= 50 },
+    { label: 'Community', detail: 'Explore together', icon: UsersRound, color: 'tan', earned: false },
+  ];
+  return <main className="reference-profile">
+    <h1 className="sr-only">Profile</h1>
+    <button className="reference-profile-settings" aria-label="Open profile settings" onClick={() => window.dispatchEvent(new Event('habbit-open-settings'))}><Settings size={20} /></button>
+    <header className="reference-profile-identity">
+      <div className="reference-profile-avatar">{me?.avatarUrl ? <img src={me.avatarUrl} alt="" /> : <span>{(me?.displayName || 'Explorer').slice(0,1)}</span>}</div>
+      <h2>{me?.displayName || 'Explorer'}</h2>
+      <p>{me?.tierLabel || 'Nature explorer'}</p>
+      <small>Explorer. Photographer. Nature lover.</small>
+    </header>
+    <dl className="reference-profile-stats">{[[discoveries.length,'Captures'],[speciesCount,'Species'],[places,'Places'],[achievements.filter(a=>a.earned).length,'Badges']].map(([value,label])=><div key={label}><dd>{value}</dd><dt>{label}</dt></div>)}</dl>
+    <button className="reference-edit-profile" onClick={() => { setName(me?.displayName || ''); setEditing(true); }}><Pencil size={16} /> Edit Profile</button>
+    {editing && <form className="reference-profile-form" onSubmit={async e => { e.preventDefault(); try { await updateMe.mutateAsync({displayName:name.trim()}); setEditing(false); } catch { /* displayed below */ } }}>
+      <label htmlFor="profile-name">Display name</label><input id="profile-name" value={name} onChange={e=>setName(e.target.value)} required maxLength={120} />
+      {updateMe.isError && <p role="alert">Could not save your profile. Please try again.</p>}
+      <div><button type="button" onClick={()=>setEditing(false)}>Cancel</button><button disabled={updateMe.isPending || !name.trim()}>{updateMe.isPending ? 'Saving…' : 'Save changes'}</button></div>
+    </form>}
+    <div className="reference-profile-tabs" role="tablist" aria-label="Profile content"><button role="tab" aria-selected={tab==='achievements'} onClick={()=>setTab('achievements')}>Achievements</button><button role="tab" aria-selected={tab==='captures'} onClick={()=>setTab('captures')}>Recently Viewed</button></div>
+    {tab === 'achievements' ? <section className="reference-achievements" aria-label="Achievements">{achievements.map(a=><div key={a.label}><span className={`reference-achievement-icon ${a.color} ${a.earned ? 'earned' : ''}`}><a.icon size={30} strokeWidth={1.6} /></span><strong>{a.label}</strong><small>{a.detail}</small><span className="sr-only">{a.earned ? 'Earned' : 'In progress'}</span></div>)}</section> : <section className="reference-recent-grid" aria-label="Recently viewed discoveries">{journal.viewed.some(id=>discoveries.some(c=>c.id===id)) ? journal.viewed.map(id=>discoveries.find(c=>c.id===id)).filter(Boolean).slice(0,9).map(c=><button key={c.id} aria-label={`View ${c.itemName}`} onClick={()=>{journal.markViewed(c.id);setSelected(c);}}><CaptureImage imageRef={c.imageRef} alt={c.itemName} useAuth={c.imageRef?.includes('/captures/')} /></button>) : <p>Open a discovery in your Journal to see it here.</p>}</section>}
+    <div className="reference-profile-links">{[['Quests','/app/quests'],['Rewards & Store','/app/rewards'],['My Journal','/app/library']].map(([label,to])=><Link key={to} to={to}>{label}<ChevronRight size={16}/></Link>)}</div>
+    {selected && <div className="selection-overlay" role="dialog" aria-modal="true" aria-label="Discovery details"><SpeciesDetail key={selected.id} card={selected} species={species} collection={discoveries} favorite={journal.favorites.includes(selected.id)} onFavorite={()=>journal.toggleFavorite(selected.id)} onSelect={c=>{journal.markViewed(c.id);setSelected(c);}} onClose={()=>setSelected(null)}/></div>}
+  </main>;
 }

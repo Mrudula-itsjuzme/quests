@@ -155,7 +155,7 @@ const legacyQuestSchema = z.object({
 export function createApp(options = {}) {
   const config = options.config || loadConfig();
   const repository = options.repository || new MemoryQuestRepository({ definitions: questDefinitions });
-  const providers = options.providers || createProviders({ mode: config.PROVIDER_MODE, aiVerifyUrl: config.QUEST_AI_VERIFY_URL, providerSecret: config.QUEST_PROVIDER_SECRET, notificationUrl: config.QUEST_NOTIFICATION_URL });
+  const providers = options.providers || createProviders({ mode: config.PROVIDER_MODE, aiVerifyUrl: config.QUEST_AI_VERIFY_URL, providerSecret: config.QUEST_PROVIDER_SECRET, notificationUrl: config.QUEST_NOTIFICATION_URL, timeoutMs: config.QUEST_PROVIDER_TIMEOUT_MS, maxRetries: config.QUEST_PROVIDER_MAX_RETRIES });
   const engine = options.engine || new QuestEngine({ repository, providers });
   const storeEngine = options.storeEngine || new StoreEngine(repository);
   const eventEngine = options.eventEngine || new EventEngine(repository, providers.notifications);
@@ -186,7 +186,7 @@ export function createApp(options = {}) {
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
-        imgSrc: ["'self'", 'data:', 'blob:', 'https://images.unsplash.com'],
+        imgSrc: ["'self'", 'data:', 'blob:', 'https://images.unsplash.com', 'https://services.arcgisonline.com', 'https://tile.openstreetmap.org'],
         connectSrc: ["'self'", 'https://*.supabase.co'],
         fontSrc: ["'self'", 'data:', 'https://fonts.gstatic.com'],
         objectSrc: ["'none'"],
@@ -257,8 +257,22 @@ export function createApp(options = {}) {
       }
     });
   }
-  app.get('/api/v1/me', asyncRoute(async (req, res) => res.json(await engine.getMe(req.identity))));
-  app.patch('/api/v1/me', writeLimiter, asyncRoute(async (req, res) => res.json(await engine.updateMe(req.identity, parse(profileSchema, req.body)))));
+  app.get('/api/v1/me', asyncRoute(async (req, res) => {
+    const me = await engine.getMe(req.identity);
+    const BLOCKED_STATUSES = new Set(['suspended', 'banned', 'deleted']);
+    if (BLOCKED_STATUSES.has(me.status)) {
+      return res.status(403).json({ error: { code: 'account_inactive', requestId: req.id } });
+    }
+    return res.json(me);
+  }));
+  app.patch('/api/v1/me', writeLimiter, asyncRoute(async (req, res) => {
+    const me = await engine.getMe(req.identity);
+    const INACTIVE_STATUSES = new Set(['suspended', 'banned', 'deleted', 'deletion_requested']);
+    if (INACTIVE_STATUSES.has(me.status)) {
+      return res.status(403).json({ error: { code: 'account_inactive', requestId: req.id } });
+    }
+    return res.json(await engine.updateMe(req.identity, parse(profileSchema, req.body)));
+  }));
   app.get('/api/v1/quests/definitions', asyncRoute(async (req, res) => sendCachedJson(req, res, await engine.definitions(req.identity, {
     cadence: optionalEnum(req.query.cadence, ['daily', 'weekly', 'monthly']),
     category: optionalEnum(req.query.category, ['Mind', 'Body', 'Discovery', 'Weekly', 'Monthly']),
@@ -443,12 +457,10 @@ export function createApp(options = {}) {
     }
   }));
   app.get('/api/v1/community/posts', asyncRoute(async (req, res) => {
-    if (config.NODE_ENV === 'development') await repository.seedDemoSocial?.(req.identity.id);
     const scope = req.query.scope == null || req.query.scope === '' ? 'public' : parse(communityScopeSchema, req.query.scope);
     res.json(redactPublicPayload(await repository.listCommunityPosts(req.identity.id, { scope, limit: req.query.limit })));
   }));
   app.get('/api/v1/community/stories', asyncRoute(async (req, res) => {
-    if (config.NODE_ENV === 'development') await repository.seedDemoSocial?.(req.identity.id);
     res.json(redactPublicPayload(await repository.listCommunityStories(req.identity.id, { limit: req.query.limit })));
   }));
   app.post('/api/v1/community/stories/:postId/view', writeLimiter, asyncRoute(async (req, res) => {
@@ -456,8 +468,21 @@ export function createApp(options = {}) {
     if (!result) return res.status(404).json({ error: { code: 'story_not_found', requestId: req.id } });
     res.json(redactPublicPayload(result));
   }));
+  app.get('/api/v1/community/search', asyncRoute(async (req, res) => {
+    // Validate query param
+    const q = req.query.q;
+    if (Array.isArray(req.query.q)) return res.status(400).json({ error: { code: 'invalid_query', requestId: req.id } });
+    if (!q || typeof q !== 'string') return res.status(400).json({ error: { code: 'missing_query', requestId: req.id } });
+    if (q.length > 80) return res.status(400).json({ error: { code: 'query_too_long', requestId: req.id } });
+    const rawLimit = req.query.limit !== undefined ? Number(req.query.limit) : 20;
+    if (!Number.isInteger(rawLimit) || rawLimit < 1 || rawLimit > 20) {
+      return res.status(400).json({ error: { code: 'invalid_limit', requestId: req.id } });
+    }
+    const users = await repository.searchUsers(q, rawLimit);
+    res.json(users.map(u => redactPublicPayload(u)));
+  }));
+
   app.get('/api/v1/community/users/:userId', asyncRoute(async (req, res) => {
-    if (config.NODE_ENV === 'development') await repository.seedDemoSocial?.(req.identity.id);
     const profile = await repository.getCommunityProfile(req.identity.id, parse(communityUserIdSchema, req.params.userId));
     if (!profile) return res.status(404).json({ error: { code: 'community_profile_not_found', requestId: req.id } });
     res.json(redactPublicPayload(profile));
@@ -529,7 +554,6 @@ export function createApp(options = {}) {
     res.status(report.created ? 201 : 200).json(redactPublicPayload(report));
   }));
   app.get('/api/v1/community/friends', asyncRoute(async (req, res) => {
-    if (config.NODE_ENV === 'development') await repository.seedDemoSocial?.(req.identity.id);
     res.json(redactPublicPayload(await repository.listFriends(req.identity.id)));
   }));
   app.get('/api/v1/feed', asyncRoute(async (req, res) => res.json(redactPublicPayload(await engine.feed(req.identity)))));
@@ -620,11 +644,11 @@ export async function createRuntime(env = process.env) {
   let repository;
   if (config.databaseUrl) {
     pool = new Pool({ connectionString: config.databaseUrl, ssl: config.DATABASE_SSL ? { rejectUnauthorized: false } : false, max: 10, connectionTimeoutMillis: 5_000, idleTimeoutMillis: 30_000, statement_timeout: config.DATABASE_STATEMENT_TIMEOUT_MS, query_timeout: config.DATABASE_STATEMENT_TIMEOUT_MS + 1_000 });
-    repository = new PostgresQuestRepository(pool);
+    repository = new PostgresQuestRepository(pool, { includeDemoHotspots: config.includeDemoHotspots });
   } else {
-    repository = new MemoryQuestRepository({ definitions: questDefinitions });
+    repository = new MemoryQuestRepository({ definitions: questDefinitions, includeDemoHotspots: config.includeDemoHotspots });
   }
-  const providers = createProviders({ mode: config.PROVIDER_MODE, aiVerifyUrl: config.QUEST_AI_VERIFY_URL, providerSecret: config.QUEST_PROVIDER_SECRET, notificationUrl: config.QUEST_NOTIFICATION_URL });
+  const providers = createProviders({ mode: config.PROVIDER_MODE, aiVerifyUrl: config.QUEST_AI_VERIFY_URL, providerSecret: config.QUEST_PROVIDER_SECRET, notificationUrl: config.QUEST_NOTIFICATION_URL, timeoutMs: config.QUEST_PROVIDER_TIMEOUT_MS, maxRetries: config.QUEST_PROVIDER_MAX_RETRIES });
 
   return { config, pool, repository, providers, engine: new QuestEngine({ repository, providers }) };
 }
@@ -669,16 +693,16 @@ function parseImageDataUrl(value) {
   return { contentType: match[1] === 'image/jpg' ? 'image/jpeg' : match[1], base64: match[2] };
 }
 function sendCaptureMedia(res, media) {
+  res.setHeader('Cache-Control', 'private, no-store');
+  res.setHeader('Vary', 'Authorization');
   if (media.storageRef) {
     const url = new URL(media.storageRef);
     if (url.protocol !== 'https:') throw Object.assign(new Error('invalid_media_reference'), { status: 500 });
-    res.setHeader('Cache-Control', media.publicSafe ? 'public, max-age=300' : 'private, no-store');
     return res.redirect(302, url.toString());
   }
   const parsed = parseImageDataUrl(media.mediaData);
   if (!parsed.base64) throw Object.assign(new Error('invalid_media_reference'), { status: 500 });
   res.setHeader('Content-Type', parsed.contentType);
-  res.setHeader('Cache-Control', media.publicSafe ? 'public, max-age=300' : 'private, no-store');
   return res.send(Buffer.from(parsed.base64, 'base64'));
 }
 function asyncRoute(handler) { return (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next); }

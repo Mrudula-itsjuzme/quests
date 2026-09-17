@@ -559,6 +559,14 @@ describe('World API', () => {
     expect(body.every((spot) => spot.isDemo === true)).toBe(true);
   });
 
+  it('returns an honest empty hotspot list when demo content is disabled', async () => {
+    const repository = new MemoryQuestRepository({ definitions: questDefinitions, includeDemoHotspots: false });
+    const app = createApp({ config: testConfig({ INCLUDE_DEMO_HOTSPOTS: 'false' }), repository });
+    const response = await request(app).get('/api/v1/world/hotspots');
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual([]);
+  });
+
   it('filters by category', async () => {
     const app = createApp({ config: testConfig() });
     const { body } = await request(app).get('/api/v1/world/hotspots?category=Waterfalls');
@@ -1191,6 +1199,16 @@ function mintCapture(app, idempotencyKey) {
 }
 
 describe('Media Contract', () => {
+  it('replays a completed capture before running duplicate-image rejection', async () => {
+    const app = createApp({ config: testConfig(), visionProvider: highConfidenceVisionProvider() });
+    const first = await mintCapture(app, 'lost-response-retry');
+    expect(first.status).toBe(201);
+    const retry = await mintCapture(app, 'lost-response-retry');
+    expect(retry.status).toBe(201);
+    expect(retry.body.id).toBe(first.body.id);
+    const captures = await request(app).get('/api/v1/captures');
+    expect(captures.body).toHaveLength(1);
+  });
   it('does not dump raw base64 bytes in normal card JSON and imageRef points to API', async () => {
     const app = createApp({ config: testConfig(), visionProvider: highConfidenceVisionProvider() });
     const captured = await mintCapture(app, 'media-test-1');
@@ -1206,7 +1224,8 @@ describe('Media Contract', () => {
     const response = await request(app).get(captured.body.imageRef);
     expect(response.status).toBe(200);
     expect(response.headers['content-type']).toBe('image/png');
-    expect(response.headers['cache-control']).toBe('public, max-age=300');
+    expect(response.headers['cache-control']).toBe('private, no-store');
+    expect(response.headers.vary).toContain('Authorization');
   });
 
   it('provisional capture media remains private and owner can access it', async () => {
@@ -1265,7 +1284,8 @@ describe('Media Contract', () => {
 
     const response = await request(app).get(`/api/v1/community/posts/${post.body.id}/media`);
     expect(response.status).toBe(200);
-    expect(response.headers['cache-control']).toBe('public, max-age=300');
+    expect(response.headers['cache-control']).toBe('private, no-store');
+    expect(response.headers.vary).toContain('Authorization');
   });
 
   it('provisional capture cannot expose public Community media', async () => {

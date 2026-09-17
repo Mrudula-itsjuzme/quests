@@ -31,54 +31,83 @@ export function newIdempotencyKey() {
 
 async function request(path, { method = 'GET', body, token, idempotencyKey, signal } = {}) {
   const headers = { 'Content-Type': 'application/json' };
-  // 'dev' is a local sentinel meaning "no real token — rely on the server's
-  // dev-auth bypass", not a value to send as a bearer credential.
   if (token && token !== 'dev') headers.Authorization = `Bearer ${token}`;
   if (idempotencyKey) headers['Idempotency-Key'] = idempotencyKey;
 
-  let response;
-  try {
-    response = await fetch(`${API_BASE_URL}/v1${path}`, {
-      method,
-      headers,
-      body: body !== undefined ? JSON.stringify(body) : undefined,
-      signal,
-      // Endpoints served via sendCachedJson set `Cache-Control: private,
-      // no-cache` and an ETag. `no-cache` revalidates with If-None-Match and
-      // resolves 304s against the browser cache, so unchanged payloads cost
-      // one round trip instead of a full body download. (`default` mode is
-      // avoided: it can hand back a bare 304 with no body, which is not `ok`
-      // and has no JSON to parse.)
-      cache: 'no-cache',
-    });
-  } catch (error) {
-    if (typeof console !== 'undefined') {
-      console.error('Wild Realm API request failed', {
-        baseUrl: API_BASE_URL,
-        path,
-        method,
-        message: error?.message,
-      });
+  const controller = new AbortController();
+  const onParentAbort = () => controller.abort();
+  if (signal) {
+    if (signal.aborted) {
+      const abortError = new Error('The operation was aborted');
+      abortError.name = 'AbortError';
+      throw abortError;
     }
-    throw new ApiError(0, 'network_unavailable');
+    signal.addEventListener('abort', onParentAbort);
   }
 
-  if (response.status === 204) return null;
-  // `cache: 'no-store'` above means a bare 304 should never reach here. If one
-  // does, surface it rather than returning null and blanking real data.
-  if (response.status === 304) throw new ApiError(304, 'stale_revalidation_failed');
+  let timeoutId;
+  let timerFired = false;
+  let timeoutReject;
+  const timeoutPromise = new Promise((_, reject) => {
+    timeoutReject = reject;
+    timeoutId = setTimeout(() => {
+      timerFired = true;
+      controller.abort();
+      reject(new ApiError(0, 'request_timeout'));
+    }, 15000);
+  });
+  timeoutPromise.catch(() => {});
 
-  let payload = null;
   try {
-    payload = await response.json();
-  } catch {
-    payload = null;
-  }
+    const fetchPromise = (async () => {
+      let response;
+      try {
+        response = await fetch(`${API_BASE_URL}/v1${path}`, {
+          method,
+          headers,
+          body: body !== undefined ? JSON.stringify(body) : undefined,
+          signal: controller.signal,
+          cache: 'no-cache',
+        });
+      } catch (error) {
+        if (signal?.aborted || error?.name === 'AbortError') {
+          const err = new Error('The operation was aborted');
+          err.name = 'AbortError';
+          throw err;
+        }
+        if (typeof console !== 'undefined') {
+          console.error('Wild Realm API request failed', {
+            baseUrl: API_BASE_URL,
+            path,
+            method,
+            message: error?.message,
+          });
+        }
+        throw new ApiError(0, 'network_unavailable');
+      }
 
-  if (!response.ok) {
-    throw new ApiError(response.status, payload?.error?.code, payload?.error?.requestId, payload?.error?.reason);
+      if (response.status === 204) return null;
+      if (response.status === 304) throw new ApiError(304, 'stale_revalidation_failed');
+
+      let payload = null;
+      try {
+        payload = await response.json();
+      } catch (err) {
+        if (err instanceof ApiError) throw err;
+        throw new ApiError(response.status || 500, 'invalid_response');
+      }
+
+      if (!response.ok) {
+        throw new ApiError(response.status, payload?.error?.code, payload?.error?.requestId, payload?.error?.reason);
+      }
+      return payload;
+    })();
+
+    return await Promise.race([fetchPromise, timeoutPromise]);
+  } finally {
+    clearTimeout(timeoutId);
+    if (signal) signal.removeEventListener('abort', onParentAbort);
   }
-  return payload;
 }
 
 import {
@@ -274,17 +303,6 @@ async function guestDelay(data, ms = 450) {
   return JSON.parse(JSON.stringify(data));
 }
 
-function makeGuestRank() {
-  const ranks = [
-    { grade: 'S', tier: 'Legendary', stars: 5, xp: 180 },
-    { grade: 'A', tier: 'Epic', stars: 4, xp: 130 },
-    { grade: 'B', tier: 'Rare', stars: 3, xp: 95 },
-    { grade: 'C', tier: 'Uncommon', stars: 2, xp: 65 },
-    { grade: 'D', tier: 'Common', stars: 1, xp: 35 },
-  ];
-  return ranks[Math.floor(Math.random() * ranks.length)];
-}
-
 export function createApiClient(getToken) {
   // Guest mode is a real product mode backed by local fixtures. For every other
   // session the server is authoritative: a failed request throws so the UI can
@@ -295,6 +313,11 @@ export function createApiClient(getToken) {
       const token = await getToken();
       if (token === 'guest') return guestDelay(GUEST_USER, 200);
       return request('/me', { signal, token });
+    },
+    requestAccountDeletion: async () => {
+      const token = await getToken();
+      if (token === 'guest') throw new Error('Guest sessions have no cloud account.');
+      return request('/me/delete-request', { method: 'POST', body: {}, token });
     },
     updateMe: async (patch) => {
       const token = await getToken();
@@ -333,22 +356,21 @@ export function createApiClient(getToken) {
     createCapture: async (bundle, idempotencyKey) => {
       const token = await getToken();
       if (token === 'guest') {
-        const rank = makeGuestRank();
         const captureId = bundle.captureId || newIdempotencyKey();
         const imageRef = await saveLocalCaptureImage(captureId, bundle.imageBase64);
         const gps = privateGps(bundle.gps);
         const card = {
           id: captureId,
-          itemName: 'Mysterious Object',
-          category: ['Grass', 'Water', 'Earth', 'Sky'][Math.floor(Math.random() * 4)],
-          cardTitle: 'The Curious Find',
-          rarityTier: rank.tier,
-          rarityGrade: rank.grade,
-          rarityStars: rank.stars,
-          rarityScore: Math.random(),
-          xpAwarded: rank.xp,
+          itemName: 'Unidentified photo',
+          category: 'Unidentified',
+          cardTitle: 'My field photo',
+          rarityTier: null,
+          rarityGrade: null,
+          rarityStars: 0,
+          rarityScore: 0,
+          xpAwarded: 0,
           imageRef,
-          description: 'AI observed shape, color, and context from this live capture.',
+          description: 'Saved on this device. Sign in to identify this photo; no AI identification or rewards have been issued.',
           capturedAt: bundle.capturedAt || new Date().toISOString(),
           gps,
           location: locationLabel(gps),
@@ -481,6 +503,13 @@ export function createApiClient(getToken) {
         return guestDelay(profile, 180);
       }
       return request(`/community/users/${encodeURIComponent(userId)}`, { signal, token });
+    },
+    searchUsers: async (query, signal) => {
+      const token = await getToken();
+      if (token === 'guest') {
+        return guestDelay({ results: [] }, 100);
+      }
+      return request(`/community/search?q=${encodeURIComponent(query)}`, { signal, token }).then(r => r.results);
     },
     setCommunityFollow: async (userId, following) => {
       const token = await getToken();

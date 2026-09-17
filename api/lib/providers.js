@@ -8,7 +8,7 @@ export class ProviderNotConfiguredError extends Error {
   }
 }
 
-export function createProviders({ mode = 'local', now = () => new Date(), aiVerifyUrl, providerSecret, notificationUrl } = {}) {
+export function createProviders({ mode = 'local', now = () => new Date(), aiVerifyUrl, providerSecret, notificationUrl, fetchImpl = fetch, timeoutMs = 10_000, maxRetries = 1 } = {}) {
   if (mode === 'disabled') {
     return {
       capabilities: { health: false, photo: false },
@@ -24,14 +24,32 @@ export function createProviders({ mode = 'local', now = () => new Date(), aiVeri
   if (mode === 'http') {
     const call = async (url, body) => {
       if (!url || !providerSecret) throw new ProviderNotConfiguredError('http');
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json', authorization: `Bearer ${providerSecret}` },
-        body: JSON.stringify(body),
-        signal: AbortSignal.timeout(10_000),
-      });
-      if (!response.ok) throw invalidProof('provider_request_failed');
-      return response.json();
+      let lastError;
+      for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
+        try {
+          const response = await fetchImpl(url, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json', authorization: `Bearer ${providerSecret}` },
+            body: JSON.stringify(body),
+            signal: AbortSignal.timeout(timeoutMs),
+          });
+          if (!response.ok) {
+            const retryable = response.status === 429 || response.status >= 500;
+            if (retryable && attempt < maxRetries) continue;
+            throw invalidProof(retryable ? 'provider_unavailable' : 'provider_request_failed');
+          }
+          try {
+            return await response.json();
+          } catch {
+            throw invalidProof('invalid_verification_response');
+          }
+        } catch (error) {
+          if (error?.code) throw error;
+          lastError = error;
+          if (attempt < maxRetries) continue;
+        }
+      }
+      throw invalidProof(lastError?.name === 'TimeoutError' || lastError?.name === 'AbortError' ? 'provider_timeout' : 'provider_unavailable');
     };
     return {
       capabilities: { health: false, photo: true },
@@ -49,7 +67,7 @@ export function createProviders({ mode = 'local', now = () => new Date(), aiVeri
         async verify({ uploadId, subjectTag }) {
           const result = await call(aiVerifyUrl, { uploadId, subjectTag });
           const confidence = Number(result.confidence);
-          if (!Number.isFinite(confidence) || confidence < 0 || confidence > 1 || !result.perceptualHash) throw invalidProof('invalid_verification_response');
+          if (!Number.isFinite(confidence) || confidence < 0 || confidence > 1 || typeof result.perceptualHash !== 'string' || !/^[A-Za-z0-9:_-]{8,256}$/.test(result.perceptualHash)) throw invalidProof('invalid_verification_response');
           return { confidence, imageHash: String(result.perceptualHash), metadata: result.metadata || {} };
         },
       },

@@ -1,0 +1,782 @@
+/* Wild Realm reference board, September 2026.
+   Final presentation layer. Existing route, data and capture contracts remain authoritative. */
+:root {
+  --reference-paper: #F5F3EF;
+  --reference-ink: #111111;
+  --reference-muted: #72766f;
+  --reference-green: #112B22;
+  --reference-line: #e3e4dd;
+}
+html body #root { background: var(--reference-paper); }
+html body #root :is(h1,h2,h3) { font-family: Georgia, 'Times New Roman', serif; font-style: normal; font-weight: 400; letter-spacing: -.035em; }
+html body #root .app-shell { color: var(--reference-ink); background: var(--reference-paper); }
+html body #root .app-shell :is(.gallery-v2-shell,.guild-page.page-stack,.profile-shell-v2,.quests-shell) {
+  background: var(--reference-paper) !important; color: var(--reference-ink) !important;
+  box-shadow: none !important;
+}
+html body #root .app-shell :is(.gallery-v2-header h1,.community-network-header h1,.profile-identity-v2 h2,.quests-section-header h2) {
+  font-family: Georgia, 'Times New Roman', serif !important; font-style: normal !important;
+  color: var(--reference-ink) !important; -webkit-text-fill-color: var(--reference-ink) !important;
+  font-size: 30px !important; line-height: 1.18 !important; font-weight: 400 !important; letter-spacing: -.035em !important;
+}
+html body #root .app-shell :is(.continue-journey-btn,.community-fab-btn,.discovery-btn-primary) {
+  background: var(--reference-green) !important; color: #fff !important; border: 0 !important;
+  border-radius: 14px !important; box-shadow: none !important;
+}
+html body #root .app-shell .library-hero-panel {
+  display: block !important; min-height: 0 !important; padding: 8px 0 18px !important; margin: 0 !important;
+  border: 0 !important; background: transparent !important; box-shadow: none !important;
+}
+html body #root .app-shell .library-hero-panel::after { display: none !important; }
+html body #root .app-shell .gallery-v2-stats { display: grid !important; grid-template-columns: repeat(3,1fr) !important; width: 100% !important; margin: 0 !important; gap: 12px !important; }
+html body #root .app-shell .gallery-v2-stat { display: flex !important; flex-direction: column !important; align-items: center !important; padding: 0 !important; border: 0 !important; background: transparent !important; }
+html body #root .app-shell .gallery-v2-stat dd { order: 0; margin: 0; font-size: 19px !important; font-weight: 600 !important; color: var(--reference-ink) !important; }
+html body #root .app-shell .gallery-v2-stat dt { order: 1; font-size: 11px !important; font-weight: 400 !important; color: var(--reference-muted) !important; text-transform: none !important; letter-spacing: 0 !important; }
+html body #root .app-shell .gallery-v2-tabs { display: flex !important; gap: 5px !important; padding: 0 0 12px !important; margin: 0 !important; border: 0 !important; overflow-x: auto !important; }
+html body #root .app-shell :is(.gallery-v2-tab,.community-tab-btn) { min-height: 40px !important; padding: 8px 15px !important; border: 0 !important; border-radius: 24px !important; background: transparent !important; color: var(--reference-ink) !important; font-size: 12px !important; font-weight: 400 !important; box-shadow: none !important; white-space: nowrap; }
+html body #root .app-shell .gallery-v2-tab > span { display: none; }
+html body #root .app-shell :is(.gallery-v2-tab.active,.community-tab-btn.active) { background: var(--reference-green) !important; color: #fff !important; -webkit-text-fill-color: #fff !important; }
+html body #root .app-shell .gallery-v2-sort-row { order: initial !important; margin: 0 !important; padding: 0 0 12px !important; min-height: 32px !important; }
+html body #root .app-shell .gallery-sort-pills { background: transparent !important; box-shadow: none !important; height: auto !important; }
+html body #root .app-shell .gallery-sort-pill { height: 32px !important; min-height: 32px !important; font-size: 11px !important; }
+html body #root .app-shell .gallery-sort-pill.active { background: #e5e9df !important; color: #183a28 !important; }
+html body #root .app-shell .gallery-v2-grid { display: grid !important; grid-template-columns: repeat(3,minmax(0,1fr)) !important; gap: 6px !important; padding: 0 !important; margin: 0 !important; }
+html body #root .app-shell .gallery-v2-card {
+  position: relative !important; inset: auto !important; grid-column: auto !important; width: 100% !important;
+  height: auto !important; aspect-ratio: 1 !important; margin: 0 !important; padding: 0 !important;
+  border: 0 !important; border-radius: 9px !important; background: #e7e9e0 !important; box-shadow: none !important;
+  transform: none !important; animation: none !important; overflow: hidden !important; pointer-events: auto !important;
+}
+html body #root .app-shell :is(.gallery-card-flipper,.gallery-card-face,.gallery-v2-photo) { position: absolute !important; inset: 0 !important; width: 100% !important; height: 100% !important; transform: none !important; border-radius: inherit !important; }
+html body #root .app-shell .gallery-v2-photo img { width: 100%; height: 100%; object-fit: cover; }
+html body #root .app-shell :is(.gallery-v2-info,.gallery-v2-rank-badge) { display: none !important; }
+html body #root .app-shell .community-network-header { padding: 0 0 16px !important; margin: 0 !important; border: 0 !important; }
+html body #root .app-shell .community-tabs-bar { gap: 10px !important; padding: 0 0 14px !important; background: transparent !important; border: 0 !important; }
+html body #root .app-shell .community-tabs-bar { display: grid !important; grid-template-columns: repeat(4,minmax(0,1fr)) !important; height: auto !important; width: 100% !important; margin: 0 !important; }
+html body #root .app-shell .community-tab-btn { min-width: 0 !important; min-height: 40px !important; height: 40px !important; padding: 8px !important; font-size: 12px !important; border-radius: 24px !important; }
+html body #root .app-shell .community-tab-btn::after { display: none !important; }
+html body #root .app-shell .guild-page { gap: 8px !important; }
+html body #root .app-shell .post-author-name-btn h4 { text-transform: none !important; font: 600 13px/1.4 Arial,sans-serif !important; }
+html body #root .app-shell .post-action { background: transparent !important; border: 0 !important; box-shadow: none !important; padding: 6px !important; }
+html body #root .app-shell :is(.post-caption,.post-location) { font-weight: 400 !important; }
+html body #root .app-shell .community-post-card { border: 0 !important; border-bottom: 1px solid var(--reference-line) !important; border-radius: 0 !important; padding: 0 0 20px !important; margin: 0 0 20px !important; background: transparent !important; box-shadow: none !important; }
+html body #root .app-shell .post-header-row { padding: 8px 0 12px !important; }
+html body #root .app-shell .post-author-avatar { width: 36px !important; height: 36px !important; border: 0 !important; box-shadow: none !important; }
+html body #root .app-shell .post-photo-wrap { margin: 0 !important; border: 0 !important; border-radius: 10px !important; aspect-ratio: 1.65 !important; }
+html body #root .app-shell .post-photo-image { height: 100% !important; width: 100% !important; object-fit: cover !important; }
+html body #root .app-shell .post-info-block { padding: 12px 0 0 !important; }
+html body #root .app-shell .post-info-block h3 { font-family: inherit !important; font-size: 14px !important; font-weight: 500 !important; color: var(--reference-ink) !important; }
+html body #root .app-shell .post-caption { color: #41473f !important; font-size: 12px !important; }
+html body #root .app-shell .post-engagement-row { border: 0 !important; padding: 10px 0 0 !important; }
+html body #root .app-shell .profile-hero-v2 { display: flex !important; flex-direction: column !important; align-items: center !important; text-align: center !important; padding: 28px 20px 12px !important; min-height: 0 !important; border: 0 !important; background: transparent !important; box-shadow: none !important; }
+html body #root .app-shell .profile-hero-v2::before, html body #root .app-shell .profile-hero-v2::after { display: none !important; }
+html body #root .app-shell .profile-avatar-v2 { width: 82px !important; height: 82px !important; border: 2px solid #e3e8dc !important; background: #d8e2ce !important; color: #204531 !important; box-shadow: none !important; font-size: 30px !important; }
+html body #root .app-shell .profile-identity-v2 h2 { margin-top: 12px !important; font-size: 25px !important; }
+html body #root .app-shell .profile-tier-row { justify-content: center !important; }
+html body #root .app-shell :is(.profile-tier-label,.profile-xp-label) { color: #626d5f !important; }
+html body #root .app-shell .profile-stat-grid-v2 { gap: 0 !important; padding: 12px 0 !important; background: transparent !important; }
+html body #root .app-shell .profile-stat-v2 { background: transparent !important; border: 0 !important; padding: 8px !important; box-shadow: none !important; }
+html body #root .app-shell .profile-stat-v2 strong { color: var(--reference-ink) !important; font-size: 20px !important; }
+html body #root .app-shell .profile-stat-v2 small { color: var(--reference-muted) !important; font-size: 11px !important; }
+html body #root .app-shell :is(.profile-menu-v2,.profile-rank-section) { border: 0 !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important; }
+html body #root .app-shell .profile-menu-row-v2 { border-bottom: 1px solid var(--reference-line) !important; background: transparent !important; min-height: 56px !important; color: var(--reference-ink) !important; }
+html body #root .settings-modal { color: var(--reference-ink) !important; background: var(--reference-paper) !important; border: 0 !important; border-radius: 22px !important; }
+html body #root .settings-modal :is(.settings-header,.settings-section,.settings-footer) { border-color: var(--reference-line) !important; background: transparent !important; box-shadow: none !important; }
+html body #root .settings-modal :is(h2,h3,.setting-info strong) { color: var(--reference-ink) !important; }
+html body #root .settings-modal .option-btn { border: 1px solid var(--reference-line) !important; background: #eeeee8 !important; color: #414a3e !important; }
+html body #root .settings-modal .option-btn.active { border-color: #31523b !important; background: #e0e7d9 !important; color: #173c27 !important; }
+html body #root .settings-modal .logout-btn { background: #e5e5df !important; color: #222a21 !important; border-radius: 12px !important; }
+html body .discovery-card-modal.discovery-card-modal { background: var(--reference-paper) !important; color: var(--reference-ink) !important; border: 0 !important; border-radius: 22px !important; box-shadow: 0 12px 50px #0003 !important; }
+html body .discovery-card-modal.discovery-card-modal :is(.discovery-info-panel,.discovery-info-section) { background: transparent !important; border-color: var(--reference-line) !important; }
+html body .discovery-card-modal.discovery-card-modal :is(h2,.discovery-info-value) { color: var(--reference-ink) !important; }
+html body .discovery-card-modal.discovery-card-modal .discovery-holo-glare { display: none !important; }
+html body .discovery-card-modal.discovery-card-modal .discovery-tag { background: #e0e6d9 !important; color: #203c26 !important; border: 0 !important; }
+html body .discovery-card-modal.discovery-card-modal .discovery-btn-primary { background: var(--reference-green) !important; color: white !important; }
+/* Full-bleed welcome and sign-in photography. */
+html body #root .landing-v2 { min-height: 100svh; background: #10231b !important; }
+html body #root .landing-cinematic-bg { object-position: center !important; }
+html body #root .landing-v2-inner { min-height: 100svh !important; justify-content: center !important; text-align: center !important; padding: 36px 28px 100px !important; gap: 20px !important; }
+html body #root .landing-logo-wrap { justify-content: center !important; margin: 0 !important; }
+html body #root .landing-logo-icon { width: 45px !important; height: 45px !important; background: transparent !important; border: 0 !important; box-shadow: none !important; color: #f7f6f2 !important; }
+html body #root .landing-logo-text { display: none !important; }
+html body #root .landing-hero-copy h1 { color: #fff !important; font: 400 46px/1.1 Georgia,serif !important; letter-spacing: -.025em !important; margin: 0 0 16px !important; }
+html body #root .landing-hero-copy p { font-size: 14px !important; color: #eeeee7 !important; max-width: none !important; margin: 0 !important; }
+html body #root .landing-cta-group { position: absolute !important; bottom: 80px !important; left: 28px !important; right: 28px !important; width: auto !important; max-width: 350px; margin: auto !important; }
+html body #root .landing-cta-primary { background: #f7f6f2 !important; color: #1d3325 !important; border-radius: 14px !important; box-shadow: none !important; min-height: 48px !important; font-size: 13px !important; }
+html body #root .landing-motto { position: absolute; bottom: 24px; width: 100%; text-align: center; font-size: 10px; font-style: italic; color: #e9eee4; }
+html body #root .auth-shell-v2 { background: #0b1d13 url('/assets/guest-library/canopy.jpg') center/cover no-repeat !important; min-height: 100svh !important; }
+html body #root .auth-shell-v2::before { content: ''; position: absolute; inset: 0; background: #06160ed9; pointer-events: none; }
+html body #root .auth-ambient-blob { display: none !important; }
+html body #root .auth-card-v2 { position: relative; display: flex; flex-direction: column; width: min(100%,380px) !important; padding: 32px 24px !important; background: transparent !important; border: 0 !important; box-shadow: none !important; }
+html body #root .auth-logo-mark { background: transparent !important; border: 0 !important; box-shadow: none !important; color: #d6dfcf !important; }
+html body #root .auth-heading-v2 { font: 400 34px/1.15 Georgia,serif !important; color: #fff !important; }
+html body #root .auth-subheading { color: #e4e8df !important; font-size: 14px !important; }
+html body #root .auth-social-stack { display: flex !important; flex-direction: column !important; margin-top: 28px !important; gap: 12px !important; }
+html body #root .auth-social-btn { min-height: 48px !important; background: #f8f8f4 !important; color: #17221a !important; border: 0 !important; border-radius: 16px !important; box-shadow: none !important; font-size: 13px !important; }
+html body #root .auth-social-btn:nth-of-type(2) { order: -1; }
+html body #root .auth-email-choice svg { width: 18px; height: 18px; fill: currentColor; }
+html body #root .auth-form-v2[hidden] { display: none !important; }
+html body #root .auth-label, html body #root .auth-footer-links .auth-link, html body #root .auth-guest-btn { color: #e4e8df !important; }
+html body #root .auth-form-v2 { margin-top: 22px; }
+html body #root .auth-back-link { z-index: 1; color: #fff !important; }
+html body #root .onboarding-shell { background: var(--reference-paper) !important; }
+html body #root .onboarding-card { background: var(--reference-paper) !important; color: var(--reference-ink) !important; border: 0 !important; box-shadow: none !important; }
+html body #root .onboarding-card h1 { color: var(--reference-ink) !important; }
+@media (max-width: 780px) {
+  html body #root .app-shell .topbar.mobile-only { display: none !important; }
+  html body #root .app-shell .mobile-content-area { padding-top: 0 !important; }
+  html body #root .app-shell :is(.gallery-v2-shell,.guild-page.page-stack,.profile-shell-v2,.quests-shell) { padding: max(24px,env(safe-area-inset-top)) 20px 100px !important; min-height: 100svh !important; }
+  html body #root .app-shell .gallery-v2-header { padding: 0 0 16px !important; margin: 0 !important; min-height: 0 !important; }
+  html body #root .app-shell .mobile-bottom-dock {
+    position: fixed !important; left: 0 !important; right: 0 !important; bottom: 0 !important; transform: none !important;
+    display: grid !important; grid-template-columns: 1fr 1fr 64px 1fr 1fr !important; gap: 0 !important;
+    width: 100% !important; max-width: none !important; min-height: 76px !important; height: auto !important;
+    padding: 8px 10px max(10px,env(safe-area-inset-bottom)) !important; border: 0 !important;
+    border-top: 1px solid #dde0d8 !important; border-radius: 0 !important; background: #f7f6f2f5 !important;
+    box-shadow: none !important; backdrop-filter: blur(15px) !important;
+  }
+  html body #root .app-shell .mobile-bottom-dock .dock-item { min-height: 48px !important; background: transparent !important; border: 0 !important; gap: 5px !important; padding: 4px 0 !important; }
+  html body #root .app-shell .mobile-bottom-dock .dock-item :is(svg,span) { color: #7b8076 !important; -webkit-text-fill-color: #7b8076 !important; }
+  html body #root .app-shell .mobile-bottom-dock .dock-item span { font-size: 10px !important; font-weight: 400 !important; letter-spacing: 0 !important; }
+  html body #root .app-shell .mobile-bottom-dock .dock-item svg { width: 20px !important; height: 20px !important; }
+  html body #root .app-shell .mobile-bottom-dock .dock-item.active :is(svg,span) { color: #14291b !important; -webkit-text-fill-color: #14291b !important; }
+  html body #root .app-shell .dock-shutter-btn { width: 54px !important; height: 54px !important; margin-top: -14px !important; border: 2px solid #f7f6f2 !important; background: #163827 !important; box-shadow: 0 3px 10px #13261a20 !important; }
+  html body #root .app-shell .dock-shutter-btn svg { width: 24px !important; height: 24px !important; color: #fff !important; }
+  html body #root .app-shell .world-explore-container { height: 100svh !important; }
+  html body #root .app-shell .explore-search-bar { top: max(22px,env(safe-area-inset-top)) !important; left: 20px !important; right: 20px !important; }
+  html body #root .app-shell .explore-search-input-wrap { background: #f7f6f2f5 !important; border-radius: 24px !important; box-shadow: none !important; }
+  html body #root .app-shell .explore-search-input { font-size: 13px !important; }
+  html body #root .app-shell .explore-tag { border-radius: 22px !important; min-height: 40px !important; font-size: 12px !important; background: #233c2cd9 !important; color: white !important; border: 1px solid #ffffff35 !important; }
+  html body #root .app-shell .explore-tag.active { background: #edf0e4 !important; color: #1a3323 !important; }
+  html body #root .app-shell .explore-bottom-sheet { bottom: 88px !important; left: 16px !important; right: 16px !important; background: #f7f6f2f5 !important; border: 0 !important; border-radius: 18px !important; padding: 14px !important; box-shadow: 0 4px 20px #0002 !important; }
+  html body #root .app-shell .explore-sheet-header h3 { font-size: 18px !important; }
+  html body #root .app-shell .explore-hotspot-detail { background: var(--reference-paper) !important; color: var(--reference-ink) !important; border-radius: 24px 24px 0 0 !important; }
+  html body .capture-flow-overlay.capture-flow-overlay { background: #08170f !important; }
+  html body .capture-flow-overlay.capture-flow-overlay .capture-viewfinder { border: 0 !important; border-radius: 0 !important; }
+  html body .capture-flow-overlay.capture-flow-overlay .capture-flow-close { top: max(20px,env(safe-area-inset-top)) !important; left: 16px !important; background: #12231980 !important; border: 0 !important; box-shadow: none !important; }
+  html body .capture-flow-overlay.capture-flow-overlay :is(.capture-player-badge,.capture-brand-title) { visibility: hidden !important; }
+  html body .capture-flow-overlay.capture-flow-overlay .capture-social-rail { top: max(20px,env(safe-area-inset-top)) !important; right: 20px !important; display: flex !important; flex-direction: row !important; }
+  html body .capture-flow-overlay.capture-flow-overlay .capture-rail-btn { border: 0 !important; background: #12231980 !important; box-shadow: none !important; }
+  html body #root .settings-modal { width: 100% !important; max-width: none !important; height: 100svh !important; max-height: 100svh !important; border-radius: 0 !important; padding: max(24px,env(safe-area-inset-top)) 22px !important; }
+}
+@media (min-width: 781px) {
+  html body #root .app-shell :is(.gallery-v2-shell,.guild-page.page-stack,.profile-shell-v2) { max-width: 900px; margin-inline: auto; }
+  html body #root .app-shell .gallery-v2-grid { grid-template-columns: repeat(4,minmax(0,1fr)) !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .landing-cinematic-bg { animation: none !important; transform: none !important; }
+}
+
+html body #root .landing-v2-inner { display: flex !important; flex-direction: column !important; align-items: center !important; width: 100% !important; }
+html body #root .landing-logo-wrap { position: relative !important; inset: auto !important; }
+html body #root .landing-hero-copy { margin: 0 !important; width: 100% !important; }
+html body #root .landing-hero-copy h1, html body #root .landing-hero-copy > p { text-align: center !important; }
+html body #root .landing-motto { z-index: 4; }
+html body #root .landing-logo-icon svg { width: 40px !important; height: 40px !important; }
+html body #root .auth-shell-v2 .auth-social-stack { order: 1; }
+html body #root .auth-shell-v2 .auth-form-v2 { order: 2; }
+html body #root .auth-shell-v2 .auth-footer-links { order: 3; }
+html body #root .auth-card-v2 { align-items: stretch !important; max-width: 380px !important; }
+html body #root .auth-social-stack, html body #root .auth-social-btn { width: 100% !important; }
+html body #root .auth-social-stack { max-width: none !important; }
+html body #root .auth-social-btn > span { background: transparent !important; }
+html body #root .landing-secondary-actions :is(a,button) { min-height: 44px !important; }
+html body #root .app-shell .gallery-v2-card { min-height: 0 !important; min-width: 0 !important; }
+html body #root .app-shell .gallery-v2-tabs { background: transparent !important; box-shadow: none !important; border-radius: 0 !important; }
+html body #root .app-shell .gallery-v2-shell { gap: 0 !important; }
+html body #root .app-shell .explore-bottom-sheet { height: auto !important; max-height: 230px !important; }
+html body #root .app-shell .explore-hotspot-empty { min-height: 70px !important; padding: 8px 0 !important; }
+html body #root .app-shell .explore-sheet-header h3 { font-family: Georgia,serif !important; font-weight: 400 !important; }
+@media (max-width: 780px) {
+  html body #root .app-shell :is(.mobile-content-area,.app-main-content,.route-stage) { margin: 0 !important; padding: 0 !important; background: var(--reference-paper) !important; }
+  html body #root .app-shell .gallery-v2-shell { max-width: none !important; width: 100% !important; margin: 0 !important; }
+}
+
+/* The updated Reference Design Manual supersedes the earlier serif UI direction. */
+:root {
+  --reference-deep-forest: #0B140F;
+  --reference-metadata: #A8A8A8;
+  --reference-gold: #D8B36C;
+  --reference-like: #C23E34;
+  --reference-destructive: #A9141F;
+  --reference-destructive-bg: #F4DFD9;
+  --reference-sage: #849E72;
+  --reference-teal: #69A186;
+  --reference-tan: #B28852;
+  --reference-ui-font: Arial, Helvetica, sans-serif;
+}
+html body #root .app-shell,
+html body .capture-flow-overlay.capture-flow-overlay,
+html body #root .onboarding-shell,
+html body #root .auth-shell-v2 { font-family: var(--reference-ui-font) !important; }
+html body #root .app-shell :is(h1,h2,h3),
+html body #root .app-shell :is(.gallery-v2-header h1,.community-network-header h1,.profile-identity-v2 h2,.quests-section-header h2,.explore-sheet-header h3),
+html body .discovery-card-modal.discovery-card-modal h2,
+html body #root .onboarding-card h1 {
+  font-family: var(--reference-ui-font) !important; font-style: normal !important;
+  font-weight: 600 !important; letter-spacing: -.025em !important;
+}
+html body #root .app-shell :is(.gallery-v2-header h1,.community-network-header h1) { font-size: 26px !important; }
+html body #root .app-shell :is(.gallery-v2-shell,.guild-page.page-stack,.profile-shell-v2,.quests-shell) { font-family: var(--reference-ui-font) !important; }
+html body #root .app-shell :is(.gallery-v2-tab,.community-tab-btn) { border: 1px solid var(--reference-line) !important; min-height: 44px !important; }
+html body #root .app-shell :is(.gallery-v2-tab.active,.community-tab-btn.active) { border-color: var(--reference-green) !important; }
+html body #root .app-shell .gallery-v2-stats dd { font-size: 21px !important; font-weight: 700 !important; }
+html body #root .app-shell .gallery-v2-stats dt { font-size: 12px !important; }
+html body #root .app-shell .gallery-v2-grid { grid-auto-rows: auto !important; }
+html body #root .app-shell .gallery-v2-card { border-radius: 12px !important; }
+html body #root .app-shell .mobile-bottom-dock { background: var(--reference-paper) !important; }
+html body #root .app-shell .mobile-bottom-dock svg { fill: none !important; }
+html body #root .app-shell .mobile-bottom-dock .dock-item.active svg { fill: #112b2226 !important; }
+html body #root .app-shell .dock-shutter-btn { background: var(--reference-green) !important; border-color: var(--reference-paper) !important; }
+html body #root .app-shell .post-action.active { color: var(--reference-like) !important; }
+html body #root .app-shell .post-action.active svg { fill: var(--reference-like) !important; }
+html body #root .auth-shell-v2 { background: var(--reference-deep-forest) !important; }
+html body #root .auth-shell-v2::before { display: none !important; }
+html body #root .auth-social-btn { border-radius: 26px !important; }
+html body #root .auth-email-choice svg { fill: none !important; }
+html body #root .app-shell .explore-tag { background: var(--reference-paper) !important; color: var(--reference-ink) !important; border: 1px solid #c8ccc5 !important; }
+html body #root .app-shell .explore-tag.active { background: var(--reference-green) !important; color: white !important; border-color: var(--reference-green) !important; }
+html body .discovery-card-modal.discovery-card-modal .discovery-card-body { position: relative; margin-top: -24px; border-radius: 24px 24px 0 0; background: var(--reference-paper) !important; padding-top: 24px !important; }
+html body .discovery-card-modal.discovery-card-modal .discovery-sci-name { color: #687065 !important; font-style: italic !important; }
+html body .discovery-card-modal.discovery-card-modal .discovery-photo-rarity { background: var(--reference-gold) !important; color: var(--reference-deep-forest) !important; }
+html body .capture-flow-overlay.capture-flow-overlay .capture-viewfinder-bottom { gap: 16px !important; }
+html body .capture-flow-overlay.capture-flow-overlay .capture-control-row { display: grid; grid-template-columns: 1fr 88px 1fr; align-items: center; justify-items: center; width: 100%; padding: 0 24px; }
+html body .capture-flow-overlay.capture-flow-overlay .capture-primary-shutter { width: 76px; height: 76px; border: 3px solid white; border-radius: 50%; background: #fff; box-shadow: inset 0 0 0 4px #112b22; }
+html body .capture-flow-overlay.capture-flow-overlay .capture-control-button { display: grid; place-items: center; width: 48px; height: 48px; padding: 10px; border-radius: 12px; background: #112b2280; color: white; border: 1px solid #ffffff70; }
+html body .capture-flow-overlay.capture-flow-overlay .capture-control-button svg { width: 24px; height: 24px; fill: none; }
+html body .capture-flow-overlay.capture-flow-overlay .capture-filter-strip { max-height: 100px; }
+html body .capture-flow-overlay.capture-flow-overlay .capture-filter-chip { min-width: 62px !important; }
+html body .capture-flow-overlay.capture-flow-overlay .capture-photo-mode { margin: 0; font: 500 12px/1 Arial,sans-serif; letter-spacing: .08em; color: white; text-align: center; }
+html body .capture-flow-overlay.capture-flow-overlay .capture-focus-pill { order: 0; }
+html body .capture-flow-overlay.capture-flow-overlay .capture-filter-strip { order: 1; }
+html body .capture-flow-overlay.capture-flow-overlay .capture-control-row { order: 2; }
+html body .capture-flow-overlay.capture-flow-overlay .capture-photo-mode { order: 3; }
+html body .capture-flow-overlay.capture-flow-overlay .capture-control-button:disabled { opacity: .45; }
+html body #root .app-shell .gallery-v2-loading { display: grid !important; grid-template-columns: repeat(3,minmax(0,1fr)) !important; gap: 6px !important; }
+html body #root .app-shell .gallery-v2-skeleton { aspect-ratio: 1 !important; min-height: 0 !important; height: auto !important; border-radius: 12px !important; }
+html body .capture-flow-overlay.capture-flow-overlay .capture-filter-strip[hidden] { display: none !important; }
+/* Approved screenshot governs visible typography and composition. */
+html body #root .app-shell :is(h1,h2,h3),
+html body #root .app-shell :is(.gallery-v2-header h1,.community-network-header h1,.profile-identity-v2 h2,.quests-section-header h2,.explore-sheet-header h3),
+html body .discovery-card-modal.discovery-card-modal h2,
+html body #root .onboarding-card h1 {
+  font-family: Georgia,'Times New Roman',serif !important;
+  font-weight: 400 !important; font-style: normal !important; letter-spacing: -.035em !important;
+}
+html body #root .app-shell :is(.gallery-v2-shell,.guild-page.page-stack) { padding-inline: 18px !important; }
+html body #root .app-shell .gallery-v2-sort-row { padding: 0 0 10px !important; }
+html body #root .app-shell .gallery-v2-tabs { gap: 5px !important; }
+html body #root .app-shell .gallery-v2-tab { padding: 6px 12px !important; }
+html body #root .app-shell .community-tab-btn svg { display: none; }
+html body #root .app-shell .post-rank-badge { display: none !important; }
+html body #root .app-shell .post-info-block h3 { font: 500 14px/1.4 Arial,sans-serif !important; }
+html body #root .app-shell .post-photo-wrap { aspect-ratio: 1.65 !important; min-height: 0 !important; }
+html body #root .app-shell .post-photo-image { min-height: 0 !important; }
+html body #root .reference-tour { position: relative; isolation: isolate; height: 100svh; min-height: 600px; overflow: hidden; color: white; background: #0b140f; }
+.reference-tour-photo,.reference-tour-shade { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1; }
+.reference-tour-shade { background: linear-gradient(180deg,transparent 30%,#08170a60 50%,#07160fee 100%); }
+.reference-tour-skip { position: absolute; right: 24px; top: max(26px,env(safe-area-inset-top)); color: white; min-height: 44px; display: flex; align-items: center; font-size: 13px; }
+.reference-tour-copy { position: absolute; left: 28px; right: 40px; bottom: 155px; }
+html body #root .reference-tour-copy h1 { font: 400 36px/1.06 Georgia,serif; margin: 0 0 20px; color: white; }
+.reference-tour-copy p { max-width: 270px; font: 400 15px/1.6 Arial,sans-serif; color: #eceee8; }
+.reference-tour-footer { position: absolute; left: 24px; right: 24px; bottom: max(35px,env(safe-area-inset-bottom)); display: flex; justify-content: space-between; align-items: center; }
+.reference-tour-dots { display: flex; }
+.reference-tour-dots button { background: transparent; border: 0; width: 30px; height: 44px; padding: 10px; }
+.reference-tour-dots span { display: block; width: 6px; height: 6px; border-radius: 50%; background: #ffffff50; }
+.reference-tour-dots [aria-current] span { background: white; }
+.reference-tour-next { display: grid; place-items: center; width: 58px; height: 58px; border: 0; border-radius: 50%; color: #14251b; background: #f5f3ef; }
+.reference-profile { position: relative; max-width: 540px; margin: auto; min-height: 100svh; padding: 40px 24px 100px; color: #111; background: #f5f3ef; font: 14px/1.4 Arial,sans-serif; }
+.reference-profile-settings { position: absolute; top: 20px; right: 16px; display: grid; place-items: center; width: 44px; height: 44px; border: 0; background: transparent; color: #253727; }
+.reference-profile-identity { text-align: center; }
+.reference-profile-avatar { display: grid; place-items: center; overflow: hidden; margin: 0 auto 12px; width: 88px; height: 88px; border-radius: 50%; background: #d9e1d0; font-size: 32px; color: #1a3929; }
+.reference-profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+html body #root .reference-profile-identity h2 { margin: 0; font: 500 24px/1.25 Arial,sans-serif !important; }
+.reference-profile-identity p { margin: 3px 0 8px; font-size: 11px; color: #767b71; }
+.reference-profile-identity small { font-size: 12px; color: #4b5147; }
+.reference-profile-stats { display: grid; grid-template-columns: repeat(4,1fr); margin: 26px 0 16px; text-align: center; }
+.reference-profile-stats dd { margin: 0; font-size: 21px; }
+.reference-profile-stats dt { margin-top: 2px; font-size: 11px; color: #737a6c; }
+.reference-edit-profile { display: flex; justify-content: center; align-items: center; gap: 9px; width: 100%; height: 44px; border: 0; border-radius: 14px; background: #e8e7e1; color: #17261c; font-size: 13px; }
+.reference-profile-tabs { display: flex; justify-content: space-around; margin-top: 20px; border-bottom: 1px solid #e1e2dc; }
+.reference-profile-tabs button { padding: 14px 6px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: #686e63; font-size: 12px; }
+.reference-profile-tabs [aria-selected=true] { color: #152b20; border-bottom-color: #152b20; }
+.reference-achievements { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; padding: 24px 0 35px; text-align: center; }
+.reference-achievements>div { display: flex; flex-direction: column; align-items: center; }
+.reference-achievement-icon { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; color: #17321f; margin-bottom: 12px; }
+.reference-achievement-icon.sage { background: #849e72; }
+.reference-achievement-icon.teal { background: #69a186; }
+.reference-achievement-icon.tan { background: #b28852; }
+.reference-achievements strong { font-size: 12px; font-weight: 500; }
+.reference-achievements small { font-size: 10px; color: #646b5e; margin-top: 3px; }
+.reference-profile-links { border-top: 1px solid #e1e2dc; }
+.reference-profile-links a { display: flex; justify-content: space-between; align-items: center; min-height: 48px; border-bottom: 1px solid #e1e2dc; color: #394334; font-size: 13px; }
+.reference-profile-form { padding: 18px 0; display: grid; gap: 10px; }
+.reference-profile-form input { width: 100%; min-height: 44px; padding: 12px; background: white; color: #17271c; border: 1px solid #ccd2c6; border-radius: 10px; }
+.reference-profile-form>div { display: flex; gap: 10px; }
+.reference-profile-form button { min-height: 44px; border: 0; padding: 10px 18px; border-radius: 12px; background: #112b22; color: white; }
+.reference-recent-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; margin: 18px 0; }
+.reference-recent-grid button { padding: 0; border: 0; aspect-ratio: 1; border-radius: 10px; overflow: hidden; }
+.reference-recent-grid img { width: 100%; height: 100%; object-fit: cover; }
+.reference-settings-overlay { position: fixed; inset: 0; z-index: 2000; background: #0005; display: grid; place-items: center; }
+.reference-settings { width: min(100%,460px); height: min(100svh,850px); overflow: auto; padding: max(28px,env(safe-area-inset-top)) 22px 30px; border-radius: 24px; background: #f5f3ef; color: #111; font: 14px/1.5 Arial,sans-serif; }
+.reference-settings header { position: relative; display: flex; align-items: center; justify-content: center; margin: 0 0 24px; min-height: 44px; }
+html body #root .reference-settings header h2 { font: 400 25px/1.2 Georgia,serif !important; text-align: center; margin: 0; }
+.reference-settings header button { position: absolute; left: -6px; width: 44px; height: 44px; border: 0; background: transparent; color: #17281c; }
+.reference-settings-menu>button { display: flex; gap: 14px; align-items: center; width: 100%; min-height: 55px; border: 0; border-bottom: 1px solid #e2e2dc; background: transparent; text-align: left; color: #30372d; font-size: 14px; }
+.reference-settings-menu>button span { flex: 1; }
+.reference-settings-menu>button svg:last-child { color: #90968a; }
+.reference-delete,.reference-logout { display: flex; justify-content: center; align-items: center; width: 100%; border: 0; min-height: 46px; border-radius: 12px; margin: 20px 0 0; gap: 10px; font-size: 13px; }
+.reference-delete { background: #f4dfd9; color: #a9141f; }
+.reference-logout { background: #e1e0da; color: #19241b; margin-top: 10px; }
+.reference-settings-content p { color: #535c4d; line-height: 1.7; }
+.reference-settings-content a { display: inline-flex; padding: 12px 20px; background: #112b22; color: white; border-radius: 12px; }
+.reference-setting-options { display: flex; gap: 8px; margin: 14px 0 24px; }
+.reference-setting-options button { flex: 1; padding: 12px; min-height: 44px; background: transparent; border: 1px solid #c9cec2; border-radius: 20px; color: #182b1c; }
+.reference-setting-options [aria-pressed=true] { background: #112b22; color: white; }
+.reference-setting-toggle { display: flex; justify-content: space-between; align-items: center; min-height: 56px; border-bottom: 1px solid #dfe2d7; }
+.reference-setting-toggle input { width: 22px; height: 22px; accent-color: #112b22; }
+.reference-groups { margin-inline: -18px; }
+.reference-groups-hero { width: 100%; height: 220px; object-fit: cover; }
+.reference-groups-sheet { position: relative; margin-top: -35px; padding: 20px 20px 30px; background: #f5f3ef; border-radius: 24px 24px 0 0; }
+html body #root .reference-groups h2 { font: 400 28px/1.2 Georgia,serif !important; margin: 0 0 6px; }
+.reference-groups-sheet>p { font-size: 12px; color: #59624f; margin: 0 0 18px; }
+.reference-group-tabs { display: flex; justify-content: space-around; margin-bottom: 15px; }
+.reference-group-tabs button { padding: 10px 20px; min-height: 44px; border: 0; border-radius: 22px; background: transparent; color: #283725; }
+.reference-group-tabs [aria-selected=true] { background: #e0e6d8; }
+.reference-trip-list article { display: flex; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid #e4e5dd; }
+.reference-trip-list article>img { width: 66px; height: 66px; object-fit: cover; border-radius: 12px; }
+.reference-trip-list article>div { flex: 1; min-width: 0; }
+html body #root .reference-trip-list h3 { font: 500 13px/1.35 Arial,sans-serif !important; margin: 0 0 4px; }
+.reference-trip-list p,.reference-trip-list small { font-size: 11px; color: #65715b; margin: 0; }
+.reference-trip-list button { border: 0; background: #112b22; color: white; min-height: 44px; padding: 10px 17px; border-radius: 16px; font-size: 12px; }
+.reference-sample-label,.reference-trip-notice { font-size: 11px; color: #717966; }
+html body #root .app-shell .explore-hotspot-detail { overflow-y: auto !important; padding: 0 0 24px !important; }
+.reference-place-hero { width: 100%; height: 260px; }
+.reference-place-hero img { width: 100%; height: 100%; object-fit: cover; }
+html body #root .app-shell .explore-hotspot-detail-head { position: relative; margin-top: -24px; padding: 22px 20px 14px !important; border-radius: 24px 24px 0 0; background: #f5f3ef; }
+html body #root .app-shell .explore-hotspot-detail>:not(.reference-place-hero):not(.explore-hotspot-detail-head) { margin-inline: 20px; }
+@media (max-width:780px) {
+  .reference-settings { height: 100svh; border-radius: 0; }
+  html body #root .app-shell .reference-profile { width: 100%; max-width: none; }
+}
+html body #root :is(.reference-profile,.reference-settings,.reference-tour) svg.lucide { fill: none !important; stroke: currentColor !important; stroke-width: 1.6 !important; }
+html body #root .reference-achievement-icon svg { width: 30px !important; height: 30px !important; }
+html body #root .reference-profile-settings svg { width: 20px !important; height: 20px !important; }
+html body #root .reference-settings-menu svg { width: 20px !important; height: 20px !important; }
+html body #root .reference-settings header svg { width: 22px !important; height: 22px !important; }
+html body #root .reference-profile-links a { text-decoration: none; }
+html body #root .reference-tour-next svg { width: 24px !important; height: 24px !important; }
+html body #root .reference-species { width: min(100%,430px); max-height: 100svh; overflow-y: auto; background: #f5f3ef; color: #111; border-radius: 24px; font: 14px/1.5 Arial,sans-serif; }
+.reference-species-hero { position: relative; height: 320px; }
+.reference-species-hero>img { width: 100%; height: 100%; object-fit: cover; }
+.reference-species-hero>button { position: absolute; top: 20px; left: 16px; width: 44px; height: 44px; border: 0; border-radius: 50%; background: #112b2250; color: white; }
+.reference-species-sheet { position: relative; margin-top: -32px; background: #f5f3ef; border-radius: 24px 24px 0 0; padding: 20px; }
+.reference-species-hero { isolation: isolate; }
+.reference-species-hero>button { z-index: 5; }
+.reference-species-sheet { z-index: 5; }
+html body #root .auth-shell-v2 { background: linear-gradient(#07140d35,#07140d60), url('/assets/reference-signin.png') center/cover no-repeat !important; }
+.reference-species-title { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+html body #root .reference-species-title h2 { font: 400 27px/1.12 Georgia,serif !important; margin: 0; }
+.reference-species-title>span { font-size: 11px; padding: 5px 13px; border-radius: 20px; background: #e0e6d8; }
+.reference-latin { font-size: 13px; font-style: italic; color: #72776b; margin: 8px 0 20px; }
+.reference-species-tabs { display: flex; justify-content: space-between; margin-top: 20px; border-bottom: 1px solid #dadfd3; }
+.reference-species-tabs button { padding: 12px 7px; background: transparent; border: 0; border-bottom: 2px solid transparent; color: #48533f; font-size: 12px; }
+.reference-species-tabs [aria-selected=true] { border-color: #112b22; color: #112b22; }
+.reference-species-facts { display: grid; grid-template-columns: repeat(3,1fr); padding: 20px 0; text-align: center; gap: 10px; }
+.reference-species-facts>div { display: flex; flex-direction: column; align-items: center; }
+.reference-species-facts strong { font-size: 11px; font-weight: 500; margin-top: 7px; }
+.reference-species-facts small { font-size: 10px; color: #727a6c; }
+html body #root .reference-species svg { width: 22px !important; height: 22px !important; stroke: currentColor !important; stroke-width: 1.6 !important; fill: none !important; }
+html body #root .reference-species-actions [aria-pressed=true] svg { fill: #112b22 !important; }
+.reference-species-description { font-size: 14px; line-height: 1.55; color: #4d5746; }
+.reference-species-date { font-size: 12px; color: #6b7563; }
+.reference-species-actions { display: flex; gap: 10px; margin-top: 20px; }
+.reference-species-actions button { min-height: 46px; border: 0; border-radius: 13px; background: #e2e4dc; color: #112b22; padding: 10px 14px; }
+.reference-species-actions button:first-child { flex: 1; background: #112b22; color: white; }
+.reference-species-gallery { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; padding: 18px 0; }
+.reference-species-gallery button { border: 0; border-radius: 10px; aspect-ratio: 1; padding: 0; overflow: hidden; }
+.reference-species-gallery img { width: 100%; height: 100%; object-fit: cover; }
+.reference-sightings { padding: 10px 0; list-style: none; }
+.reference-sightings li { display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #e0e3d8; padding: 15px 0; }
+.reference-sightings strong { font-size: 13px; font-weight: 500; }
+.reference-sightings p { margin: 4px 0 0; font-size: 12px; color: #738068; }
+@media(max-width:780px) { html body #root .selection-overlay { padding: 0 !important; background: #f5f3ef !important; } html body #root .reference-species { width: 100%; min-height: 100svh; border-radius: 0; } }
+html body #root .app-shell .gallery-v2-header { padding-bottom: 12px !important; }
+html body #root .app-shell .library-hero-panel { padding-bottom: 14px !important; }
+html body #root .app-shell .gallery-icon-btn { background: transparent !important; border: 0 !important; box-shadow: none !important; }
+html body #root .app-shell .gallery-v2-grid { margin-top: 2px !important; }
+html body #root .app-shell .map-leaflet-pin { background: transparent !important; box-shadow: none !important; }
+html body #root .app-shell .map-leaflet-pin-inner { border: 3px solid #f5f3ef !important; border-radius: 50% !important; background: #112b22 !important; overflow: hidden; }
+html body #root .app-shell .map-leaflet-pin-inner img { width: 100%; height: 100%; object-fit: cover; }
+html body .capture-flow-overlay.capture-flow-overlay .capture-flow-panel-clean:has(.reference-identification) { padding: 0 !important; display: block !important; }
+.reference-identification { position: relative; isolation: isolate; min-height: 100svh; width: 100%; max-width: 560px; margin: auto; background: #0b140f; color: #fff; font: 14px/1.5 Arial,sans-serif; display: flex; align-items: flex-end; }
+.reference-identification-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; }
+.reference-identification-shade { position: absolute; inset: 0; background: linear-gradient(180deg,transparent 30%,#0b140f70 53%,#0b140ff5 75%,#0b140f 100%); z-index: -1; }
+.reference-identification-share { position: absolute; top: max(24px,env(safe-area-inset-top)); right: 20px; width: 44px; height: 44px; border: 0; border-radius: 50%; color: white; background: #0b140f70; }
+.reference-identification-content { padding: 360px 24px max(32px,env(safe-area-inset-bottom)); width: 100%; }
+html body .reference-identification h2 { color: white !important; font: 400 28px/1.15 Georgia,serif !important; margin: 0 0 7px; }
+.reference-identification-content>em { font: italic 13px/1.5 Arial,sans-serif; color: #d4dacd; }
+.reference-identification-badges { display: flex; gap: 10px; margin-top: 20px; }
+.reference-identification-badges>span { display: flex; align-items: center; gap: 7px; padding: 8px 12px; border-radius: 16px; font-size: 12px; background: #d8b36c; color: #152319; }
+.reference-identification-badges>span+span { color: white; border: 1px solid #ffffff50; background: transparent; }
+html body .reference-identification svg { stroke: currentColor !important; stroke-width: 1.6 !important; fill: none !important; }
+.reference-identification-meta { list-style: none; padding: 0; margin: 20px 0 28px; display: grid; gap: 10px; }
+.reference-identification-meta li { display: flex; align-items: center; gap: 10px; font-size: 12px; }
+.reference-identification-actions { display: flex; gap: 12px; }
+.reference-identification-actions button { min-height: 50px; flex: 1; border-radius: 16px; border: 1px solid #ffffff40; background: #f5f3ef; color: #112b22; font-size: 13px; }
+.reference-identification-actions button+button { background: #112b22; color: white; }
+.reference-identification-details { margin: 16px 0 20px; display: grid; gap: 8px; }
+.reference-identification-details label { color: #e1e5dc; font-size: 12px; }
+.reference-identification-details :is(input,textarea) { width: 100%; background: #ffffff10; border: 1px solid #ffffff40; border-radius: 12px; padding: 12px; color: #fff; font: 14px/1.5 Arial,sans-serif; scroll-margin-bottom: 35vh; }
+html body #root .app-shell .explore-category-tags { display: flex !important; gap: 12px !important; }
+html body #root .app-shell .explore-tag { flex: 1 !important; }
+html body #root .app-shell .mobile-content-area-world .mobile-bottom-dock { background: #0b2119ef !important; border-color: #ffffff20 !important; }
+html body #root .app-shell .mobile-content-area-world .mobile-bottom-dock .dock-item :is(svg,span) { color: #d4dfd2 !important; -webkit-text-fill-color: #d4dfd2 !important; }
+html body #root .app-shell .mobile-content-area-world .mobile-bottom-dock .dock-item.active :is(svg,span) { color: white !important; -webkit-text-fill-color: white !important; }
+html body #root .app-shell .explore-tag { background: #233c2cbf !important; color: white !important; border: 1px solid #ffffff35 !important; font-weight: 400 !important; }
+html body #root .app-shell .explore-tag.active { background: #edf0e4 !important; color: #1a3323 !important; border-color: transparent !important; }
+html body #root .reference-tour-copy h1 { font: 400 36px/1.12 Georgia,serif !important; color: #fff !important; -webkit-text-fill-color: #fff !important; text-shadow: none !important; }
+html body #root .reference-tour-copy p { color: #edf0e8 !important; -webkit-text-fill-color: #edf0e8 !important; font: 400 15px/1.55 Arial,sans-serif !important; }
+html body .capture-flow-overlay.capture-flow-overlay { z-index: 10000 !important; }
+html body .capture-flow-overlay.capture-flow-overlay button svg { color: #fff !important; stroke: #fff !important; fill: none !important; width: 23px !important; height: 23px !important; }
+html body #root .auth-shell-v2::before { background: #06160e30 !important; }
+html body #root .reference-settings-menu button { color: #252a23 !important; -webkit-text-fill-color: #252a23 !important; font-weight: 400 !important; }
+html body #root .auth-shell-v2 { display: flex !important; justify-content: center !important; align-items: center !important; }
+html body #root .auth-card-v2 { flex: 0 1 380px !important; width: 100% !important; text-align: center !important; }
+html body #root .auth-card-v2::before,html body #root .auth-card-v2::after { display: none !important; }
+html body #root .auth-logo-mark { margin: 0 auto 16px !important; }
+html body #root .auth-social-btn { border-radius: 16px !important; font-weight: 400 !important; }
+html body #root .auth-card-v2 { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+html body #root .landing-motto { color: #dce4d8 !important; -webkit-text-fill-color: #dce4d8 !important; }
+html body .capture-flow-overlay.capture-flow-overlay .capture-photo-mode { color: #f5f3ef !important; -webkit-text-fill-color: #f5f3ef !important; font: 400 11px/1.4 Arial,sans-serif !important; }
+
+/* One mobile gutter; the feed scrolls above the fixed navigation. */
+@media (max-width: 780px) {
+  html body #root .app-shell .guild-page.page-stack {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: max(20px, env(safe-area-inset-top, 0px)) 20px calc(100px + env(safe-area-inset-bottom, 0px)) !important;
+    gap: 8px !important;
+  }
+  html body #root .app-shell .guild-page > [role='tabpanel'] {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  html body #root .app-shell .guild-page .community-feed-stream {
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    gap: 12px !important;
+  }
+  html body #root .app-shell .guild-page .community-stories-rail {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 4px 0 8px !important;
+    gap: 12px !important;
+    overflow-x: auto !important;
+    scroll-padding-inline: 0;
+  }
+  html body #root .app-shell .guild-page .community-story-card {
+    flex: 0 0 64px !important;
+    width: 64px !important;
+    min-width: 64px !important;
+    gap: 5px !important;
+  }
+  html body #root .app-shell .guild-page .community-story-ring { width: 60px !important; height: 60px !important; }
+  html body #root .app-shell .guild-page .community-story-photo,
+  html body #root .app-shell .guild-page .community-story-photo .capture-image-photo { width: 54px !important; height: 54px !important; }
+  html body #root .app-shell .guild-page .community-post-card {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+  }
+  html body #root .app-shell .guild-page .post-header-row {
+    height: auto !important;
+    min-height: 52px !important;
+    padding: 4px 0 12px !important;
+  }
+  html body #root .app-shell .guild-page .post-author-avatar { width: 36px !important; height: 36px !important; }
+  html body #root .app-shell .guild-page .post-info-block { padding: 10px 0 0 !important; }
+  html body #root .app-shell .guild-page .post-photo-wrap {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 30svh !important;
+    aspect-ratio: 1.65 !important;
+  }
+  html body #root .app-shell .guild-page .post-engagement-row { flex-wrap: wrap !important; }
+  html body #root .app-shell .guild-page .post-engagement-actions { flex-wrap: wrap !important; }
+}
+@media (max-width: 780px) {
+  html body #root .app-shell .guild-page.page-stack { transform: none !important; }
+  html body #root .app-shell .guild-page .post-header-row { margin: 0 !important; }
+  html body #root .app-shell .guild-page .post-author-block { padding: 0 !important; }
+  html body #root .app-shell .guild-page .post-engagement-row { margin-top: 4px !important; padding-top: 4px !important; }
+  html body #root .app-shell .guild-page .post-action { min-height: 44px !important; height: auto !important; }
+}
+@media (max-width: 780px) and (max-height: 780px) {
+  html body #root .app-shell .guild-page .post-photo-wrap { max-height: 24svh !important; }
+}
+
+/* Explore: profile beside search, quieter map controls, photo-led place rows. */
+html body #root .app-shell .explore-search-bar { left: 16px !important; right: 16px !important; top: max(20px,env(safe-area-inset-top,0px)) !important; }
+html body #root .app-shell .explore-search-input-wrap { width: calc(100% - 60px) !important; height: 50px !important; border-radius: 28px !important; background: #f5f3eff5 !important; padding: 0 16px !important; box-shadow: 0 3px 18px #0c241a18 !important; }
+html body #root .app-shell .explore-search-input-wrap svg { width: 19px !important; height: 19px !important; color: #586853 !important; stroke: currentColor !important; fill: none !important; flex-shrink: 0; }
+html body #root .app-shell .explore-search-input { font: 400 13px/1.4 Arial,sans-serif !important; min-width: 0 !important; }
+html body #root .app-shell .world-hud-left { display: block !important; left: auto !important; right: 16px !important; top: max(20px,env(safe-area-inset-top,0px)) !important; z-index: 80 !important; }
+html body #root .app-shell .world-hud-avatar { display: grid !important; place-items: center !important; position: relative !important; width: 50px !important; height: 50px !important; border-radius: 50% !important; padding: 3px !important; border: 2px solid #f5f3ef !important; background: #cbd8c0 !important; box-shadow: 0 3px 18px #0c241a30 !important; }
+html body #root .app-shell .world-hud-avatar-face { display: grid !important; place-items: center !important; position: static !important; width: 40px !important; height: 40px !important; border-radius: 50% !important; overflow: hidden; background: #dce5d2 !important; color: #193b2b !important; font: 500 20px/1 Arial,sans-serif !important; }
+html body #root .app-shell .world-hud-avatar-face img { width: 100%; height: 100%; object-fit: cover; }
+html body #root .app-shell :is(.world-xp-ring,.world-hud-level) { display: none !important; }
+html body #root .app-shell .world-hud-right { top: max(138px,calc(env(safe-area-inset-top,0px) + 118px)) !important; right: 16px !important; gap: 10px !important; }
+html body #root .app-shell .explore-category-tags { margin-top: 12px !important; padding: 0 !important; }
+html body #root .app-shell .explore-bottom-sheet { padding: 16px !important; border-radius: 24px !important; max-height: min(34svh,250px) !important; }
+html body #root .app-shell .explore-sheet-header { margin: 0 0 12px !important; padding: 0 !important; }
+html body #root .app-shell .explore-sheet-header h3 { font: 400 21px/1.2 Georgia,serif !important; color: #152b20 !important; }
+html body #root .app-shell .explore-sheet-see-all { color: #35553c !important; font: 400 12px Arial,sans-serif !important; }
+html body #root .app-shell .explore-hotspot-cards { display: flex !important; gap: 10px !important; overflow-x: auto !important; padding: 0 0 4px !important; }
+html body #root .app-shell .explore-hotspot-card { display: flex !important; flex: 0 0 260px !important; align-items: center !important; gap: 12px !important; width: 260px !important; min-width: 0 !important; height: 112px !important; min-height: 0 !important; padding: 8px !important; border: 1px solid #e0e4d9 !important; border-radius: 16px !important; background: #eeeee6 !important; box-shadow: none !important; text-align: left; transform: none !important; }
+html body #root .app-shell .explore-hotspot-card::before,html body #root .app-shell .explore-hotspot-card::after { display: none !important; }
+html body #root .app-shell .explore-community-photo { position: relative !important; inset: auto !important; width: 86px !important; height: 94px !important; flex: 0 0 86px !important; border-radius: 11px !important; overflow: hidden !important; }
+html body #root .app-shell .explore-hotspot-overlay { position: static !important; padding: 0 !important; background: transparent !important; min-width: 0 !important; }
+html body #root .app-shell .explore-hotspot-chip { border: 0 !important; background: transparent !important; padding: 0 !important; font: 400 9px/1.3 Arial,sans-serif !important; color: #65765c !important; }
+html body #root .app-shell .explore-hotspot-title { font: 400 17px/1.15 Georgia,serif !important; color: #162b20 !important; margin: 5px 0 !important; text-shadow: none !important; }
+html body #root .app-shell .explore-hotspot-meta { font: 400 10px/1.4 Arial,sans-serif !important; color: #68715f !important; text-shadow: none !important; }
+
+/* Quests uses the same paper, botanical photography and forest actions. */
+html body #root .app-shell .quests-shell { max-width: 720px !important; margin: auto !important; padding: 28px 20px 110px !important; transform: none !important; background: #f5f3ef !important; }
+.reference-quests-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.reference-quests-heading p { font: 400 9px/1.4 Arial,sans-serif; letter-spacing: 2px; color: #78806e; margin: 0 0 7px; }
+html body #root .reference-quests-heading h1 { font: 400 34px/1 Georgia,serif !important; margin: 0 !important; color: #172b20 !important; }
+.reference-quests-heading>span { font: 12px Arial,sans-serif; background: #e3e8da; color: #344d32; padding: 9px 13px; border-radius: 20px; }
+.reference-quests-hero { padding: 24px 20px 20px; border-radius: 22px; background: linear-gradient(100deg,#0c231ce8,#0c231c85),url('/assets/reference-signin.png') center 30%/cover; color: #fff; margin-bottom: 22px; }
+html body #root .reference-quests-hero>p { color: #dce4d6 !important; font: 12px/1.4 Arial,sans-serif !important; margin: 0 0 10px !important; }
+html body #root .reference-quests-hero h2 { font: 400 29px/1.15 Georgia,serif !important; color: #fff !important; margin: 0 0 28px !important; }
+.reference-quests-progress { display: flex; justify-content: space-between; gap: 12px; font: 11px/1.5 Arial,sans-serif; color: #dce4d6; margin: 10px 0; }
+html body #root .app-shell .quest-cadence-tabs { display: grid !important; grid-template-columns: repeat(3,1fr) !important; background: #e9ebe2 !important; border: 0 !important; border-radius: 24px !important; padding: 4px !important; gap: 4px !important; margin: 0 0 22px !important; }
+html body #root .app-shell .quest-cadence-btn { border: 0 !important; border-radius: 22px !important; background: transparent !important; color: #58634f !important; min-height: 42px !important; font: 13px Arial,sans-serif !important; box-shadow: none !important; }
+html body #root .app-shell .quest-cadence-btn.active { background: #153c2c !important; color: #fff !important; }
+html body #root .app-shell .quests-card-list { display: grid !important; gap: 12px !important; }
+html body #root .app-shell .quests-section-header { margin: 0 !important; padding: 0 0 3px !important; }
+html body #root .app-shell .quests-section-header h2 { font: 400 23px/1.2 Georgia,serif !important; color: #223522 !important; }
+html body #root .app-shell .reference-quest-card { display: flex; width: 100%; gap: 14px; padding: 14px; border-radius: 18px; border: 1px solid #dde2d4; background: #fcfbf7; text-align: left; color: #233c2a; box-shadow: none; }
+.reference-quest-photo { width: 72px; height: 90px; flex: 0 0 72px; border-radius: 12px; object-fit: cover; }
+.reference-quest-copy { flex: 1; min-width: 0; }
+.reference-quest-eyebrow { display: flex; justify-content: space-between; gap: 8px; font: 10px/1.4 Arial,sans-serif; color: #6b7b5d; }
+html body #root .reference-quest-copy h3 { font: 400 21px/1.15 Georgia,serif !important; color: #203b28 !important; margin: 8px 0 !important; }
+html body #root .reference-quest-copy p { font: 400 12px/1.5 Arial,sans-serif !important; color: #6a715e !important; margin: 0 0 12px !important; }
+.reference-quest-progress { display: flex; gap: 12px; align-items: center; font: 11px Arial,sans-serif; }
+.reference-quest-progress>div { flex: 1; }
+.reference-quest-status { display: flex; justify-content: space-between; margin-top: 12px; font: 600 10px/1.5 Arial,sans-serif; color: #244c31; letter-spacing: .5px; }
+html body #root .reference-quest-card.completed { background: #edf1e6; }
+/* Location details are a scrollable sheet, with the photograph in its own layer. */
+html body #root .app-shell .explore-hotspot-detail { position: fixed !important; left: 12px !important; right: 12px !important; bottom: calc(90px + env(safe-area-inset-bottom,0px)) !important; top: auto !important; width: auto !important; max-width: 540px !important; margin-inline: auto !important; max-height: calc(100svh - 190px) !important; overflow-y: auto !important; overflow-x: hidden !important; padding: 0 0 20px !important; background: #f5f3ef !important; border: 0 !important; border-radius: 24px !important; box-shadow: 0 12px 40px #071d1940 !important; z-index: 200 !important; }
+html body #root .app-shell .reference-place-hero { position: relative !important; isolation: isolate; height: min(26svh,240px) !important; width: 100% !important; overflow: hidden !important; flex-shrink: 0 !important; }
+html body #root .app-shell .reference-place-hero .capture-image { height: 100% !important; width: 100% !important; }
+html body #root .app-shell .explore-hotspot-detail-head { position: relative !important; z-index: 2 !important; background: #f5f3ef !important; border-radius: 22px 22px 0 0 !important; margin: -20px 0 0 !important; padding: 20px 20px 12px !important; align-items: flex-start !important; }
+html body #root .app-shell .explore-hotspot-detail-head h3 { font: 400 26px/1.1 Georgia,serif !important; margin: 0 0 8px !important; }
+html body #root .app-shell .explore-hotspot-detail-head p { font: 400 12px/1.5 Arial,sans-serif !important; }
+html body #root .app-shell .explore-hotspot-detail-head button { flex: 0 0 44px !important; width: 44px !important; height: 44px !important; border: 0 !important; background: #e7eadf !important; border-radius: 50% !important; }
+html body #root .app-shell .explore-hotspot-detail-body { font: 400 14px/1.6 Arial,sans-serif !important; color: #4d5d47 !important; }
+html body #root .app-shell .explore-hotspot-detail-actions { padding-top: 12px !important; }
+.reference-camera-preview { position: relative; width: 100%; height: 100svh; background: #091b12; color: #fff; }
+.reference-camera-preview>img { width: 100%; height: 100%; object-fit: contain; }
+.reference-preview-controls { position: absolute; inset: auto 0 0; padding: 80px 20px max(24px,env(safe-area-inset-bottom)); background: linear-gradient(transparent,#07170ded 30%,#07170d); }
+.reference-preview-filter { display: inline-block; padding: 5px 10px; border: 1px solid #ffffff40; border-radius: 16px; color: #edf0e8; font: 11px/1.4 Arial,sans-serif; }
+.reference-preview-filters { display: flex; gap: 8px; overflow-x: auto; padding: 12px 0; }
+.reference-preview-filters button { flex-shrink: 0; min-height: 44px; border-radius: 22px; padding: 8px 14px; border: 1px solid #ffffff40; background: #ffffff10; color: #fff; }
+.reference-preview-filters button[aria-pressed=true] { background: #dfe8d4; color: #153923; }
+.reference-preview-destination,.reference-preview-actions { display: flex; gap: 10px; }
+.reference-preview-destination button,.reference-preview-actions button { flex: 1; min-height: 48px; border: 1px solid #ffffff30; border-radius: 14px; background: #ffffff10; color: #fff; font: 13px Arial,sans-serif; }
+.reference-preview-destination button[aria-pressed=true],.reference-preview-actions button:last-child { background: #f5f3ef; color: #163722; }
+html body .reference-preview-controls>p { color: #dfe5d8 !important; font: 12px/1.5 Arial,sans-serif !important; }
+html body .reference-ai-note { display: flex; gap: 10px; align-items: flex-start; font: 12px/1.5 Arial,sans-serif !important; color: #dce4d7 !important; margin: 14px 0; }
+.reference-ai-note strong { display: grid; place-items: center; border: 1px solid #e1cc97; border-radius: 50%; flex: 0 0 20px; height: 20px; color: #e1cc97; }
+.reference-post-toggle { display: grid; grid-template-columns: 24px 1fr; gap: 4px 10px; align-items: center; padding: 14px 0; font: 13px/1.4 Arial,sans-serif; color: white; }
+.reference-post-toggle input { width: 20px; height: 20px; accent-color: #8da97e; }
+.reference-post-toggle span { grid-column: 2; color: #c3ceba; font-size: 11px; }
+.reference-quest-photo-notice { border-radius: 16px; background: #e6ebdc; padding: 16px; margin-bottom: 20px; font: 13px/1.5 Arial,sans-serif; }
+.reference-quest-photo-notice button { min-height: 44px; border: 0; background: transparent; color: #274a30; text-decoration: underline; }
+.reference-quest-proof-preview { display: grid; gap: 12px; }
+.reference-quest-proof-preview img { width: 100%; max-height: 230px; object-fit: contain; border-radius: 14px; }
+html body .capture-flow-overlay.capture-flow-overlay button { animation: none !important; box-shadow: none !important; }
+html body #root .app-shell .explore-category-tags { position: static !important; width: 100% !important; max-width: none !important; margin-inline: 0 !important; }
+html body #root .app-shell .explore-hotspot-card { flex-direction: row !important; justify-content: flex-start !important; overflow: hidden !important; }
+html body #root .app-shell .explore-community-photo { margin: 0 !important; min-height: 94px !important; max-height: 94px !important; height: 94px !important; aspect-ratio: auto !important; }
+html body #root .app-shell .explore-hotspot-overlay { flex: 1 !important; width: auto !important; }
+html body #root .app-shell .explore-hotspot-title { -webkit-text-fill-color: #162b20 !important; }
+html body #root .app-shell .explore-hotspot-meta,html body #root .app-shell .explore-hotspot-meta span { -webkit-text-fill-color: #68715f !important; color: #68715f !important; }
+html body #root .app-shell .explore-hotspot-chip { -webkit-text-fill-color: #65765c !important; }
+html body #root .app-shell .hotspot-community-actions { display: flex !important; flex-wrap: wrap !important; gap: 12px !important; align-items: center !important; }
+html body #root .app-shell .hotspot-community-actions>button { min-height: 44px !important; padding: 10px 12px !important; font: 12px Arial,sans-serif !important; }
+html body #root .app-shell .explore-hotspot-detail-actions button { font: 400 14px Arial,sans-serif !important; text-transform: none !important; letter-spacing: 0 !important; }
+html body #root .reference-quests-hero .progress-bar,html body #root .reference-quest-progress .progress-bar { height: 5px !important; border: 0 !important; background: #b9c6ac50 !important; border-radius: 4px !important; }
+html body #root .reference-quests-hero .progress-bar>div { background: #c7d6b4 !important; }
+html body #root .reference-quest-progress .progress-bar>div { background: #668557 !important; }
+html body #root .reference-quests-progress span { color: #dce4d6 !important; -webkit-text-fill-color: #dce4d6 !important; font: 400 11px/1.5 Arial,sans-serif !important; }
+html body #root .app-shell .quest-cadence-btn.active { -webkit-text-fill-color: #fff !important; }
+html body #root .app-shell .quest-cadence-tabs { box-shadow: none !important; }
+html body #root .app-shell .quests-card-list { padding: 0 !important; margin: 0 !important; }
+.reference-photo-loading { display: grid; place-items: center; width: 100%; height: 100svh; background: #0c2118; color: #f5f3ef; font: 15px Arial,sans-serif; }
+/* Startup follows the photographic reference while real session loading runs. */
+.reference-startup { position: fixed; inset: 0; z-index: 12000; display: grid; place-items: center; isolation: isolate; background: #0c1d17; color: #fff; }
+.reference-startup-photo,.reference-startup-shade { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; object-fit: cover; }
+.reference-startup-shade { background: linear-gradient(#10201910,#08171055 45%,#06120a9c); }
+.reference-startup-brand { display: flex; flex-direction: column; align-items: center; text-align: center; margin-top: -30px; }
+html body #root .reference-startup-brand svg { width: 38px !important; height: 38px !important; color: #fff !important; margin-bottom: 20px; }
+html body #root .reference-startup-brand h1 { font: 400 44px/1.12 Georgia,serif !important; color: #fff !important; -webkit-text-fill-color: #fff !important; margin: 0 0 14px !important; }
+html body #root .reference-startup-brand p { font: 400 14px/1.4 Arial,sans-serif !important; color: #f4f4ed !important; }
+.reference-startup-footer { position: absolute; bottom: max(32px,env(safe-area-inset-bottom,0px)); left: 24px; right: 24px; text-align: center; }
+html body #root .reference-startup-footer p { color: #dce4d8 !important; font: italic 10px/1.5 Arial,sans-serif !important; }
+.reference-startup-progress { display: block; width: 120px; height: 2px; margin: 22px auto 0; border-radius: 2px; background: #ffffff30; overflow: hidden; }
+.reference-startup-progress::after { content: ''; display: block; width: 50%; height: 100%; background: #f4f4ed; animation: reference-load 1.5s ease-in-out infinite alternate; }
+@keyframes reference-load { to { transform: translateX(100%); } }
+@media(prefers-reduced-motion:reduce) { .reference-startup-progress::after { animation: none; } }
+.reference-startup-error { padding: 20px; border-radius: 18px; background: #0b2119e8; }
+html body #root .reference-startup-error h2 { color: #fff !important; font: 24px Georgia,serif !important; }
+.reference-startup-error button { border: 0; border-radius: 14px; background: #f5f3ef; color: #153323; padding: 12px 24px; min-height: 44px; }
+
+/* Photo pins: a cream outline and a pointed tip, with no neon halo. */
+html body #root .app-shell .reference-map-pin { position: relative !important; width: 54px !important; height: 64px !important; border: 0 !important; background: transparent !important; border-radius: 0 !important; box-shadow: none !important; transform: none !important; filter: drop-shadow(0 2px 3px #08231b45) !important; animation: none !important; }
+html body #root .app-shell .reference-map-pin::before { display: none !important; }
+html body #root .app-shell .reference-map-pin::after { content: '' !important; position: absolute !important; display: block !important; width: 13px !important; height: 13px !important; left: 20px !important; top: 45px !important; border: 1.5px solid #f5f3e9 !important; border-top: 0 !important; border-left: 0 !important; background: #244536 !important; transform: rotate(45deg) !important; border-radius: 0 0 3px 0 !important; box-shadow: none !important; z-index: -1 !important; }
+html body #root .app-shell .reference-map-pin .map-leaflet-pin-inner { width: 54px !important; height: 54px !important; margin: 0 !important; padding: 0 !important; border: 1.5px solid #f5f3e9 !important; border-radius: 50% !important; background: #244536 !important; box-shadow: none !important; filter: none !important; overflow: hidden !important; }
+html body #root .app-shell .reference-map-pin .map-leaflet-pin-inner::before,html body #root .app-shell .reference-map-pin .map-leaflet-pin-inner::after { display: none !important; }
+html body #root .app-shell .reference-map-pin img { width: 100% !important; height: 100% !important; object-fit: cover !important; border: 0 !important; border-radius: 50% !important; filter: none !important; }
+html body #root .app-shell .map-user-dot { background: #2199d5 !important; border: 2px solid #fff !important; box-shadow: 0 0 0 5px #2199d525 !important; }
+html body #root .app-shell .map-user-pulse-ring { border-color: #2199d550 !important; }
+
+/* Search and profile share one baseline; compact filters sit directly beneath. */
+html body #root .app-shell .explore-search-bar { top: max(18px,env(safe-area-inset-top,0px)) !important; left: 18px !important; right: 18px !important; display: flex !important; flex-direction: column !important; gap: 12px !important; }
+html body #root .app-shell .explore-search-input-wrap { height: 44px !important; min-height: 44px !important; width: calc(100% - 56px) !important; padding: 0 14px !important; }
+html body #root .app-shell .world-hud-left { top: max(18px,env(safe-area-inset-top,0px)) !important; right: 18px !important; }
+html body #root .app-shell .world-hud-avatar { width: 44px !important; height: 44px !important; border: 1.5px solid #f5f3ef !important; padding: 2px !important; }
+html body #root .app-shell .world-hud-avatar-face { width: 36px !important; height: 36px !important; font-size: 17px !important; }
+html body #root .app-shell .explore-category-tags { width: auto !important; align-self: flex-start !important; gap: 10px !important; margin: 0 !important; }
+html body #root .app-shell .explore-tag { flex: 0 0 auto !important; min-height: 38px !important; height: 38px !important; padding: 8px 18px !important; font: 400 12px Arial,sans-serif !important; background: #284335a8 !important; border: 1px solid #ffffff40 !important; }
+html body #root .app-shell .explore-tag.active { background: #f0f2e8 !important; color: #203828 !important; }
+html body #root .app-shell .world-hud-right { top: max(132px,calc(env(safe-area-inset-top,0px) + 114px)) !important; right: 18px !important; }
+html body #root .app-shell .world-hud-stats-toggle,html body #root .app-shell .world-hud-bell { width: 40px !important; height: 40px !important; min-width: 40px !important; min-height: 40px !important; border: 1px solid #ffffff65 !important; box-shadow: none !important; background: #f5f3efed !important; }
+html body #root .app-shell .explore-bottom-sheet { left: 18px !important; right: 18px !important; padding: 12px !important; border-radius: 18px !important; }
+html body #root .app-shell .explore-sheet-header h3 { font: 400 17px/1.2 Georgia,serif !important; }
+html body #root .app-shell .explore-hotspot-card { flex-basis: 100% !important; width: 100% !important; height: 84px !important; background: transparent !important; border: 0 !important; padding: 0 !important; scroll-snap-align: start; }
+html body #root .app-shell .explore-hotspot-cards { scroll-snap-type: x mandatory; }
+html body #root .app-shell .explore-community-photo { width: 70px !important; flex-basis: 70px !important; height: 70px !important; min-height: 70px !important; max-height: 70px !important; }
+html body #root .app-shell .explore-hotspot-title { font: 400 17px/1.2 Georgia,serif !important; }
+html body #root .app-shell .reference-map-pin { clip-path: none !important; overflow: visible !important; opacity: 1 !important; }
+html body #root .app-shell .reference-map-pin::after { z-index: 0 !important; opacity: 1 !important; clip-path: none !important; }
+html body #root .app-shell .reference-map-pin .map-leaflet-pin-inner { position: relative !important; z-index: 1 !important; }
+/* Full-screen place detail; community photographs keep their original framing. */
+html body .place-page { position: fixed; inset: 0; z-index: 10000; display: flex; flex-direction: column; background: #f5f3ef; color: #172c21; font: 14px/1.5 Arial,sans-serif; }
+.place-page-top { display: flex; align-items: center; gap: 12px; padding: max(14px,env(safe-area-inset-top,0px)) 18px 10px; flex-shrink: 0; }
+.place-page-top button { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid #dfe4d8; border-radius: 50%; background: transparent; color: #25412e; }
+.place-page-top>span { font-size: 12px; letter-spacing: .4px; color: #677260; }
+.place-page-scroll { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.place-page-photo { position: relative; height: clamp(240px,38svh,420px); margin: 0; background: #17241c; }
+html body .place-page-photo .capture-image { width: 100% !important; height: 100% !important; }
+html body .place-page-photo .capture-image-photo { object-fit: contain !important; width: 100% !important; height: 100% !important; }
+.place-page-photo figcaption { position: absolute; right: 14px; bottom: 26px; z-index: 3; padding: 4px 9px; border-radius: 14px; background: #112a21be; color: #fff; font-size: 10px; }
+.place-page-content { position: relative; z-index: 4; margin-top: -18px; padding: 24px 24px 32px; border-radius: 22px 22px 0 0; background: #f5f3ef; }
+html body .place-page-eyebrow { color: #77826d !important; font: 10px/1.4 Arial,sans-serif !important; letter-spacing: 1.5px; text-transform: uppercase; margin: 0 0 10px !important; }
+html body .place-page-content h1 { font: 400 30px/1.08 Georgia,serif !important; color: #172c21 !important; -webkit-text-fill-color: #172c21 !important; margin: 0 0 12px !important; }
+html body .place-page-location { display: flex; align-items: center; gap: 7px; color: #687462 !important; font: 12px/1.5 Arial,sans-serif !important; margin: 0 0 24px !important; }
+.place-page-contributor { display: flex; align-items: center; gap: 12px; padding: 18px 0; border-top: 1px solid #dfe3d8; }
+.place-page-contributor>span { width: 42px; height: 42px; flex: 0 0 42px; display: grid; place-items: center; background: #e0e8d8; border-radius: 50%; color: #34513a; }
+.place-page-contributor strong { font: 500 13px Arial,sans-serif; }
+html body .place-page-contributor p { font: 12px/1.5 Arial,sans-serif !important; color: #718068 !important; margin: 5px 0 0 !important; }
+html body .place-page-description { font: 14px/1.6 Arial,sans-serif !important; color: #4c5c46 !important; }
+.place-page-finds h2 { font: 22px Georgia,serif; margin: 24px 0 12px; }
+.place-page-finds>div { display: flex; flex-wrap: wrap; gap: 8px; }
+.place-page-finds span { padding: 6px 12px; background: #e7ecde; border-radius: 18px; text-transform: capitalize; font-size: 12px; }
+.place-page-social { display: flex; flex-wrap: wrap; gap: 20px; align-items: center; margin-top: 24px; }
+.place-page-social>button { display: flex; align-items: center; gap: 8px; border: 1px solid #d7dfce; background: #eff1e8; padding: 12px; border-radius: 12px; color: #34503a; }
+.place-page-stars { display: flex; }
+.place-page-stars button { background: transparent; border: 0; width: 32px; height: 44px; padding: 0; color: #657750; }
+.place-page-social small,.place-page-attribution { color: #76816a; font-size: 11px; }
+.place-page-actions { display: flex; gap: 12px; flex-shrink: 0; padding: 16px 20px max(20px,env(safe-area-inset-bottom,0px)); border-top: 1px solid #dfe4d7; background: #f5f3ef; }
+.place-page-actions>a,.place-page-actions>button { display: flex; justify-content: center; align-items: center; gap: 8px; flex: 1; min-height: 50px; border: 1px solid #d6dfcd; border-radius: 14px; background: transparent; color: #274731; font: 13px Arial,sans-serif; text-decoration: none; }
+.place-page-actions>button { background: #163c2c; color: white; border-color: transparent; }
+html body .place-page svg { stroke: currentColor !important; fill: none; stroke-width: 1.6 !important; }
+@media(min-width:781px) { html body .place-page { inset: 24px max(24px,calc((100vw - 560px)/2)); border-radius: 24px; overflow: hidden; box-shadow: 0 0 0 100vmax #10251c60; } }
+
+/* Reference manual: reserve the editorial serif for the Wild Realm mark. */
+html body #root .app-shell :is(h1,h2,h3),
+html body #root .app-shell .explore-sheet-header h3,
+html body #root .app-shell .explore-hotspot-title,
+html body .place-page-content h1,
+html body .place-page-finds h2 {
+  font-family: var(--reference-ui-font) !important;
+  font-style: normal !important;
+  font-weight: 700 !important;
+  letter-spacing: -.02em !important;
+}
+
+/* Small, event-driven feedback; never an idle animation loop. */
+@keyframes discovery-heart-pop {
+  0%, 100% { transform: scale(1); }
+  40% { transform: scale(1.28) rotate(-8deg); }
+  70% { transform: scale(.94); }
+}
+.post-action[aria-pressed="true"] svg {
+  fill: currentColor;
+  animation: discovery-heart-pop 320ms ease-out;
+}
+.post-action, .community-chat-action, .capture-control-button,
+.capture-primary-shutter, .capture-filter-chip {
+  transition: transform 150ms ease-out, background-color 150ms ease-out, border-color 150ms ease-out;
+  touch-action: manipulation;
+}
+.post-action:active, .community-chat-action:active, .capture-control-button:active { transform: scale(.95); }
+.capture-primary-shutter:active { transform: scale(.92); }
+.capture-flow-overlay .capture-viewfinder-bottom { display: flex; flex-direction: column; gap: 12px; }
+.capture-flow-overlay .capture-focus-pill { order: 0; }
+.capture-flow-overlay .capture-filter-strip {
+  order: 1; width: 100%; min-width: 0; overflow-x: auto;
+  overscroll-behavior-x: contain; scroll-snap-type: x proximity;
+  padding: 8px 12px; scrollbar-width: none;
+}
+.capture-flow-overlay .capture-filter-strip[hidden] { display: none; }
+.capture-flow-overlay .capture-filter-chip { scroll-snap-align: center; flex-shrink: 0; }
+.capture-flow-overlay .capture-filter-chip.active .capture-filter-preview {
+  outline: 2px solid #f4f1e8; outline-offset: 4px;
+}
+.capture-flow-overlay .capture-filter-label { color: #fff; text-shadow: 0 1px 4px #000; }
+.capture-flow-overlay .capture-control-row { order: 2; }
+.capture-flow-overlay .capture-photo-mode { order: 3; margin: 0; }
+.explorer-search { display: grid; gap: 8px; margin: 18px 0; font-size: 13px; }
+.explorer-search input { width: 100%; min-height: 44px; border: 1px solid #b8c4b7; border-radius: 16px; padding: 10px 14px; color: inherit; background: transparent; font: inherit; }
+.level-up-card { width: min(360px, calc(100vw - 32px)); text-align: center; }
+.level-up-card .continue-btn { width: 100%; min-height: 48px; margin-top: 20px; }
+html[data-motion-reduced="true"] .post-action svg,
+html[data-motion-reduced="true"] .capture-flow-overlay *,
+html[data-motion-reduced="true"] .community-chat-action { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+@media (prefers-reduced-motion: reduce) {
+  .post-action svg, .capture-flow-overlay *, .community-chat-action { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+@media (max-height: 640px) {
+  .capture-flow-overlay .capture-viewfinder-bottom { gap: 6px; }
+  .capture-flow-overlay .capture-filter-preview { width: 38px; height: 38px; }
+}
+
+.capture-sample-notice { position: absolute; top: 100px; left: 24px; right: 24px; margin: 0; text-align: center; color: #fff; font-size: 12px; padding: 8px 12px; border-radius: 20px; background: rgba(10, 30, 22, .8); z-index: 2; }
+.explorer-search-result { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 72px; padding: 12px 0; border: 0; border-bottom: 1px solid #d8ded5; background: transparent; color: inherit; text-align: left; cursor: pointer; }
+.explorer-search-result > span:nth-child(2) { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.explorer-search-result small { display: block; margin-top: 4px; opacity: .7; }
+.public-explorer-page { max-width: 760px; margin-inline: auto; padding: 24px 20px calc(110px + env(safe-area-inset-bottom)); }
+.public-profile-back { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; color: inherit; text-decoration: none; }
+.public-explorer-header { padding: 28px 0; text-align: center; border-bottom: 1px solid #d8ded5; }
+.public-explorer-header .post-author-avatar { display: inline-flex; width: 72px; height: 72px; font-size: 24px; }
+.public-explorer-header h1 { margin: 16px 0 6px; overflow-wrap: anywhere; }
+.public-explorer-header .community-profile-stats { justify-content: center; margin: 24px 0; }
+.public-explorer-header button { min-height: 44px; padding-inline: 24px; }
+.public-explorer-discoveries { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.public-explorer-discoveries article { min-width: 0; overflow-wrap: anywhere; }
+.public-explorer-photo { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 16px; }
+.public-explorer-discoveries h3 { font-size: 16px; }
+.library-load-error { padding: 16px; margin: 12px 0 20px; border: 1px solid #c9c5b7; border-radius: 16px; background: var(--reference-paper); color: var(--reference-ink); }
+.library-load-error p { margin: 0 0 12px; line-height: 1.5; }
+.library-load-error button { min-height: 44px; padding-inline: 20px; }

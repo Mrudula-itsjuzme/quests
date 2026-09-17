@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useApiClient } from '../../lib/useApiClient';
 import { newIdempotencyKey } from '../../lib/api';
@@ -44,9 +45,16 @@ export function useSpecies() {
 export function useCaptureItem() {
   const api = useApiClient();
   const queryClient = useQueryClient();
+  const pendingKeyRef = useRef(null);
   return useMutation({
-    mutationFn: (bundle) => api.createCapture(bundle, newIdempotencyKey()),
+    mutationFn: (bundle) => {
+      if (bundle?.chosenCandidateIndex != null || !pendingKeyRef.current) {
+        pendingKeyRef.current = newIdempotencyKey();
+      }
+      return api.createCapture(bundle, pendingKeyRef.current);
+    },
     onSuccess: () => {
+      pendingKeyRef.current = null;
       queryClient.invalidateQueries({ queryKey: ['captures'] });
       queryClient.invalidateQueries({ queryKey: ['world', 'hotspots'] });
     },
@@ -147,6 +155,15 @@ export function useCommunityProfile(userId) {
     queryKey: ['community', 'profile', userId],
     queryFn: ({ signal }) => api.getCommunityProfile(userId, signal),
     enabled: Boolean(userId),
+  });
+}
+
+export function useSearchUsers(query) {
+  const api = useApiClient();
+  return useQuery({
+    queryKey: ['community', 'search', query],
+    queryFn: ({ signal }) => api.searchUsers(query, signal),
+    enabled: query.trim().length > 0,
   });
 }
 

@@ -64,7 +64,10 @@ export function CaptureImage({ imageRef, alt, element, className = '', eager = f
     };
   }, [imageRef]);
 
-  const visualState = showPhoto ? (state === 'failed' ? 'loading' : state) : 'crest';
+  // A failed remote/private image immediately promotes the local fallback.
+  // Keeping the component in `loading` left that fallback permanently at
+  // opacity: 0, producing the blank beige cards seen in Library.
+  const visualState = showPhoto ? (state === 'failed' ? 'loaded' : state) : 'crest';
 
   return (
     <div className={`capture-image ${className}`.trim()} data-state={visualState} style={style}>

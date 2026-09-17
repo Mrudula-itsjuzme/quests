@@ -89,6 +89,8 @@ describe('App (development auth mode)', () => {
       if (url.includes('/v1/quests/history')) return jsonResponse([]);
       if (url.includes('/v1/quests/definitions')) return jsonResponse([]);
       if (url.includes('/v1/collectibles')) return jsonResponse([]);
+      if (url.includes('/v1/captures')) return jsonResponse([]);
+      if (url.includes('/v1/species')) return jsonResponse([]);
       if (url.includes('/v1/world/hotspots')) return jsonResponse([mockHotspot]);
       if (url.includes('/v1/community/friends')) return jsonResponse([]);
       if (url.includes('/v1/community/posts')) return jsonResponse([]);
@@ -107,7 +109,7 @@ describe('App (development auth mode)', () => {
   it('renders the world/capture screen with real profile data instead of hardcoded fallbacks', async () => {
     renderApp('/app');
 
-    expect(await screen.findByLabelText(/notifications/i)).toBeInTheDocument();
+    expect(await screen.findByLabelText(/notifications/i, {}, {timeout:3000})).toBeInTheDocument();
     expect(screen.queryByText(/1,240/)).not.toBeInTheDocument();
     expect(screen.queryByText('24')).not.toBeInTheDocument();
   });
@@ -130,7 +132,7 @@ describe('App (development auth mode)', () => {
     renderApp('/app/quests');
 
     await screen.findAllByText(/dawn observation/i);
-    fireEvent.click(screen.getByRole('button', { name: /^view$/i }));
+    fireEvent.click(screen.getByRole('button', { name: /view dawn observation/i }));
     fireEvent.change(await screen.findByLabelText(/write your reflection/i), { target: { value: 'A real reflection proof.' } });
     fireEvent.click(screen.getByRole('button', { name: /submit proof/i }));
 
@@ -292,8 +294,19 @@ describe('App (development auth mode)', () => {
 
     fireEvent.click(cameraButtons[cameraButtons.length - 1]);
 
-    expect(await screen.findByRole('button', { name: /capture photo/i })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: /^take photo$/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /bloom/i })).toHaveAttribute('aria-pressed', 'false');
+    fireEvent.click(screen.getByRole('button', { name: /hide filters/i }));
+    expect(screen.queryByRole('button', { name: /bloom/i })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /show filters/i }));
+    expect(screen.getByRole('button', { name: /bloom/i })).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('opens the new settings menu from profile', async () => {
+    renderApp('/app/profile');
+    fireEvent.click(await screen.findByRole('button', { name: 'Open profile settings' }));
+    expect(await screen.findByRole('dialog', { name: 'Settings' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Privacy & Data' })).toBeInTheDocument();
   });
 
   it('navigates every primary dock tab without leaving a blank app shell', async () => {
@@ -303,13 +316,13 @@ describe('App (development auth mode)', () => {
     fireEvent.click(screen.getAllByRole('link', { name: /quests/i }).at(-1));
     expect(await screen.findByRole('heading', { name: /^quests$/i, hidden: true })).toBeInTheDocument();
 
-    fireEvent.click(screen.getAllByRole('link', { name: /library/i }).at(-1));
+    fireEvent.click(screen.getAllByRole('link', { name: /journal/i }).at(-1));
     expect(await screen.findByText(/Your collection starts here/i)).toBeInTheDocument();
 
     fireEvent.click(screen.getAllByRole('link', { name: /community/i }).at(-1));
     expect(await screen.findByRole('heading', { name: /^community$/i, hidden: true })).toBeInTheDocument();
 
-    fireEvent.click(screen.getAllByRole('link', { name: /map/i }).at(-1));
+    fireEvent.click(screen.getAllByRole('link', { name: /^explore$/i }).at(-1));
     expect(await screen.findByLabelText(/notifications/i)).toBeInTheDocument();
   });
 

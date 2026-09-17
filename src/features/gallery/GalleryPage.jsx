@@ -2,18 +2,17 @@ import { useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useCaptures, useSpecies } from '../quests/queries';
 import { playTap } from '../../lib/useSoundEffects';
-import { DiscoveryCard } from '../world/DiscoveryCard';
+import { SpeciesDetail } from './SpeciesDetail';
+import { useJournalPreferences } from './useJournalPreferences';
 import { Icon } from '../../components/Icon';
 import { CaptureImage } from '../../components/CaptureImage';
 
 const ELEMENT_TABS = [
-  { id: 'all', label: 'All', emoji: '🌍' },
-  { id: 'Fire', label: 'Fire', emoji: '🔥' },
-  { id: 'Water', label: 'Water', emoji: '💧' },
-  { id: 'Grass', label: 'Grass', emoji: '🌿' },
-  { id: 'Earth', label: 'Earth', emoji: '🪨' },
-  { id: 'Sky', label: 'Sky', emoji: '☁️' },
-  { id: 'familiars', label: 'Fauna', emoji: '🦎' },
+  { id: 'all', label: 'All' },
+  { id: 'wildlife', label: 'Wildlife' },
+  { id: 'flora', label: 'Plants' },
+  { id: 'places', label: 'Places' },
+  { id: 'favorites', label: 'Favourites' },
 ];
 
 const RARITY_ORDER = [5, 4, 3, 2, 1];
@@ -28,14 +27,15 @@ const SORT_OPTIONS = [
 ];
 
 export function GalleryPage() {
-  const { data: captures, isLoading: capturesLoading } = useCaptures();
-  const { data: species, isLoading: speciesLoading } = useSpecies();
+  const {favorites,toggleFavorite,markViewed} = useJournalPreferences();
+  const { data: captures, isLoading: capturesLoading, isError: capturesError, isFetching: capturesFetching, refetch: retryCaptures } = useCaptures();
+  const { data: species, isError: speciesError, isFetching: speciesFetching, refetch: retrySpecies } = useSpecies();
   const [activeTab, setActiveTab] = useState('all');
   const [sortBy, setSortBy] = useState('rarity');
   const [selectedCard, setSelectedCard] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
-  const isLoading = capturesLoading || speciesLoading;
+  const isLoading = capturesLoading;
 
   const collection = useMemo(
     () => (captures || []).filter((c) => c.status !== 'rejected'),
@@ -45,10 +45,11 @@ export function GalleryPage() {
   const displayList = useMemo(() => {
     const speciesById = new Map((species || []).map((s) => [s.id, s]));
     let filtered = collection;
-    if (activeTab !== 'all') {
-      filtered = activeTab === 'familiars'
-        ? collection.filter((c) => (speciesById.get(c.speciesId)?.category || c.category) === 'Fauna')
-        : collection.filter((c) => (speciesById.get(c.speciesId)?.element || c.element || 'Earth') === activeTab);
+    if (activeTab === 'favorites') {
+      filtered = collection.filter(c=>favorites.includes(c.id));
+    } else if (activeTab !== 'all') {
+      const categories = { wildlife: ['Fauna'], flora: ['Flora'], places: ['Landscape', 'Heritage'] };
+      filtered = collection.filter((c) => categories[activeTab]?.includes(speciesById.get(c.speciesId)?.category || c.category));
     }
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
@@ -63,10 +64,13 @@ export function GalleryPage() {
       if (sortBy === 'recent') return new Date(b.capturedAt) - new Date(a.capturedAt);
       return byRarity(a) - byRarity(b) || new Date(b.capturedAt) - new Date(a.capturedAt);
     });
-  }, [collection, species, activeTab, sortBy, searchQuery]);
+  }, [collection, species, activeTab, sortBy, searchQuery, favorites]);
 
-  const sRankCount = collection.filter((c) => c.rarityStars === 5).length;
-  const totalXp = collection.reduce((sum, c) => sum + (c.xpAwarded ?? Math.max(25, Number(c.rarityStars || 1) * 25)), 0);
+  const speciesCount = new Set(collection.filter((c) => ['Fauna', 'Flora'].includes((species || []).find((entry) => entry.id === c.speciesId)?.category || c.category)).map((c) => c.speciesId || c.itemName || c.cardTitle).filter(Boolean)).size;
+  const placeCount = new Set(collection.map((c) => {
+    const category = (species || []).find((entry) => entry.id === c.speciesId)?.category || c.category;
+    return ['Landscape', 'Heritage'].includes(category) ? (c.speciesId || c.itemName || c.cardTitle) : null;
+  }).filter(Boolean)).size;
 
   return (
     <main className="gallery-v2-shell">
@@ -86,8 +90,7 @@ export function GalleryPage() {
         ) : (
           <>
             <div className="gallery-title-lockup">
-              <span className="gallery-title-kicker">Field collection</span>
-              <h1>My Library</h1>
+              <h1>My Journal</h1>
             </div>
             <button type="button" className="gallery-icon-btn" aria-label="Search" onClick={() => setShowSearch(true)}>
               <Icon name="search" />
@@ -97,26 +100,13 @@ export function GalleryPage() {
       </div>
 
       {/* ── Stats strip ── */}
-      <section className="library-hero-panel" aria-label="Library summary">
-        <div>
-          <span className="library-kicker">Field archive</span>
-          <p>{collection.length} captures logged across your Wild Realm finds.</p>
-        </div>
+      {(!capturesError || captures) && <section className="library-hero-panel" aria-label="Library summary">
         <dl className="gallery-v2-stats">
-          <div className="gallery-v2-stat">
-            <dt>Captures</dt>
-            <dd>{collection.length}</dd>
-          </div>
-          <div className="gallery-v2-stat gold">
-            <dt>5 Star</dt>
-            <dd>{sRankCount}</dd>
-          </div>
-          <div className="gallery-v2-stat">
-            <dt>XP</dt>
-            <dd>{totalXp.toLocaleString()}</dd>
-          </div>
+          <div className="gallery-v2-stat"><dd>{collection.length}</dd><dt>Captures</dt></div>
+          <div className="gallery-v2-stat"><dd>{speciesCount}</dd><dt>Species</dt></div>
+          <div className="gallery-v2-stat"><dd>{placeCount}</dd><dt>Places</dt></div>
         </dl>
-      </section>
+      </section>}
 
       {/* ── Element filter tabs ── */}
       <div className="gallery-v2-tabs">
@@ -127,14 +117,13 @@ export function GalleryPage() {
             className={`gallery-v2-tab ${activeTab === tab.id ? 'active' : ''}`}
             onClick={() => { playTap(); setActiveTab(tab.id); }}
           >
-            <span>{tab.emoji}</span>
             {tab.label}
           </button>
         ))}
       </div>
 
       {/* ── Sort row ── */}
-      {displayList.length > 0 && (
+      {displayList.length > 0 && showSearch && (
         <div className="gallery-v2-sort-row">
           <span className="gallery-v2-count">{displayList.length} {displayList.length === 1 ? 'card' : 'cards'}</span>
           <div className="gallery-sort-pills">
@@ -153,11 +142,15 @@ export function GalleryPage() {
       )}
 
       {/* ── Content ── */}
+      {(capturesError || speciesError) && <div className="library-load-error" role="alert">
+        <p>{capturesError ? 'Your journal could not refresh. Your saved discoveries have not been deleted.' : 'Species details could not load. Your saved photos are still available.'}</p>
+        <button type="button" className="primary-action" disabled={capturesFetching || speciesFetching} onClick={() => { if (capturesError) retryCaptures(); if (speciesError) retrySpecies(); }}>Try again</button>
+      </div>}
       {isLoading ? (
         <div className="gallery-v2-loading" aria-busy="true">
           {[0,1,2,3].map((i) => <div key={i} className="gallery-v2-skeleton" />)}
         </div>
-      ) : displayList.length === 0 ? (
+      ) : capturesError && !captures ? null : displayList.length === 0 ? (
         <div className="library-start-card">
           <div className="library-empty-media" aria-hidden="true">
             <div className="gallery-empty-icon"><Icon name="camera" /></div>
@@ -167,8 +160,8 @@ export function GalleryPage() {
             <span className="library-loop-kicker">Collection loop</span>
             <h3>
               {collection.length === 0
-                ? 'Start your Library.'
-                : `No ${activeTab === 'familiars' ? 'Fauna' : activeTab} finds yet.`}
+                ? 'Start your Journal.'
+                : searchQuery ? 'No matching discoveries.' : `No ${(ELEMENT_TABS.find((tab) => tab.id === activeTab)?.label || 'matching').toLowerCase()} finds yet.`}
             </h3>
             <p>
               {collection.length === 0
@@ -189,43 +182,49 @@ export function GalleryPage() {
                 <motion.button
                   key={card.id}
                   type="button"
-                  className={`gallery-v2-card rank-${stars} ${i === 0 ? 'gallery-v2-card-featured' : ''}`}
+                  className={`gallery-v2-card rank-${stars}`}
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ delay: Math.min(i, 10) * 0.025, type: 'spring', stiffness: 380, damping: 28 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => { playTap(); setSelectedCard(card); }}
-                  aria-label={`Open ${card.itemName}, ${stars} star rank`}
+                  onClick={() => {
+                    playTap();
+                    markViewed(card.id);
+                    setSelectedCard(card);
+                  }}
+                  aria-label={`Open ${card.itemName || card.cardTitle}, ${stars} star rank`}
                 >
-                  {/* Photo — fills top 70% */}
-                  <div className="gallery-v2-photo">
-                    <CaptureImage
-                      imageRef={card.imageRef}
-                      alt={card.itemName}
-                      element={speciesEntry?.element}
-                      useAuth={card.imageRef?.includes('/captures/')}
-                    />
-                    {/* Rank badge on photo */}
-                    <span
-                      className="gallery-v2-rank-badge"
-                      style={{ color: gradeColor, borderColor: gradeColor }}
-                    >
-                      {stars}★
-                    </span>
-                  </div>
+                  <div className="gallery-card-flipper">
+                    <div className="gallery-card-face gallery-card-front">
+                      <div className="gallery-v2-photo">
+                        <CaptureImage
+                          imageRef={card.imageRef}
+                          alt={card.itemName}
+                          element={speciesEntry?.element}
+                          useAuth={card.imageRef?.includes('/captures/')}
+                        />
+                        <span
+                          className="gallery-v2-rank-badge"
+                          style={{ color: gradeColor, borderColor: gradeColor }}
+                        >
+                          {stars}★
+                        </span>
+                      </div>
+                      <div className="gallery-v2-info">
+                        <span className="gallery-v2-name">{card.itemName || card.cardTitle}</span>
+                        <span className="gallery-v2-meta">
+                          {speciesEntry?.element || card.element || 'Wild'}
+                          {card.location ? ` · ${card.location}` : ''}
+                        </span>
+                      </div>
+                    </div>
 
-                  {/* Info — bottom 30% */}
-                  <div className="gallery-v2-info">
-                    <span className="gallery-v2-name">{card.itemName || card.cardTitle}</span>
-                    <span className="gallery-v2-meta">
-                      {speciesEntry?.element || card.element || 'Wild'}
-                      {card.location ? ` · ${card.location}` : ''}
-                    </span>
                   </div>
                 </motion.button>
               );
             })}
+
           </>
         </div>
       )}
@@ -242,13 +241,15 @@ export function GalleryPage() {
             animate={{ backgroundColor: 'rgba(0,0,0,0.88)' }}
             exit={{ backgroundColor: 'rgba(0,0,0,0)' }}
           >
-            <DiscoveryCard
+            <SpeciesDetail
+              key={selectedCard.id}
               card={selectedCard}
               species={species}
-              layoutIdPrefix="gallery-"
-              onAddToLibrary={() => setSelectedCard(null)}
-              onShare={() => setSelectedCard(null)}
-              onClose={() => setSelectedCard(null)}
+              collection={collection}
+              onSelect={card=>{markViewed(card.id);setSelectedCard(card);}}
+              favorite={favorites.includes(selectedCard.id)}
+              onFavorite={()=>toggleFavorite(selectedCard.id)}
+              onClose={()=>setSelectedCard(null)}
             />
           </motion.div>
         )}

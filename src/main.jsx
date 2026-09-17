@@ -2,10 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, HashRouter } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
-import { QueryClientProvider } from '@tanstack/react-query';
 import App from './App';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { queryClient } from './lib/queryClient';
 import '@fontsource/manrope/400.css';
 import '@fontsource/manrope/500.css';
 import '@fontsource/manrope/600.css';
@@ -17,17 +15,16 @@ import './wild-realm.css';
 import './design-system.css';
 import './community-final.css';
 import './ui-fixes.css';
+import './reference-theme.css';
 
 const Router = Capacitor.isNativePlatform() ? HashRouter : BrowserRouter;
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
         <Router>
           <App />
         </Router>
-      </QueryClientProvider>
     </ErrorBoundary>
   </React.StrictMode>,
 );

@@ -14,7 +14,7 @@ import { Camera } from '@capacitor/camera';
  * `active` lets the caller stop the stream as soon as the shutter fires so the
  * camera light doesn't stay on during scanning/reveal.
  */
-export function useCameraPreview(active = true) {
+export function useCameraPreview(active = true, facingMode = 'environment') {
   const videoRef = useRef(null);
   const streamRef = useRef(null);
   const [status, setStatus] = useState('idle'); // idle | starting | live | native | unavailable
@@ -38,15 +38,17 @@ export function useCameraPreview(active = true) {
       if (Capacitor.isNativePlatform()) {
         try {
           const permission = await Camera.checkPermissions();
-          if (!cancelled) {
-            // Capacitor opens the native camera UI on shutter press; it does
-            // not provide a live MediaStream for this web view.
-            setStatus(permission.camera === 'denied' ? 'unavailable' : 'native');
+          if (permission.camera !== 'granted') {
+            const requested = await Camera.requestPermissions({ permissions: ['camera'] });
+            if (requested.camera !== 'granted') {
+              if (!cancelled) setStatus('unavailable');
+              return;
+            }
           }
         } catch {
           if (!cancelled) setStatus('unavailable');
+          return;
         }
-        return;
       }
 
       const media = typeof navigator !== 'undefined' ? navigator.mediaDevices : null;
@@ -58,7 +60,7 @@ export function useCameraPreview(active = true) {
       try {
         const stream = await media.getUserMedia({
           video: {
-            facingMode: { ideal: 'environment' },
+            facingMode: { ideal: facingMode },
             width: { ideal: 1280 },
             height: { ideal: 720 },
           },
@@ -83,7 +85,7 @@ export function useCameraPreview(active = true) {
 
     start();
     return () => { cancelled = true; stop(); };
-  }, [active]);
+  }, [active, facingMode]);
 
   return { videoRef, status };
 }

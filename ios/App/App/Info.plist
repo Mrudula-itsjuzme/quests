@@ -26,6 +26,10 @@
 	<true/>
 	<key>NSMotionUsageDescription</key>
 	<string>Wild Realm uses motion activity to count steps during an exploration walk you start.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Wild Realm uses the camera when you choose to photograph a discovery.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Wild Realm uses your location while exploring to show nearby places and attach a coarse location to discoveries.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

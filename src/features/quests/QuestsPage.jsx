@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { QuestDetail } from './QuestDetail';
 import { ProgressBar, questProgressRatio } from './QuestCard';
-import { Icon, categoryIcon } from '../../components/Icon';
+import { Icon } from '../../components/Icon';
 import { playTap } from '../../lib/useSoundEffects';
 import { BottomSheet } from '../../components/motion/BottomSheet';
 import { QuestSuccessModal } from '../../components/motion/QuestSuccessModal';
@@ -18,6 +19,12 @@ import {
 const CADENCE_LABEL = { daily: "Today's Quests", weekly: 'Weekly Quests', monthly: 'Monthly Quests' };
 
 export function QuestsPage() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [questPhoto, setQuestPhoto] = useState(location.state?.questPhoto || null);
+  useEffect(() => {
+    if (location.state?.questPhoto) navigate(location.pathname, {replace:true,state:null});
+  }, [location.pathname, location.state, navigate]);
   const activeQuery = useActiveQuests();
   const meQuery = useMe();
   const generateDaily = useGenerateDaily();
@@ -41,8 +48,8 @@ export function QuestsPage() {
   const xpRemaining = Math.max(0, xpForCurrentLevel - xpIntoLevel);
 
   const visibleQuests = useMemo(
-    () => quests.filter((q) => !tab || (q.cadence && q.cadence.toLowerCase() === tab.toLowerCase())),
-    [quests, tab],
+    () => quests.filter(q => (!tab || q.cadence?.toLowerCase() === tab) && (!questPhoto || (q.verificationType === 'PHOTO' && ['active','rejected'].includes(q.status)))),
+    [quests, tab, questPhoto],
   );
   const currentGenerate = tab === 'daily' ? generateDaily : tab === 'weekly' ? generateWeekly : generateMonthly;
 
@@ -52,6 +59,7 @@ export function QuestsPage() {
   useEffect(() => {
     const handleQuestCompleted = (event) => {
       setSelectedId(null);
+      setQuestPhoto(null);
       setCompletedQuestModal(event.detail);
     };
     window.addEventListener('habbit-quest-completed', handleQuestCompleted);
@@ -69,35 +77,16 @@ export function QuestsPage() {
 
   return (
     <main className="quests-shell">
-      <h1 className="sr-only">Quests</h1>
-      {/* Explorer Profile */}
-      <section className="quest-explorer-card" aria-label="Explorer progression">
-        <div className="quest-user-topbar">
-          <div className="quest-user-avatar" aria-hidden="true">
-            <span>{(me?.displayName || 'Adventurer').split(/\s+/).slice(0, 2).map((part) => part[0]?.toUpperCase() || '').join('')}</span>
-          </div>
-          <div className="quest-user-identity">
-            <h3>{me?.displayName || 'Adventurer'}</h3>
-            <small>{me?.tierLabel || `${me?.tier || 'Bronze'} Explorer`} · Level {me?.level || 1}</small>
-            <ProgressBar value={xpProgress} compact />
-          </div>
-          <div className="quest-user-economy">
-            <span>{gold.toLocaleString()}</span>
-            <small>coins</small>
-          </div>
-        </div>
-        <div className="quest-season-strip">
-          <div>
-            <span style={{ color: 'var(--wr-walnut)', fontWeight: 800 }}>Rank Progress</span>
-            <strong style={{ color: 'var(--wr-forest)', fontWeight: 900 }}>{me?.tierLabel || `${me?.tier || 'Bronze'} Explorer`}</strong>
-          </div>
-          <div style={{ textAlign: 'right' }}>
-            <span style={{ color: 'var(--wr-walnut)', fontWeight: 800 }}>{xpIntoLevel} / {xpForCurrentLevel || 250} XP</span>
-            {xpRemaining > 0 && <small style={{ display: 'block', color: 'var(--wr-walnut-muted)', fontWeight: 700 }}>{xpRemaining} XP to next rank</small>}
-          </div>
-        </div>
+      <header className="reference-quests-heading"><div><p>MAKE ROOM FOR WONDER</p><h1>Quests</h1></div><span>Level {me?.level || 1}</span></header>
+      <section className="reference-quests-hero" aria-label="Explorer progression">
+        <p>One small adventure at a time.</p>
+        <h2>Go a little further.</h2>
+        <div className="reference-quests-progress"><span>{me?.tierLabel || 'Nature explorer'}</span><span>{xpIntoLevel} / {xpForCurrentLevel || 250} XP</span></div>
+        <ProgressBar value={xpProgress} compact />
+        <div className="reference-quests-progress"><span>{xpRemaining > 0 ? `${xpRemaining} XP to your next level` : 'Keep exploring'}</span><span>{gold.toLocaleString()} coins</span></div>
       </section>
 
+      {questPhoto && <div className="reference-quest-photo-notice" role="status"><strong>Choose a quest for your photo</strong><p>Only active photo quests are shown. Review the requirements before submitting.</p><button onClick={()=>setQuestPhoto(null)}>Cancel photo submission</button></div>}
       {/* Cadence Filter Tabs */}
       <div className="quest-cadence-tabs">
         {['daily', 'weekly', 'monthly'].map((t) => {
@@ -143,40 +132,22 @@ export function QuestsPage() {
             {visibleQuests.map((quest) => {
               const state = questState(quest);
               return (
-                <motion.div
+                <button
+                  type="button"
                   key={quest.id}
-                  className={`quest-item-card ${state} rarity-${(quest.rarity || 'Common').toLowerCase()}`}
-                  whileHover={{ scale: 1.01 }}
+                  className={`reference-quest-card ${state}`}
                   onClick={() => { playTap(); setSelectedId(quest.id); }}
+                  aria-label={`View ${quest.title}`}
                 >
-                  <div className="quest-card-content">
-                    <div className="quest-card-topline">
-                      <span className="quest-rarity-mark">
-                        <Icon name={categoryIcon(quest.category)} />
-                        {quest.rarity || 'Common'}
-                      </span>
-                      <span className="quest-xp-reward">+{quest.xpReward} XP</span>
-                    </div>
-                    <div className={`quest-row-thumb category-${(quest.category || 'Discovery').toLowerCase()}`}>
-                      <img src={questThumbSrc(quest)} alt="" loading="lazy" decoding="async" />
-                    </div>
-                    <div className="quest-row-main">
-                      <h4 className="quest-item-title">{quest.title}</h4>
-                      <p className="quest-item-instruction">
-                        {quest.description || `Capture ${quest.targetValue} ${quest.unit || 'finds'} to complete this quest.`}
-                      </p>
-                      <div className="quest-row-meta">
-                        <ProgressBar value={questProgressRatio(quest)} compact />
-                        <span className="quest-progress-num">
-                          {quest.progressValue || 0}/{quest.targetValue || 1}
-                        </span>
-                      </div>
-                    </div>
-                    <button type="button" className="quest-card-action" aria-label="View" title={`View ${quest.title}`}>
-                      {questActionLabel(quest)}
-                    </button>
+                  <img className="reference-quest-photo" src={questThumbSrc(quest)} alt="" loading="lazy" />
+                  <div className="reference-quest-copy">
+                    <div className="reference-quest-eyebrow"><span>{quest.category || 'Discovery'}</span><span>+{quest.xpReward} XP</span></div>
+                    <h3>{quest.title}</h3>
+                    <p>{quest.description || `Capture ${quest.targetValue} ${quest.unit || 'finds'} to complete this quest.`}</p>
+                    <div className="reference-quest-progress"><ProgressBar value={questProgressRatio(quest)} compact /><span>{quest.progressValue || 0}/{quest.targetValue || 1}</span></div>
+                    <span className="reference-quest-status">{questActionLabel(quest)} <span aria-hidden="true">↗</span></span>
                   </div>
-                </motion.div>
+                </button>
               );
             })}
           </>
@@ -187,7 +158,7 @@ export function QuestsPage() {
       <AnimatePresence>
         {selected && (
           <BottomSheet isOpen={!!selected} onClose={() => setSelectedId(null)}>
-            <QuestDetail quest={selected} />
+            <QuestDetail quest={selected} initialPhoto={questPhoto} />
           </BottomSheet>
         )}
       </AnimatePresence>

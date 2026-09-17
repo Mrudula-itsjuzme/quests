@@ -21,7 +21,7 @@ async function getLeaflet() {
 function makePinHtml(pin) {
   if (pin.obfuscated || pin.gps?.obfuscated) {
     return `
-      <div class="map-leaflet-pin map-pin-obfuscated" title="Approximate Location: ${pin.title}">
+      <div class="map-leaflet-pin map-pin-obfuscated" title="Approximate Location: ${escapeHtml(pin.title)}">
         <div class="map-leaflet-pin-inner" style="border-style: dashed; border-color: rgba(255,100,100,0.8); color: #ff6666;">?</div>
       </div>
     `;
@@ -29,11 +29,37 @@ function makePinHtml(pin) {
   const grade = pin.grade || '';
   const gradeClass = grade ? `rank-hex-${grade.toLowerCase()}` : 'map-pin-curated';
   const label = grade || getCategoryEmoji(pin.category);
+  const imageRef = safeImageRef(pin.imageRef || markerFallback(pin.category), pin.category);
   return `
-    <div class="map-leaflet-pin ${gradeClass}" title="${pin.title}">
-      <div class="map-leaflet-pin-inner">${label}</div>
+    <div class="reference-map-pin map-leaflet-pin ${gradeClass}${imageRef ? ' map-pin-photo' : ''}" title="${escapeHtml(pin.title)}">
+      <div class="map-leaflet-pin-inner">
+        ${imageRef ? `<img src="${imageRef}" alt="" loading="lazy" referrerpolicy="no-referrer" />` : label}
+      </div>
     </div>
   `;
+}
+
+function escapeHtml(value = '') {
+  return String(value).replace(/[&<>"']/g, (character) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;',
+  })[character]);
+}
+
+function safeImageRef(value, category) {
+  if (typeof value !== 'string') return '';
+  // Private capture endpoints need authorization headers, which a Leaflet
+  // HTML marker cannot attach. Use a local visual fallback instead of a
+  // broken image while the authenticated photo remains in the detail card.
+  if (value.startsWith('/api/')) return markerFallback(category);
+  if (value.startsWith('/') || value.startsWith('data:image/') || /^https:\/\//i.test(value)) return escapeHtml(value);
+  return '';
+}
+
+function markerFallback(category = '') {
+  const key = String(category).toLowerCase();
+  if (key.includes('bird')) return '/assets/blue-billed-cuckoo.png';
+  if (key.includes('water') || key.includes('park') || key.includes('community')) return '/assets/verdant-explorer-banner.png';
+  return '/assets/guest-library/mountains.jpg';
 }
 
 function getCategoryEmoji(category = '') {
@@ -57,27 +83,32 @@ export function WorldCanvas({ hotspots = [], onSelectHotspot, onPointMap, userPo
     getLeaflet().then((Leaflet) => {
       if (destroyed || !containerRef.current) return;
 
-      // Center on Bangalore by default (user's location used when available)
+      // Do not make a seeded city look like the explorer's current location.
+      // A granted position pans the map to the real place immediately.
       const map = Leaflet.map(containerRef.current, {
         zoomControl: false,
         attributionControl: false,
-      }).setView([12.9716, 77.5946], 12);
+      }).setView([20, 0], 2);
 
       if (!offlineNative) {
-        // OpenStreetMap standard tiles (No API Key Required)
+        // Satellite imagery matches the reference; retain a street-map fallback.
         const tiles = Leaflet.tileLayer(
-          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+          'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
           {
-            attribution: '© OpenStreetMap contributors',
+            attribution: 'Imagery © Esri, Maxar, Earthstar Geographics, and the GIS User Community',
             maxZoom: 19,
             keepBuffer: 4,
             updateWhenIdle: false,
           },
         );
-        tiles.on('tileerror', ({ tile }) => {
-          if (!tile || tile.dataset.fallbackApplied === 'true') return;
-          tile.dataset.fallbackApplied = 'true';
-          tile.src = tile.src.replace('tile.openstreetmap.org', 'tile.openstreetmap.fr/hot');
+        let fallbackAdded = false;
+        tiles.on('tileerror', () => {
+          if (fallbackAdded || destroyed) return;
+          fallbackAdded = true;
+          Leaflet.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors', maxZoom: 19,
+          }).addTo(map);
+          map.removeLayer(tiles);
         });
         tiles.addTo(map);
 
@@ -133,7 +164,10 @@ export function WorldCanvas({ hotspots = [], onSelectHotspot, onPointMap, userPo
         userMarkerRef.current = null;
       }
 
-      const pos = userPosition || { lat: 12.9716, lng: 77.5946 };
+      // Do not draw a fabricated "you are here" marker while a real location
+      // fix is unresolved. The old Bengaluru fallback looked like live GPS.
+      if (!userPosition) return;
+      const pos = userPosition;
 
       const userIcon = Leaflet.divIcon({
         className: '',
@@ -168,11 +202,11 @@ export function WorldCanvas({ hotspots = [], onSelectHotspot, onPointMap, userPo
         const icon = Leaflet.divIcon({
           className: '',
           html: makePinHtml(pin),
-          iconSize: [44, 44],
-          iconAnchor: [22, 44],
+          iconSize: [54, 64],
+          iconAnchor: [27, 64],
         });
 
-        const marker = Leaflet.marker([lat, lng], { icon })
+        const marker = Leaflet.marker([lat, lng], { icon, title: pin.title, alt: pin.title, keyboard: true })
           .addTo(mapRef.current)
           .on('click', () => onSelectHotspot?.(pin));
 

@@ -1,3 +1,4 @@
+import { Home, UsersRound, NotebookPen, Compass, Plus } from 'lucide-react';
 import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -33,13 +34,13 @@ const CaptureFlow = lazy(() => import('../features/world/CaptureFlow').then((m) 
 // Profile is reachable from the topbar avatar, and Rewards from Profile, so the
 // dock keeps four thumb-sized targets instead of crowding six onto a phone.
 const navItemsLeft = [
-  { to: '/app', label: 'Map', icon: 'compass', end: true },
-  { to: '/app/quests', label: 'Quests', icon: 'scroll' },
+  { to: '/app', label: 'Explore', icon: Home, end: true },
+  { to: '/app/community', label: 'Community', icon: UsersRound },
 ];
 
 const navItemsRight = [
-  { to: '/app/library', label: 'Library', icon: 'book' },
-  { to: '/app/community', label: 'Community', icon: 'user' },
+  { to: '/app/library', label: 'Journal', icon: NotebookPen },
+  { to: '/app/quests', label: 'Quests', icon: Compass },
 ];
 
 const routeLoaders = {
@@ -69,6 +70,17 @@ export function AppShell() {
     playTap();
     setCaptureOpen(true);
   };
+
+  const handleThemeChange = useCallback((mode) => {
+    if (!['light', 'dark', 'system'].includes(mode)) return;
+    document.documentElement.dataset.wildTheme = mode;
+    setThemeMode(mode);
+    try {
+      localStorage.setItem(THEME_KEY, mode);
+    } catch {
+      // The state change still applies when persistent storage is unavailable.
+    }
+  }, []);
 
   const prefetchRoute = useCallback((routePath) => {
     const loader = routeLoaders[routePath];
@@ -149,7 +161,7 @@ export function AppShell() {
           >
             <span className="brand-mark" aria-hidden="true"><Icon name="leaf" /></span>
             <div>
-              <strong>WANDER</strong>
+              <strong>Wild Realm</strong>
             </div>
           </motion.div>
           <div className="user-profile-trigger">
@@ -191,7 +203,18 @@ export function AppShell() {
 
       <div className={`mobile-content-area ${isWorldRoute ? 'mobile-content-area-world' : ''}`}>
         <div className="journal-page-transition route-stage">
-          <Outlet />
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={location.pathname}
+              initial={{ opacity: 0, y: 8, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -8, scale: 0.98 }}
+              transition={{ type: 'spring', stiffness: 450, damping: 30 }}
+              className="page-transition-wrapper"
+            >
+              <Outlet />
+            </motion.div>
+          </AnimatePresence>
         </div>
 
         {/* Floating Glass Bottom HUD Dock */}
@@ -205,7 +228,7 @@ export function AppShell() {
               onClick={playTap}
               onMouseEnter={() => { playHover(); prefetchRoute(item.to); }}
             >
-              <Icon name={item.icon} />
+              <item.icon strokeWidth={1.6} />
               <span>{item.label}</span>
             </NavLink>
           ))}
@@ -220,7 +243,7 @@ export function AppShell() {
               whileTap={{ scale: 0.9 }}
               onClick={handleOpenCapture}
             >
-              <Icon name="camera" />
+              <Plus strokeWidth={1.6} />
             </motion.button>
           </div>
 
@@ -236,7 +259,7 @@ export function AppShell() {
                 prefetchRoute(item.to);
               }}
             >
-              <Icon name={item.icon} />
+              <item.icon strokeWidth={1.6} />
               <span>{item.label}</span>
             </NavLink>
           ))}
@@ -288,7 +311,7 @@ export function AppShell() {
           <SettingsModal
             user={me}
             themeMode={themeMode}
-            onThemeChange={setThemeMode}
+            onThemeChange={handleThemeChange}
             onClose={() => setSettingsOpen(false)}
             onLogout={() => {
               setSettingsOpen(false);

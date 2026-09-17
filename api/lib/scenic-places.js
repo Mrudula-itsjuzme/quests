@@ -37,12 +37,23 @@ function mapElement(element) {
     name: tags.name,
     category,
     description: tags.description || tags['description:en'] || scenicDescription(category),
+    imageRef: scenicImage(tags, category),
     region: tags['addr:city'] || tags['addr:suburb'] || tags['addr:district'] || 'Nearby',
     gps: { lat, lng },
     source: 'openstreetmap',
     sourceUrl: `https://www.openstreetmap.org/${element.type}/${element.id}`,
     attribution: '© OpenStreetMap contributors',
   };
+}
+
+function scenicImage(tags, category) {
+  if (typeof tags.image === 'string' && /^https?:\/\//i.test(tags.image)) return tags.image;
+  if (typeof tags.wikimedia_commons === 'string' && tags.wikimedia_commons.startsWith('File:')) {
+    return `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(tags.wikimedia_commons.slice(5))}`;
+  }
+  if (category === 'Parks' || category === 'Waterfalls') return '/assets/verdant-explorer-banner.png';
+  if (category === 'Birding') return '/assets/blue-billed-cuckoo.png';
+  return '/assets/quest-compass-poster.png';
 }
 
 function scenicCategory(tags) {

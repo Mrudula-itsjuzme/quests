@@ -5,8 +5,9 @@ import { fileURLToPath } from 'node:url';
 import { progressionEngine } from './progression-engine.js';
 
 export class PostgresQuestRepository {
-  constructor(pool) {
+  constructor(pool, { includeDemoHotspots = true } = {}) {
     this.pool = pool;
+    this.includeDemoHotspots = includeDemoHotspots;
     this._definitionCache = null;
   }
 
@@ -21,6 +22,38 @@ export class PostgresQuestRepository {
   }
   async getUser(userId) { const { rows } = await this.pool.query('SELECT * FROM quest_users WHERE id = $1', [userId]); return rows[0] ? mapUser(rows[0]) : null; }
   async listUsers() { const { rows } = await this.pool.query('SELECT * FROM quest_users ORDER BY id'); return rows.map(mapUser); }
+  async searchUsers(query, limit = 20) {
+    if (!query) return [];
+    const { rows } = await this.pool.query(
+      `SELECT u.*,
+              COUNT(DISTINCT p.id) FILTER (WHERE p.visibility = 'public') AS posts_count,
+              COUNT(DISTINCT f1.follower_id) AS followers_count,
+              COUNT(DISTINCT f2.following_id) AS following_count
+       FROM quest_users u
+       LEFT JOIN community_posts p ON p.user_id = u.id
+       LEFT JOIN community_follows f1 ON f1.following_id = u.id
+       LEFT JOIN community_follows f2 ON f2.follower_id = u.id
+       WHERE u.status NOT IN ('suspended', 'banned', 'deleted', 'deletion_requested')
+         AND u.display_name ILIKE $1
+       GROUP BY u.id
+       ORDER BY u.total_xp DESC
+       LIMIT $2`,
+      [`%${query}%`, limit]
+    );
+    return rows.map((r) => {
+      const u = mapUser(r);
+      return {
+        ...u,
+        userId: u.id,
+        rankTitle: progressionEngine.rankTitleForXp(u.totalXp),
+        stats: {
+          posts: Number(r.posts_count || 0),
+          followers: Number(r.followers_count || 0),
+          following: Number(r.following_count || 0),
+        },
+      };
+    });
+  }
   async updateUserProfile(userId, patch) {
     const fields = {
       displayName: 'display_name',
@@ -577,6 +610,7 @@ export class PostgresQuestRepository {
   async listWorldHotspots({ category = null, bbox = null, limit = 200, viewerId = null } = {}) {
     const values = [viewerId];
     const where = ['h.enabled'];
+    if (!this.includeDemoHotspots) where.push('NOT h.is_demo');
     if (category) { values.push(category); where.push(`h.category = $${values.length}`); }
     if (bbox) {
       // Explicit min/max per axis, so a caller cannot accidentally filter
@@ -1511,7 +1545,7 @@ function levelFromXp(totalXp) {
 }
 function rankTitleForPercentile(percentile) {
   if (percentile <= .1) return 'Legend Circle';
-  if (percentile <= 1) return 'Mythril Knight';
+  if (percentile <= 1) return 'Adamantium Knight';
   if (percentile <= 5) return 'Pathfinder';
   if (percentile <= 10) return 'Guardian';
   if (percentile <= 25) return 'Scout';

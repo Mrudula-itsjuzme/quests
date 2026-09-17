@@ -10409,3 +10409,32 @@ html body .app-shell .world-canvas-wrap .leaflet-container { background: rgba(23
     box-shadow: 0 12px 24px rgba(53, 46, 34, 0.1) !important;
   }
 }
+
+/* QA 2026-09-15: keep the post-capture result usable above mobile keyboards.
+   This sits at the true end of the cascade so older card rules cannot restore
+   overflow:hidden after the responsive scroll treatment. */
+@media (max-width: 780px) {
+  html body .capture-flow-overlay .capture-flow-panel-clean {
+    align-items: start !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior-y: contain;
+    padding: max(12px, env(safe-area-inset-top, 0px)) 12px max(24px, env(safe-area-inset-bottom, 0px)) !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  html body .capture-flow-overlay .capture-flow-panel-clean .discovery-card-modal {
+    max-height: none !important;
+    overflow: visible !important;
+    margin: 0 auto !important;
+  }
+
+  html body .capture-flow-overlay .discovery-notes-input {
+    scroll-margin-bottom: calc(44vh + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+.page-transition-wrapper {
+  height: 100%;
+  width: 100%;
+}

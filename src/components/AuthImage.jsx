@@ -48,6 +48,12 @@ export function AuthImage({ src, alt, className, useAuth: requiresAuth = false, 
 
     async function load() {
       try {
+        // Media references are data. Never send a session token to a host
+        // supplied in a post or capture record.
+        const apiOrigin = new URL(API_BASE_URL, window.location.origin).origin;
+        if (new URL(absoluteSrc, window.location.origin).origin !== apiOrigin) {
+          throw new Error('Untrusted authenticated media origin');
+        }
         const token = await getToken();
         const headers = {};
         if (token && token !== 'dev') {
@@ -57,6 +63,7 @@ export function AuthImage({ src, alt, className, useAuth: requiresAuth = false, 
         const response = await fetch(absoluteSrc, { 
           headers,
           signal: controller.signal,
+          cache: 'no-store',
           // Follow redirects in case it points to a signed storageURL
           redirect: 'follow'
         });
@@ -77,7 +84,9 @@ export function AuthImage({ src, alt, className, useAuth: requiresAuth = false, 
       }
     }
     
-    load();
+    // Let the parent initialize its loading state before an immediately
+    // rejected reference reports failure.
+    void Promise.resolve().then(() => { if (isMounted) return load(); });
 
     return () => {
       isMounted = false;

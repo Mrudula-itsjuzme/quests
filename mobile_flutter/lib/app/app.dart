@@ -303,9 +303,8 @@ class _QuestShellState extends State<QuestShell> {
     if (level <= 40) return 'Silver';
     if (level <= 60) return 'Gold';
     if (level <= 80) return 'Platinum';
-    if (level <= 100) return 'Mythril';
-    if (level <= 120) return 'Diamond';
-    return 'Ascendant';
+    if (level <= 100) return 'Diamond';
+    return 'Adamantium';
   }
 }
 

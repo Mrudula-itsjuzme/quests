@@ -1,3 +1,4 @@
+import { Share2, MapPin, NotebookPen, Sparkles, BadgeCheck } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { Icon } from '../../components/Icon';
@@ -58,6 +59,10 @@ export function DiscoveryCard({
   onAddToLibrary,
   onShare,
   onClose,
+  filterName,
+  postToCommunity = false,
+  onPostToCommunityChange,
+  saving = false,
   layoutIdPrefix = '',
 }) {
   const cardData = card || {};
@@ -89,6 +94,7 @@ export function DiscoveryCard({
 
   const cardId = cardData.assetId || cardData.id || 'new';
   const [shareNotice, setShareNotice] = useState('');
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
   // 3D tilt
   const cardRef = useRef(null);
@@ -113,6 +119,33 @@ export function DiscoveryCard({
     else if (result === 'shared') setShareNotice('Shared! 🎉');
     setTimeout(() => setShareNotice(''), 3000);
   };
+
+  if (isNew) return (
+    <article className="reference-identification">
+      {cardImg && <CaptureImage className="reference-identification-photo" imageRef={cardImg} alt={itemName} useAuth={cardImg?.includes('/captures/')} eager style={{filter:imageFilter && imageFilter!=='none'?imageFilter:undefined}}/>}
+      <div className="reference-identification-shade" />
+      <button className="reference-identification-share" aria-label="Share to other apps" onClick={()=>onShare?.({caption:notesValue.trim() || undefined})}><Share2 size={21}/></button>
+      <section className="reference-identification-content">
+        <h2>{titleValue || itemName}</h2>
+        {filterName && <span className="reference-preview-filter">{filterName} filter</span>}
+        {scientificName && <em>{scientificName}</em>}
+        <div className="reference-identification-badges"><span><BadgeCheck size={15}/>{stars > 0 ? ['Common','Uncommon','Rare','Epic','Legendary'][Math.min(4, stars-1)] : 'Not identified'}</span>{confidence != null && <span><Sparkles size={15}/>{confidence}% match</span>}</div>
+        <ul className="reference-identification-meta">
+          {rawXp>0 && <li><Sparkles size={16}/><span>+{rawXp} XP</span></li>}
+          <li><NotebookPen size={16}/><span>Ready for your Journal</span></li>
+          <li><MapPin size={16}/><span>{locationText || 'Location not recorded'}</span></li>
+        </ul>
+        <p className="reference-ai-note"><strong aria-hidden="true">!</strong> AI can make mistakes. Check the identification and edit your notes before saving.</p>
+        {onPostToCommunityChange && <label className="reference-post-toggle"><input type="checkbox" checked={postToCommunity} onChange={e=>onPostToCommunityChange(e.target.checked)} />Post to Community<span>{postToCommunity ? 'Visible in the community feed' : 'No community post'}</span></label>}
+        {detailsOpen && <div className="reference-identification-details">
+          <p>{aiCaption || 'No field observation was returned.'}</p>
+          <label htmlFor="identification-title">Discovery name</label><input id="identification-title" value={titleValue ?? itemName} maxLength={80} onChange={e=>onTitleChange?.(e.target.value)}/>
+          <label htmlFor="identification-notes">Notes</label><textarea id="identification-notes" value={notesValue} maxLength={500} rows={3} onChange={e=>onNotesChange?.(e.target.value)} placeholder="What did you notice?"/>
+        </div>}
+        <div className="reference-identification-actions"><button onClick={()=>setDetailsOpen(!detailsOpen)} aria-expanded={detailsOpen}>{detailsOpen?'Done editing':'Edit details'}</button><button disabled={saving} onClick={onAddToLibrary}>{saving?'Saving…':postToCommunity?'Save & post':'Save to Journal'}</button></div>
+      </section>
+    </article>
+  );
 
   return (
     <motion.div
@@ -216,7 +249,9 @@ export function DiscoveryCard({
           <div className="discovery-info-section">
             <span className="discovery-info-label">🤖 AI Observed</span>
             <p className="discovery-info-value">
-              {aiCaption || `${gradeLabel} specimen identified with ${confidence != null ? confidence + '% confidence' : 'high confidence'}.`}
+              {aiCaption || (confidence != null
+                ? `Identification confidence: ${confidence}%. No field observation was returned.`
+                : 'Still identifying this discovery. No field observation is available yet.')}
             </p>
           </div>
 

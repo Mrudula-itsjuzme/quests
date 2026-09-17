@@ -4,7 +4,7 @@ import { demoWorldHotspots } from './world-hotspots.js';
 import { speciesCatalog } from './species-catalog.js';
 
 export class MemoryQuestRepository {
-  constructor({ definitions = [] } = {}) {
+  constructor({ definitions = [], includeDemoHotspots = true } = {}) {
     this.definitions = definitions.map((item) => ({ ...item }));
     this.users = new Map();
     this.assignments = new Map();
@@ -30,7 +30,7 @@ export class MemoryQuestRepository {
       { itemId: 'event_chest_1', name: 'Verdant Event Chest', type: 'chest', priceCoins: 500 },
     ];
     this.regionalEvents = [];
-    this.worldHotspots = demoWorldHotspots.map((item) => ({ ...item }));
+    this.worldHotspots = includeDemoHotspots ? demoWorldHotspots.map((item) => ({ ...item })) : [];
     this.savedHotspots = [];
     this.hotspotRatings = [];
     this.communityPosts = [];
@@ -164,6 +164,8 @@ export class MemoryQuestRepository {
   async getCommunityProfile(viewerId, profileUserId) {
     const user = this.users.get(profileUserId);
     if (!user) return null;
+    const INACTIVE_STATUSES = new Set(['suspended', 'banned', 'deleted', 'deletion_requested']);
+    if (INACTIVE_STATUSES.has(user.status)) return null;
     const posts = this.communityPosts
       .filter((post) => post.userId === profileUserId && this._canViewCommunityPost(viewerId, post))
       .map((post) => this._decorateCommunityPost(viewerId, post))
@@ -195,6 +197,9 @@ export class MemoryQuestRepository {
 
   async setCommunityFollow(viewerId, profileUserId, following) {
     if (viewerId === profileUserId || !this.users.has(profileUserId)) return null;
+    const targetUser = this.users.get(profileUserId);
+    const INACTIVE_STATUSES = new Set(['suspended', 'banned', 'deleted', 'deletion_requested']);
+    if (INACTIVE_STATUSES.has(targetUser?.status)) return null;
     const existing = this.follows.findIndex((follow) => follow.followerId === viewerId && follow.followingId === profileUserId);
     if (following && existing === -1) this.follows.push({ followerId: viewerId, followingId: profileUserId, createdAt: new Date().toISOString() });
     if (!following && existing !== -1) this.follows.splice(existing, 1);
@@ -484,6 +489,30 @@ export class MemoryQuestRepository {
 
   async getUser(userId) { return clone(this.users.get(userId)); }
   async listUsers() { return [...this.users.values()].map(clone); }
+  async searchUsers(query, limit = 20) {
+    if (!query) return [];
+    const INACTIVE_STATUSES = new Set(['suspended', 'banned', 'deleted', 'deletion_requested']);
+    const lowerQuery = query.toLowerCase();
+    const results = [...this.users.values()]
+      .filter(u => !INACTIVE_STATUSES.has(u.status) && u.displayName && u.displayName.toLowerCase().includes(lowerQuery))
+      .sort((a, b) => (b.totalXp || 0) - (a.totalXp || 0))
+      .slice(0, limit);
+    return results.map((u) => {
+      const posts = this.communityPosts.filter((post) => post.userId === u.id).length;
+      const followers = this.follows.filter((follow) => follow.followingId === u.id).length;
+      const following = this.follows.filter((follow) => follow.followerId === u.id).length;
+      return {
+        id: u.id,
+        userId: u.id,
+        displayName: u.displayName || 'Adventurer',
+        totalXp: Number(u.totalXp || 0),
+        streakDays: Number(u.streakDays || 0),
+        rankTitle: progressionEngine.rankTitleForXp(Number(u.totalXp || 0)),
+        primaryPath: u.primaryPath || null,
+        stats: { posts, followers, following },
+      };
+    });
+  }
   async updateUserProfile(userId, patch) {
     const current = this.users.get(userId);
     if (!current) return null;
