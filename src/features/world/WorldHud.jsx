@@ -38,7 +38,7 @@ export function WorldHud({ me, rankProgress, energy, gold, gems, onOpenNotificat
               transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             />
           </svg>
-          <span className="world-hud-avatar-face">{(me?.displayName || 'S')[0].toUpperCase()}</span>
+          <span className="world-hud-avatar-face">{me?.avatarUrl ? <img src={me.avatarUrl} alt="" /> : (me?.displayName || 'Explorer')[0].toUpperCase()}</span>
           <span className="world-hud-level">{me?.level ?? 1}</span>
         </button>
       </div>

@@ -10,6 +10,7 @@ import { CaptureImage } from '../../components/CaptureImage';
 const ELEMENT_TABS = [
   { id: 'all', label: 'All' },
   { id: 'wildlife', label: 'Wildlife' },
+  { id: 'flora', label: 'Plants' },
   { id: 'places', label: 'Places' },
   { id: 'favorites', label: 'Favourites' },
 ];
@@ -27,14 +28,14 @@ const SORT_OPTIONS = [
 
 export function GalleryPage() {
   const {favorites,toggleFavorite,markViewed} = useJournalPreferences();
-  const { data: captures, isLoading: capturesLoading } = useCaptures();
-  const { data: species, isLoading: speciesLoading } = useSpecies();
+  const { data: captures, isLoading: capturesLoading, isError: capturesError, isFetching: capturesFetching, refetch: retryCaptures } = useCaptures();
+  const { data: species, isError: speciesError, isFetching: speciesFetching, refetch: retrySpecies } = useSpecies();
   const [activeTab, setActiveTab] = useState('all');
   const [sortBy, setSortBy] = useState('rarity');
   const [selectedCard, setSelectedCard] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
-  const isLoading = capturesLoading || speciesLoading;
+  const isLoading = capturesLoading;
 
   const collection = useMemo(
     () => (captures || []).filter((c) => c.status !== 'rejected'),
@@ -99,13 +100,13 @@ export function GalleryPage() {
       </div>
 
       {/* ── Stats strip ── */}
-      <section className="library-hero-panel" aria-label="Library summary">
+      {(!capturesError || captures) && <section className="library-hero-panel" aria-label="Library summary">
         <dl className="gallery-v2-stats">
           <div className="gallery-v2-stat"><dd>{collection.length}</dd><dt>Captures</dt></div>
           <div className="gallery-v2-stat"><dd>{speciesCount}</dd><dt>Species</dt></div>
           <div className="gallery-v2-stat"><dd>{placeCount}</dd><dt>Places</dt></div>
         </dl>
-      </section>
+      </section>}
 
       {/* ── Element filter tabs ── */}
       <div className="gallery-v2-tabs">
@@ -141,11 +142,15 @@ export function GalleryPage() {
       )}
 
       {/* ── Content ── */}
+      {(capturesError || speciesError) && <div className="library-load-error" role="alert">
+        <p>{capturesError ? 'Your journal could not refresh. Your saved discoveries have not been deleted.' : 'Species details could not load. Your saved photos are still available.'}</p>
+        <button type="button" className="primary-action" disabled={capturesFetching || speciesFetching} onClick={() => { if (capturesError) retryCaptures(); if (speciesError) retrySpecies(); }}>Try again</button>
+      </div>}
       {isLoading ? (
         <div className="gallery-v2-loading" aria-busy="true">
           {[0,1,2,3].map((i) => <div key={i} className="gallery-v2-skeleton" />)}
         </div>
-      ) : displayList.length === 0 ? (
+      ) : capturesError && !captures ? null : displayList.length === 0 ? (
         <div className="library-start-card">
           <div className="library-empty-media" aria-hidden="true">
             <div className="gallery-empty-icon"><Icon name="camera" /></div>

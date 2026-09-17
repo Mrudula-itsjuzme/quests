@@ -1,4 +1,5 @@
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
+import { useMotionReducedPreference } from '../../lib/useMotionPreference';
 import { createPortal } from 'react-dom';
 import { Icon } from '../Icon';
 import { AnimatedCounter } from './AnimatedCounter';
@@ -6,6 +7,9 @@ import { playSuccess, playTap } from '../../lib/useSoundEffects';
 import { useEffect } from 'react';
 
 export function QuestSuccessModal({ quest, onClose }) {
+  const systemReduced = useReducedMotion();
+  const calm = useMotionReducedPreference();
+  const reduced = systemReduced || calm;
   useEffect(() => {
     playSuccess();
   }, []);
@@ -31,7 +35,7 @@ export function QuestSuccessModal({ quest, onClose }) {
       onMouseDown={(e) => e.target === e.currentTarget && onClose()}
     >
       <div className="celebration-particles">
-        {particles.map((particle) => (
+        {!reduced && particles.slice(0, 6).map((particle) => (
           <motion.span
             key={particle.id}
             className="sparkle-particle"
@@ -49,7 +53,7 @@ export function QuestSuccessModal({ quest, onClose }) {
 
       <motion.div
         className="celebration-card ornate-panel"
-        initial={{ scale: 0.8, y: 30, rotate: -2 }}
+        initial={reduced ? false : { scale: 0.97, y: 12, rotate: 0 }}
         animate={{ scale: 1, y: 0, rotate: 0 }}
         exit={{ scale: 0.8, y: 30, opacity: 0 }}
         transition={{ type: 'spring', stiffness: 450, damping: 26 }}
@@ -80,7 +84,7 @@ export function QuestSuccessModal({ quest, onClose }) {
           className="primary-btn continue-btn"
           onClick={() => { playTap(); onClose(); }}
         >
-          Claim & Continue Path ›
+          Continue exploring
         </button>
       </motion.div>
     </motion.div>,

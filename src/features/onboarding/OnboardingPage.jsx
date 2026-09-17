@@ -9,7 +9,7 @@ import { FullScreenStatus } from '../auth/ProtectedRoute';
 const detectedTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
 
 export function OnboardingPage() {
-  const { data: me, isLoading } = useMe();
+  const { data: me, isLoading, isError, refetch } = useMe();
   const updateMe = useUpdateMe();
   const [step, setStep] = useState(1);
   const [displayName, setDisplayName] = useState('');
@@ -25,6 +25,7 @@ export function OnboardingPage() {
       />
     );
   }
+  if (isError) return <FullScreenStatus type="error" title="Profile unavailable" text="We couldn’t load your profile. Retry before making changes." onRetry={refetch} />;
   if (me?.onboardingCompletedAt) return <Navigate to="/app" replace />;
 
   const onNextStep = (e) => {
@@ -188,10 +189,10 @@ export function OnboardingPage() {
                     <button type="button" className="ghost-action" onClick={onPrevStep} onMouseEnter={playHover}>
                       ‹ Back
                     </button>
-                    <button type="submit" className="auth-submit" disabled={updateMe.isPending} onMouseEnter={playHover}>
+                    <motion.button type="submit" className="auth-submit" disabled={updateMe.isPending} onMouseEnter={playHover} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                       <span>{updateMe.isPending ? 'Saving...' : 'Start exploring'}</span>
                       <Icon name={updateMe.isPending ? 'star' : 'compass'} />
-                    </button>
+                    </motion.button>
                   </div>
                 </form>
               </motion.div>

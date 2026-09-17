@@ -10433,3 +10433,8 @@ html body .app-shell .world-canvas-wrap .leaflet-container { background: rgba(23
     scroll-margin-bottom: calc(44vh + env(safe-area-inset-bottom, 0px));
   }
 }
+
+.page-transition-wrapper {
+  height: 100%;
+  width: 100%;
+}

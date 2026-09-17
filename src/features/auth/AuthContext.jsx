@@ -3,6 +3,7 @@ import { Capacitor } from '@capacitor/core';
 import { App } from '@capacitor/app';
 import { Browser } from '@capacitor/browser';
 import { supabase, supabaseConfigured } from '../../lib/supabase';
+import { AccountQueryBoundary } from './AccountQueryBoundary';
 
 const AuthContext = createContext(null);
 
@@ -18,17 +19,30 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     if (!supabaseConfigured) return undefined;
 
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
+    let active = true;
+    let authEventReceived = false;
+    const applySession = (nextSession) => {
+      if (!active) return;
+      if (nextSession) {
+        localStorage.removeItem('habbit_guest_mode');
+        setIsGuest(false);
+      }
+      setSession(nextSession);
       setLoading(false);
+    };
+
+    supabase.auth.getSession().then(({ data }) => {
+      if (!authEventReceived) applySession(data.session);
+    }).catch(() => {
+      if (!authEventReceived) applySession(null);
     });
 
     const { data: subscription } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      setSession(nextSession);
-      setLoading(false);
+      authEventReceived = true;
+      applySession(nextSession);
     });
 
-    return () => subscription.subscription.unsubscribe();
+    return () => { active = false; subscription.subscription.unsubscribe(); };
   }, []);
 
   useEffect(() => {
@@ -101,14 +115,17 @@ export function AuthProvider({ children }) {
       },
       signOut: async () => {
         exitGuest();
-        if (devMode) return;
-        await supabase.auth.signOut();
+        if (devMode || !supabaseConfigured) return;
+        const { error } = await supabase.auth.signOut();
+        if (error) throw error;
+        setSession(null);
       },
     }),
     [devMode, isGuest, loading, offlineNativeMode, session],
   );
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  const identity = loading ? 'loading' : isGuest ? 'guest' : session?.user?.id ? `user:${session.user.id}` : devMode ? 'development' : 'anonymous';
+  return <AuthContext.Provider value={value}><AccountQueryBoundary key={identity}>{children}</AccountQueryBoundary></AuthContext.Provider>;
 }
 
 export function useAuth() {

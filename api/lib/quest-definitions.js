@@ -2452,19 +2452,19 @@ export const questDefinitions = Object.freeze(
   },
   {
     "id": "body-explorer-walk",
-    "title": "Explorer Walk",
-    "description": "Take a 2,000-step walking route through a park, heritage district, waterfront, or other public place.",
-    "category": "Body",
+    "title": "Habitat Notebook",
+    "description": "Visit a park, waterfront, garden, or heritage landscape and record one specific nature observation.",
+    "category": "Discovery",
     "rarity": "Common",
-    "verificationType": "AUTO",
-    "subjectTag": "steps",
+    "verificationType": "TEXT",
+    "subjectTag": "habitat_note",
     "cadence": "daily",
-    "targetValue": 2000,
-    "unit": "steps",
+    "targetValue": 1,
+    "unit": "observation",
     "cooldownDays": 2,
-    "xpReward": 25,
+    "xpReward": 50,
     "enabled": true,
-    "instructions": ["Start the step counter from Explore", "Walk only where public access is allowed"]
+    "instructions": ["Choose a public, accessible place", "Record a plant, animal, weather pattern, or habitat detail"]
   },
   {
     "id": "mind-place-story",

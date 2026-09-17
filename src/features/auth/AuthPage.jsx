@@ -296,16 +296,17 @@ export function AuthPage({ mode }) {
                 )}
               </AnimatePresence>
 
-              {/* Submit */}
               <motion.div variants={fieldStagger} initial="hidden" animate="show" custom={3}>
-                <button
+                <motion.button
                   type="submit"
                   className="auth-submit-btn"
                   disabled={submitState === 'loading' || submitState === 'success'}
                   onMouseEnter={playHover}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                 >
                   {submitState === 'loading' ? 'Signing in…' : isSignUp ? 'Create account' : 'Sign in'}
-                </button>
+                </motion.button>
               </motion.div>
             </form>
           )}

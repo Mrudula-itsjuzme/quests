@@ -1,3 +1,4 @@
+import { StartupScreen } from './components/StartupScreen';
 import React, { Suspense } from 'react';
 import { Navigate, Route, Routes, useNavigate, useLocation } from 'react-router-dom';
 import { App as CapApp } from '@capacitor/app';
@@ -21,9 +22,14 @@ const ProfilePage = React.lazy(() => import('./features/profile/ProfilePage').th
 const QuestsPage = React.lazy(() => import('./features/quests/QuestsPage').then(m => ({ default: m.QuestsPage })));
 const RewardsPage = React.lazy(() => import('./features/rewards/RewardsPage').then(m => ({ default: m.RewardsPage })));
 const ModerationQueue = React.lazy(() => import('./features/admin/ModerationQueue').then(m => ({ default: m.ModerationQueue })));
+const PublicProfile = React.lazy(() => import('./features/profile/PublicProfile').then(m => ({ default: m.PublicProfile })));
 
 function App() {
   const motionReduced = useMotionReducedPreference();
+  React.useEffect(() => {
+    document.documentElement.dataset.motionReduced = String(motionReduced);
+    return () => { delete document.documentElement.dataset.motionReduced; };
+  }, [motionReduced]);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -74,6 +80,7 @@ function App() {
                   <Route path="collection" element={<GalleryPage />} />
                   <Route path="library" element={<GalleryPage />} />
                   <Route path="profile" element={<ProfilePage />} />
+                  <Route path="community/user/:id" element={<PublicProfile />} />
                   <Route path="admin/queue" element={<ModerationQueue />} />
                 </Route>
               </Route>
@@ -86,21 +93,6 @@ function App() {
   );
 }
 
-function AppLoading() {
-  return (
-    <div className="startup-screen" role="status" aria-live="polite">
-      <div className="startup-logo-container">
-        <div className="startup-logo-pulse" />
-        <div className="startup-logo-icon">🌿</div>
-      </div>
-      <h1 className="startup-title">Wild Realm</h1>
-      <div className="startup-spinner">
-        <div className="startup-spinner-dot"></div>
-        <div className="startup-spinner-dot"></div>
-        <div className="startup-spinner-dot"></div>
-      </div>
-    </div>
-  );
-}
+function AppLoading() { return <StartupScreen />; }
 
 export default App;

@@ -10,20 +10,28 @@ import { FloatingXp } from '../../components/motion/FloatingXp';
 const MAX_PHOTO_BYTES = 8 * 1024 * 1024;
 const ACCEPTED_PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
-export function QuestDetail({ quest }) {
+export function QuestDetail({ quest, initialPhoto }) {
   const postProgress = usePostProgress();
   const submitProof = useSubmitProof();
   const [textProof, setTextProof] = useState('');
   const [fileError, setFileError] = useState('');
   const [serviceMessage, setServiceMessage] = useState('');
-  const [shareToFeed, setShareToFeed] = useState(true);
+  const [shareToFeed, setShareToFeed] = useState(false);
   const [rewardBurst, setRewardBurst] = useState(null);
   const fileInputRef = useRef(null);
+  const [photoPreview, setPhotoPreview] = useState('');
+  useEffect(() => {
+    if (!initialPhoto) { setPhotoPreview(''); return; }
+    const url = URL.createObjectURL(initialPhoto);
+    setPhotoPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [initialPhoto]);
 
   // Clear stale state when switching between quests (the component
   // is reused inside the BottomSheet so it doesn't unmount).
   useEffect(() => {
     setTextProof('');
+    setShareToFeed(false);
     setFileError('');
     setServiceMessage('');
     if (fileInputRef.current) fileInputRef.current.value = '';
@@ -154,7 +162,7 @@ export function QuestDetail({ quest }) {
       </div>
 
       <div className="step-list">
-        <h4>Steps</h4>
+        <h4>Field plan</h4>
         {(quest.instructions || []).map((instruction, index) => (
           <div key={instruction} className={index < Math.ceil(ratio * (quest.instructions.length || 1)) ? 'done' : ''}>
             <span aria-hidden="true" />
@@ -212,6 +220,7 @@ export function QuestDetail({ quest }) {
 
       {canAct && quest.verificationType === 'PHOTO' && (
         <div className="proof-form">
+          {initialPhoto && <div className="reference-quest-proof-preview"><img src={photoPreview} alt="Your quest photo"/><button type="button" className="primary-action" disabled={submitProof.isPending} onClick={()=>onFileChange({target:{files:[initialPhoto]}})}>{submitProof.isPending ? 'Submitting…' : 'Submit this photo'}</button></div>}
           <label htmlFor="proof-photo">Upload photo proof (JPEG/PNG/WEBP, up to 8MB)</label>
           <input ref={fileInputRef} id="proof-photo" type="file" accept="image/jpeg,image/png,image/webp" onChange={onFileChange} disabled={submitProof.isPending} />
           <label className="feed-opt-in"><input type="checkbox" checked={shareToFeed} onChange={(event) => setShareToFeed(event.target.checked)} /> Share this verified completion with the community</label>

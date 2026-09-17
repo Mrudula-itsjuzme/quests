@@ -76,9 +76,12 @@ export function CaptureFlow({ onClose }) {
   const isNative = Capacitor.isNativePlatform();
   const inputRef = useRef(null);
   const filterChipRefs = useRef(new Map());
-  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [destination, setDestination] = useState('journal');
+  const [postToCommunity, setPostToCommunity] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(true);
   const [facingMode, setFacingMode] = useState('environment');
-  const [stage, setStage] = useState('prompt'); // prompt | scanning | candidates | reveal | error
+  const [stage, setStage] = useState('prompt'); // prompt | preparing | preview | scanning | candidates | reveal | error
   const [card, setCard] = useState(null);
   const [name, setName] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
@@ -149,6 +152,7 @@ export function CaptureFlow({ onClose }) {
 
   const submitCapture = async (bundle) => {
     if (captureItem.isPending) return;
+    setPendingBundle(bundle);
     triggerHaptic([20, 40, 20]);
     try {
       const result = await captureItem.mutateAsync(bundle);
@@ -166,7 +170,9 @@ export function CaptureFlow({ onClose }) {
     } catch (error) {
       triggerHaptic([80, 40, 80]);
       setErrorMessage(
-        error?.code === 'anti_cheat_rejected'
+        error?.code === 'request_timeout' || error?.code === 'network_unavailable'
+          ? 'The connection was interrupted. Your photo is still here. Retry to check the result without taking another photo.'
+          : error?.code === 'anti_cheat_rejected'
           ? messageForRejection(error.reason)
           : error?.code === 'vision_provider_invalid_subject'
             ? 'That looks like an indoor or man-made object. Wild Realm only rewards nature and heritage discoveries.'
@@ -176,15 +182,52 @@ export function CaptureFlow({ onClose }) {
     }
   };
 
+  const queuePreview = (bundle) => {
+    setPendingBundle(bundle);
+    setStage('preview');
+  };
+
+  const continuePreview = async () => {
+    if (!pendingBundle) return;
+    if (destination === 'quest') {
+      const blob = await (await fetch(previewUrl)).blob();
+      const file = new File([blob], 'wild-realm-quest.jpg', { type: blob.type });
+      onClose();
+      navigate('/app/quests', { state: { questPhoto: file } });
+      return;
+    }
+    setStage('scanning');
+    await submitCapture(pendingBundle);
+  };
+
+  const shareExternally = async () => {
+    if (!previewUrl) return;
+    try {
+      const blob = await (await fetch(previewUrl)).blob();
+      const file = new File([blob], 'wild-realm.jpg', { type: blob.type });
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: name || 'My discovery', text: notes || 'Discovered with Wild Realm' });
+      } else {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url; link.download = 'wild-realm.jpg'; link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        window.dispatchEvent(new CustomEvent('habbit-notice', {detail:'Photo downloaded. You can share it from your photos or files.'}));
+      }
+    } catch (error) {
+      if (error.name !== 'AbortError') window.dispatchEvent(new CustomEvent('habbit-notice',{detail:'Could not share this photo. Please try again.'}));
+    }
+  };
+
   const handleFile = async (event) => {
     if (captureItem.isPending) return;
     const file = event.target.files?.[0];
     if (!file) return;
-    setStage('scanning');
+    setStage('preparing');
     setErrorMessage('');
     const [dataUrl, telemetry] = await Promise.all([fileToOptimizedDataUrl(file), collectCaptureTelemetry(file)]);
     setPreviewUrl(dataUrl);
-    await submitCapture({
+    queuePreview({
       captureId: crypto.randomUUID(),
       imageBase64: dataUrl,
       capturedAt: telemetry.capturedAt,
@@ -209,7 +252,7 @@ export function CaptureFlow({ onClose }) {
 
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
     const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
-    setStage('scanning');
+    setStage('preparing');
     setErrorMessage('');
     setPreviewUrl(dataUrl);
 
@@ -217,7 +260,7 @@ export function CaptureFlow({ onClose }) {
     const blob = await response.blob();
     const file = new File([blob], 'capture.jpg', { type: 'image/jpeg' });
     const telemetry = await collectCaptureTelemetry(file);
-    await submitCapture({
+    queuePreview({
       captureId: crypto.randomUUID(),
       imageBase64: dataUrl,
       capturedAt: telemetry.capturedAt,
@@ -248,14 +291,14 @@ export function CaptureFlow({ onClose }) {
           source: CameraSource.Camera,
         });
         if (image.webPath) {
-          setStage('scanning');
+          setStage('preparing');
           setErrorMessage('');
           const response = await fetch(image.webPath);
           const blob = await response.blob();
           const file = new File([blob], 'capture.jpg', { type: 'image/jpeg' });
           const [dataUrl, telemetry] = await Promise.all([fileToOptimizedDataUrl(file), collectCaptureTelemetry(file)]);
           setPreviewUrl(dataUrl);
-          await submitCapture({
+          queuePreview({
             captureId: crypto.randomUUID(),
             imageBase64: dataUrl,
             capturedAt: telemetry.capturedAt,
@@ -280,33 +323,16 @@ export function CaptureFlow({ onClose }) {
   };
 
   const handleConfirm = async () => {
-    playTap();
-    try { await persistCardEdits(); } catch { /* save still confirms the server-minted card */ }
-    if (card?.id) {
-      try {
-        await addCardToLibrary.mutateAsync(card.id);
-      } catch {
-        window.dispatchEvent(new CustomEvent('habbit-notice', { detail: 'Your discovery was saved, but Library confirmation failed. Try again from Collection.' }));
-      }
-    }
-    onClose();
-  };
-
-  const handleShare = async ({ caption } = {}) => {
-    playTap();
-    if (!card || shareDiscovery.isPending) return;
+    if (saving || !card?.id) return;
+    playTap(); setSaving(true);
     try {
-      const updatedCard = await persistCardEdits();
-      await shareDiscovery.mutateAsync({ cardId: updatedCard.id, caption: caption || notes.trim() || undefined });
-      window.dispatchEvent(new CustomEvent('habbit-notice', { detail: 'Shared to the community feed.' }));
+      const updated = await persistCardEdits();
+      await addCardToLibrary.mutateAsync(updated.id);
+      if (postToCommunity) await shareDiscovery.mutateAsync({cardId:updated.id,caption:notes.trim() || undefined});
       onClose();
-    } catch (error) {
-      window.dispatchEvent(new CustomEvent('habbit-notice', {
-        detail: error?.code === 'guest_write_unavailable'
-          ? 'Guest mode is read-only. Sign in to share discoveries.'
-          : 'Your discovery was saved, but sharing failed. Try again from Community.',
-      }));
-    }
+    } catch {
+      window.dispatchEvent(new CustomEvent('habbit-notice',{detail:'Could not finish saving or posting. Your preview is still here; please try again.'}));
+    } finally { setSaving(false); }
   };
 
   return createPortal(
@@ -347,6 +373,7 @@ export function CaptureFlow({ onClose }) {
             />
             <div className={`capture-filter-aura filter-${activeFilter.toLowerCase()}`} aria-hidden="true" />
             <div className="capture-viewfinder-vignette" aria-hidden="true" />
+            {cameraStatus !== 'live' && <p className="capture-sample-notice" role="status">Sample background · choose your own photo</p>}
 
             {/* Top HUD */}
             <div className="capture-viewfinder-top">
@@ -398,7 +425,7 @@ export function CaptureFlow({ onClose }) {
                 <button type="button" className="capture-primary-shutter" aria-label="Take photo" onClick={() => { playTap(); triggerHaptic([12]); handleNativeCamera(); }} />
                 <button type="button" className="capture-control-button" aria-label="Flip camera" disabled={cameraStatus !== 'live'} onClick={() => { playTap(); setFacingMode((mode) => mode === 'environment' ? 'user' : 'environment'); }}><SwitchCamera strokeWidth={1.6} /></button>
               </div>
-              <p className="capture-photo-mode">PHOTO</p>
+              <p className="capture-photo-mode">PHOTO · {currentFilter.label}</p>
 
               {/* Real photo-filter strip (Instagram/Snap style) */}
               <div className="capture-filter-strip" aria-label="Camera filters" hidden={!filtersOpen}>
@@ -412,16 +439,11 @@ export function CaptureFlow({ onClose }) {
                     type="button"
                     className={`capture-filter-chip ${activeFilter === filter.id ? 'active' : ''}`}
                     aria-pressed={activeFilter === filter.id}
-                    aria-label={activeFilter === filter.id ? `Capture photo with ${filter.label}` : `Select ${filter.label} filter`}
+                    aria-label={`Select ${filter.label} filter`}
                     onClick={(event) => {
                       playTap();
                       if (typeof event.currentTarget.scrollIntoView === 'function') {
                         event.currentTarget.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-                      }
-                      if (activeFilter === filter.id) {
-                        triggerHaptic([12]);
-                        handleNativeCamera();
-                        return;
                       }
                       setActiveFilter(filter.id);
                     }}
@@ -449,6 +471,18 @@ export function CaptureFlow({ onClose }) {
             />
           </motion.div>
         )}
+
+        {stage === 'preparing' && <div className="reference-photo-loading" role="status">Preparing your photo…</div>}
+        {stage === 'preview' && <section className="reference-camera-preview">
+          <img src={previewUrl} alt="Your photo preview" style={{filter:currentFilter.css}} />
+          <div className="reference-preview-controls">
+            <span className="reference-preview-filter">{currentFilter.label}</span>
+            <div className="reference-preview-filters" aria-label="Preview filters">{CAPTURE_FILTERS.map(filter=><button key={filter.id} aria-pressed={activeFilter===filter.id} onClick={()=>setActiveFilter(filter.id)}>{filter.label}</button>)}</div>
+            <div className="reference-preview-destination" aria-label="Photo destination"><button aria-pressed={destination==='journal'} onClick={()=>setDestination('journal')}>My Journal</button><button aria-pressed={destination==='quest'} onClick={()=>setDestination('quest')}>For a Quest</button></div>
+            <p>{destination==='journal' ? 'Identify your discovery, then review and edit its details.' : 'Choose a quest and review its requirements before submitting. Quest proof uses your original photo.'}</p>
+            <div className="reference-preview-actions"><button onClick={()=>{setPendingBundle(null);setStage('prompt');}}>Retake</button><button onClick={continuePreview}>{destination==='journal'?'Identify & continue':'Choose a quest'}</button></div>
+          </div>
+        </section>}
 
         {/* ── SCANNING ── */}
         {stage === 'scanning' && (
@@ -537,8 +571,9 @@ export function CaptureFlow({ onClose }) {
           >
             <p>{errorMessage}</p>
             <button type="button" className="continue-journey-btn" onClick={() => setStage('prompt')}>
-              Try Again
+              Retake Photo
             </button>
+            {pendingBundle && <button type="button" className="continue-journey-btn" onClick={() => { setStage('scanning'); submitCapture(pendingBundle); }}>Retry this photo</button>}
           </motion.div>
         )}
 
@@ -563,7 +598,11 @@ export function CaptureFlow({ onClose }) {
               notesValue={notes}
               onNotesChange={setNotes}
               onAddToLibrary={handleConfirm}
-              onShare={handleShare}
+              onShare={shareExternally}
+              filterName={currentFilter.label}
+              postToCommunity={postToCommunity}
+              onPostToCommunityChange={setPostToCommunity}
+              saving={saving}
             />
           </motion.div>
         )}

@@ -21,7 +21,7 @@ async function getLeaflet() {
 function makePinHtml(pin) {
   if (pin.obfuscated || pin.gps?.obfuscated) {
     return `
-      <div class="map-leaflet-pin map-pin-obfuscated" title="Approximate Location: ${pin.title}">
+      <div class="map-leaflet-pin map-pin-obfuscated" title="Approximate Location: ${escapeHtml(pin.title)}">
         <div class="map-leaflet-pin-inner" style="border-style: dashed; border-color: rgba(255,100,100,0.8); color: #ff6666;">?</div>
       </div>
     `;
@@ -29,9 +29,9 @@ function makePinHtml(pin) {
   const grade = pin.grade || '';
   const gradeClass = grade ? `rank-hex-${grade.toLowerCase()}` : 'map-pin-curated';
   const label = grade || getCategoryEmoji(pin.category);
-  const imageRef = safeImageRef(pin.imageRef, pin.category);
+  const imageRef = safeImageRef(pin.imageRef || markerFallback(pin.category), pin.category);
   return `
-    <div class="map-leaflet-pin ${gradeClass}${imageRef ? ' map-pin-photo' : ''}" title="${escapeHtml(pin.title)}">
+    <div class="reference-map-pin map-leaflet-pin ${gradeClass}${imageRef ? ' map-pin-photo' : ''}" title="${escapeHtml(pin.title)}">
       <div class="map-leaflet-pin-inner">
         ${imageRef ? `<img src="${imageRef}" alt="" loading="lazy" referrerpolicy="no-referrer" />` : label}
       </div>
@@ -59,7 +59,7 @@ function markerFallback(category = '') {
   const key = String(category).toLowerCase();
   if (key.includes('bird')) return '/assets/blue-billed-cuckoo.png';
   if (key.includes('water') || key.includes('park') || key.includes('community')) return '/assets/verdant-explorer-banner.png';
-  return '/assets/quest-compass-poster.png';
+  return '/assets/guest-library/mountains.jpg';
 }
 
 function getCategoryEmoji(category = '') {
@@ -83,11 +83,12 @@ export function WorldCanvas({ hotspots = [], onSelectHotspot, onPointMap, userPo
     getLeaflet().then((Leaflet) => {
       if (destroyed || !containerRef.current) return;
 
-      // Center on Bangalore by default (user's location used when available)
+      // Do not make a seeded city look like the explorer's current location.
+      // A granted position pans the map to the real place immediately.
       const map = Leaflet.map(containerRef.current, {
         zoomControl: false,
         attributionControl: false,
-      }).setView([12.9716, 77.5946], 12);
+      }).setView([20, 0], 2);
 
       if (!offlineNative) {
         // Satellite imagery matches the reference; retain a street-map fallback.
@@ -201,11 +202,11 @@ export function WorldCanvas({ hotspots = [], onSelectHotspot, onPointMap, userPo
         const icon = Leaflet.divIcon({
           className: '',
           html: makePinHtml(pin),
-          iconSize: [44, 44],
-          iconAnchor: [22, 44],
+          iconSize: [54, 64],
+          iconAnchor: [27, 64],
         });
 
-        const marker = Leaflet.marker([lat, lng], { icon })
+        const marker = Leaflet.marker([lat, lng], { icon, title: pin.title, alt: pin.title, keyboard: true })
           .addTo(mapRef.current)
           .on('click', () => onSelectHotspot?.(pin));
 

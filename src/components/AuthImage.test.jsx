@@ -3,6 +3,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AuthProvider } from '../features/auth/AuthContext';
 import { CaptureImage } from './CaptureImage';
 
+vi.mock('../lib/supabase', () => ({ supabase: null, supabaseConfigured: false }));
+
 describe('authenticated capture images', () => {
   afterEach(() => {
     vi.restoreAllMocks();
@@ -31,4 +33,13 @@ describe('authenticated capture images', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(warnSpy).not.toHaveBeenCalled();
   });
+});
+
+it('never attaches authentication to an external media reference', async () => {
+  const fetchMock = vi.fn();
+  vi.stubGlobal('fetch', fetchMock);
+  const { container } = render(<AuthProvider><CaptureImage imageRef="https://untrusted.example/captures/private/media" alt="External reference" useAuth /></AuthProvider>);
+  await waitFor(() => expect(container.querySelector('.capture-image')).toHaveAttribute('data-state', 'loaded'));
+  expect(fetchMock).not.toHaveBeenCalled();
+  vi.unstubAllGlobals();
 });

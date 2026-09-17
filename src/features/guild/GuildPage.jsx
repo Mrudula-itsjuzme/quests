@@ -16,13 +16,16 @@ import {
   useSetCommunityFollow,
   useToggleCommunityLike,
   useReportCommunityPost,
+  useSearchUsers,
 } from '../quests/queries';
+import { Link } from 'react-router-dom';
 import { playTap } from '../../lib/useSoundEffects';
 import { projectCommunityMarkers } from '../../lib/communityMapProjection';
 import { CommunityShareSheet } from './CommunityShareSheet';
 
 const TABS = [
   { id: 'FEED', label: 'Feed', icon: 'star' },
+  { id: 'SEARCH', label: 'Search', icon: 'search' },
   { id: 'FRIENDS', label: 'Chats', icon: 'user' },
   { id: 'MAP', label: 'Nearby', icon: 'compass' },
   { id: 'GROUPS', label: 'Trips', icon: 'compass' },
@@ -85,6 +88,7 @@ export function GuildPage() {
 
       <div role="tabpanel" id={`community-panel-${tab}`} aria-labelledby={`community-tab-${tab}`}>
         {tab === 'FEED' && <CommunityFeed onShare={() => setShareOpen(true)} />}
+        {tab === 'SEARCH' && <CommunitySearch />}
         {tab === 'FRIENDS' && <FriendsPanel />}
         {tab === 'MAP' && <CommunityMap />}
         {tab === 'GROUPS' && <GroupsPanel />}
@@ -747,13 +751,8 @@ function CommentThread({ postId, post }) {
   const addComment = useAddCommunityComment();
   const [draft, setDraft] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-  const visibleComments = useMemo(() => {
-    if (comments?.length) return comments;
-    if (!isLoading && !isError && post?.commentCount > 0) {
-      return buildCommentPreview(post);
-    }
-    return [];
-  }, [comments, isError, isLoading, post]);
+  const visibleComments = comments || [];
+  const [showAll, setShowAll] = useState(false);
 
   const submit = async (event) => {
     event.preventDefault();
@@ -784,7 +783,7 @@ function CommentThread({ postId, post }) {
       )}
       {visibleComments.length > 0 && (
         <div className="post-comment-list">
-          {visibleComments.slice(0, 3).map((comment) => (
+          {(showAll ? visibleComments : visibleComments.slice(0, 3)).map((comment) => (
             <div key={comment.id} className="post-comment">
               <span className="post-comment-avatar" aria-hidden="true">{initials(comment.displayName)}</span>
               <div className="post-comment-bubble">
@@ -796,11 +795,9 @@ function CommentThread({ postId, post }) {
               </div>
             </div>
           ))}
-          {post?.commentCount > visibleComments.length && (
-            <p className="community-state-note">Showing preview comments. Sign in to load the full thread.</p>
-          )}
+          {post?.commentCount > visibleComments.length && <p className="community-state-note">Some comments are currently unavailable.</p>}
           {visibleComments.length > 3 && (
-            <p className="community-state-note">Showing latest 3 of {visibleComments.length} comments.</p>
+            <button type="button" className="post-view-comments" onClick={() => setShowAll(value => !value)}>{showAll ? 'Show fewer replies' : `View all ${visibleComments.length} replies`}</button>
           )}
         </div>
       )}
@@ -824,23 +821,11 @@ function CommentThread({ postId, post }) {
   );
 }
 
-function buildCommentPreview(post) {
-  const firstName = post.author?.displayName?.split(/\s+/)[0] || 'Explorer';
-  const place = post.placeLabel || 'there';
-  const count = Math.min(3, post.commentCount || 0);
-  const samples = [
-    { displayName: 'Nila Skies', body: `That light at ${place} looks unreal.`, createdAt: new Date(Date.now() - 42 * 60000).toISOString() },
-    { displayName: 'Arjun Vale', body: 'Adding this to my next walk list.', createdAt: new Date(Date.now() - 25 * 60000).toISOString() },
-    { displayName: firstName, body: 'Thanks. It was worth stopping for.', createdAt: new Date(Date.now() - 12 * 60000).toISOString() },
-  ];
-  return samples.slice(0, count).map((comment, index) => ({
-    id: `${post.id}-preview-${index}`,
-    ...comment,
-  }));
-}
-
 function FriendsPanel() {
   const { data: friends, isLoading, isError, refetch } = useFriends();
+  const [search, setSearch] = useState('');
+  const [profileUserId, setProfileUserId] = useState(null);
+  const matches = (friends || []).filter(friend => friend.displayName.toLowerCase().includes(search.trim().toLowerCase()));
 
   if (isLoading) {
     return <div className="community-state-panel" aria-busy="true"><p role="status">Loading explorers…</p></div>;
@@ -860,8 +845,8 @@ function FriendsPanel() {
     return (
       <div className="community-state-panel community-chat-empty">
         <Icon name="user" />
-        <p className="community-state-title">Start a trail chat.</p>
-        <p>Friends, streak partners, and shared quest plans will live here.</p>
+        <p className="community-state-title">Meet fellow explorers.</p>
+        <p>Open an author’s profile in Feed to follow them. Private messaging is not available yet.</p>
         <div className="retention-loop-rail" aria-label="Chat loop">
           <span><strong>1</strong> Add</span>
           <span><strong>2</strong> Plan</span>
@@ -877,7 +862,7 @@ function FriendsPanel() {
         <div>
           <span className="community-chats-kicker">Trail chats</span>
           <h2>Plan the next snap.</h2>
-          <p>Message friends, build streak plans, then jump back into Camera.</p>
+          <p>Find friends and explore their discoveries. Private messaging is not available yet.</p>
         </div>
         <button
           type="button"
@@ -892,9 +877,12 @@ function FriendsPanel() {
         </button>
       </section>
 
+      <label className="explorer-search">Find an explorer<input type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Search your friends" /></label>
+      {!matches.length && <p role="status">No explorers match that name.</p>}
+      <AnimatePresence>{profileUserId && <CommunityProfileSheet userId={profileUserId} onClose={() => setProfileUserId(null)} />}</AnimatePresence>
       <div className="community-story-rail" aria-label="Friends">
-        {friends.map((friend) => (
-          <button key={friend.userId} type="button" className="community-story-chip" onClick={playTap}>
+        {matches.map((friend) => (
+          <button key={friend.userId} type="button" className="community-story-chip" onClick={() => setProfileUserId(friend.userId)}>
             <span className="post-author-avatar" aria-hidden="true">{initials(friend.displayName)}</span>
             <span>{friend.displayName.split(/\s+/)[0]}</span>
           </button>
@@ -902,7 +890,7 @@ function FriendsPanel() {
       </div>
 
       <div className="community-friend-list">
-      {friends.map((friend) => (
+      {matches.map((friend) => (
         <article key={friend.userId} className="community-friend-card">
           <span className="post-author-avatar" aria-hidden="true">{initials(friend.displayName)}</span>
           <div className="community-friend-meta">
@@ -910,7 +898,7 @@ function FriendsPanel() {
             <small>{friend.streakDays}-day streak</small>
             <p>{friend.totalXp.toLocaleString()} XP. Ready for a camera quest together.</p>
           </div>
-          <button type="button" className="community-chat-action" aria-label={`Message ${friend.displayName}`} onClick={playTap}>
+          <button type="button" className="community-chat-action" aria-label={`View ${friend.displayName}'s profile`} onClick={() => setProfileUserId(friend.userId)}>
             <Icon name="scroll" />
           </button>
           {friend.status === 'pending' && (
@@ -987,6 +975,50 @@ function CommunityMap() {
           </li>
         ))}
       </ul>
+    </div>
+  );
+}
+
+function CommunitySearch() {
+  const [query, setQuery] = useState('');
+  const { data, isLoading, isError } = useSearchUsers(query);
+
+  return (
+    <div className="community-search-panel">
+      <div className="search-bar">
+        <Icon name="search" />
+        <input
+          type="search"
+          placeholder="Search explorers..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          aria-label="Search community profiles"
+        />
+      </div>
+      
+      {isLoading && <p className="community-state-note" role="status">Searching...</p>}
+      {isError && <p className="community-state-note error" role="alert">Could not complete search.</p>}
+      
+      {!isLoading && !isError && query && data?.length === 0 && (
+        <p className="community-state-note">No explorers found for "{query}".</p>
+      )}
+      
+      {!isLoading && !isError && data?.length > 0 && (
+        <ul className="community-search-results">
+          {data.map((user) => (
+            <li key={user.id} className="search-result-item">
+              <Link to={`/app/community/user/${user.id}`} onClick={playTap}>
+                <span className="post-author-avatar" aria-hidden="true">{initials(user.displayName)}</span>
+                <div>
+                  <strong>{user.displayName}</strong>
+                  <span>{user.totalXp ? Number(user.totalXp).toLocaleString() : 0} XP</span>
+                </div>
+                <Icon name="chevron-right" />
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

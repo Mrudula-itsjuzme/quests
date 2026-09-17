@@ -449,3 +449,334 @@ html body #root .auth-social-btn { border-radius: 16px !important; font-weight: 
 html body #root .auth-card-v2 { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
 html body #root .landing-motto { color: #dce4d8 !important; -webkit-text-fill-color: #dce4d8 !important; }
 html body .capture-flow-overlay.capture-flow-overlay .capture-photo-mode { color: #f5f3ef !important; -webkit-text-fill-color: #f5f3ef !important; font: 400 11px/1.4 Arial,sans-serif !important; }
+
+/* One mobile gutter; the feed scrolls above the fixed navigation. */
+@media (max-width: 780px) {
+  html body #root .app-shell .guild-page.page-stack {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: max(20px, env(safe-area-inset-top, 0px)) 20px calc(100px + env(safe-area-inset-bottom, 0px)) !important;
+    gap: 8px !important;
+  }
+  html body #root .app-shell .guild-page > [role='tabpanel'] {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  html body #root .app-shell .guild-page .community-feed-stream {
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    gap: 12px !important;
+  }
+  html body #root .app-shell .guild-page .community-stories-rail {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 4px 0 8px !important;
+    gap: 12px !important;
+    overflow-x: auto !important;
+    scroll-padding-inline: 0;
+  }
+  html body #root .app-shell .guild-page .community-story-card {
+    flex: 0 0 64px !important;
+    width: 64px !important;
+    min-width: 64px !important;
+    gap: 5px !important;
+  }
+  html body #root .app-shell .guild-page .community-story-ring { width: 60px !important; height: 60px !important; }
+  html body #root .app-shell .guild-page .community-story-photo,
+  html body #root .app-shell .guild-page .community-story-photo .capture-image-photo { width: 54px !important; height: 54px !important; }
+  html body #root .app-shell .guild-page .community-post-card {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+  }
+  html body #root .app-shell .guild-page .post-header-row {
+    height: auto !important;
+    min-height: 52px !important;
+    padding: 4px 0 12px !important;
+  }
+  html body #root .app-shell .guild-page .post-author-avatar { width: 36px !important; height: 36px !important; }
+  html body #root .app-shell .guild-page .post-info-block { padding: 10px 0 0 !important; }
+  html body #root .app-shell .guild-page .post-photo-wrap {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 30svh !important;
+    aspect-ratio: 1.65 !important;
+  }
+  html body #root .app-shell .guild-page .post-engagement-row { flex-wrap: wrap !important; }
+  html body #root .app-shell .guild-page .post-engagement-actions { flex-wrap: wrap !important; }
+}
+@media (max-width: 780px) {
+  html body #root .app-shell .guild-page.page-stack { transform: none !important; }
+  html body #root .app-shell .guild-page .post-header-row { margin: 0 !important; }
+  html body #root .app-shell .guild-page .post-author-block { padding: 0 !important; }
+  html body #root .app-shell .guild-page .post-engagement-row { margin-top: 4px !important; padding-top: 4px !important; }
+  html body #root .app-shell .guild-page .post-action { min-height: 44px !important; height: auto !important; }
+}
+@media (max-width: 780px) and (max-height: 780px) {
+  html body #root .app-shell .guild-page .post-photo-wrap { max-height: 24svh !important; }
+}
+
+/* Explore: profile beside search, quieter map controls, photo-led place rows. */
+html body #root .app-shell .explore-search-bar { left: 16px !important; right: 16px !important; top: max(20px,env(safe-area-inset-top,0px)) !important; }
+html body #root .app-shell .explore-search-input-wrap { width: calc(100% - 60px) !important; height: 50px !important; border-radius: 28px !important; background: #f5f3eff5 !important; padding: 0 16px !important; box-shadow: 0 3px 18px #0c241a18 !important; }
+html body #root .app-shell .explore-search-input-wrap svg { width: 19px !important; height: 19px !important; color: #586853 !important; stroke: currentColor !important; fill: none !important; flex-shrink: 0; }
+html body #root .app-shell .explore-search-input { font: 400 13px/1.4 Arial,sans-serif !important; min-width: 0 !important; }
+html body #root .app-shell .world-hud-left { display: block !important; left: auto !important; right: 16px !important; top: max(20px,env(safe-area-inset-top,0px)) !important; z-index: 80 !important; }
+html body #root .app-shell .world-hud-avatar { display: grid !important; place-items: center !important; position: relative !important; width: 50px !important; height: 50px !important; border-radius: 50% !important; padding: 3px !important; border: 2px solid #f5f3ef !important; background: #cbd8c0 !important; box-shadow: 0 3px 18px #0c241a30 !important; }
+html body #root .app-shell .world-hud-avatar-face { display: grid !important; place-items: center !important; position: static !important; width: 40px !important; height: 40px !important; border-radius: 50% !important; overflow: hidden; background: #dce5d2 !important; color: #193b2b !important; font: 500 20px/1 Arial,sans-serif !important; }
+html body #root .app-shell .world-hud-avatar-face img { width: 100%; height: 100%; object-fit: cover; }
+html body #root .app-shell :is(.world-xp-ring,.world-hud-level) { display: none !important; }
+html body #root .app-shell .world-hud-right { top: max(138px,calc(env(safe-area-inset-top,0px) + 118px)) !important; right: 16px !important; gap: 10px !important; }
+html body #root .app-shell .explore-category-tags { margin-top: 12px !important; padding: 0 !important; }
+html body #root .app-shell .explore-bottom-sheet { padding: 16px !important; border-radius: 24px !important; max-height: min(34svh,250px) !important; }
+html body #root .app-shell .explore-sheet-header { margin: 0 0 12px !important; padding: 0 !important; }
+html body #root .app-shell .explore-sheet-header h3 { font: 400 21px/1.2 Georgia,serif !important; color: #152b20 !important; }
+html body #root .app-shell .explore-sheet-see-all { color: #35553c !important; font: 400 12px Arial,sans-serif !important; }
+html body #root .app-shell .explore-hotspot-cards { display: flex !important; gap: 10px !important; overflow-x: auto !important; padding: 0 0 4px !important; }
+html body #root .app-shell .explore-hotspot-card { display: flex !important; flex: 0 0 260px !important; align-items: center !important; gap: 12px !important; width: 260px !important; min-width: 0 !important; height: 112px !important; min-height: 0 !important; padding: 8px !important; border: 1px solid #e0e4d9 !important; border-radius: 16px !important; background: #eeeee6 !important; box-shadow: none !important; text-align: left; transform: none !important; }
+html body #root .app-shell .explore-hotspot-card::before,html body #root .app-shell .explore-hotspot-card::after { display: none !important; }
+html body #root .app-shell .explore-community-photo { position: relative !important; inset: auto !important; width: 86px !important; height: 94px !important; flex: 0 0 86px !important; border-radius: 11px !important; overflow: hidden !important; }
+html body #root .app-shell .explore-hotspot-overlay { position: static !important; padding: 0 !important; background: transparent !important; min-width: 0 !important; }
+html body #root .app-shell .explore-hotspot-chip { border: 0 !important; background: transparent !important; padding: 0 !important; font: 400 9px/1.3 Arial,sans-serif !important; color: #65765c !important; }
+html body #root .app-shell .explore-hotspot-title { font: 400 17px/1.15 Georgia,serif !important; color: #162b20 !important; margin: 5px 0 !important; text-shadow: none !important; }
+html body #root .app-shell .explore-hotspot-meta { font: 400 10px/1.4 Arial,sans-serif !important; color: #68715f !important; text-shadow: none !important; }
+
+/* Quests uses the same paper, botanical photography and forest actions. */
+html body #root .app-shell .quests-shell { max-width: 720px !important; margin: auto !important; padding: 28px 20px 110px !important; transform: none !important; background: #f5f3ef !important; }
+.reference-quests-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.reference-quests-heading p { font: 400 9px/1.4 Arial,sans-serif; letter-spacing: 2px; color: #78806e; margin: 0 0 7px; }
+html body #root .reference-quests-heading h1 { font: 400 34px/1 Georgia,serif !important; margin: 0 !important; color: #172b20 !important; }
+.reference-quests-heading>span { font: 12px Arial,sans-serif; background: #e3e8da; color: #344d32; padding: 9px 13px; border-radius: 20px; }
+.reference-quests-hero { padding: 24px 20px 20px; border-radius: 22px; background: linear-gradient(100deg,#0c231ce8,#0c231c85),url('/assets/reference-signin.png') center 30%/cover; color: #fff; margin-bottom: 22px; }
+html body #root .reference-quests-hero>p { color: #dce4d6 !important; font: 12px/1.4 Arial,sans-serif !important; margin: 0 0 10px !important; }
+html body #root .reference-quests-hero h2 { font: 400 29px/1.15 Georgia,serif !important; color: #fff !important; margin: 0 0 28px !important; }
+.reference-quests-progress { display: flex; justify-content: space-between; gap: 12px; font: 11px/1.5 Arial,sans-serif; color: #dce4d6; margin: 10px 0; }
+html body #root .app-shell .quest-cadence-tabs { display: grid !important; grid-template-columns: repeat(3,1fr) !important; background: #e9ebe2 !important; border: 0 !important; border-radius: 24px !important; padding: 4px !important; gap: 4px !important; margin: 0 0 22px !important; }
+html body #root .app-shell .quest-cadence-btn { border: 0 !important; border-radius: 22px !important; background: transparent !important; color: #58634f !important; min-height: 42px !important; font: 13px Arial,sans-serif !important; box-shadow: none !important; }
+html body #root .app-shell .quest-cadence-btn.active { background: #153c2c !important; color: #fff !important; }
+html body #root .app-shell .quests-card-list { display: grid !important; gap: 12px !important; }
+html body #root .app-shell .quests-section-header { margin: 0 !important; padding: 0 0 3px !important; }
+html body #root .app-shell .quests-section-header h2 { font: 400 23px/1.2 Georgia,serif !important; color: #223522 !important; }
+html body #root .app-shell .reference-quest-card { display: flex; width: 100%; gap: 14px; padding: 14px; border-radius: 18px; border: 1px solid #dde2d4; background: #fcfbf7; text-align: left; color: #233c2a; box-shadow: none; }
+.reference-quest-photo { width: 72px; height: 90px; flex: 0 0 72px; border-radius: 12px; object-fit: cover; }
+.reference-quest-copy { flex: 1; min-width: 0; }
+.reference-quest-eyebrow { display: flex; justify-content: space-between; gap: 8px; font: 10px/1.4 Arial,sans-serif; color: #6b7b5d; }
+html body #root .reference-quest-copy h3 { font: 400 21px/1.15 Georgia,serif !important; color: #203b28 !important; margin: 8px 0 !important; }
+html body #root .reference-quest-copy p { font: 400 12px/1.5 Arial,sans-serif !important; color: #6a715e !important; margin: 0 0 12px !important; }
+.reference-quest-progress { display: flex; gap: 12px; align-items: center; font: 11px Arial,sans-serif; }
+.reference-quest-progress>div { flex: 1; }
+.reference-quest-status { display: flex; justify-content: space-between; margin-top: 12px; font: 600 10px/1.5 Arial,sans-serif; color: #244c31; letter-spacing: .5px; }
+html body #root .reference-quest-card.completed { background: #edf1e6; }
+/* Location details are a scrollable sheet, with the photograph in its own layer. */
+html body #root .app-shell .explore-hotspot-detail { position: fixed !important; left: 12px !important; right: 12px !important; bottom: calc(90px + env(safe-area-inset-bottom,0px)) !important; top: auto !important; width: auto !important; max-width: 540px !important; margin-inline: auto !important; max-height: calc(100svh - 190px) !important; overflow-y: auto !important; overflow-x: hidden !important; padding: 0 0 20px !important; background: #f5f3ef !important; border: 0 !important; border-radius: 24px !important; box-shadow: 0 12px 40px #071d1940 !important; z-index: 200 !important; }
+html body #root .app-shell .reference-place-hero { position: relative !important; isolation: isolate; height: min(26svh,240px) !important; width: 100% !important; overflow: hidden !important; flex-shrink: 0 !important; }
+html body #root .app-shell .reference-place-hero .capture-image { height: 100% !important; width: 100% !important; }
+html body #root .app-shell .explore-hotspot-detail-head { position: relative !important; z-index: 2 !important; background: #f5f3ef !important; border-radius: 22px 22px 0 0 !important; margin: -20px 0 0 !important; padding: 20px 20px 12px !important; align-items: flex-start !important; }
+html body #root .app-shell .explore-hotspot-detail-head h3 { font: 400 26px/1.1 Georgia,serif !important; margin: 0 0 8px !important; }
+html body #root .app-shell .explore-hotspot-detail-head p { font: 400 12px/1.5 Arial,sans-serif !important; }
+html body #root .app-shell .explore-hotspot-detail-head button { flex: 0 0 44px !important; width: 44px !important; height: 44px !important; border: 0 !important; background: #e7eadf !important; border-radius: 50% !important; }
+html body #root .app-shell .explore-hotspot-detail-body { font: 400 14px/1.6 Arial,sans-serif !important; color: #4d5d47 !important; }
+html body #root .app-shell .explore-hotspot-detail-actions { padding-top: 12px !important; }
+.reference-camera-preview { position: relative; width: 100%; height: 100svh; background: #091b12; color: #fff; }
+.reference-camera-preview>img { width: 100%; height: 100%; object-fit: contain; }
+.reference-preview-controls { position: absolute; inset: auto 0 0; padding: 80px 20px max(24px,env(safe-area-inset-bottom)); background: linear-gradient(transparent,#07170ded 30%,#07170d); }
+.reference-preview-filter { display: inline-block; padding: 5px 10px; border: 1px solid #ffffff40; border-radius: 16px; color: #edf0e8; font: 11px/1.4 Arial,sans-serif; }
+.reference-preview-filters { display: flex; gap: 8px; overflow-x: auto; padding: 12px 0; }
+.reference-preview-filters button { flex-shrink: 0; min-height: 44px; border-radius: 22px; padding: 8px 14px; border: 1px solid #ffffff40; background: #ffffff10; color: #fff; }
+.reference-preview-filters button[aria-pressed=true] { background: #dfe8d4; color: #153923; }
+.reference-preview-destination,.reference-preview-actions { display: flex; gap: 10px; }
+.reference-preview-destination button,.reference-preview-actions button { flex: 1; min-height: 48px; border: 1px solid #ffffff30; border-radius: 14px; background: #ffffff10; color: #fff; font: 13px Arial,sans-serif; }
+.reference-preview-destination button[aria-pressed=true],.reference-preview-actions button:last-child { background: #f5f3ef; color: #163722; }
+html body .reference-preview-controls>p { color: #dfe5d8 !important; font: 12px/1.5 Arial,sans-serif !important; }
+html body .reference-ai-note { display: flex; gap: 10px; align-items: flex-start; font: 12px/1.5 Arial,sans-serif !important; color: #dce4d7 !important; margin: 14px 0; }
+.reference-ai-note strong { display: grid; place-items: center; border: 1px solid #e1cc97; border-radius: 50%; flex: 0 0 20px; height: 20px; color: #e1cc97; }
+.reference-post-toggle { display: grid; grid-template-columns: 24px 1fr; gap: 4px 10px; align-items: center; padding: 14px 0; font: 13px/1.4 Arial,sans-serif; color: white; }
+.reference-post-toggle input { width: 20px; height: 20px; accent-color: #8da97e; }
+.reference-post-toggle span { grid-column: 2; color: #c3ceba; font-size: 11px; }
+.reference-quest-photo-notice { border-radius: 16px; background: #e6ebdc; padding: 16px; margin-bottom: 20px; font: 13px/1.5 Arial,sans-serif; }
+.reference-quest-photo-notice button { min-height: 44px; border: 0; background: transparent; color: #274a30; text-decoration: underline; }
+.reference-quest-proof-preview { display: grid; gap: 12px; }
+.reference-quest-proof-preview img { width: 100%; max-height: 230px; object-fit: contain; border-radius: 14px; }
+html body .capture-flow-overlay.capture-flow-overlay button { animation: none !important; box-shadow: none !important; }
+html body #root .app-shell .explore-category-tags { position: static !important; width: 100% !important; max-width: none !important; margin-inline: 0 !important; }
+html body #root .app-shell .explore-hotspot-card { flex-direction: row !important; justify-content: flex-start !important; overflow: hidden !important; }
+html body #root .app-shell .explore-community-photo { margin: 0 !important; min-height: 94px !important; max-height: 94px !important; height: 94px !important; aspect-ratio: auto !important; }
+html body #root .app-shell .explore-hotspot-overlay { flex: 1 !important; width: auto !important; }
+html body #root .app-shell .explore-hotspot-title { -webkit-text-fill-color: #162b20 !important; }
+html body #root .app-shell .explore-hotspot-meta,html body #root .app-shell .explore-hotspot-meta span { -webkit-text-fill-color: #68715f !important; color: #68715f !important; }
+html body #root .app-shell .explore-hotspot-chip { -webkit-text-fill-color: #65765c !important; }
+html body #root .app-shell .hotspot-community-actions { display: flex !important; flex-wrap: wrap !important; gap: 12px !important; align-items: center !important; }
+html body #root .app-shell .hotspot-community-actions>button { min-height: 44px !important; padding: 10px 12px !important; font: 12px Arial,sans-serif !important; }
+html body #root .app-shell .explore-hotspot-detail-actions button { font: 400 14px Arial,sans-serif !important; text-transform: none !important; letter-spacing: 0 !important; }
+html body #root .reference-quests-hero .progress-bar,html body #root .reference-quest-progress .progress-bar { height: 5px !important; border: 0 !important; background: #b9c6ac50 !important; border-radius: 4px !important; }
+html body #root .reference-quests-hero .progress-bar>div { background: #c7d6b4 !important; }
+html body #root .reference-quest-progress .progress-bar>div { background: #668557 !important; }
+html body #root .reference-quests-progress span { color: #dce4d6 !important; -webkit-text-fill-color: #dce4d6 !important; font: 400 11px/1.5 Arial,sans-serif !important; }
+html body #root .app-shell .quest-cadence-btn.active { -webkit-text-fill-color: #fff !important; }
+html body #root .app-shell .quest-cadence-tabs { box-shadow: none !important; }
+html body #root .app-shell .quests-card-list { padding: 0 !important; margin: 0 !important; }
+.reference-photo-loading { display: grid; place-items: center; width: 100%; height: 100svh; background: #0c2118; color: #f5f3ef; font: 15px Arial,sans-serif; }
+/* Startup follows the photographic reference while real session loading runs. */
+.reference-startup { position: fixed; inset: 0; z-index: 12000; display: grid; place-items: center; isolation: isolate; background: #0c1d17; color: #fff; }
+.reference-startup-photo,.reference-startup-shade { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; object-fit: cover; }
+.reference-startup-shade { background: linear-gradient(#10201910,#08171055 45%,#06120a9c); }
+.reference-startup-brand { display: flex; flex-direction: column; align-items: center; text-align: center; margin-top: -30px; }
+html body #root .reference-startup-brand svg { width: 38px !important; height: 38px !important; color: #fff !important; margin-bottom: 20px; }
+html body #root .reference-startup-brand h1 { font: 400 44px/1.12 Georgia,serif !important; color: #fff !important; -webkit-text-fill-color: #fff !important; margin: 0 0 14px !important; }
+html body #root .reference-startup-brand p { font: 400 14px/1.4 Arial,sans-serif !important; color: #f4f4ed !important; }
+.reference-startup-footer { position: absolute; bottom: max(32px,env(safe-area-inset-bottom,0px)); left: 24px; right: 24px; text-align: center; }
+html body #root .reference-startup-footer p { color: #dce4d8 !important; font: italic 10px/1.5 Arial,sans-serif !important; }
+.reference-startup-progress { display: block; width: 120px; height: 2px; margin: 22px auto 0; border-radius: 2px; background: #ffffff30; overflow: hidden; }
+.reference-startup-progress::after { content: ''; display: block; width: 50%; height: 100%; background: #f4f4ed; animation: reference-load 1.5s ease-in-out infinite alternate; }
+@keyframes reference-load { to { transform: translateX(100%); } }
+@media(prefers-reduced-motion:reduce) { .reference-startup-progress::after { animation: none; } }
+.reference-startup-error { padding: 20px; border-radius: 18px; background: #0b2119e8; }
+html body #root .reference-startup-error h2 { color: #fff !important; font: 24px Georgia,serif !important; }
+.reference-startup-error button { border: 0; border-radius: 14px; background: #f5f3ef; color: #153323; padding: 12px 24px; min-height: 44px; }
+
+/* Photo pins: a cream outline and a pointed tip, with no neon halo. */
+html body #root .app-shell .reference-map-pin { position: relative !important; width: 54px !important; height: 64px !important; border: 0 !important; background: transparent !important; border-radius: 0 !important; box-shadow: none !important; transform: none !important; filter: drop-shadow(0 2px 3px #08231b45) !important; animation: none !important; }
+html body #root .app-shell .reference-map-pin::before { display: none !important; }
+html body #root .app-shell .reference-map-pin::after { content: '' !important; position: absolute !important; display: block !important; width: 13px !important; height: 13px !important; left: 20px !important; top: 45px !important; border: 1.5px solid #f5f3e9 !important; border-top: 0 !important; border-left: 0 !important; background: #244536 !important; transform: rotate(45deg) !important; border-radius: 0 0 3px 0 !important; box-shadow: none !important; z-index: -1 !important; }
+html body #root .app-shell .reference-map-pin .map-leaflet-pin-inner { width: 54px !important; height: 54px !important; margin: 0 !important; padding: 0 !important; border: 1.5px solid #f5f3e9 !important; border-radius: 50% !important; background: #244536 !important; box-shadow: none !important; filter: none !important; overflow: hidden !important; }
+html body #root .app-shell .reference-map-pin .map-leaflet-pin-inner::before,html body #root .app-shell .reference-map-pin .map-leaflet-pin-inner::after { display: none !important; }
+html body #root .app-shell .reference-map-pin img { width: 100% !important; height: 100% !important; object-fit: cover !important; border: 0 !important; border-radius: 50% !important; filter: none !important; }
+html body #root .app-shell .map-user-dot { background: #2199d5 !important; border: 2px solid #fff !important; box-shadow: 0 0 0 5px #2199d525 !important; }
+html body #root .app-shell .map-user-pulse-ring { border-color: #2199d550 !important; }
+
+/* Search and profile share one baseline; compact filters sit directly beneath. */
+html body #root .app-shell .explore-search-bar { top: max(18px,env(safe-area-inset-top,0px)) !important; left: 18px !important; right: 18px !important; display: flex !important; flex-direction: column !important; gap: 12px !important; }
+html body #root .app-shell .explore-search-input-wrap { height: 44px !important; min-height: 44px !important; width: calc(100% - 56px) !important; padding: 0 14px !important; }
+html body #root .app-shell .world-hud-left { top: max(18px,env(safe-area-inset-top,0px)) !important; right: 18px !important; }
+html body #root .app-shell .world-hud-avatar { width: 44px !important; height: 44px !important; border: 1.5px solid #f5f3ef !important; padding: 2px !important; }
+html body #root .app-shell .world-hud-avatar-face { width: 36px !important; height: 36px !important; font-size: 17px !important; }
+html body #root .app-shell .explore-category-tags { width: auto !important; align-self: flex-start !important; gap: 10px !important; margin: 0 !important; }
+html body #root .app-shell .explore-tag { flex: 0 0 auto !important; min-height: 38px !important; height: 38px !important; padding: 8px 18px !important; font: 400 12px Arial,sans-serif !important; background: #284335a8 !important; border: 1px solid #ffffff40 !important; }
+html body #root .app-shell .explore-tag.active { background: #f0f2e8 !important; color: #203828 !important; }
+html body #root .app-shell .world-hud-right { top: max(132px,calc(env(safe-area-inset-top,0px) + 114px)) !important; right: 18px !important; }
+html body #root .app-shell .world-hud-stats-toggle,html body #root .app-shell .world-hud-bell { width: 40px !important; height: 40px !important; min-width: 40px !important; min-height: 40px !important; border: 1px solid #ffffff65 !important; box-shadow: none !important; background: #f5f3efed !important; }
+html body #root .app-shell .explore-bottom-sheet { left: 18px !important; right: 18px !important; padding: 12px !important; border-radius: 18px !important; }
+html body #root .app-shell .explore-sheet-header h3 { font: 400 17px/1.2 Georgia,serif !important; }
+html body #root .app-shell .explore-hotspot-card { flex-basis: 100% !important; width: 100% !important; height: 84px !important; background: transparent !important; border: 0 !important; padding: 0 !important; scroll-snap-align: start; }
+html body #root .app-shell .explore-hotspot-cards { scroll-snap-type: x mandatory; }
+html body #root .app-shell .explore-community-photo { width: 70px !important; flex-basis: 70px !important; height: 70px !important; min-height: 70px !important; max-height: 70px !important; }
+html body #root .app-shell .explore-hotspot-title { font: 400 17px/1.2 Georgia,serif !important; }
+html body #root .app-shell .reference-map-pin { clip-path: none !important; overflow: visible !important; opacity: 1 !important; }
+html body #root .app-shell .reference-map-pin::after { z-index: 0 !important; opacity: 1 !important; clip-path: none !important; }
+html body #root .app-shell .reference-map-pin .map-leaflet-pin-inner { position: relative !important; z-index: 1 !important; }
+/* Full-screen place detail; community photographs keep their original framing. */
+html body .place-page { position: fixed; inset: 0; z-index: 10000; display: flex; flex-direction: column; background: #f5f3ef; color: #172c21; font: 14px/1.5 Arial,sans-serif; }
+.place-page-top { display: flex; align-items: center; gap: 12px; padding: max(14px,env(safe-area-inset-top,0px)) 18px 10px; flex-shrink: 0; }
+.place-page-top button { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid #dfe4d8; border-radius: 50%; background: transparent; color: #25412e; }
+.place-page-top>span { font-size: 12px; letter-spacing: .4px; color: #677260; }
+.place-page-scroll { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.place-page-photo { position: relative; height: clamp(240px,38svh,420px); margin: 0; background: #17241c; }
+html body .place-page-photo .capture-image { width: 100% !important; height: 100% !important; }
+html body .place-page-photo .capture-image-photo { object-fit: contain !important; width: 100% !important; height: 100% !important; }
+.place-page-photo figcaption { position: absolute; right: 14px; bottom: 26px; z-index: 3; padding: 4px 9px; border-radius: 14px; background: #112a21be; color: #fff; font-size: 10px; }
+.place-page-content { position: relative; z-index: 4; margin-top: -18px; padding: 24px 24px 32px; border-radius: 22px 22px 0 0; background: #f5f3ef; }
+html body .place-page-eyebrow { color: #77826d !important; font: 10px/1.4 Arial,sans-serif !important; letter-spacing: 1.5px; text-transform: uppercase; margin: 0 0 10px !important; }
+html body .place-page-content h1 { font: 400 30px/1.08 Georgia,serif !important; color: #172c21 !important; -webkit-text-fill-color: #172c21 !important; margin: 0 0 12px !important; }
+html body .place-page-location { display: flex; align-items: center; gap: 7px; color: #687462 !important; font: 12px/1.5 Arial,sans-serif !important; margin: 0 0 24px !important; }
+.place-page-contributor { display: flex; align-items: center; gap: 12px; padding: 18px 0; border-top: 1px solid #dfe3d8; }
+.place-page-contributor>span { width: 42px; height: 42px; flex: 0 0 42px; display: grid; place-items: center; background: #e0e8d8; border-radius: 50%; color: #34513a; }
+.place-page-contributor strong { font: 500 13px Arial,sans-serif; }
+html body .place-page-contributor p { font: 12px/1.5 Arial,sans-serif !important; color: #718068 !important; margin: 5px 0 0 !important; }
+html body .place-page-description { font: 14px/1.6 Arial,sans-serif !important; color: #4c5c46 !important; }
+.place-page-finds h2 { font: 22px Georgia,serif; margin: 24px 0 12px; }
+.place-page-finds>div { display: flex; flex-wrap: wrap; gap: 8px; }
+.place-page-finds span { padding: 6px 12px; background: #e7ecde; border-radius: 18px; text-transform: capitalize; font-size: 12px; }
+.place-page-social { display: flex; flex-wrap: wrap; gap: 20px; align-items: center; margin-top: 24px; }
+.place-page-social>button { display: flex; align-items: center; gap: 8px; border: 1px solid #d7dfce; background: #eff1e8; padding: 12px; border-radius: 12px; color: #34503a; }
+.place-page-stars { display: flex; }
+.place-page-stars button { background: transparent; border: 0; width: 32px; height: 44px; padding: 0; color: #657750; }
+.place-page-social small,.place-page-attribution { color: #76816a; font-size: 11px; }
+.place-page-actions { display: flex; gap: 12px; flex-shrink: 0; padding: 16px 20px max(20px,env(safe-area-inset-bottom,0px)); border-top: 1px solid #dfe4d7; background: #f5f3ef; }
+.place-page-actions>a,.place-page-actions>button { display: flex; justify-content: center; align-items: center; gap: 8px; flex: 1; min-height: 50px; border: 1px solid #d6dfcd; border-radius: 14px; background: transparent; color: #274731; font: 13px Arial,sans-serif; text-decoration: none; }
+.place-page-actions>button { background: #163c2c; color: white; border-color: transparent; }
+html body .place-page svg { stroke: currentColor !important; fill: none; stroke-width: 1.6 !important; }
+@media(min-width:781px) { html body .place-page { inset: 24px max(24px,calc((100vw - 560px)/2)); border-radius: 24px; overflow: hidden; box-shadow: 0 0 0 100vmax #10251c60; } }
+
+/* Reference manual: reserve the editorial serif for the Wild Realm mark. */
+html body #root .app-shell :is(h1,h2,h3),
+html body #root .app-shell .explore-sheet-header h3,
+html body #root .app-shell .explore-hotspot-title,
+html body .place-page-content h1,
+html body .place-page-finds h2 {
+  font-family: var(--reference-ui-font) !important;
+  font-style: normal !important;
+  font-weight: 700 !important;
+  letter-spacing: -.02em !important;
+}
+
+/* Small, event-driven feedback; never an idle animation loop. */
+@keyframes discovery-heart-pop {
+  0%, 100% { transform: scale(1); }
+  40% { transform: scale(1.28) rotate(-8deg); }
+  70% { transform: scale(.94); }
+}
+.post-action[aria-pressed="true"] svg {
+  fill: currentColor;
+  animation: discovery-heart-pop 320ms ease-out;
+}
+.post-action, .community-chat-action, .capture-control-button,
+.capture-primary-shutter, .capture-filter-chip {
+  transition: transform 150ms ease-out, background-color 150ms ease-out, border-color 150ms ease-out;
+  touch-action: manipulation;
+}
+.post-action:active, .community-chat-action:active, .capture-control-button:active { transform: scale(.95); }
+.capture-primary-shutter:active { transform: scale(.92); }
+.capture-flow-overlay .capture-viewfinder-bottom { display: flex; flex-direction: column; gap: 12px; }
+.capture-flow-overlay .capture-focus-pill { order: 0; }
+.capture-flow-overlay .capture-filter-strip {
+  order: 1; width: 100%; min-width: 0; overflow-x: auto;
+  overscroll-behavior-x: contain; scroll-snap-type: x proximity;
+  padding: 8px 12px; scrollbar-width: none;
+}
+.capture-flow-overlay .capture-filter-strip[hidden] { display: none; }
+.capture-flow-overlay .capture-filter-chip { scroll-snap-align: center; flex-shrink: 0; }
+.capture-flow-overlay .capture-filter-chip.active .capture-filter-preview {
+  outline: 2px solid #f4f1e8; outline-offset: 4px;
+}
+.capture-flow-overlay .capture-filter-label { color: #fff; text-shadow: 0 1px 4px #000; }
+.capture-flow-overlay .capture-control-row { order: 2; }
+.capture-flow-overlay .capture-photo-mode { order: 3; margin: 0; }
+.explorer-search { display: grid; gap: 8px; margin: 18px 0; font-size: 13px; }
+.explorer-search input { width: 100%; min-height: 44px; border: 1px solid #b8c4b7; border-radius: 16px; padding: 10px 14px; color: inherit; background: transparent; font: inherit; }
+.level-up-card { width: min(360px, calc(100vw - 32px)); text-align: center; }
+.level-up-card .continue-btn { width: 100%; min-height: 48px; margin-top: 20px; }
+html[data-motion-reduced="true"] .post-action svg,
+html[data-motion-reduced="true"] .capture-flow-overlay *,
+html[data-motion-reduced="true"] .community-chat-action { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+@media (prefers-reduced-motion: reduce) {
+  .post-action svg, .capture-flow-overlay *, .community-chat-action { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+@media (max-height: 640px) {
+  .capture-flow-overlay .capture-viewfinder-bottom { gap: 6px; }
+  .capture-flow-overlay .capture-filter-preview { width: 38px; height: 38px; }
+}
+
+.capture-sample-notice { position: absolute; top: 100px; left: 24px; right: 24px; margin: 0; text-align: center; color: #fff; font-size: 12px; padding: 8px 12px; border-radius: 20px; background: rgba(10, 30, 22, .8); z-index: 2; }
+.explorer-search-result { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 72px; padding: 12px 0; border: 0; border-bottom: 1px solid #d8ded5; background: transparent; color: inherit; text-align: left; cursor: pointer; }
+.explorer-search-result > span:nth-child(2) { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.explorer-search-result small { display: block; margin-top: 4px; opacity: .7; }
+.public-explorer-page { max-width: 760px; margin-inline: auto; padding: 24px 20px calc(110px + env(safe-area-inset-bottom)); }
+.public-profile-back { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; color: inherit; text-decoration: none; }
+.public-explorer-header { padding: 28px 0; text-align: center; border-bottom: 1px solid #d8ded5; }
+.public-explorer-header .post-author-avatar { display: inline-flex; width: 72px; height: 72px; font-size: 24px; }
+.public-explorer-header h1 { margin: 16px 0 6px; overflow-wrap: anywhere; }
+.public-explorer-header .community-profile-stats { justify-content: center; margin: 24px 0; }
+.public-explorer-header button { min-height: 44px; padding-inline: 24px; }
+.public-explorer-discoveries { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.public-explorer-discoveries article { min-width: 0; overflow-wrap: anywhere; }
+.public-explorer-photo { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 16px; }
+.public-explorer-discoveries h3 { font-size: 16px; }
+.library-load-error { padding: 16px; margin: 12px 0 20px; border: 1px solid #c9c5b7; border-radius: 16px; background: var(--reference-paper); color: var(--reference-ink); }
+.library-load-error p { margin: 0 0 12px; line-height: 1.5; }
+.library-load-error button { min-height: 44px; padding-inline: 20px; }

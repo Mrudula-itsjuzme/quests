@@ -48,3 +48,30 @@ Frontend tests cover camera stream races/cleanup, settings actions, navigation, 
 - Favourites/recently viewed are local to the account on this device, not cloud-synced.
 
 The Android generated files were left untouched by this visual pass. No deployment, commit, or push was performed.
+
+## Follow-up: Community viewport fit
+
+Removed nested feed gutters, oversized story/author spacing and the page transform. The feed and tabs now share a 20px gutter. Photo height adapts to short screens; the final post retains bottom navigation clearance through page padding. Verified no page-wide horizontal overflow at 360, 393 and 514px widths, with first-post engagement actions above the dock at the tested 740, 852 and 836px heights respectively. Stories keep their own horizontal scrolling. Evidence: `/tmp/wild-match-qa/community-fit-360.png` and `community-fit-514.png`. Production build and whitespace check passed.
+
+## Follow-up: Explore, Quests and camera review flow
+
+- Bottom navigation now ends with Quests. Explore has a circular top-right Profile button using the account photo or initial.
+- Explore uses aligned search/categories, compact photo-and-text place cards, and a scrollable place-detail sheet with separated photo/title layers. Verified the Hebbal Lake sheet shows description, likely finds, social actions and Capture here above the dock.
+- Quests has a leafy progress header, daily/weekly/monthly controls and cream adventure cards. Keyboard activation opens quest details; existing completion submissions remain connected.
+- Camera files/live photos/native photos now enter a review stage before identification. Review offers named filters, Retake, My Journal or For a Quest. The quest choice hands the original File to active photo quests for explicit submission.
+- Identification details support title/notes editing, a visible AI-accuracy notice, community posting off by default, and a separate share-to-other-apps action. Device sharing uses Web Share where available, with photo download fallback. Quest proofs also default to community sharing off.
+- Camera filter effects are visual preview effects; quest proof and external export use the original photo. No crop/drawing editor was added.
+- Save/edit failures keep the result open instead of silently closing it.
+
+Phone screenshots: `/tmp/wild-match-qa/explore-updated.png`, `quests-updated.png`, and `place-updated.png`. Browser verified avatar navigation, quest filters and location detail layout at 393 × 852. Photo-picker automation was blocked by the Chrome extension's file-URL access setting; no bypass was used. Camera preview/no-submit, original-photo quest handoff, opt-in defaults and explicit quest submission are verified by component tests. Real device camera and native social-share completion remain unverified.
+
+Validation: 69 frontend tests; build, lint and typecheck pass. Existing build chunk/import warnings remain.
+
+## Interaction and data integrity pass — 2026-09-16
+- Removed automatic development social seeding from signed-in read endpoints and fabricated comment fallback replies. Previously persisted demo records are not deleted by this change; audit the deployment database separately.
+- Guest photo captures no longer invent identification, rarity, or XP. Guest browsing still contains explicit demo fixtures in the guest data layer.
+- Fixed level-up render crash; added focused keyboard dismissal, subtle entrance, like feedback, and reduced-motion handling. Quest completion wording no longer suggests claiming rewards twice.
+- Camera opens with named filter choices; selecting an already selected filter does not trigger the shutter. Unavailable-camera sample background is labelled. These are color filters, not face-tracking AR lenses.
+- Friends can be searched and profiles opened. Private messaging is not implemented; UI now states that instead of offering a no-op Message action. Comments show actual returned replies with show-all/show-fewer controls.
+- Browser review at 390×844: Community feed and camera controls fit; filter selection updates aria-pressed. Physical camera capture, signed-in deployment data, and 1,000-user load remain unverified.
+- Validation: lint/typecheck/production build passed; full regression run had only four obsolete hidden-filter expectations failing (222 passed, 35 skipped). Updated expectations and reran all affected suites: 29 passed. Existing jsdom window.scrollTo warnings remain.
