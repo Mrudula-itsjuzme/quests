@@ -1,6 +1,6 @@
 # Deployment guide (Render)
 
-This deploys HABBIT Quests as a single Docker web service on Render, backed by
+This deploys Wild Realm Quests as a single Docker web service on Render, backed by
 Render's managed PostgreSQL, with Express serving both the API and the built
 React app from one origin.
 

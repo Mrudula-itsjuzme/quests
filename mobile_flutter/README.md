@@ -1,6 +1,6 @@
-# HABBIT Quest Mobile
+# Wild Realm Mobile
 
-Flutter phone UI for the standalone HABBIT Quest app.
+Flutter phone UI for the standalone Wild Realm app.
 
 This version is a compact, gamified dark-fantasy mobile experience. The primary
 quest loop is interactive: players can log progress, submit a short reflection,

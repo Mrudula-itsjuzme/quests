@@ -30,7 +30,7 @@ class HabbitQuestApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'HABBIT Quest',
+      title: 'Wild Realm',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark(),
       home: services == null
@@ -470,7 +470,7 @@ class _SimpleLoginPlaceholder extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('HABBIT QUEST',
+                Text('WILD REALM',
                     style: TextStyle(
                       fontFamily: 'Cinzel',
                       color: AppColors.brightGold,

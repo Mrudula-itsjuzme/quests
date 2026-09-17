@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 
 import 'api_config.dart';
 
-/// Low-level HTTP client for the HABBIT API.
+/// Low-level HTTP client for the Wild Realm API.
 ///
 /// Injects the auth token when available and maps HTTP errors
 /// to [ApiException].

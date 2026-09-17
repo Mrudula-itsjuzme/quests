@@ -41,7 +41,7 @@ Beyond the core loop, Wild Realm includes public explorer profiles, user search,
 ## Product snapshots
 
 <p align="center">
-  <img src="android_screen_5item_v2.png" alt="Wild Realm Android interface" width="29%" />
+  <img src="qa-proof/android-screenshots/android_screen_5item_v2.png" alt="Wild Realm Android interface" width="29%" />
   &nbsp;&nbsp;
   <img src="qa-proof/screenshots/screenshot_1.png" alt="Wild Realm QA build" width="29%" />
   &nbsp;&nbsp;
